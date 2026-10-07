@@ -428,11 +428,20 @@ export function AccountPanel({
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadFacebookStatus(), pingCloudinary(), pingOpenRouter()]);
-    setTimeout(() => {
+    try {
+      await Promise.all([
+        api("/instagram/connection/sync-profile", { method: "POST" }).catch(() => null),
+        loadFacebookStatus(),
+        pingCloudinary(),
+        pingOpenRouter(),
+      ]);
+      message.success("Account & Meta integration status refreshed");
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch {
       setRefreshing(false);
-      message.success("Account & Cloud integration status refreshed");
-    }, 400);
+    }
   };
 
   const handleConnectFacebook = async () => {
@@ -683,24 +692,21 @@ export function AccountPanel({
               <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white uppercase">
                 {cleanUsername.charAt(0)}
               </div>
-              <img
-                src={
-                  status.profilePictureUrl?.startsWith("/media/")
-                    ? `${API_BASE}${status.profilePictureUrl}`
-                    : status.profilePictureUrl || "/brand-avatar.jpg"
-                }
-                alt=""
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  const img = e.currentTarget;
-                  if (!img.src.includes("brand-avatar.jpg")) {
-                    img.src = "/brand-avatar.jpg";
-                  } else {
-                    img.style.display = "none";
+              {status.profilePictureUrl && (
+                <img
+                  src={
+                    status.profilePictureUrl.startsWith("/media/")
+                      ? `${API_BASE}${status.profilePictureUrl}`
+                      : status.profilePictureUrl
                   }
-                }}
-                className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-full object-cover bg-white"
-              />
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                  className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-full object-cover bg-white"
+                />
+              )}
             </div>
             <div className="min-w-0">
               <div className="text-sm font-bold text-slate-900 truncate">@{cleanUsername}</div>
@@ -779,24 +785,21 @@ export function AccountPanel({
                   <div className="h-full w-full rounded-[14px] bg-slate-900 flex items-center justify-center text-lg font-bold text-white uppercase">
                     {cleanUsername.charAt(0)}
                   </div>
-                  <img
-                    src={
-                      status.profilePictureUrl?.startsWith("/media/")
-                        ? `${API_BASE}${status.profilePictureUrl}`
-                        : status.profilePictureUrl || "/brand-avatar.jpg"
-                    }
-                    alt=""
-                    referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const img = e.currentTarget;
-                      if (!img.src.includes("brand-avatar.jpg")) {
-                        img.src = "/brand-avatar.jpg";
-                      } else {
-                        img.style.display = "none";
+                  {status.profilePictureUrl && (
+                    <img
+                      src={
+                        status.profilePictureUrl.startsWith("/media/")
+                          ? `${API_BASE}${status.profilePictureUrl}`
+                          : status.profilePictureUrl
                       }
-                    }}
-                    className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover bg-white"
-                  />
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                      className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover bg-white"
+                    />
+                  )}
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

@@ -1806,23 +1806,18 @@ console.log("Customer photo submitted:", data);`}
                       <div className="flex items-center gap-2">
                         <div className="h-8 w-8 rounded-full p-[1.5px] bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 shrink-0">
                           <div className="h-full w-full rounded-full overflow-hidden bg-white flex items-center justify-center relative">
-                            {!brandAvatarError ? (
+                            {!brandAvatarError && brandProfile.profilePictureUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={
-                                  brandProfile.profilePictureUrl?.startsWith("/media/")
+                                  brandProfile.profilePictureUrl.startsWith("/media/")
                                     ? `${API_BASE}${brandProfile.profilePictureUrl}`
-                                    : brandProfile.profilePictureUrl || "/brand-avatar.jpg"
+                                    : brandProfile.profilePictureUrl
                                 }
                                 alt=""
                                 referrerPolicy="no-referrer"
-                                onError={(e) => {
-                                  const img = e.currentTarget;
-                                  if (!img.src.includes("brand-avatar.jpg")) {
-                                    img.src = "/brand-avatar.jpg";
-                                  } else {
-                                    setBrandAvatarError(true);
-                                  }
+                                onError={() => {
+                                  setBrandAvatarError(true);
                                 }}
                                 className="h-full w-full object-cover"
                               />
@@ -1844,7 +1839,7 @@ console.log("Customer photo submitted:", data);`}
                             </svg>
                           </div>
                           <div className="text-[10px] text-slate-500 leading-tight">
-                            Fabroniee Men&apos;s Fashion
+                            @{brandProfile.username}
                           </div>
                         </div>
                       </div>
@@ -2042,10 +2037,14 @@ console.log("Customer photo submitted:", data);`}
                       <div className="h-7 w-7 rounded-full overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={brandProfile.profilePictureUrl || "/brand-avatar.jpg"}
-                          alt="Brand avatar"
+                          src={
+                            brandProfile.profilePictureUrl?.startsWith("/media/")
+                              ? `${API_BASE}${brandProfile.profilePictureUrl}`
+                              : brandProfile.profilePictureUrl || ""
+                          }
+                          alt=""
                           className="h-full w-full object-cover"
-                          onError={(e) => { (e.target as HTMLImageElement).src = "/brand-avatar.jpg"; }}
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                         />
                       </div>
                       <div className="min-w-0 leading-tight">
