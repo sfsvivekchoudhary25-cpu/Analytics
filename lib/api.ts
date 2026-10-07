@@ -8,10 +8,10 @@ export function getApiBase(): string {
       return `http://${host}:4000`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  return process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
 }
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
 const TOKEN_KEY = "ighub_token";
 
 export const auth = {
