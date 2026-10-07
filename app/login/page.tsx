@@ -5,22 +5,16 @@ import { useRouter } from "next/navigation";
 import {
   CheckCircleFilled,
   CommentOutlined,
-  EyeInvisibleOutlined,
-  EyeOutlined,
-  FacebookOutlined,
   HeartFilled,
   HeartOutlined,
   InstagramOutlined,
   LoadingOutlined,
-  LockOutlined,
-  MailOutlined,
   MessageOutlined,
   PictureOutlined,
   RobotOutlined,
   SendOutlined,
   ShareAltOutlined,
   ThunderboltFilled,
-  UserOutlined,
 } from "@ant-design/icons";
 import { auth, getApiBase } from "@/lib/api";
 
@@ -114,16 +108,6 @@ const CAROUSEL_SLIDES = [
 export default function AuthPage() {
   const router = useRouter();
 
-  // Mode: 'signin' | 'signup'
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-
-  // Form Fields
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [instagramHandle, setInstagramHandle] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-
   // Status
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,91 +166,6 @@ export default function AuthPage() {
       setBusy(false);
     }
   }
-
-  async function handleConnectFacebook() {
-    setBusy(true);
-    setError(null);
-    try {
-      const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/facebook-page/oauth/url`);
-      const data = await res.json();
-      if (!res.ok || !data.url) {
-        throw new Error(data.message || "Failed to generate Facebook Business OAuth URL. Check server configuration.");
-      }
-      window.location.href = data.url;
-    } catch (err: any) {
-      setError(err?.message || "Could not reach the Facebook OAuth service. Please ensure the backend server is running.");
-      setBusy(false);
-    }
-  }
-
-  // Form Submit Handler
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    setSuccessMsg(null);
-
-    try {
-      if (mode === "signup") {
-        if (!name.trim()) throw new Error("Please enter your name.");
-        if (!email.trim() || !email.includes("@")) throw new Error("Please enter a valid email address.");
-        if (password.length < 6) throw new Error("Password must be at least 6 characters long.");
-
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim(),
-            name: name.trim(),
-            password,
-            instagramHandle: instagramHandle.trim(),
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || "Registration failed");
-        }
-
-        auth.set(data.token);
-        setSuccessMsg("Account created! Redirecting to your dashboard...");
-        setTimeout(() => router.replace("/"), 600);
-      } else {
-        // Sign In
-        if (!password) throw new Error("Please enter your password.");
-
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: email.trim(),
-            password,
-          }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || "Invalid email or password");
-        }
-
-        auth.set(data.token);
-        setSuccessMsg("Welcome back! Redirecting...");
-        setTimeout(() => router.replace("/"), 500);
-      }
-    } catch (err: any) {
-      setError(err?.message || "Authentication failed. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  // Quick helper to fill admin demo credentials
-  const handlePrefillAdmin = () => {
-    setEmail("admin@inro.social");
-    setPassword("fdjNiJdowLNR");
-    setError(null);
-  };
 
   const currentSlide = CAROUSEL_SLIDES[activeSlide];
 
@@ -562,242 +461,90 @@ export default function AuthPage() {
           {/* Heading & Subtitle */}
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              {mode === "signin"
-                ? "Welcome back, it's nice to see you!"
-                : "Nice to meet you, join us today!"}
+              Sign in with Instagram
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed">
-              {mode === "signin"
-                ? "Sign in to your account and access your audience, campaigns and automations."
-                : "You don't have access yet? Create your account then link your Instagram account to unlock DM automation!"}
+              Connect your Instagram Professional or Creator account to access real-time analytics, automated DM flows, and audience insights.
             </p>
           </div>
 
-          {/* ── Official Meta & Instagram OAuth Actions ── */}
-          <div className="space-y-2.5 pt-1">
+          {/* Primary Action Card */}
+          <div className="space-y-4 pt-1">
             <button
               type="button"
               onClick={handleConnectInstagram}
               disabled={busy}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] hover:opacity-95 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-60"
+              className="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] hover:opacity-95 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 active:scale-[0.99]"
             >
-              <InstagramOutlined className="text-xl" />
-              <div className="text-left">
-                <span className="block leading-tight font-extrabold text-sm">Continue with Instagram</span>
-                <span className="text-[10px] text-white/80 font-normal leading-none">Auto-connect Professional / Creator Account</span>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleConnectFacebook}
-              disabled={busy}
-              className="w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-100/80 text-slate-700 font-semibold text-xs shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
-            >
-              <FacebookOutlined className="text-blue-600 text-sm" />
-              <span>Connect via Facebook &amp; Meta Business</span>
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              Or sign in with email
-            </span>
-            <div className="flex-grow border-t border-slate-200"></div>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 pt-1">
-            {/* Email Field */}
-            <div>
-              <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. linda.lee@sprawl.com"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              />
-            </div>
-
-            {/* Name Field (Sign Up only) */}
-            {mode === "signup" && (
-              <div>
-                <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Linda Lee"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  This will be used as your account name
-                </p>
-              </div>
-            )}
-
-            {/* Instagram Account Field (Sign Up only) */}
-            {mode === "signup" && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-800">
-                    Instagram account
-                  </label>
-                  <span className="text-[11px] text-slate-400 font-normal">Optional</span>
-                </div>
-                <input
-                  type="text"
-                  value={instagramHandle}
-                  onChange={(e) => setInstagramHandle(e.target.value)}
-                  placeholder="e.g. @sprawlinc"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-              </div>
-            )}
-
-            {/* Password Field */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-bold text-slate-800">
-                  Password
-                </label>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === "signup" ? "Enter your password" : "••••••••"}
-                  className="w-full px-4 py-3 pr-11 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-white focus:bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
-                >
-                  {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                </button>
-              </div>
-              {mode === "signup" && (
-                <p className="text-[11px] text-slate-400 mt-1">6 characters minimum</p>
+              {busy ? (
+                <>
+                  <LoadingOutlined className="text-xl" />
+                  <span>Connecting to Instagram...</span>
+                </>
+              ) : (
+                <>
+                  <InstagramOutlined className="text-2xl" />
+                  <div className="text-left">
+                    <span className="block leading-tight font-extrabold text-sm sm:text-base">
+                      Continue with Instagram
+                    </span>
+                    <span className="text-[11px] text-white/80 font-normal leading-none">
+                      Professional or Creator Account
+                    </span>
+                  </div>
+                </>
               )}
-            </div>
-
-            {/* Forgot Password link & demo prefill (Sign In only) */}
-            {mode === "signin" && (
-              <div className="flex items-center justify-between pt-0.5">
-                <button
-                  type="button"
-                  onClick={handlePrefillAdmin}
-                  className="text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-                >
-                  Fill master credentials
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    alert(
-                      "To reset your credentials, please use the master admin password configured in your server environment."
-                    )
-                  }
-                  className="text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors cursor-pointer"
-                >
-                  Forgot your email or password?
-                </button>
-              </div>
-            )}
+            </button>
 
             {/* Error Message */}
             {error && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug">
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug">
                 {error}
               </div>
             )}
 
             {/* Success Message */}
             {successMsg && (
-              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700 leading-snug flex items-center gap-2">
-                <CheckCircleFilled className="text-emerald-500 text-sm" />
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700 leading-snug flex items-center gap-2">
+                <CheckCircleFilled className="text-emerald-500 text-base flex-shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
-            {/* Submit CTA Button (Inrō Blue) */}
-            <button
-              type="submit"
-              disabled={busy}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-sm shadow-sm transition-all duration-200 disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer mt-2"
-            >
-              {busy ? (
-                <>
-                  <LoadingOutlined className="text-base" />
-                  <span>{mode === "signup" ? "Creating account..." : "Logging in..."}</span>
-                </>
-              ) : mode === "signup" ? (
-                "Create your account"
-              ) : (
-                "Log in"
-              )}
-            </button>
-
-            {/* Terms notice (Sign Up only) */}
-            {mode === "signup" && (
-              <p className="text-[11px] text-slate-400 text-center leading-relaxed pt-1">
-                By creating an account, you agree to our{" "}
-                <a href="/legal/terms" className="underline hover:text-slate-600">
-                  terms of service
-                </a>{" "}
-                and{" "}
-                <a href="/legal/privacy" className="underline hover:text-slate-600">
-                  privacy policy
-                </a>
-                .
-              </p>
-            )}
-
-            {/* Toggle Switch between Sign In and Sign Up */}
-            <div className="text-center text-xs text-slate-500 pt-4 border-t border-slate-100">
-              {mode === "signin" ? (
-                <span>
-                  No account yet?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("signup");
-                      setError(null);
-                    }}
-                    className="font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Sign up today
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  Already have an account?{" "}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("signin");
-                      setError(null);
-                    }}
-                    className="font-bold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Log in
-                  </button>
-                </span>
-              )}
+            {/* Trust & Features card */}
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 space-y-2.5">
+              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                Official Meta &amp; Instagram Integration
+              </div>
+              <ul className="text-xs text-slate-600 space-y-2">
+                <li className="flex items-start gap-2">
+                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
+                  <span>Direct OAuth authentication via Meta Graph API</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
+                  <span>Instant access to posts, reels, comments &amp; audience data</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
+                  <span>No password sharing needed — 100% secure token exchange</span>
+                </li>
+              </ul>
             </div>
-          </form>
+
+            {/* Terms notice */}
+            <p className="text-[11px] text-slate-400 text-center leading-relaxed pt-2">
+              By connecting your account, you agree to our{" "}
+              <a href="/legal/terms" className="underline hover:text-slate-600">
+                terms of service
+              </a>{" "}
+              and{" "}
+              <a href="/legal/privacy" className="underline hover:text-slate-600">
+                privacy policy
+              </a>
+              .
+            </p>
+          </div>
         </div>
 
         {/* ── Cookie / Privacy Floating Pill (Identical to inro.social) ─── */}
