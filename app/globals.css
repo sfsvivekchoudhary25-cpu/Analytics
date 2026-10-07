@@ -1,0 +1,176 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "../components/minimal-modern-theme.css";
+
+/* The app is a fixed light/white theme, matching the reference design exactly — it no longer follows the
+   OS/browser dark-mode preference. `dark:` utility classes are kept in components (harmless, unused) rather
+   than stripped everywhere, but redefining the variant to be class-scoped (and never applying that class)
+   means none of them can ever trigger. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Chart tokens (dataviz reference palette; single blue series) */
+:root {
+  --viz-surface: #fcfcfb;
+  --viz-ink: #0b0b0b;
+  --viz-ink-2: #52514e;
+  --viz-muted: #898781;
+  --viz-grid: #e1e0d9;
+  --viz-axis: #c3c2b7;
+  --viz-border: rgba(11, 11, 11, 0.1);
+  --viz-series-1: #2a78d6;
+/* Single accent used sparingly: active nav, primary tabs, key highlights. Everything else stays monochrome. */
+  --viz-accent: #2563eb;
+  --viz-accent-soft: rgba(37, 99, 235, 0.1);
+}
+
+@keyframes pageEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-entrance {
+  animation: pageEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeletonPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Modern Premium Segmented Control & Tab Pills ────────────────────────── */
+
+/* Remove browser and Ant Design harsh focus outlines globally on segmented controls */
+.ant-segmented,
+.ant-segmented *,
+.ant-segmented-item,
+.ant-segmented-item * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.ant-segmented {
+  background-color: #f1f5f9 !important; /* slate-100 */
+  border: 1px solid #e2e8f0 !important; /* slate-200 */
+  border-radius: 12px !important;
+  padding: 3px !important;
+  color: #64748b !important; /* slate-500 */
+  font-weight: 500 !important;
+  font-size: 12px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.ant-segmented .ant-segmented-group {
+  gap: 2px !important;
+}
+
+.ant-segmented .ant-segmented-item {
+  border-radius: 9px !important;
+  transition: color 0.15s ease, background-color 0.15s ease !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.ant-segmented .ant-segmented-item:hover:not(.ant-segmented-item-selected) {
+  color: #1e293b !important; /* slate-800 */
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Selected active pill: pristine white card with soft micro-shadow, NO blue border outline */
+.ant-segmented .ant-segmented-item-selected {
+  background-color: #ffffff !important;
+  color: #0f172a !important; /* slate-900 */
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 9px !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Sliding active thumb */
+.ant-segmented .ant-segmented-thumb {
+  background-color: #ffffff !important;
+  border-radius: 9px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+  outline: none !important;
+  border: none !important;
+}
+
+/* Eliminate all focus rings / focus-visible outlines */
+.ant-segmented:focus,
+.ant-segmented:focus-visible,
+.ant-segmented-item:focus,
+.ant-segmented-item:focus-visible,
+.ant-segmented-item-focused,
+.ant-segmented-item-selected:focus,
+.ant-segmented-item-selected:focus-visible,
+.ant-segmented-item-selected.ant-segmented-item-focused {
+  outline: none !important;
+  border: none !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Inner content typography & icon alignment */
+.ant-segmented .ant-segmented-item-label {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 4px 10px !important;
+  min-height: 24px !important;
+  line-height: 1.4 !important;
+  text-decoration: none !important;
+}
+
+.ant-segmented .ant-segmented-item-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 13px !important;
+  color: #64748b !important;
+  transition: color 0.15s ease !important;
+}
+
+.ant-segmented .ant-segmented-item-selected .ant-segmented-item-icon {
+  color: #2563eb !important; /* lively blue icon for active item */
+}
+
+/* Card header flex resiliency: prevent premature truncation of titles and toggles */
+.ant-card .ant-card-head-title {
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
