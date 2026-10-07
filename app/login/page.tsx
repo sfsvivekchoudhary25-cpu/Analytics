@@ -470,66 +470,179 @@ export default function AuthPage() {
 
           {/* Primary Action Card */}
           <div className="space-y-4 pt-1">
+            {/* ── Exact Instagram OAuth Hero Button ── */}
             <button
               type="button"
               onClick={handleConnectInstagram}
               disabled={busy}
-              className="w-full py-4 px-5 rounded-2xl bg-gradient-to-r from-[#f09433] via-[#e6683c] via-[#dc2743] via-[#cc2366] to-[#bc1888] hover:opacity-95 text-white font-bold text-base shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 active:scale-[0.99]"
+              className="group relative w-full p-3.5 sm:p-4 rounded-[26px] text-white shadow-[0_12px_28px_-6px_rgba(225,48,108,0.35)] hover:shadow-[0_16px_36px_-6px_rgba(225,48,108,0.45)] transition-all duration-300 flex items-center justify-between gap-3.5 cursor-pointer disabled:opacity-60 active:scale-[0.99] overflow-hidden text-left"
+              style={{
+                background:
+                  "linear-gradient(110deg, #f7931e 0%, #fa5c38 28%, #e1306c 60%, #c13584 82%, #833ab4 100%)",
+              }}
             >
-              {busy ? (
-                <>
-                  <LoadingOutlined className="text-xl" />
-                  <span>Connecting to Instagram...</span>
-                </>
-              ) : (
-                <>
-                  <InstagramOutlined className="text-2xl" />
-                  <div className="text-left">
-                    <span className="block leading-tight font-extrabold text-sm sm:text-base">
-                      Continue with Instagram
-                    </span>
-                    <span className="text-[11px] text-white/80 font-normal leading-none">
-                      Professional or Creator Account
-                    </span>
-                  </div>
-                </>
-              )}
+              {/* Organic fluid wave overlay on right */}
+              <div className="absolute right-0 top-0 bottom-0 w-2/5 pointer-events-none overflow-hidden rounded-r-[26px]">
+                <svg
+                  className="absolute right-0 top-0 h-full w-full object-cover"
+                  viewBox="0 0 200 100"
+                  preserveAspectRatio="none"
+                  fill="none"
+                >
+                  <path
+                    d="M60 0 C105 35, 105 75, 200 100 L200 0 Z"
+                    fill="white"
+                    fillOpacity="0.10"
+                  />
+                  <path
+                    d="M100 0 C125 45, 125 80, 200 45 L200 0 Z"
+                    fill="white"
+                    fillOpacity="0.06"
+                  />
+                </svg>
+              </div>
+
+              {/* Left Group: Frosted Icon + Divider + Texts */}
+              <div className="flex items-center gap-3 sm:gap-3.5 z-10 min-w-0">
+                {/* Frosted Glass Instagram Icon Container */}
+                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.45),0_4px_12px_rgba(0,0,0,0.06)] border border-white/25">
+                  <svg
+                    className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-xs"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5.5" ry="5.5" />
+                    <circle cx="12" cy="12" r="4.2" />
+                    <circle cx="17.6" cy="6.4" r="0.9" fill="currentColor" />
+                  </svg>
+                </div>
+
+                {/* Subtle vertical divider */}
+                <div className="w-[1px] h-8 sm:h-9 bg-white/25 rounded-full flex-shrink-0 mx-0.5" />
+
+                {/* Text Content */}
+                <div className="min-w-0">
+                  <span className="block leading-tight font-bold text-base sm:text-[18px] text-white tracking-tight truncate">
+                    Continue with Instagram
+                  </span>
+                  <span className="block text-[11px] sm:text-xs text-white/85 font-normal leading-tight mt-1 truncate">
+                    Professional or Creator Account
+                  </span>
+                </div>
+              </div>
+
+              {/* Right Action: Frosted Glass Circle with Arrow */}
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center flex-shrink-0 shadow-[inset_0_1px_2px_rgba(255,255,255,0.35)] border border-white/20 z-10 transition-transform duration-200 group-hover:scale-105">
+                {busy ? (
+                  <LoadingOutlined className="text-base text-white animate-spin" />
+                ) : (
+                  <svg
+                    className="w-5 h-5 text-white transition-transform duration-200 group-hover:translate-x-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5l7 7-7 7" />
+                  </svg>
+                )}
+              </div>
             </button>
 
             {/* Error Message */}
             {error && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug">
+              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug">
                 {error}
               </div>
             )}
 
             {/* Success Message */}
             {successMsg && (
-              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700 leading-snug flex items-center gap-2">
+              <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-700 leading-snug flex items-center gap-2">
                 <CheckCircleFilled className="text-emerald-500 text-base flex-shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
-            {/* Trust & Features card */}
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 space-y-2.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Official Meta &amp; Instagram Integration
+            {/* ── Official Meta & Instagram Integration Card (Exact Screenshot Match) ── */}
+            <div className="rounded-[24px] border border-blue-100/80 bg-[#fbfdff] p-5 sm:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
+              <div className="text-[10px] sm:text-[11px] font-bold tracking-[0.14em] text-[#5c6f84] uppercase">
+                OFFICIAL META &amp; INSTAGRAM INTEGRATION
               </div>
-              <ul className="text-xs text-slate-600 space-y-2">
-                <li className="flex items-start gap-2">
-                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
-                  <span>Direct OAuth authentication via Meta Graph API</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
-                  <span>Instant access to posts, reels, comments &amp; audience data</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircleFilled className="text-emerald-500 text-xs mt-0.5 flex-shrink-0" />
-                  <span>No password sharing needed — 100% secure token exchange</span>
-                </li>
-              </ul>
+
+              <div className="space-y-3.5">
+                {/* Feature 1: Shield */}
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[#e0f2fe] flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    <svg
+                      className="w-5 h-5 text-[#0284c7]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="M9 12l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <span className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] leading-tight">
+                    Direct OAuth authentication via Meta Graph API
+                  </span>
+                </div>
+
+                {/* Feature 2: Bar Chart */}
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[#dcfce7] flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    <svg
+                      className="w-5 h-5 text-[#10b981]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="4" y="14" width="3.5" height="7" rx="1.5" />
+                      <rect x="10.25" y="9" width="3.5" height="12" rx="1.5" />
+                      <rect x="16.5" y="4" width="3.5" height="17" rx="1.5" />
+                    </svg>
+                  </div>
+                  <span className="text-[13px] sm:text-[14px] font-bold text-[#0f172a] leading-tight">
+                    Instant access to posts, reels, comments &amp; audience data
+                  </span>
+                </div>
+
+                {/* Feature 3: Padlock */}
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[#f3e8ff] flex items-center justify-center flex-shrink-0 shadow-2xs">
+                    <svg
+                      className="w-5 h-5 text-[#a855f7]"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="5" y="11" width="14" height="10" rx="3" />
+                      <path d="M8 11V7a4 4 0 018 0v4" />
+                    </svg>
+                  </div>
+                  <span className="text-[13px] sm:text-[14px] leading-tight">
+                    <span className="font-bold text-[#0f172a]">No password sharing needed</span>{" "}
+                    <span className="text-[#64748b] font-normal">— 100% secure token exchange</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Terms notice */}
