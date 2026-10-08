@@ -13,11 +13,27 @@ export function getApiBase(): string {
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
 const TOKEN_KEY = "ighub_token";
+const ACCOUNT_KEY = "ighub_account";
 
 export const auth = {
   get: () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN_KEY)),
   set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
   clear: () => localStorage.removeItem(TOKEN_KEY),
+};
+
+export const activeAccount = {
+  get: () => (typeof window === "undefined" ? null : localStorage.getItem(ACCOUNT_KEY)),
+  set: (a: string) => {
+    if (typeof window !== "undefined") {
+      const clean = a.replace(/^@/, "").toLowerCase();
+      localStorage.setItem(ACCOUNT_KEY, clean);
+    }
+  },
+  clear: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(ACCOUNT_KEY);
+    }
+  },
 };
 
 export class ApiError extends Error {
@@ -28,6 +44,7 @@ export class ApiError extends Error {
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = auth.get();
+  const acct = activeAccount.get();
   const baseUrl = getApiBase();
 
   let signal = init.signal;
@@ -56,6 +73,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
         // FormData sets its own multipart boundary header.
         ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(acct ? { "x-instagram-account": acct } : {}),
         ...init.headers,
       },
     });

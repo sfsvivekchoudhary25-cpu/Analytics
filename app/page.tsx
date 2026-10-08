@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, ApiError, auth, ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
@@ -29,6 +29,9 @@ type View = { status: ConnectionStatus; daysLeft: number | null };
 
 async function fetchView(): Promise<View> {
   const status = await api<ConnectionStatus>("/instagram/connection");
+  if (status.connected && status.username) {
+    activeAccount.set(status.username);
+  }
   const daysLeft = status.connected
     ? Math.max(0, Math.round((new Date(status.expiresAt).getTime() - Date.now()) / 86_400_000))
     : null;
@@ -144,6 +147,7 @@ export default function Dashboard() {
 
   function logout() {
     auth.clear();
+    activeAccount.clear();
     router.replace("/login");
   }
 
