@@ -12,9 +12,8 @@ import { AccountPanel } from "@/components/AccountPanel";
 import { FacebookPageCard } from "@/components/FacebookPageCard";
 import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { NotificationBell, AccountAvatar } from "@/components/HeaderControls";
-import { ChatIcon, CommentIcon, GearIcon, GridIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
+import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
-import { NumberOutlined } from "@ant-design/icons";
 
 const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
@@ -22,7 +21,7 @@ const SECTIONS: Section[] = [
   { id: "comments", label: "Comments", icon: <CommentIcon /> },
   { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
   { id: "stories", label: "Stories", icon: <StoriesIcon /> },
-  { id: "hashtags", label: "Hashtag Search", icon: <NumberOutlined /> },
+  { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
 
