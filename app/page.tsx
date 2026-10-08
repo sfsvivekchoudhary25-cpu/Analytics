@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, ApiError, auth, ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus, type ConnectedAccount } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
@@ -26,14 +26,17 @@ const SECTIONS: Section[] = [
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
 
-type View = { status: ConnectionStatus; daysLeft: number | null };
+type View = { status: ConnectionStatus; daysLeft: number | null; accounts: ConnectedAccount[] };
 
 async function fetchView(): Promise<View> {
-  const status = await api<ConnectionStatus>("/instagram/connection");
+  const [status, accounts] = await Promise.all([
+    api<ConnectionStatus>("/instagram/connection"),
+    api<ConnectedAccount[]>("/instagram/connection/accounts").catch(() => []),
+  ]);
   const daysLeft = status.connected
     ? Math.max(0, Math.round((new Date(status.expiresAt).getTime() - Date.now()) / 86_400_000))
     : null;
-  return { status, daysLeft };
+  return { status, daysLeft, accounts };
 }
 
 export default function Dashboard() {
@@ -87,6 +90,9 @@ export default function Dashboard() {
     }
     fetchView().then((v) => {
       setView(v);
+      if (v.status.connected && !activeAccount.get()) {
+        activeAccount.set(v.status.username);
+      }
       // Instagram/Facebook send the browser back here with ?connected=<user>, ?fbPageConnected=<page>, or ?error=<why>.
       const q = new URLSearchParams(window.location.search);
       if (q.get("error")) setError(q.get("error"));
@@ -98,6 +104,31 @@ export default function Dashboard() {
       }
     }, handleLoadError);
   }, [router, handleLoadError]);
+
+  const handleSwitchAccount = useCallback(async (targetUsername: string) => {
+    try {
+      await api("/instagram/connection/switch", {
+        method: "POST",
+        body: JSON.stringify({ username: targetUsername }),
+      });
+      activeAccount.set(targetUsername);
+      const v = await fetchView();
+      setView(v);
+      setNotice(`Switched to active workspace @${targetUsername}`);
+    } catch (err: any) {
+      setError(err?.message || "Failed to switch account");
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleAccountChange = () => {
+      fetchView().then((v) => setView(v), handleLoadError);
+    };
+    window.addEventListener("ighub_active_account_change", handleAccountChange);
+    return () => {
+      window.removeEventListener("ighub_active_account_change", handleAccountChange);
+    };
+  }, [handleLoadError]);
 
   // Real notification count: customer photos waiting for approval.
   useEffect(() => {
@@ -113,7 +144,7 @@ export default function Dashboard() {
       cancelled = true;
       clearInterval(id);
     };
-  }, [view?.status.connected]);
+  }, [view?.status.connected, view?.status.connected ? view.status.username : undefined]);
 
   async function connectWithInstagram() {
     setError(null);
@@ -145,6 +176,7 @@ export default function Dashboard() {
 
   function logout() {
     auth.clear();
+    activeAccount.clear();
     router.replace("/login");
   }
 
@@ -164,6 +196,8 @@ export default function Dashboard() {
       token={token}
       setToken={setToken}
       busy={busy}
+      accounts={view?.accounts ?? []}
+      onSwitchAccount={handleSwitchAccount}
       onConnectInstagram={connectWithInstagram}
       onPasteConnect={connect}
       onSignOut={logout}
@@ -194,6 +228,8 @@ export default function Dashboard() {
         daysLeft={daysLeft ?? null}
         onSignOut={logout}
         pendingPhotos={pendingPhotos}
+        accounts={view?.accounts ?? []}
+        onSwitchAccount={handleSwitchAccount}
       />
 
       <main
@@ -226,7 +262,7 @@ export default function Dashboard() {
         </nav>
 
         <div
-          key={active}
+          key={`${active}-${status.username}`}
           className={
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"

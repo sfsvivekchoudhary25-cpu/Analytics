@@ -29,18 +29,20 @@ import {
   LockOutlined,
   MessageOutlined,
   PictureOutlined,
+  PlusOutlined,
   ReloadOutlined,
   RobotOutlined,
   SafetyCertificateOutlined,
   SearchOutlined,
   SettingOutlined,
+  SwapOutlined,
   SyncOutlined,
   ThunderboltOutlined,
   UploadOutlined,
   UserOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { api, API_BASE, type ConnectionStatus } from "@/lib/api";
+import { api, API_BASE, type ConnectionStatus, type ConnectedAccount } from "@/lib/api";
 
 const PERMISSIONS = [
   {
@@ -138,6 +140,8 @@ type Props = {
   onConnectInstagram: () => void;
   onPasteConnect: (e: React.FormEvent) => void;
   onSignOut?: () => void;
+  accounts?: ConnectedAccount[];
+  onSwitchAccount?: (username: string) => void;
 };
 
 type FacebookPageStatus =
@@ -187,6 +191,8 @@ export function AccountPanel({
   onConnectInstagram,
   onPasteConnect,
   onSignOut,
+  accounts = [],
+  onSwitchAccount,
 }: Props) {
   const { message, modal } = App.useApp();
 
@@ -223,6 +229,26 @@ export function AccountPanel({
   const [igTokenModalOpen, setIgTokenModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
+  const [accountList, setAccountList] = useState<ConnectedAccount[]>(accounts || []);
+
+  useEffect(() => {
+    if (accounts && accounts.length > 0) {
+      setAccountList(accounts);
+    }
+  }, [accounts]);
+
+  const loadAccounts = async () => {
+    try {
+      const list = await api<ConnectedAccount[]>("/instagram/connection/accounts");
+      if (Array.isArray(list) && list.length > 0) {
+        setAccountList(list);
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    loadAccounts();
+  }, [status?.connected ? status.username : null]);
 
   const connected = status?.connected === true;
   const granted = connected && Array.isArray(status.permissions) ? status.permissions : null;
@@ -431,6 +457,7 @@ export function AccountPanel({
     try {
       await Promise.all([
         api("/instagram/connection/sync-profile", { method: "POST" }).catch(() => null),
+        loadAccounts(),
         loadFacebookStatus(),
         pingCloudinary(),
         pingOpenRouter(),
@@ -771,6 +798,125 @@ export function AccountPanel({
             {fbStatus?.connected ? fbStatus.pageName : "Page Required"}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">Comment-to-DM Private Reply Engine</div>
+        </div>
+      </div>
+
+      {/* ── ROW 0.5: CONNECTED INSTAGRAM ACCOUNTS (Multi-Account & Tester Isolation) ── */}
+      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-xs">
+              <InstagramOutlined className="text-base" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-slate-900 leading-none">
+                  Connected Instagram Accounts
+                </h3>
+                <Tag color="purple" className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0">
+                  {accountList.length} Connected
+                </Tag>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-1">
+                Strict workspace isolation: automations, comment triggers, DM queues, and database records are 100% independent per account.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="primary"
+              size="small"
+              icon={<PlusOutlined />}
+              onClick={onConnectInstagram}
+              className="!rounded-xl !bg-indigo-600 hover:!bg-indigo-700 !text-xs font-semibold !h-8 !px-3 shadow-xs"
+            >
+              Connect Another Account
+            </Button>
+            <Button
+              size="small"
+              icon={<KeyOutlined />}
+              onClick={() => setIgTokenModalOpen(true)}
+              className="!rounded-xl !border-slate-200 !text-slate-600 !text-xs !h-8 !px-3 font-medium"
+            >
+              Add with Token
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
+          {(accountList.length > 0 ? accountList : [{ username: cleanUsername, profilePictureUrl: status?.connected ? status.profilePictureUrl : undefined }]).map((acc) => {
+            const isCurrent = acc.username.toLowerCase() === cleanUsername.toLowerCase();
+            return (
+              <div
+                key={acc.username}
+                className={`relative rounded-2xl border p-4 transition-all ${
+                  isCurrent
+                    ? "border-blue-500/60 bg-blue-50/20 shadow-xs ring-1 ring-blue-500/20"
+                    : "border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-2xs"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative h-10 w-10 shrink-0 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
+                      <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white uppercase">
+                        {acc.username.charAt(0)}
+                      </div>
+                      {acc.profilePictureUrl && (
+                        <img
+                          src={
+                            acc.profilePictureUrl.startsWith("/media/")
+                              ? `${API_BASE}${acc.profilePictureUrl}`
+                              : acc.profilePictureUrl
+                          }
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                          className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-full object-cover bg-white"
+                        />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-slate-900 truncate">
+                          @{acc.username}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        {acc.igUserId ? `ID: ${acc.igUserId.slice(0, 10)}...` : "Instagram Account"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isCurrent ? (
+                    <Tag color="blue" className="!rounded-full font-bold !text-[10px] !px-2 !py-0.5 !m-0 flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                      <span>Active</span>
+                    </Tag>
+                  ) : (
+                    <Button
+                      size="small"
+                      type="default"
+                      icon={<SwapOutlined />}
+                      onClick={() => onSwitchAccount && onSwitchAccount(acc.username)}
+                      className="!text-xs !font-semibold !rounded-xl !h-7 !px-2.5 !border-slate-200 !text-slate-700 hover:!border-blue-400 hover:!text-blue-600"
+                    >
+                      Switch
+                    </Button>
+                  )}
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                  <span>Scope: Isolated</span>
+                  <span className={isCurrent ? "text-blue-600 font-semibold" : "text-slate-500"}>
+                    {isCurrent ? "Current Workspace" : "Click switch to view"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

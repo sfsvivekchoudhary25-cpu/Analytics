@@ -356,6 +356,14 @@ export function Inbox({
     if (!list) return null;
     let result = list;
 
+    // Never show the currently connected user's own account in the DM list
+    const ownHandle = (username || "").replace(/^@/, "").toLowerCase().trim();
+    if (ownHandle) {
+      result = result.filter(
+        (c) => cleanUsername(c).toLowerCase() !== ownHandle
+      );
+    }
+
     // Apply Channel category filter
     if (activeChannel === "unread") {
       result = result.filter((c) => c.unread > 0);
@@ -374,7 +382,7 @@ export function Inbox({
     }
 
     return result;
-  }, [list, activeChannel, searchQuery]);
+  }, [list, activeChannel, searchQuery, username]);
 
   const cleanOwnUsername = username ? username.replace(/^@/, "") : "instagram_user";
   const unreadTotal = list ? list.reduce((acc, c) => acc + c.unread, 0) : 0;

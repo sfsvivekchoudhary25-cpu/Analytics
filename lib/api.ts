@@ -13,11 +13,29 @@ export function getApiBase(): string {
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
 const TOKEN_KEY = "ighub_token";
+const ACTIVE_ACCOUNT_KEY = "ighub_active_account";
 
 export const auth = {
   get: () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN_KEY)),
   set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
   clear: () => localStorage.removeItem(TOKEN_KEY),
+};
+
+export const activeAccount = {
+  get: () => (typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_ACCOUNT_KEY)),
+  set: (acc: string | null) => {
+    if (typeof window !== "undefined") {
+      if (acc) localStorage.setItem(ACTIVE_ACCOUNT_KEY, acc);
+      else localStorage.removeItem(ACTIVE_ACCOUNT_KEY);
+      window.dispatchEvent(new CustomEvent("ighub_active_account_change", { detail: acc }));
+    }
+  },
+  clear: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(ACTIVE_ACCOUNT_KEY);
+      window.dispatchEvent(new CustomEvent("ighub_active_account_change", { detail: null }));
+    }
+  },
 };
 
 export class ApiError extends Error {
@@ -28,6 +46,7 @@ export class ApiError extends Error {
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = auth.get();
+  const currentAccount = activeAccount.get();
   const baseUrl = getApiBase();
 
   let signal = init.signal;
@@ -56,6 +75,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
         // FormData sets its own multipart boundary header.
         ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(currentAccount ? { "x-instagram-account": currentAccount } : {}),
         ...init.headers,
       },
     });
@@ -93,3 +113,12 @@ export type ConnectionStatus =
       expiresAt: string;
       permissions: string[] | null;
     };
+
+export type ConnectedAccount = {
+  username: string;
+  igUserId?: string;
+  profilePictureUrl?: string | null;
+  expiresAt?: string;
+  permissions?: string[] | null;
+  updatedAt?: string;
+};

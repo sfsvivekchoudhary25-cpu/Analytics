@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Badge, Tag, Button, Avatar, Tooltip } from "antd";
+import { Badge, Tag, Button, Avatar, Tooltip, Dropdown } from "antd";
 import {
   AppstoreOutlined,
   MessageOutlined,
@@ -14,7 +14,10 @@ import {
   InstagramOutlined,
   CheckCircleFilled,
   NumberOutlined,
+  PlusOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
+import { API_BASE, type ConnectedAccount } from "@/lib/api";
 
 export type SectionId =
   | "dashboard"
@@ -46,6 +49,8 @@ type Props = {
   daysLeft: number | null;
   onSignOut: () => void;
   pendingPhotos?: number;
+  accounts?: ConnectedAccount[];
+  onSwitchAccount?: (username: string) => void;
 };
 
 export function Sidebar({
@@ -56,8 +61,71 @@ export function Sidebar({
   daysLeft,
   onSignOut,
   pendingPhotos = 0,
+  accounts = [],
+  onSwitchAccount,
 }: Props) {
   const cleanUsername = username.replace(/^@/, "");
+
+  const accountMenuItems = [
+    {
+      key: "accounts-group",
+      type: "group" as const,
+      label: "Connected Accounts",
+      children: (accounts && accounts.length > 0 ? accounts : [{ username: cleanUsername }]).map((acc) => {
+        const isCurrent = acc.username.toLowerCase() === cleanUsername.toLowerCase();
+        return {
+          key: acc.username,
+          label: (
+            <div className="flex items-center justify-between gap-3 py-1 min-w-[190px]">
+              <div className="flex items-center gap-2">
+                <Avatar
+                  size={24}
+                  src={
+                    acc.profilePictureUrl?.startsWith("/media/")
+                      ? `${API_BASE}${acc.profilePictureUrl}`
+                      : acc.profilePictureUrl
+                  }
+                  className="bg-indigo-600 text-white font-semibold text-[10px]"
+                >
+                  {acc.username.charAt(0).toUpperCase()}
+                </Avatar>
+                <span className="font-semibold text-xs text-slate-800 truncate max-w-[110px]">
+                  @{acc.username}
+                </span>
+              </div>
+              {isCurrent ? (
+                <Tag color="blue" className="!m-0 !text-[10px] !px-1.5 font-bold">
+                  Active
+                </Tag>
+              ) : (
+                <span className="text-[11px] text-blue-600 font-semibold hover:underline">
+                  Switch
+                </span>
+              )}
+            </div>
+          ),
+          onClick: () => {
+            if (!isCurrent && onSwitchAccount) {
+              onSwitchAccount(acc.username);
+            }
+          },
+        };
+      }),
+    },
+    { type: "divider" as const },
+    {
+      key: "connect-new",
+      icon: <PlusOutlined className="text-blue-500" />,
+      label: <span className="font-medium text-xs text-blue-600">Connect Another Account</span>,
+      onClick: () => onSelect("account"),
+    },
+    {
+      key: "settings",
+      icon: <SettingOutlined className="text-slate-400" />,
+      label: <span className="text-xs text-slate-700">Account & Integrations</span>,
+      onClick: () => onSelect("account"),
+    },
+  ];
 
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-xs md:flex">
@@ -81,10 +149,9 @@ export function Sidebar({
 
       {/* Account Selector Card */}
       <div className="px-3 pb-2">
-        <Tooltip title="Switch or configure account">
+        <Dropdown menu={{ items: accountMenuItems }} trigger={["click"]} placement="bottom">
           <button
-            onClick={() => onSelect("account")}
-            className="group flex w-full items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 text-left transition-all hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs"
+            className="group flex w-full items-center gap-2.5 rounded-xl border border-slate-200/90 bg-slate-50/70 p-2.5 text-left transition-all hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs cursor-pointer"
           >
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xs">
               <InstagramOutlined className="text-sm" />
@@ -94,11 +161,13 @@ export function Sidebar({
                 <span className="truncate text-xs font-semibold text-slate-800">@{cleanUsername}</span>
                 <CheckCircleFilled className="text-[11px] text-blue-500" />
               </div>
-              <span className="text-[10px] text-slate-500">Connected account</span>
+              <span className="text-[10px] text-slate-500">
+                {accounts && accounts.length > 1 ? `${accounts.length} accounts (switch)` : "Connected account"}
+              </span>
             </div>
             <DownOutlined className="text-[10px] text-slate-400 transition-transform group-hover:text-slate-600" />
           </button>
-        </Tooltip>
+        </Dropdown>
       </div>
 
       {/* Navigation List */}
