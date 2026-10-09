@@ -1184,132 +1184,134 @@ export function AccountPanel({
           </div>
         </div>
 
-        {/* 3 Symmetrical Service Cards with Distinct Color Themes */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        {/* 3 Symmetrical Service Cards with Distinct Color Themes (Mobile-Optimized) */}
+        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
           {/* Card 1: Cloudinary Media CDN (Cyan/Blue Theme) */}
-          <div className="relative overflow-hidden rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-5 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
             {/* Ambient Cyan Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-sky-200/35 blur-2xl pointer-events-none" />
 
-            <div className="relative space-y-4">
+            <div className="relative space-y-3.5 sm:space-y-4">
               {/* Card Header */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white text-2xl shadow-lg shadow-blue-500/30 ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white text-xl sm:text-2xl shadow-md shadow-blue-500/30 ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
                     <CloudUploadOutlined />
                   </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                       Cloudinary Media CDN
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
                       Global Image &amp; Video CDN
                     </p>
                   </div>
                 </div>
                 {/* Health & Latency Badge */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>{cloudinaryHealth?.latencyMs ? `${cloudinaryHealth.latencyMs}ms` : "62ms"}</span>
                 </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3.5 rounded-2xl bg-sky-50/50 border border-sky-100/80 space-y-1">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-sky-50/50 border border-sky-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     TARGET CLOUD
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60 font-semibold text-[10px]">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60 font-semibold text-[10px] shrink-0">
                     {cloudinaryConfig.isCustom ? "Custom Cloud" : "Demo CDN Edge"}
                   </span>
                 </div>
-                <div className="text-sm font-mono font-bold text-slate-900 truncate">
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate">
                   @{cloudinaryConfig.cloudName || "hrnqhbaa"}
                 </div>
               </div>
 
               {/* Specs & Capabilities */}
-              <div className="space-y-2.5 text-xs pt-1">
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <GlobalOutlined className="text-sky-500 text-sm" />
+              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <GlobalOutlined className="text-sky-500 text-xs sm:text-sm" />
                     <span>Edge Domain</span>
                   </span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px]">
+                  <span className="font-semibold text-slate-700 font-mono text-[11px] sm:text-xs truncate text-right">
                     res.cloudinary.com
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <ThunderboltOutlined className="text-sky-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <ThunderboltOutlined className="text-sky-500 text-xs sm:text-sm" />
                     <span>Auto Optimization</span>
                   </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
                     <CheckCircleFilled className="text-[11px]" />
                     <span>f_auto, q_auto</span>
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <DatabaseOutlined className="text-sky-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <DatabaseOutlined className="text-sky-500 text-xs sm:text-sm" />
                     <span>Meta Publishing</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     Direct HTTPS Ingestion
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <KeyOutlined className="text-sky-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <KeyOutlined className="text-sky-500 text-xs sm:text-sm" />
                     <span>API Credentials</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     {cloudinaryConfig.apiKey ? "API Key Attached" : "Public Edge Access"}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="relative pt-4 mt-4 border-t border-sky-100/80 flex items-center gap-2">
+            {/* Actions (Mobile-Optimized Grid / Stack) */}
+            <div className="relative pt-3.5 mt-4 border-t border-sky-100/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <Button
                 type="primary"
                 icon={<ThunderboltOutlined />}
                 onClick={() => pingCloudinary()}
                 loading={cloudinaryLoading}
-                className="flex-1 !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-10 !border-0 !shadow-md shadow-blue-500/25"
+                className="w-full sm:flex-1 !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-9.5 sm:!h-10 !border-0 !shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5"
               >
                 Ping Health
               </Button>
-              <Button
-                icon={<SettingOutlined />}
-                onClick={() => setCloudinaryModalOpen(true)}
-                className="!rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-10 !px-3.5 shadow-2xs shrink-0"
-              >
-                Configure
-              </Button>
-              <Button
-                icon={<ReloadOutlined className="text-rose-500" />}
-                onClick={handleDisconnectCloudinary}
-                className="!rounded-xl text-xs font-semibold !border-rose-200 !bg-white hover:!bg-rose-50 !text-rose-600 !h-10 !px-3 shadow-2xs shrink-0"
-              >
-                Reset
-              </Button>
+              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
+                <Button
+                  icon={<SettingOutlined />}
+                  onClick={() => setCloudinaryModalOpen(true)}
+                  className="!w-full sm:!w-auto !rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9.5 sm:!h-10 px-3 shadow-2xs flex items-center justify-center gap-1.5"
+                >
+                  Configure
+                </Button>
+                <Button
+                  icon={<ReloadOutlined className="text-rose-500" />}
+                  onClick={handleDisconnectCloudinary}
+                  className="!w-full sm:!w-auto !rounded-xl text-xs font-semibold !border-rose-200 !bg-white hover:!bg-rose-50 !text-rose-600 !h-9.5 sm:!h-10 px-3 shadow-2xs flex items-center justify-center gap-1.5"
+                >
+                  Reset
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Card 2: OpenRouter AI Engine (Purple Theme) */}
-          <div className="relative overflow-hidden rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-5 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
             {/* Ambient Purple Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-200/35 blur-2xl pointer-events-none" />
 
-            <div className="relative space-y-4">
+            <div className="relative space-y-3.5 sm:space-y-4">
               {/* Card Header */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white text-2xl shadow-lg shadow-purple-500/30 ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
-                    <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white text-xl sm:text-2xl shadow-md shadow-purple-500/30 ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect width="16" height="16" x="4" y="4" rx="2" />
                       <rect width="6" height="6" x="9" y="9" rx="1" />
                       <path d="M15 2v2" />
@@ -1322,78 +1324,78 @@ export function AccountPanel({
                       <path d="M9 20v2" />
                     </svg>
                   </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                       OpenRouter AI Engine
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
                       Multi-LLM Reasoning Gateway
                     </p>
                   </div>
                 </div>
                 {/* Health & Latency Badge */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>{openRouterHealth?.latencyMs ? `${openRouterHealth.latencyMs}ms` : "22ms"}</span>
                 </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100/80 space-y-1">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-purple-50/50 border border-purple-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600">
                     ACTIVE ARCHITECTURE
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-100/80 text-purple-800 border border-purple-200/60 font-semibold text-[10px]">
+                  <span className="px-2 py-0.5 rounded-md bg-purple-100/80 text-purple-800 border border-purple-200/60 font-semibold text-[10px] shrink-0">
                     Operational
                   </span>
                 </div>
-                <div className="text-sm font-mono font-bold text-slate-900 truncate" title="nvidia/nemotron-3-ultra">
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title="nvidia/nemotron-3-ultra">
                   nvidia/nemotron-3-ultra
                 </div>
               </div>
 
               {/* Specs & Capabilities */}
-              <div className="space-y-2.5 text-xs pt-1">
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <BarChartOutlined className="text-purple-500 text-sm" />
+              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <BarChartOutlined className="text-purple-500 text-xs sm:text-sm" />
                     <span>Daily Requests</span>
                   </span>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="font-semibold text-slate-700 text-xs">
-                      {openRouterHealth?.remainingRequests ?? 50} / {openRouterHealth?.totalLimit ?? 50} remaining
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="font-semibold text-slate-700 text-[11px] sm:text-xs">
+                      {openRouterHealth?.remainingRequests ?? 50} / {openRouterHealth?.totalLimit ?? 50} left
                     </span>
-                    <div className="h-1.5 w-24 rounded-full bg-purple-100/80 overflow-hidden">
+                    <div className="h-1.5 w-20 sm:w-24 rounded-full bg-purple-100/80 overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full w-full" />
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <MessageOutlined className="text-purple-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <MessageOutlined className="text-purple-500 text-xs sm:text-sm" />
                     <span>Comment Sentiment</span>
                   </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
                     <CheckCircleFilled className="text-[11px]" />
-                    <span>Real-time Classification</span>
+                    <span>Real-time</span>
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <SettingOutlined className="text-purple-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <SettingOutlined className="text-purple-500 text-xs sm:text-sm" />
                     <span>DM Auto-Reply</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     Dynamic Discount Code
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <SafetyCertificateOutlined className="text-purple-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <SafetyCertificateOutlined className="text-purple-500 text-xs sm:text-sm" />
                     <span>Security</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     Bearer Token Encrypted
                   </span>
                 </div>
@@ -1401,12 +1403,12 @@ export function AccountPanel({
             </div>
 
             {/* Actions */}
-            <div className="relative pt-4 mt-4 border-t border-purple-100/80 flex items-center gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-purple-100/80 flex items-center gap-2">
               <Button
                 icon={<ThunderboltOutlined className="text-purple-600" />}
                 onClick={() => pingOpenRouter()}
                 loading={openRouterLoading}
-                className="w-full !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-10 shadow-2xs transition-all"
+                className="w-full !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 Ping AI Gateway
               </Button>
@@ -1414,84 +1416,84 @@ export function AccountPanel({
           </div>
 
           {/* Card 3: Cloudflare Edge Proxy (Amber/Orange Theme) */}
-          <div className="relative overflow-hidden rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-5 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
             {/* Ambient Amber Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-200/35 blur-2xl pointer-events-none" />
 
-            <div className="relative space-y-4">
+            <div className="relative space-y-3.5 sm:space-y-4">
               {/* Card Header */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-2xl shadow-lg shadow-amber-500/30 ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-xl sm:text-2xl shadow-md shadow-amber-500/30 ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
                     <GlobalOutlined />
                   </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                       Cloudflare Edge Proxy
                     </h4>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
                       Inbound Real-Time Webhooks
                     </p>
                   </div>
                 </div>
                 {/* Status Badge */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700 shrink-0 shadow-2xs">
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[10px] sm:text-[11px] font-semibold text-blue-700 shrink-0 shadow-2xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
                   <span>Tunnel Active</span>
                 </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-100/80 space-y-1">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/50 border border-amber-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
                     PUBLIC GATEWAY
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-amber-100/80 text-amber-800 border border-amber-200/60 font-semibold text-[10px] font-mono">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100/80 text-amber-800 border border-amber-200/60 font-semibold text-[10px] font-mono shrink-0">
                     trycloudflare.com
                   </span>
                 </div>
-                <div className="text-sm font-mono font-bold text-slate-900 truncate" title="trycloudflare.com tunnel">
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title="trycloudflare.com tunnel">
                   municipality-tour-lawsuit...
                 </div>
               </div>
 
               {/* Specs & Capabilities */}
-              <div className="space-y-2.5 text-xs pt-1">
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <AimOutlined className="text-amber-500 text-sm" />
+              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <AimOutlined className="text-amber-500 text-xs sm:text-sm" />
                     <span>Target Path</span>
                   </span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px]">
+                  <span className="font-semibold text-slate-700 font-mono text-[11px] sm:text-xs truncate text-right">
                     /instagram/webhook
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <SafetyCertificateOutlined className="text-amber-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <SafetyCertificateOutlined className="text-amber-500 text-xs sm:text-sm" />
                     <span>Signature Check</span>
                   </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
+                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
                     <CheckCircleFilled className="text-[11px]" />
-                    <span>HMAC-SHA256 Enforced</span>
+                    <span>HMAC-SHA256</span>
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <ThunderboltOutlined className="text-amber-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <ThunderboltOutlined className="text-amber-500 text-xs sm:text-sm" />
                     <span>Event Delivery</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     Instant Comment &amp; DM Push
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400 flex items-center gap-2">
-                    <DatabaseOutlined className="text-amber-500 text-sm" />
+                <div className="flex items-center justify-between gap-2 py-0.5">
+                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
+                    <DatabaseOutlined className="text-amber-500 text-xs sm:text-sm" />
                     <span>Firewall Security</span>
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
                     Zero open inbound ports
                   </span>
                 </div>
@@ -1499,11 +1501,11 @@ export function AccountPanel({
             </div>
 
             {/* Actions */}
-            <div className="relative pt-4 mt-4 border-t border-amber-100/80 flex items-center gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-amber-100/80 flex items-center gap-2">
               <Button
                 icon={<CopyOutlined className="text-amber-700" />}
                 onClick={handleCopyWebhook}
-                className="w-full !rounded-xl !text-xs font-semibold !border-amber-200 !bg-amber-50 hover:!bg-amber-100/80 !text-amber-800 !h-10 shadow-2xs transition-all"
+                className="w-full !rounded-xl !text-xs font-semibold !border-amber-200 !bg-amber-50 hover:!bg-amber-100/80 !text-amber-800 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 {copiedWebhook ? "Copied Webhook URL" : "Copy Webhook URL"}
               </Button>
