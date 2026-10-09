@@ -14,6 +14,14 @@ import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { NotificationBell, AccountAvatar } from "@/components/HeaderControls";
 import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
+import {
+  AppstoreOutlined,
+  CommentOutlined,
+  InstagramOutlined,
+  MenuOutlined,
+  MessageOutlined,
+  PictureOutlined,
+} from "@ant-design/icons";
 
 const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
@@ -50,6 +58,7 @@ export default function Dashboard() {
   const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">("inbox");
   const [messagesTargetUser, setMessagesTargetUser] = useState<string | null>(null);
   const [messagesInitialText, setMessagesInitialText] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const openMessagesWithUser = useCallback((user?: string, text?: string) => {
     if (user) setMessagesTargetUser(user);
@@ -199,54 +208,84 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"}`}>
+    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-slate-50/50`}>
       <Sidebar
         sections={SECTIONS}
         active={active}
-        onSelect={setTab}
+        onSelect={(id) => {
+          setTab(id);
+          setMobileMenuOpen(false);
+        }}
         username={status.username.replace(/^@/, "")}
         daysLeft={daysLeft ?? null}
         onSignOut={logout}
         pendingPhotos={pendingPhotos}
+        mobileOpen={mobileMenuOpen}
+        onMobileClose={() => setMobileMenuOpen(false)}
       />
 
       <main
-        className={`min-w-0 flex-1 ${
+        className={`min-w-0 flex-1 flex flex-col ${
           active === "messages"
-            ? "flex h-full flex-col overflow-hidden"
-            : "min-h-screen overflow-y-auto"
+            ? "h-full overflow-hidden"
+            : "min-h-screen overflow-y-auto pb-20 sm:pb-6"
         }`}
       >
-        {/* Mobile section switcher: the sidebar only shows on md+ screens. */}
-        <nav
-          className="flex shrink-0 gap-1.5 overflow-x-auto border-b border-slate-200/80 bg-white px-3 py-2 md:hidden"
-          aria-label="Sections"
-        >
-          {SECTIONS.map((s) => (
+        {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
+        <header className="sticky top-0 z-30 flex h-15 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:hidden shadow-2xs">
+          {/* Left: Hamburger Button + Brand */}
+          <div className="flex items-center gap-3">
             <button
-              key={s.id}
-              onClick={() => setTab(s.id)}
-              aria-current={active === s.id ? "page" : undefined}
-              className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                active === s.id
-                  ? "bg-blue-50 text-blue-600 ring-1 ring-blue-500/20"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/80 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
             >
-              {s.icon}
-              {s.label}
+              <MenuOutlined className="text-base" />
             </button>
-          ))}
-        </nav>
 
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-2xs text-sm">
+                <InstagramOutlined />
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5 leading-none">
+                  <span className="text-sm font-bold tracking-tight text-slate-900">Instagram Hub</span>
+                  <span className="rounded bg-blue-50 px-1 py-0.5 text-[9px] font-bold text-blue-600 ring-1 ring-inset ring-blue-500/20">
+                    PRO
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 capitalize mt-0.5">{activeLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Notification Bell & Account Avatar */}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="truncate max-w-[120px]">@{status.username.replace(/^@/, "")}</span>
+            </div>
+            <NotificationBell
+              pendingPhotos={pendingPhotos}
+              onClick={() => setTab("photos")}
+            />
+            <AccountAvatar
+              username={status.username}
+              onClick={() => setTab("account")}
+            />
+          </div>
+        </header>
+
+        {/* Main Section Content */}
         <div
           key={`${active}-${status.username}`}
           className={
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
               : active === "hashtags"
-              ? "animate-page-entrance w-full space-y-6 p-6"
-              : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-6"
+              ? "animate-page-entrance w-full space-y-6 p-4 sm:p-6"
+              : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-4 sm:p-6"
           }
         >
           {active === "dashboard" && (
@@ -277,6 +316,85 @@ export default function Dashboard() {
           {active === "hashtags" && <HashtagSearch />}
           {active === "account" && accountPanel}
         </div>
+
+        {/* Sleek Native Mobile Bottom Navigation Bar (Phones only, < 640px) */}
+        <nav
+          className="fixed bottom-0 inset-x-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/90 bg-white/95 px-2 backdrop-blur-lg shadow-[0_-4px_12px_rgba(0,0,0,0.04)] sm:hidden"
+          aria-label="Mobile Navigation"
+        >
+          {/* 1. Dashboard */}
+          <button
+            type="button"
+            onClick={() => setTab("dashboard")}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
+              active === "dashboard" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "dashboard" ? "bg-blue-50 text-blue-600" : ""}`}>
+              <AppstoreOutlined className="text-base" />
+            </div>
+            <span className="text-[10px] leading-tight">Dashboard</span>
+          </button>
+
+          {/* 2. Comments */}
+          <button
+            type="button"
+            onClick={() => setTab("comments")}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
+              active === "comments" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "comments" ? "bg-blue-50 text-blue-600" : ""}`}>
+              <CommentOutlined className="text-base" />
+            </div>
+            <span className="text-[10px] leading-tight">Comments</span>
+          </button>
+
+          {/* 3. Messages */}
+          <button
+            type="button"
+            onClick={() => setTab("messages")}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
+              active === "messages" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "messages" ? "bg-blue-50 text-blue-600" : ""}`}>
+              <MessageOutlined className="text-base" />
+            </div>
+            <span className="text-[10px] leading-tight">DMs</span>
+          </button>
+
+          {/* 4. Photos */}
+          <button
+            type="button"
+            onClick={() => setTab("photos")}
+            className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
+              active === "photos" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "photos" ? "bg-blue-50 text-blue-600" : ""}`}>
+              <PictureOutlined className="text-base" />
+            </div>
+            <span className="text-[10px] leading-tight">Photos</span>
+            {pendingPhotos > 0 && (
+              <span className="absolute top-1 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-xs">
+                {pendingPhotos}
+              </span>
+            )}
+          </button>
+
+          {/* 5. More (Opens Full Drawer Menu) */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
+          >
+            <div className="flex items-center justify-center h-7 w-7 rounded-lg">
+              <MenuOutlined className="text-base" />
+            </div>
+            <span className="text-[10px] leading-tight">More</span>
+          </button>
+        </nav>
       </main>
     </div>
   );

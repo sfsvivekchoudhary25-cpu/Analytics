@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Badge, Tag, Button, Avatar, Tooltip } from "antd";
+import { Badge, Tag, Button, Avatar, Tooltip, Drawer } from "antd";
 import {
   AppstoreOutlined,
   MessageOutlined,
@@ -13,6 +13,7 @@ import {
   InstagramOutlined,
   CheckCircleFilled,
   NumberOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 
 export type SectionId =
@@ -45,9 +46,11 @@ type Props = {
   daysLeft: number | null;
   onSignOut: () => void;
   pendingPhotos?: number;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 };
 
-export function Sidebar({
+function SidebarInner({
   sections,
   active,
   onSelect,
@@ -55,13 +58,15 @@ export function Sidebar({
   daysLeft,
   onSignOut,
   pendingPhotos = 0,
-}: Props) {
+  onClose,
+  isDrawer = false,
+}: Props & { onClose?: () => void; isDrawer?: boolean }) {
   const cleanUsername = username.replace(/^@/, "");
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-xs md:flex">
+    <div className="flex h-full w-full flex-col bg-white">
       {/* Brand Header */}
-      <div className="flex items-center justify-between px-5 pt-6 pb-4">
+      <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-sm text-white text-lg">
             <InstagramOutlined />
@@ -76,6 +81,17 @@ export function Sidebar({
             <p className="text-[11px] text-slate-400">Automation & CRM</p>
           </div>
         </div>
+
+        {isDrawer && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer"
+            aria-label="Close menu"
+          >
+            <CloseOutlined className="text-sm" />
+          </button>
+        )}
       </div>
 
       {/* Connected Account Badge */}
@@ -108,9 +124,12 @@ export function Sidebar({
             return (
               <li key={s.id}>
                 <button
-                  onClick={() => onSelect(s.id)}
+                  onClick={() => {
+                    onSelect(s.id);
+                    if (isDrawer) onClose?.();
+                  }}
                   aria-current={isSelected ? "page" : undefined}
-                  className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                  className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer ${
                     isSelected
                       ? "bg-blue-50/90 text-blue-600 shadow-xs ring-1 ring-blue-500/20"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -138,7 +157,7 @@ export function Sidebar({
       </nav>
 
       {/* Footer Profile & Status Card */}
-      <div className="p-3">
+      <div className="p-3 border-t border-slate-100">
         <div className="rounded-2xl border border-slate-200/90 bg-gradient-to-b from-slate-50/80 to-slate-100/60 p-3.5 shadow-2xs">
           <div className="flex items-center gap-3">
             <Avatar
@@ -168,13 +187,70 @@ export function Sidebar({
           <Button
             block
             icon={<LogoutOutlined />}
-            onClick={onSignOut}
+            onClick={() => {
+              onSignOut();
+              if (isDrawer) onClose?.();
+            }}
             className="!mt-3 !h-8 !rounded-lg !border-slate-200 !text-xs !text-slate-600 hover:!border-rose-300 hover:!bg-rose-50/80 hover:!text-rose-600 transition-colors"
           >
             Sign out
           </Button>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export function Sidebar({
+  sections,
+  active,
+  onSelect,
+  username,
+  daysLeft,
+  onSignOut,
+  pendingPhotos = 0,
+  mobileOpen = false,
+  onMobileClose,
+}: Props) {
+  return (
+    <>
+      {/* ── Desktop Permanent Sidebar (lg: >= 1024px) ── */}
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-slate-200/80 bg-white shadow-xs lg:flex">
+        <SidebarInner
+          sections={sections}
+          active={active}
+          onSelect={onSelect}
+          username={username}
+          daysLeft={daysLeft}
+          onSignOut={onSignOut}
+          pendingPhotos={pendingPhotos}
+        />
+      </aside>
+
+      {/* ── Tablet & Mobile Slide-Over Drawer (< 1024px) ── */}
+      <Drawer
+        open={mobileOpen}
+        onClose={onMobileClose}
+        placement="left"
+        width={288}
+        closable={false}
+        styles={{
+          body: { padding: 0 },
+        }}
+        className="!p-0"
+      >
+        <SidebarInner
+          sections={sections}
+          active={active}
+          onSelect={onSelect}
+          username={username}
+          daysLeft={daysLeft}
+          onSignOut={onSignOut}
+          pendingPhotos={pendingPhotos}
+          onClose={onMobileClose}
+          isDrawer
+        />
+      </Drawer>
+    </>
   );
 }
