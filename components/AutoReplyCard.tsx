@@ -189,23 +189,22 @@ export function AutoReplyCard({
       {/* ── Top Header Card (Minimalist Monochromatic with Subtle Accents) ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm w-full"
-        styles={{ body: { padding: "24px 28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs mt-0.5 sm:mt-0">
               {behaviorConfig.icon}
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
                   {behaviorConfig.title}
                 </h2>
                 {active ? (
                   <Tag
                     color="success"
-                    className="!rounded-full !px-3 !py-0.5 !text-xs !font-semibold !flex !items-center !gap-1.5 !m-0 !border-emerald-200 !bg-emerald-50 !text-emerald-700"
+                    className="!rounded-full !px-2.5 !py-0.5 !text-[11px] sm:!text-xs !font-semibold !flex !items-center !gap-1.5 !m-0 !border-emerald-200 !bg-emerald-50 !text-emerald-700 !shrink-0"
                   >
                     <span className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -216,13 +215,13 @@ export function AutoReplyCard({
                 ) : (
                   <Tag
                     color="default"
-                    className="!rounded-full !px-3 !py-0.5 !text-xs !font-semibold !m-0 !bg-slate-100 !text-slate-500"
+                    className="!rounded-full !px-2.5 !py-0.5 !text-[11px] sm:!text-xs !font-semibold !m-0 !bg-slate-100 !text-slate-600 !border-slate-200 !shrink-0"
                   >
                     ● {behaviorConfig.badgeText}
                   </Tag>
                 )}
               </div>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed">
                 {statusDescription}
                 {active && auto?.enabledAt ? (
                   <span className="text-slate-700 font-medium"> Only {noun} received after {when(auto.enabledAt)} are answered.</span>
@@ -231,22 +230,28 @@ export function AutoReplyCard({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">AI Replies:</span>
-              <span className={`font-semibold ${aiOn ? "text-slate-900" : "text-slate-400"}`}>
+          <div className="grid grid-cols-3 gap-2 w-full lg:w-auto lg:flex lg:items-center lg:gap-2.5 shrink-0 pt-3 border-t border-slate-100 lg:border-t-0 lg:pt-0">
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                AI Replies
+              </span>
+              <span className={`text-xs font-bold lg:font-semibold ${aiOn ? "text-slate-900" : "text-slate-500"}`}>
                 {aiOn ? "Enabled" : "Off"}
               </span>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">Trigger Rules:</span>
-              <span className={`font-semibold ${rulesOn ? "text-slate-900" : "text-slate-400"}`}>
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                Trigger Rules
+              </span>
+              <span className={`text-xs font-bold lg:font-semibold ${rulesOn ? "text-slate-900" : "text-slate-500"}`}>
                 {auto?.rules.filter((r) => r.enabled).length ?? 0} active
               </span>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">Hourly Cap:</span>
-              <span className="font-semibold text-slate-900">
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                Hourly Cap
+              </span>
+              <span className="text-xs font-bold lg:font-semibold text-slate-900">
                 {auto?.maxPerHour ?? 35} / hr
               </span>
             </div>
@@ -267,8 +272,7 @@ export function AutoReplyCard({
       {/* ── AI Replies Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
@@ -477,8 +481,7 @@ export function AutoReplyCard({
       {/* ── Keyword Rules Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">
@@ -741,8 +744,7 @@ export function AutoReplyCard({
       {/* ── Safety Limits Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "24px 28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start gap-4">
