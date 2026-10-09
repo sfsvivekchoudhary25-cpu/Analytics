@@ -247,6 +247,16 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     return () => clearInterval(timer);
   }, [rule, refreshLogs]);
 
+  // Close post picker modal on Escape key
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPickerOpen(false);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [pickerOpen]);
+
   const keywords = keywordDraft.split(",").map((k) => k.trim()).filter(Boolean);
   const removeKeyword = (k: string) => {
     setKeywordDraft(keywords.filter((x) => x !== k).join(", "));
@@ -348,6 +358,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     if (!rule) return;
     try {
       setRule(await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ mediaId: null, mediaPermalink: null, mediaThumb: null }) }));
+      setPickerOpen(false);
     } catch (err) {
       setError((err as Error).message);
     }
@@ -2177,30 +2188,196 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         )}
       </div>
 
+      {/* ── Overlay Modal: Choose Target Post ────────────────────── */}
       {pickerOpen && (
-        <div className={card}>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--viz-ink)]">Choose a post</h3>
-            <button onClick={() => setPickerOpen(false)} className="text-xs underline">
-              Close
-            </button>
-          </div>
-          {postsError && <p className="text-xs text-red-600">{postsError}</p>}
-          {!posts && !postsError && <p className="text-xs opacity-70">Loading posts…</p>}
-          {posts && (
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-              {posts.map((p) => (
-                <button key={p.mediaId} onClick={() => choosePost(p)} className="aspect-square overflow-hidden rounded-md border border-[var(--viz-border)] hover:opacity-80">
-                  {p.thumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={p.thumb} alt={p.caption || "Post"} referrerPolicy="no-referrer" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full bg-black/5 dark:bg-white/10" />
-                  )}
-                </button>
-              ))}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+          onClick={() => setPickerOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4.5 border-b border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.02]">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-indigo-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/20 shadow-2xs">
+                  <InstagramIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--viz-ink)]">Select Instagram Post or Reel</h3>
+                  <p className="text-xs text-[var(--viz-muted)]">
+                    Choose which specific post will trigger this automation, or select All Posts.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-sm text-[var(--viz-muted)] hover:bg-black/5 hover:text-[var(--viz-ink)] dark:hover:bg-white/5 transition-colors"
+                title="Close modal"
+              >
+                ✕
+              </button>
             </div>
-          )}
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {/* Option 1: All Posts & Reels */}
+              <div
+                onClick={() => clearPost()}
+                className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
+                  !rule.mediaId
+                    ? "border-pink-500/50 bg-pink-500/5 ring-1 ring-pink-500/30"
+                    : "border-dashed border-[var(--viz-border)] hover:border-[var(--viz-ink)]/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-white font-bold text-sm shadow-2xs">
+                    ∞
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-[var(--viz-ink)]">All Posts &amp; Reels</span>
+                      {!rule.mediaId && (
+                        <span className="rounded-full bg-pink-500/15 px-2 py-0.5 text-[10px] font-bold text-pink-600 dark:text-pink-400">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)]">
+                      Triggers across every post and reel published on your profile
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                    !rule.mediaId
+                      ? "bg-pink-600 text-white shadow-2xs"
+                      : "border border-[var(--viz-border)] bg-background text-[var(--viz-ink)] hover:bg-black/5 dark:hover:bg-white/5"
+                  }`}
+                >
+                  {!rule.mediaId ? "Selected" : "Select All Posts"}
+                </button>
+              </div>
+
+              {/* Section Divider */}
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex-1 border-t border-[var(--viz-border)]" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--viz-muted)]">
+                  Or select a specific post
+                </span>
+                <div className="flex-1 border-t border-[var(--viz-border)]" />
+              </div>
+
+              {/* Error Alert */}
+              {postsError && (
+                <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-600">
+                  <span>{postsError}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPosts(null);
+                      openPicker();
+                    }}
+                    className="font-semibold underline hover:no-underline ml-2"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Loading Skeletons */}
+              {!posts && !postsError && (
+                <div className="space-y-2.5">
+                  <p className="text-xs text-[var(--viz-muted)] animate-pulse">Loading recent posts from Instagram…</p>
+                  <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                      <div key={i} className="aspect-square rounded-xl bg-black/5 dark:bg-white/5 animate-pulse" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {posts && posts.length === 0 && (
+                <div className="py-10 text-center text-xs text-[var(--viz-muted)]">
+                  No published feed posts found on your connected Instagram account.
+                </div>
+              )}
+
+              {/* Post Grid */}
+              {posts && posts.length > 0 && (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {posts.map((p) => {
+                    const isSelected = rule.mediaId === p.mediaId;
+                    return (
+                      <div
+                        key={p.mediaId}
+                        onClick={() => choosePost(p)}
+                        className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all cursor-pointer ${
+                          isSelected
+                            ? "border-pink-500 ring-2 ring-pink-500/40 shadow-sm bg-pink-500/5"
+                            : "border-[var(--viz-border)] hover:border-[var(--viz-ink)]/50 hover:shadow-md bg-background"
+                        }`}
+                      >
+                        <div className="relative aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5">
+                          {p.thumb ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.thumb}
+                              alt={p.caption || "Post"}
+                              referrerPolicy="no-referrer"
+                              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xs text-[var(--viz-muted)]">
+                              No image
+                            </div>
+                          )}
+
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 text-white text-[11px] font-bold shadow-md">
+                              ✓
+                            </div>
+                          )}
+
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="rounded-lg bg-white/95 px-2.5 py-1 text-xs font-bold text-slate-900 shadow-xs backdrop-blur-xs">
+                              {isSelected ? "Selected" : "Select Post"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {p.caption && (
+                          <div className="p-2">
+                            <p className="text-[11px] text-[var(--viz-ink-2)] line-clamp-2 leading-snug">
+                              {p.caption}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between px-6 py-3 border-t border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.02]">
+              <span className="text-[11px] text-[var(--viz-muted)]">
+                {posts ? `${posts.length} post${posts.length === 1 ? "" : "s"} available` : ""}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPickerOpen(false)}
+                className="rounded-lg border border-[var(--viz-border)] bg-background px-3.5 py-1.5 text-xs font-medium text-[var(--viz-ink)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
