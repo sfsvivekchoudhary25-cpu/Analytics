@@ -232,10 +232,11 @@ export function Sidebar({
         open={mobileOpen}
         onClose={onMobileClose}
         placement="left"
-        width={288}
+        size="default"
         closable={false}
         styles={{
           body: { padding: 0 },
+          wrapper: { width: "min(300px, 85vw)" },
         }}
         className="!p-0"
       >

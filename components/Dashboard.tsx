@@ -726,8 +726,11 @@ export function Dashboard({
             </Button>
           )}
 
-          {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
-          {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
+          {/* Desktop-only secondary header controls (mobile/tablet already has them in the sticky top bar) */}
+          <div className="hidden lg:flex items-center gap-2">
+            {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
+            {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
+          </div>
         </div>
       </div>
 
