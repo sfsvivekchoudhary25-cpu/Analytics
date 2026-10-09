@@ -1184,25 +1184,25 @@ export function AccountPanel({
           </div>
         </div>
 
-        {/* 3 Symmetrical Service Cards with Distinct Color Themes (Mobile-Optimized) */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 items-stretch">
+        {/* 3 Symmetrical Service Cards with Distinct Color Themes (Responsive: Mobile & Tablet Optimized) */}
+        <div className="relative grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 items-stretch">
           {/* Card 1: Cloudinary Media CDN (Cyan/Blue Theme) */}
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
             {/* Ambient Cyan Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-sky-200/35 blur-2xl pointer-events-none" />
 
             <div className="relative space-y-3.5 sm:space-y-4">
-              {/* Card Header */}
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white text-xl sm:text-2xl shadow-md shadow-blue-500/30 ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
                     <CloudUploadOutlined />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudinary Media CDN
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
                       Global Image &amp; Video CDN
                     </p>
                   </div>
@@ -1271,29 +1271,29 @@ export function AccountPanel({
               </div>
             </div>
 
-            {/* Actions (Mobile-Optimized Grid / Stack) */}
-            <div className="relative pt-3.5 mt-4 border-t border-sky-100/80 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            {/* Actions (Structured 2-Row Layout: Never Clips on Mobile or Tablet) */}
+            <div className="relative pt-3.5 mt-4 border-t border-sky-100/80 flex flex-col gap-2">
               <Button
                 type="primary"
                 icon={<ThunderboltOutlined />}
                 onClick={() => pingCloudinary()}
                 loading={cloudinaryLoading}
-                className="w-full sm:flex-1 !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-9.5 sm:!h-10 !border-0 !shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5"
+                className="w-full !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-9.5 sm:!h-10 !border-0 !shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5"
               >
                 Ping Health
               </Button>
-              <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0">
+              <div className="grid grid-cols-2 gap-2 w-full">
                 <Button
                   icon={<SettingOutlined />}
                   onClick={() => setCloudinaryModalOpen(true)}
-                  className="!w-full sm:!w-auto !rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9.5 sm:!h-10 px-3 shadow-2xs flex items-center justify-center gap-1.5"
+                  className="!w-full !rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
                 >
                   Configure
                 </Button>
                 <Button
                   icon={<ReloadOutlined className="text-rose-500" />}
                   onClick={handleDisconnectCloudinary}
-                  className="!w-full sm:!w-auto !rounded-xl text-xs font-semibold !border-rose-200 !bg-white hover:!bg-rose-50 !text-rose-600 !h-9.5 sm:!h-10 px-3 shadow-2xs flex items-center justify-center gap-1.5"
+                  className="!w-full !rounded-xl text-xs font-semibold !border-rose-200 !bg-white hover:!bg-rose-50 !text-rose-600 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
                 >
                   Reset
                 </Button>
@@ -1302,12 +1302,12 @@ export function AccountPanel({
           </div>
 
           {/* Card 2: OpenRouter AI Engine (Purple Theme) */}
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
             {/* Ambient Purple Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-200/35 blur-2xl pointer-events-none" />
 
             <div className="relative space-y-3.5 sm:space-y-4">
-              {/* Card Header */}
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white text-xl sm:text-2xl shadow-md shadow-purple-500/30 ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
@@ -1325,10 +1325,10 @@ export function AccountPanel({
                     </svg>
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       OpenRouter AI Engine
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
                       Multi-LLM Reasoning Gateway
                     </p>
                   </div>
@@ -1415,23 +1415,23 @@ export function AccountPanel({
             </div>
           </div>
 
-          {/* Card 3: Cloudflare Edge Proxy (Amber/Orange Theme) */}
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-4 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
+          {/* Card 3: Cloudflare Edge Proxy (Amber/Orange Theme - Spans 2 Cols on Tablet for Balance) */}
+          <div className="md:col-span-2 xl:col-span-1 relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
             {/* Ambient Amber Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-200/35 blur-2xl pointer-events-none" />
 
             <div className="relative space-y-3.5 sm:space-y-4">
-              {/* Card Header */}
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-xl sm:text-2xl shadow-md shadow-amber-500/30 ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
                     <GlobalOutlined />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudflare Edge Proxy
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
                       Inbound Real-Time Webhooks
                     </p>
                   </div>
@@ -1458,8 +1458,8 @@ export function AccountPanel({
                 </div>
               </div>
 
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
+              {/* Specs & Capabilities (Responsive 2-Col on Tablet Span, 1-Col on Mobile/Desktop) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-x-6 gap-y-2 text-xs pt-0.5">
                 <div className="flex items-center justify-between gap-2 py-0.5">
                   <span className="text-slate-500 flex items-center gap-2 shrink-0">
                     <AimOutlined className="text-amber-500 text-xs sm:text-sm" />
