@@ -167,8 +167,7 @@ export function MessageAutomation() {
       {ai?.enabled && (
         <Card
           variant="outlined"
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-          styles={{ body: { padding: "28px" } }}
+          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-5 flex items-start gap-4">
@@ -240,22 +239,21 @@ export function MessageAutomation() {
       {/* ── Recent Decisions Audit Log ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
               <HistoryOutlined className="text-lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-slate-900">Recent Decisions</h3>
-                <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-600 !font-medium">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-slate-900 leading-tight">Recent Decisions</h3>
+                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-600 !font-medium !m-0 shrink-0">
                   Live Audit Log
                 </Tag>
               </div>
-              <p className="mt-0.5 text-xs text-slate-500">
+              <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
                 Every incoming message evaluated by your automation engine, with details on replies and silent skips.
               </p>
             </div>
@@ -266,14 +264,14 @@ export function MessageAutomation() {
               size="middle"
               icon={<ReloadOutlined spin={refreshing} />}
               onClick={handleManualRefresh}
-              className="!rounded-xl self-start sm:self-auto !border-slate-200"
+              className="!rounded-xl !border-slate-200 self-start sm:self-auto shrink-0 text-xs font-semibold"
             >
               Refresh Log
             </Button>
           </Tooltip>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-5 sm:mt-6">
           {!log ? (
             <div className="flex justify-center py-12">
               <Spin description="Loading activity stream…" />
@@ -296,39 +294,39 @@ export function MessageAutomation() {
                 return (
                   <div
                     key={r.id}
-                    className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 p-4 hover:bg-slate-50/70 transition-colors"
+                    className="flex flex-col gap-2 p-3 sm:p-4 hover:bg-slate-50/70 transition-colors"
                   >
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                        <span className="font-semibold text-xs sm:text-sm text-slate-900 flex items-center gap-1 truncate">
+                          <UserOutlined className="text-slate-400 text-[10px]" />
+                          {r.username ? `@${r.username}` : `User ${r.igsid.slice(-6)}`}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-slate-400 shrink-0">
+                          • {when(r.createdAt)}
+                        </span>
+                      </div>
+
                       <Tag
                         icon={conf.icon}
-                        className={`!rounded-md !px-2.5 !py-0.5 !text-xs !font-semibold !m-0 !shrink-0 ${conf.badgeClass}`}
+                        className={`!rounded-md !px-2.5 !py-0.5 !text-[11px] sm:!text-xs !font-semibold !m-0 !shrink-0 ${conf.badgeClass}`}
                       >
                         {conf.label}
                       </Tag>
-
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-xs text-slate-900 flex items-center gap-1">
-                            <UserOutlined className="text-slate-400 text-[10px]" />
-                            {r.username ? `@${r.username}` : `User ${r.igsid.slice(-6)}`}
-                          </span>
-                          <span className="text-[11px] text-slate-400">• {when(r.createdAt)}</span>
-                        </div>
-
-                        {r.replyText && r.outcome === "sent" && (
-                          <div className="flex items-start gap-1.5 rounded-lg bg-emerald-50/50 border border-emerald-100 p-2 text-xs text-emerald-950 font-mono">
-                            <MessageOutlined className="text-emerald-600 mt-0.5 shrink-0" />
-                            <span className="break-words">&ldquo;{r.replyText}&rdquo;</span>
-                          </div>
-                        )}
-
-                        {r.note && (
-                          <p className="text-xs text-slate-500 italic">
-                            Reason: {r.note}
-                          </p>
-                        )}
-                      </div>
                     </div>
+
+                    {r.replyText && r.outcome === "sent" && (
+                      <div className="w-full flex items-start gap-2 rounded-lg bg-emerald-50/60 border border-emerald-100/90 p-2.5 text-xs text-emerald-950 font-mono">
+                        <MessageOutlined className="text-emerald-600 mt-0.5 shrink-0 text-xs" />
+                        <span className="break-words leading-relaxed">&ldquo;{r.replyText}&rdquo;</span>
+                      </div>
+                    )}
+
+                    {r.note && (
+                      <p className="text-xs text-slate-500 leading-relaxed break-words">
+                        <span className="font-medium text-slate-600">Reason:</span> {r.note}
+                      </p>
+                    )}
                   </div>
                 );
               })}

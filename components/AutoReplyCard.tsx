@@ -676,7 +676,7 @@ export function AutoReplyCard({
                   {r.enabled && rulesOn ? (
                     <StatusBadge status="enabled" text="Active" />
                   ) : r.enabled && !rulesOn ? (
-                    <StatusBadge status="warning" text="Rules Inactive" />
+                    <StatusBadge status="warning" text="Inactive" />
                   ) : (
                     <StatusBadge status="disabled" text="Paused" />
                   )}
