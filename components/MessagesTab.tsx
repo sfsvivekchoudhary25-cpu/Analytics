@@ -23,7 +23,7 @@ export function MessagesTab({
   if (view === "auto") {
     return (
       <div className="h-full w-full flex flex-col bg-slate-50/50 overflow-hidden">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-6 shadow-2xs">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-6 shadow-2xs gap-2">
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
@@ -32,15 +32,15 @@ export function MessagesTab({
           >
             Back to Messages
           </Button>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-800">Automated Responses</span>
-            <Tag color="blue" icon={<ThunderboltOutlined />} className="!rounded-full !m-0 !text-[11px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+            <span className="text-xs font-semibold text-slate-800 hidden sm:inline">Automated Responses</span>
+            <Tag color="blue" icon={<ThunderboltOutlined />} className="!rounded-full !m-0 !text-[11px] shrink-0">
               AI & Rules
             </Tag>
           </div>
-          <div className="w-24" />
+          <div className="w-8 sm:w-24 shrink-0" />
         </div>
-        <div className="flex-1 overflow-y-auto p-6 md:p-8 w-full bg-slate-100/70">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 w-full bg-slate-100/70">
           <div className="w-full">
             <MessageAutomation />
           </div>

@@ -19,6 +19,7 @@ import {
   ReloadOutlined,
   LinkOutlined,
   DeleteOutlined,
+  ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { api } from "@/lib/api";
 
@@ -132,6 +133,8 @@ export function Inbox({
   const [list, setList] = useState<Conversation[] | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [thread, setThread] = useState<Thread | null>(null);
+  // Mobile responsive view toggle: "list" for conversation sidebar, "chat" for active thread
+  const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const targetAppliedRef = useRef<string | null>(null);
   const initialTextAppliedRef = useRef(false);
 
@@ -209,6 +212,7 @@ export function Inbox({
             if (matched) {
               targetAppliedRef.current = targetUsername;
               setSelected(matched.igsid);
+              setMobileView("chat");
               setError(null);
               return;
             }
@@ -457,7 +461,9 @@ export function Inbox({
   return (
     <div className="flex h-full w-full overflow-hidden bg-white select-none">
       {/* ---------------- LEFT SIDEBAR (CHANNELS & REAL INSTAGRAM DMs) ---------------- */}
-      <aside className="flex h-full w-64 shrink-0 flex-col border-r border-slate-200/80 bg-[#f9fafc]">
+      <aside className={`h-full shrink-0 flex-col border-r border-slate-200/80 bg-[#f9fafc] ${
+        mobileView === "list" ? "flex w-full" : "hidden"
+      } md:flex md:w-64 lg:w-72`}>
         {/* Workspace / Account Header */}
         <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/70 px-4">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -710,21 +716,36 @@ export function Inbox({
                       onClick={() => {
                         setSelected(c.igsid);
                         setThread(null);
+                        setMobileView("chat");
                       }}
-                      className={`flex w-full items-center justify-between rounded-xl px-2.5 py-1.5 text-left transition-colors ${
+                      className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
                         isSelected
                           ? "bg-blue-50 text-blue-700 font-semibold ring-1 ring-blue-500/20"
                           : "text-slate-700 hover:bg-slate-200/50"
                       }`}
                     >
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <ContactAvatar id={name} src={c.profilePic} size="h-6 w-6" />
-                        <span className="truncate text-xs text-slate-800">
-                          @{name}
-                        </span>
+                      <div className="flex min-w-0 items-center gap-2.5 flex-1">
+                        <ContactAvatar id={name} src={c.profilePic} size="h-8 w-8 sm:h-7 sm:w-7" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="truncate text-xs font-bold text-slate-900">
+                              @{name}
+                            </span>
+                            {c.lastMessageAt && (
+                              <span className="text-[10px] text-slate-400 shrink-0 font-normal">
+                                {time(c.lastMessageAt)}
+                              </span>
+                            )}
+                          </div>
+                          {c.lastText && (
+                            <p className="text-[11px] text-slate-400 truncate mt-0.5 font-normal">
+                              {c.lastText}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       {c.unread > 0 && (
-                        <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ee4e4e] px-1.5 text-[10px] font-bold text-white shrink-0">
+                        <span className="ml-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ee4e4e] px-1.5 text-[10px] font-bold text-white shrink-0">
                           {c.unread}
                         </span>
                       )}
@@ -745,42 +766,53 @@ export function Inbox({
       </aside>
 
       {/* ---------------- RIGHT CHAT AREA (REAL INSTAGRAM THREAD) ---------------- */}
-      <section className="flex flex-1 flex-col h-full min-h-0 bg-white">
+      <section className={`flex-col h-full min-h-0 bg-white ${
+        mobileView === "chat" ? "flex w-full flex-1" : "hidden"
+      } md:flex md:flex-1`}>
         {/* Top Header Bar */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 px-6 bg-white">
-          {/* Left Title & Status */}
-          <div>
-            <h1 className="text-base font-bold text-slate-900 tracking-tight">
-              {thread?.conversation
-                ? `@${cleanUsername(thread.conversation)}`
-                : selected
-                ? `@${selected}`
-                : "# Direct Messages"}
-            </h1>
-            <div className="flex items-center gap-2 mt-0.5">
-              {thread?.conversation && (
-                <div className="flex -space-x-1.5">
-                  <ContactAvatar id={cleanUsername(thread.conversation)} src={thread.conversation.profilePic} size="h-4 w-4" />
-                  <ContactAvatar id={cleanOwnUsername} src={ownAvatar} size="h-4 w-4" />
-                </div>
-              )}
-              <span className="text-xs text-slate-500 font-normal">
-                2 Members •{" "}
-                {thread?.conversation?.canReply ? (
-                  <span className="font-medium text-emerald-600">
-                    • Online (Reply window open)
-                  </span>
-                ) : (
-                  <span className="font-medium text-slate-400">
-                    • 24h reply window closed
-                  </span>
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 px-3 sm:px-6 bg-white gap-2">
+          {/* Left Title & Status + Mobile Back Button */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={() => setMobileView("list")}
+              className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+              aria-label="Back to conversations"
+            >
+              <ArrowLeftOutlined className="text-xs" />
+            </button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
+                {thread?.conversation
+                  ? `@${cleanUsername(thread.conversation)}`
+                  : selected
+                  ? `@${selected}`
+                  : "# Direct Messages"}
+              </h1>
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 min-w-0">
+                {thread?.conversation && (
+                  <div className="flex -space-x-1.5 shrink-0">
+                    <ContactAvatar id={cleanUsername(thread.conversation)} src={thread.conversation.profilePic} size="h-4 w-4" />
+                    <ContactAvatar id={cleanOwnUsername} src={ownAvatar} size="h-4 w-4" />
+                  </div>
                 )}
-              </span>
+                <span className="text-[11px] sm:text-xs text-slate-500 font-normal truncate">
+                  {thread?.conversation?.canReply ? (
+                    <span className="font-medium text-emerald-600">
+                      • Online (Reply window open)
+                    </span>
+                  ) : (
+                    <span className="font-medium text-slate-400">
+                      • 24h window closed
+                    </span>
+                  )}
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Right Action Icons: Profile Link, Sync, More */}
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-1 sm:gap-2 text-slate-400 shrink-0">
             {thread?.conversation?.username && (
               <Tooltip title="View Instagram Profile">
                 <a
@@ -789,7 +821,7 @@ export function Inbox({
                   rel="noreferrer"
                   className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
-                  <LinkOutlined className="text-base" />
+                  <LinkOutlined className="text-sm sm:text-base" />
                 </a>
               </Tooltip>
             )}
@@ -798,7 +830,7 @@ export function Inbox({
                 onClick={syncNow}
                 className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
               >
-                <ReloadOutlined className={`text-base ${syncing ? "animate-spin text-blue-600" : ""}`} />
+                <ReloadOutlined className={`text-sm sm:text-base ${syncing ? "animate-spin text-blue-600" : ""}`} />
               </button>
             </Tooltip>
             {thread?.conversation && (
@@ -818,7 +850,7 @@ export function Inbox({
                 trigger={["click"]}
               >
                 <button className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors">
-                  <EllipsisOutlined className="text-base" />
+                  <EllipsisOutlined className="text-sm sm:text-base" />
                 </button>
               </Dropdown>
             )}
@@ -828,7 +860,7 @@ export function Inbox({
         {/* Real Message Stream (Slack Timeline format) */}
         <div
           ref={messagesContainerRef}
-          className="flex-1 min-h-0 overflow-y-auto px-8 py-5 space-y-3.5"
+          className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 md:px-8 py-3 sm:py-5 space-y-3 sm:space-y-3.5"
         >
           {/* Skeleton while thread loading */}
           {selected && !thread && (
@@ -874,7 +906,7 @@ export function Inbox({
               <div key={m.id}>
                 {/* Date Divider between days */}
                 {showDivider && (
-                  <div className="relative my-5 flex items-center justify-center">
+                  <div className="relative my-4 sm:my-5 flex items-center justify-center">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-slate-100" />
                     </div>
@@ -886,11 +918,11 @@ export function Inbox({
 
                 {isFollowUp ? (
                   /* Compact follow-up message row (Slack/Discord style) */
-                  <div className="group pl-[46px] -mt-1 hover:bg-slate-50/60 -mx-4 px-4 py-0.5 rounded-lg transition-colors">
+                  <div className="group pl-9 sm:pl-[46px] -mt-1 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-0.5 rounded-lg transition-colors">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         {m.text ? (
-                          <p className="text-sm text-slate-700 leading-relaxed break-words">
+                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed break-words">
                             {m.text}
                           </p>
                         ) : m.attachmentUrl && m.attachmentType === "image" ? null : (
@@ -899,45 +931,45 @@ export function Inbox({
                           </p>
                         )}
                       </div>
-                      <span className="opacity-0 group-hover:opacity-100 text-[10px] text-slate-400 font-normal shrink-0 transition-opacity">
+                      <span className="text-[10px] text-slate-400 font-normal shrink-0 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         {time(m.createdAt)}
                       </span>
                     </div>
 
                     {/* Image attachment if any */}
                     {m.attachmentUrl && m.attachmentType === "image" && (
-                      <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-sm">
+                      <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
                         <img
                           src={m.attachmentUrl}
                           alt="Attachment"
                           referrerPolicy="no-referrer"
-                          className="max-h-64 object-cover"
+                          className="max-h-52 sm:max-h-64 object-cover"
                         />
                       </div>
                     )}
                   </div>
                 ) : (
                   /* Standard message row with Avatar, Name and Time */
-                  <div className="group flex items-start gap-3.5 hover:bg-slate-50/60 -mx-4 px-4 py-1.5 rounded-lg transition-colors">
-                    <ContactAvatar id={senderAvatarId} src={senderAvatarSrc} size="h-9 w-9" />
+                  <div className="group flex items-start gap-2.5 sm:gap-3.5 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-1.5 rounded-lg transition-colors">
+                    <ContactAvatar id={senderAvatarId} src={senderAvatarSrc} size="h-8 w-8 sm:h-9 sm:w-9" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-baseline gap-2">
-                          <span className="text-sm font-bold text-slate-900">
+                          <span className="text-xs sm:text-sm font-bold text-slate-900">
                             {senderName}
                           </span>
-                          <span className="text-xs text-slate-400 font-normal">
+                          <span className="text-[10px] sm:text-xs text-slate-400 font-normal">
                             {time(m.createdAt)}
                           </span>
                         </div>
-                        <span className="opacity-0 group-hover:opacity-100 text-xs text-slate-400 transition-opacity">
+                        <span className="opacity-0 group-hover:opacity-100 text-[11px] sm:text-xs text-slate-400 transition-opacity hidden sm:inline">
                           {isOut ? "Sent via app" : "Direct Message"}
                         </span>
                       </div>
 
                       {/* Text message */}
                       {m.text ? (
-                        <p className="mt-0.5 text-sm text-slate-700 leading-relaxed break-words">
+                        <p className="mt-0.5 text-xs sm:text-sm text-slate-700 leading-relaxed break-words">
                           {m.text}
                         </p>
                       ) : m.attachmentUrl && m.attachmentType === "image" ? null : (
@@ -948,12 +980,12 @@ export function Inbox({
 
                       {/* Image attachment if any */}
                       {m.attachmentUrl && m.attachmentType === "image" && (
-                        <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-sm">
+                        <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
                           <img
                             src={m.attachmentUrl}
                             alt="Attachment"
                             referrerPolicy="no-referrer"
-                            className="max-h-64 object-cover"
+                            className="max-h-52 sm:max-h-64 object-cover"
                           />
                         </div>
                       )}
@@ -980,10 +1012,10 @@ export function Inbox({
         </div>
 
         {/* Floating Card Composer (Fixed at Bottom with shrink-0) */}
-        <div className="shrink-0 px-6 pb-4 pt-1 bg-white">
+        <div className="shrink-0 px-2.5 sm:px-6 pb-2.5 sm:pb-4 pt-1 bg-white border-t border-slate-100 sm:border-t-0">
           <form
             onSubmit={handleSend}
-            className="rounded-2xl border border-slate-200/90 bg-white p-3 shadow-xs focus-within:border-slate-300 focus-within:shadow-sm transition-all"
+            className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-3 shadow-xs focus-within:border-slate-300 focus-within:shadow-sm transition-all"
           >
             {error && (
               <p role="alert" className="mb-2 text-xs font-medium text-rose-500">
@@ -993,7 +1025,7 @@ export function Inbox({
 
             {/* 24-hour reply window limit notice */}
             {thread && !thread.conversation.canReply && (
-              <div className="mb-2 rounded-lg bg-amber-50 border border-amber-200/60 p-2 text-xs text-amber-800">
+              <div className="mb-2 rounded-lg bg-amber-50 border border-amber-200/60 p-2 text-[11px] sm:text-xs text-amber-800">
                 More than 24 hours have passed since their last message: Instagram limits replies until the customer messages again.
               </div>
             )}
@@ -1009,25 +1041,25 @@ export function Inbox({
                   ? `Message @${cleanUsername(thread.conversation)}`
                   : "Select a conversation to reply..."
               }
-              className="w-full border-0 bg-transparent px-1.5 py-1 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-50"
+              className="w-full border-0 bg-transparent px-1.5 py-1 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-0 disabled:opacity-50"
             />
 
             {/* Bottom Action Bar */}
-            <div className="mt-3 flex items-center justify-between pt-1">
-              <div className="flex items-center gap-1 text-slate-400">
+            <div className="mt-2 sm:mt-3 flex items-center justify-between pt-1 gap-1">
+              <div className="flex items-center gap-0.5 sm:gap-1 text-slate-400 overflow-x-auto no-scrollbar py-0.5">
                 <button
                   type="button"
                   onClick={() => {}}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
-                  <PlusOutlined className="text-sm" />
+                  <PlusOutlined className="text-xs sm:text-sm" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setInputText((t) => t + " 😊")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
-                  <SmileOutlined className="text-sm" />
+                  <SmileOutlined className="text-xs sm:text-sm" />
                 </button>
                 <button
                   type="button"
@@ -1040,24 +1072,24 @@ export function Inbox({
                           : " @")
                     )
                   }
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
                   <span className="font-semibold text-xs">@</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => {}}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
-                  <FileTextOutlined className="text-sm" />
+                  <FileTextOutlined className="text-xs sm:text-sm" />
                 </button>
                 <button
                   type="button"
                   onClick={onOpenAutomations}
                   title="Auto-reply templates"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
                 >
-                  <GiftOutlined className="text-sm" />
+                  <GiftOutlined className="text-xs sm:text-sm" />
                 </button>
               </div>
 
@@ -1069,9 +1101,9 @@ export function Inbox({
                   !inputText.trim() ||
                   (thread ? !thread.conversation.canReply : !selected)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
-                <SendOutlined className="text-sm" />
+                <SendOutlined className="text-xs sm:text-sm" />
               </button>
             </div>
           </form>
