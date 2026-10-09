@@ -917,9 +917,16 @@ export function Inbox({
                 )}
 
                 {isFollowUp ? (
-                  /* Compact follow-up message row (Slack/Discord style) */
-                  <div className="group pl-9 sm:pl-[46px] -mt-1 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-0.5 rounded-lg transition-colors">
-                    <div className="flex items-baseline justify-between gap-2">
+                  /* Compact follow-up message row (Slack/Discord style) with identical alignment to avatar row */
+                  <div className="group flex items-start gap-2.5 sm:gap-3.5 -mt-0.5 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-0.5 rounded-lg transition-colors">
+                    {/* Placeholder spacer matching ContactAvatar width */}
+                    <div className="w-8 sm:w-9 shrink-0 flex items-center justify-end select-none">
+                      <span className="text-[9px] text-slate-400 font-normal opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">
+                        {time(m.createdAt)}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1 flex items-baseline justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         {m.text ? (
                           <p className="text-xs sm:text-sm text-slate-700 leading-relaxed break-words">
@@ -930,23 +937,24 @@ export function Inbox({
                             {m.attachmentType ? `[${m.attachmentType}]` : "Instagram direct interaction"}
                           </p>
                         )}
+
+                        {/* Image attachment if any */}
+                        {m.attachmentUrl && m.attachmentType === "image" && (
+                          <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
+                            <img
+                              src={m.attachmentUrl}
+                              alt="Attachment"
+                              referrerPolicy="no-referrer"
+                              className="max-h-52 sm:max-h-64 object-cover"
+                            />
+                          </div>
+                        )}
                       </div>
+
                       <span className="text-[10px] text-slate-400 font-normal shrink-0 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                         {time(m.createdAt)}
                       </span>
                     </div>
-
-                    {/* Image attachment if any */}
-                    {m.attachmentUrl && m.attachmentType === "image" && (
-                      <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
-                        <img
-                          src={m.attachmentUrl}
-                          alt="Attachment"
-                          referrerPolicy="no-referrer"
-                          className="max-h-52 sm:max-h-64 object-cover"
-                        />
-                      </div>
-                    )}
                   </div>
                 ) : (
                   /* Standard message row with Avatar, Name and Time */
