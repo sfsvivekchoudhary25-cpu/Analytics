@@ -460,7 +460,7 @@ export default function AuthPage() {
 
           {/* Primary Action Button */}
           <div className="space-y-4 pt-1">
-            {/* Dev Quick Bypass Button (Local dev testing) */}
+            {/* Dev Quick Bypass Button (Local dev testing) - Commented out
             <div className="rounded-2xl border border-amber-300 bg-linear-to-br from-amber-50 to-orange-50/50 p-4 space-y-3 shadow-xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="inline-flex items-center gap-1.5 font-bold text-amber-900">
@@ -490,6 +490,7 @@ export default function AuthPage() {
                 or authenticate with meta
               </span>
             </div>
+            */}
 
             <button
               type="button"
