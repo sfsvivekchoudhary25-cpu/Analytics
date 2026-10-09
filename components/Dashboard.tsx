@@ -671,65 +671,75 @@ export function Dashboard({
 
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
-      {/* ── Top Header Toolbar ────────────────────────────────────────── */}
-      <div className="-mx-6 -mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-6 py-4 shadow-2xs">
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold text-slate-900">Dashboard</h1>
-            <Tag className="!rounded-full !bg-blue-50 !text-blue-700 !border-blue-200/80 !font-semibold !px-2.5 !m-0">
-              Live Hub
-            </Tag>
+      {/* ── Top Hero Card (Exact Match to Design Reference) ───────────── */}
+      <div className="relative overflow-hidden rounded-[26px] border border-slate-100 bg-white p-6 sm:p-7 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.03)]">
+        {/* Subtle ambient violet/purple and blue gradient glow on the right */}
+        <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-purple-200/40 via-pink-100/25 to-blue-200/30 blur-3xl" />
+        <div className="pointer-events-none absolute right-4 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-100/30 to-purple-100/25 blur-2xl" />
+
+        <div className="relative z-10 space-y-4">
+          {/* Title & Live Hub Badge */}
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+                Dashboard
+              </h1>
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/90 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 shadow-2xs">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span>Live Hub</span>
+              </div>
+            </div>
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed max-w-xl">
+              Instagram performance, account growth analytics, and automated messaging.
+            </p>
           </div>
-          <p className="text-xs text-slate-500">
-            Instagram performance, account growth analytics, and automated messaging
-          </p>
-        </div>
 
-        {/* Controls Toolbar with proper alignment */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Dropdown
-            menu={{
-              items: [
-                { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
-                { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
-                { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
-              ],
-              selectedKeys: [String(days)],
-            }}
-            trigger={["click"]}
-            disabled={isAnyLoading}
-          >
-            <Button className="!flex !items-center !gap-2 !h-9 !rounded-lg !border-slate-200 !bg-white !px-3.5 !text-xs !font-medium !text-slate-700 hover:!border-blue-400 hover:!text-blue-600 shadow-xs transition-all">
-              <CalendarOutlined className="text-slate-400 text-sm" />
-              <span>{dateRangeLabel(days)}</span>
-              <DownOutlined className="text-[10px] text-slate-400 ml-0.5" />
-            </Button>
-          </Dropdown>
-
-          <Tooltip title="Refresh data">
-            <Button
-              icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-600" />}
-              onClick={() => setTick((n) => n + 1)}
+          {/* Action Toolbar */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
+                  { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
+                  { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
+                ],
+                selectedKeys: [String(days)],
+              }}
+              trigger={["click"]}
               disabled={isAnyLoading}
-              className="!flex !items-center !justify-center !h-9 !w-9 !rounded-lg !border-slate-200 !bg-white hover:!border-blue-400 hover:!bg-blue-50/50 shadow-xs transition-colors"
-            />
-          </Tooltip>
-
-          {onOpenAutomations && (
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={onOpenAutomations}
-              className="!flex !items-center !gap-1.5 !h-9 !rounded-lg !bg-blue-600 !px-4 !text-xs !font-medium !shadow-xs hover:!bg-blue-700 transition-all active:scale-98"
             >
-              Open Automations
-            </Button>
-          )}
+              <Button className="!flex !items-center !gap-2.5 !h-11 !rounded-xl !border-slate-200/90 !bg-white !px-4 !text-xs sm:!text-sm !font-medium !text-slate-800 hover:!border-slate-300 !shadow-2xs transition-all">
+                <CalendarOutlined className="text-slate-500 text-sm" />
+                <span>{dateRangeLabel(days)}</span>
+                <DownOutlined className="text-[10px] text-slate-400 ml-1" />
+              </Button>
+            </Dropdown>
 
-          {/* Desktop-only secondary header controls (mobile/tablet already has them in the sticky top bar) */}
-          <div className="hidden lg:flex items-center gap-2">
-            {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
-            {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
+            <Tooltip title="Refresh data">
+              <Button
+                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700" />}
+                onClick={() => setTick((n) => n + 1)}
+                disabled={isAnyLoading}
+                className="!flex !items-center !justify-center !h-11 !w-11 !rounded-xl !border-slate-200/90 !bg-white hover:!border-slate-300 !shadow-2xs transition-colors"
+              />
+            </Tooltip>
+
+            {onOpenAutomations && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined className="text-sm font-bold" />}
+                onClick={onOpenAutomations}
+                className="!flex !items-center !gap-2 !h-11 !rounded-xl !bg-gradient-to-r !from-blue-600 !to-blue-500 hover:!from-blue-700 hover:!to-blue-600 !px-5 !text-xs sm:!text-sm !font-semibold !text-white !shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:!shadow-[0_6px_18px_rgba(37,99,235,0.35)] active:scale-98 transition-all"
+              >
+                Open Automations
+              </Button>
+            )}
+
+            {/* Desktop-only secondary header controls */}
+            <div className="hidden lg:flex items-center gap-2.5 ml-auto">
+              {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
+              {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
+            </div>
           </div>
         </div>
       </div>

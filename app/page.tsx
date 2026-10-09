@@ -232,48 +232,67 @@ export default function Dashboard() {
         }`}
       >
         {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
-        <header className="sticky top-0 z-30 flex h-15 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur-md sm:px-6 lg:hidden shadow-2xs">
+        <header className="sticky top-0 z-30 flex h-[72px] w-full shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 sm:px-6 lg:hidden shadow-xs">
           {/* Left: Hamburger Button + Brand */}
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/80 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/70 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
             >
-              <MenuOutlined className="text-base" />
+              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
 
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-2xs text-sm">
-                <InstagramOutlined />
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-xs">
+                <InstagramOutlined className="text-xl" />
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <span className="text-sm font-bold tracking-tight text-slate-900">Instagram Hub</span>
-                  <span className="rounded bg-blue-50 px-1 py-0.5 text-[9px] font-bold text-blue-600 ring-1 ring-inset ring-blue-500/20">
+                  <span className="text-base font-bold tracking-tight text-slate-950">Instagram Hub</span>
+                  <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-500/20">
                     PRO
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 capitalize mt-0.5">{activeLabel}</span>
+                <span className="text-xs text-slate-400 font-medium capitalize mt-1 leading-none">{activeLabel}</span>
               </div>
             </div>
           </div>
 
-          {/* Right: Notification Bell & Account Avatar */}
-          <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
+          {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
+          <div className="flex items-center gap-2.5">
+            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate max-w-[120px]">@{status.username.replace(/^@/, "")}</span>
+              <span className="truncate max-w-[130px]">@{status.username.replace(/^@/, "")}</span>
             </div>
-            <NotificationBell
-              pendingPhotos={pendingPhotos}
+
+            {/* Notification Bell with indicator */}
+            <button
+              type="button"
               onClick={() => setTab("photos")}
-            />
-            <AccountAvatar
-              username={status.username}
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/90 bg-slate-50/70 text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
+              aria-label="Notifications"
+            >
+              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              {pendingPhotos > 0 && (
+                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
+              )}
+            </button>
+
+            {/* User Avatar */}
+            <button
+              type="button"
               onClick={() => setTab("account")}
-            />
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f172a] text-white font-bold text-base shadow-xs hover:ring-2 hover:ring-blue-500/20 active:scale-95 transition-all cursor-pointer"
+              aria-label="Account Settings"
+            >
+              {status.username.replace(/^@/, "").charAt(0).toUpperCase() || "S"}
+            </button>
           </div>
         </header>
 
