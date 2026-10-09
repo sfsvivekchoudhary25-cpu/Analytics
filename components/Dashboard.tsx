@@ -677,78 +677,76 @@ export function Dashboard({
         <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-purple-200/40 via-pink-100/25 to-blue-200/30 blur-3xl" />
         <div className="pointer-events-none absolute right-4 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-100/30 to-purple-100/25 blur-2xl" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
-          {/* Title & Live Hub Badge */}
-          <div className="min-w-0">
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+        <div className="relative z-10 flex flex-row items-center justify-between gap-2 sm:gap-4 md:gap-6">
+          {/* Left: Title, Live Hub Badge & Subtitle */}
+          <div className="min-w-0 shrink-0 sm:shrink">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+              <h1 className="text-lg sm:text-2xl lg:text-3xl font-black tracking-tight text-slate-950 whitespace-nowrap">
                 Dashboard
               </h1>
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/90 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 shadow-2xs">
-                <span className="relative flex h-2 w-2">
+              <div className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full bg-blue-50/90 border border-blue-200/60 px-2 sm:px-2.5 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-blue-600 shadow-2xs shrink-0">
+                <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-emerald-500" />
                 </span>
                 <span>Live Hub</span>
               </div>
             </div>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed truncate lg:max-w-md xl:max-w-xl">
+            <p className="hidden md:block mt-0.5 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed truncate max-w-xs lg:max-w-md xl:max-w-xl">
               Instagram performance, account growth analytics, and automated messaging.
             </p>
           </div>
 
-          {/* Action Toolbar & Header Controls - Single row on desktop, responsive toolbar on mobile */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 w-full lg:w-auto justify-between lg:justify-end">
-            <div className="flex items-center gap-1.5 sm:gap-2.5 flex-1 lg:flex-initial min-w-0">
-              {/* 1. Date Range Dropdown with calendar icon and right chevron */}
-              <Dropdown
-                menu={{
-                  items: [
-                    { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
-                    { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
-                    { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
-                  ],
-                  selectedKeys: [String(days)],
-                }}
-                trigger={["click"]}
+          {/* Right: Action Toolbar & Header Controls - One single clean row on all screens */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end">
+            {/* 1. Date Range Dropdown with calendar icon and right chevron */}
+            <Dropdown
+              menu={{
+                items: [
+                  { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
+                  { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
+                  { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
+                ],
+                selectedKeys: [String(days)],
+              }}
+              trigger={["click"]}
+              disabled={isAnyLoading}
+            >
+              <Button className="!flex !items-center !justify-between !gap-1 sm:!gap-2 !h-8.5 sm:!h-10 md:!h-11 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white !px-2 sm:!px-3.5 md:!px-4 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap shrink-0">
+                <span className="flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+                  <CalendarOutlined className="text-slate-600 text-xs sm:text-sm md:text-base shrink-0" />
+                  <span className="whitespace-nowrap font-medium text-slate-800 text-[11px] sm:text-xs md:text-sm">{dateRangeLabel(days)}</span>
+                </span>
+                <DownOutlined className="text-[9px] sm:text-[10px] text-slate-400 shrink-0 ml-1" />
+              </Button>
+            </Dropdown>
+
+            {/* 2. Refresh Button */}
+            <Tooltip title="Refresh data">
+              <Button
+                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600 text-xs sm:text-sm" /> : <ReloadOutlined className="text-slate-700 text-xs sm:text-sm" />}
+                onClick={() => setTick((n) => n + 1)}
                 disabled={isAnyLoading}
+                className="!flex !items-center !justify-center !h-8.5 !w-8.5 sm:!h-10 sm:!w-10 md:!h-11 md:!w-11 !shrink-0 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
+                aria-label="Refresh data"
+              />
+            </Tooltip>
+
+            {/* 3. Automations Primary CTA */}
+            {onOpenAutomations && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined className="text-[11px] sm:text-xs md:text-sm font-bold" />}
+                onClick={onOpenAutomations}
+                className="!flex !items-center !justify-center !gap-1 sm:!gap-1.5 !h-8.5 sm:!h-10 md:!h-11 !shrink-0 !rounded-xl sm:!rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-2.5 sm:!px-3.5 md:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all whitespace-nowrap"
               >
-                <Button className="!flex-1 lg:!flex-initial !flex !items-center !justify-between !gap-2 sm:!gap-2.5 !h-10 sm:!h-10.5 md:!h-11 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white !px-3 sm:!px-4 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap min-w-0">
-                  <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-0">
-                    <CalendarOutlined className="text-slate-600 text-xs sm:text-sm md:text-base shrink-0" />
-                    <span className="whitespace-nowrap font-medium text-slate-800 text-[11px] sm:text-xs md:text-sm truncate">{dateRangeLabel(days)}</span>
-                  </span>
-                  <DownOutlined className="text-[9px] sm:text-[10px] text-slate-400 shrink-0 ml-1.5" />
-                </Button>
-              </Dropdown>
-
-              {/* 2. Refresh Button */}
-              <Tooltip title="Refresh data">
-                <Button
-                  icon={isAnyLoading ? <LoadingOutlined className="text-blue-600 text-sm" /> : <ReloadOutlined className="text-slate-700 text-sm" />}
-                  onClick={() => setTick((n) => n + 1)}
-                  disabled={isAnyLoading}
-                  className="!flex !items-center !justify-center !h-10 !w-10 sm:!h-10.5 sm:!w-10.5 md:!h-11 md:!w-11 !shrink-0 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
-                  aria-label="Refresh data"
-                />
-              </Tooltip>
-
-              {/* 3. Automations Primary CTA */}
-              {onOpenAutomations && (
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined className="text-xs sm:text-sm font-bold" />}
-                  onClick={onOpenAutomations}
-                  className="!flex !items-center !justify-center !gap-1 sm:!gap-1.5 !h-10 sm:!h-10.5 md:!h-11 !shrink-0 !rounded-xl sm:!rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-3.5 sm:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all whitespace-nowrap"
-                >
-                  <span>Automations</span>
-                </Button>
-              )}
-            </div>
+                <span>Automations</span>
+              </Button>
+            )}
 
             {/* Desktop-only secondary header controls (Bell & Avatar) in the same line */}
             {(onOpenPhotos || (username && onOpenAccount)) && (
-              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200/80 ml-1.5 shrink-0">
+              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200/80 ml-1 shrink-0">
                 {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
                 {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
               </div>
