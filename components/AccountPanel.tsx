@@ -1142,42 +1142,39 @@ export function AccountPanel({
       </div>
 
       {/* ── ROW 3: THIRD-PARTY CLOUD SERVICES & CDN INFRASTRUCTURE ──────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-slate-50/60 via-white to-white p-6 sm:p-7 shadow-sm space-y-6">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-slate-50/60 via-white to-white p-4 sm:p-7 shadow-sm space-y-6">
         {/* Soft Ambient Mesh Glows */}
         <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-gradient-to-bl from-blue-100/50 via-purple-100/40 to-transparent blur-3xl pointer-events-none" />
         <div className="absolute -top-10 left-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-sky-100/40 to-transparent blur-3xl pointer-events-none" />
 
         {/* Header */}
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-100/90 gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50/90 border border-blue-100 text-blue-600 shadow-2xs ring-4 ring-blue-50/50">
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-5 border-b border-slate-100/90 gap-3.5 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-blue-50/90 border border-blue-100 text-blue-600 shadow-2xs ring-2 sm:ring-4 ring-blue-50/50">
               <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.9a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
                 <path d="m22 12.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 12.65" />
                 <path d="m22 17.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 17.65" />
               </svg>
             </div>
-            <div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
-                  Third-Party Services &amp; Cloud Infrastructure
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-nowrap">
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 leading-tight whitespace-nowrap">
+                  External Services
                 </h3>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold shadow-2xs">
+                <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] sm:text-xs font-semibold shadow-2xs shrink-0 whitespace-nowrap">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>3 Connected</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1">
-                External media delivery CDNs, AI reasoning engines, and edge proxy tunnels connected to InstaVeyra.
-              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="w-full sm:w-auto shrink-0 pt-0.5 sm:pt-0">
             <Button
               icon={<ReloadOutlined className={allPinging ? "animate-spin text-slate-500" : "text-slate-500"} />}
               onClick={handlePingAllServices}
               loading={allPinging}
-              className="!rounded-xl font-semibold !text-xs !border-slate-200 hover:!border-slate-300 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
+              className="!w-full sm:!w-auto !rounded-xl font-semibold !text-xs !border-slate-200 hover:!border-slate-300 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-10 px-4 shadow-2xs transition-all flex items-center justify-center gap-2"
             >
               Ping All Services
             </Button>
@@ -1202,9 +1199,6 @@ export function AccountPanel({
                     <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudinary Media CDN
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
-                      Global Image &amp; Video CDN
-                    </p>
                   </div>
                 </div>
                 {/* Health & Latency Badge */}
@@ -1328,9 +1322,6 @@ export function AccountPanel({
                     <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       OpenRouter AI Engine
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
-                      Multi-LLM Reasoning Gateway
-                    </p>
                   </div>
                 </div>
                 {/* Health & Latency Badge */}
@@ -1431,9 +1422,6 @@ export function AccountPanel({
                     <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudflare Edge Proxy
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-tight">
-                      Inbound Real-Time Webhooks
-                    </p>
                   </div>
                 </div>
                 {/* Status Badge */}
