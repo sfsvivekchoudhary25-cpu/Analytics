@@ -16,7 +16,7 @@ import {
   ShareAltOutlined,
   ThunderboltFilled,
 } from "@ant-design/icons";
-import { auth, getApiBase } from "@/lib/api";
+import { auth, devBypassLogin, getApiBase, isLocalDev } from "@/lib/api";
 
 // ── Inrō Brand Logo (Minimalist & Modern) ──────────────────────────────────────
 function InroLogo({ className = "" }: { className?: string }) {
@@ -85,6 +85,19 @@ export default function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isLocal, setIsLocal] = useState(false);
+
+  useEffect(() => {
+    setIsLocal(isLocalDev());
+  }, []);
+
+  function handleDevBypass() {
+    devBypassLogin();
+    setSuccessMsg("Dev bypass token activated (@sfs.vivekchoudhary25). Redirecting to dashboard...");
+    setTimeout(() => {
+      router.replace("/");
+    }, 300);
+  }
 
   // Carousel
   const [activeSlide, setActiveSlide] = useState(0);
@@ -447,6 +460,37 @@ export default function AuthPage() {
 
           {/* Primary Action Button */}
           <div className="space-y-4 pt-1">
+            {/* Dev Quick Bypass Button (Local dev testing) */}
+            <div className="rounded-2xl border border-amber-300 bg-linear-to-br from-amber-50 to-orange-50/50 p-4 space-y-3 shadow-xs">
+              <div className="flex items-center justify-between text-xs">
+                <span className="inline-flex items-center gap-1.5 font-bold text-amber-900">
+                  <ThunderboltFilled className="text-amber-500" />
+                  <span>Local Dev Mode {isLocal ? "(Active)" : ""}</span>
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-full">
+                  Quick Bypass
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-900/80 leading-relaxed">
+                Skip Instagram OAuth authentication and enter the dashboard immediately with <b>@sfs.vivekchoudhary25</b> to test features locally.
+              </p>
+              <button
+                type="button"
+                onClick={handleDevBypass}
+                className="w-full h-11 px-4 rounded-xl bg-linear-to-r from-amber-500 via-amber-600 to-orange-500 hover:brightness-105 active:scale-[0.99] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <ThunderboltFilled className="text-sm" />
+                <span>⚡ Bypass Login &amp; Open Dashboard</span>
+              </button>
+            </div>
+
+            <div className="relative flex items-center justify-center my-1">
+              <div className="border-t border-slate-200 w-full" />
+              <span className="bg-slate-50/60 px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider absolute">
+                or authenticate with meta
+              </span>
+            </div>
+
             <button
               type="button"
               onClick={handleConnectInstagram}

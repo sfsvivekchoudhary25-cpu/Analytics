@@ -1,17 +1,37 @@
+export const REMOTE_API_BASE = "https://analytics-backend-vxak.onrender.com";
+
+export function isLocalDev(): boolean {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname;
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)
+  );
+}
+
+export function devBypassLogin(targetAccount = "sfs.vivekchoudhary25"): void {
+  auth.set("dev-bypass-token");
+  activeAccount.set(targetAccount);
+}
+
 export function getApiBase(): string {
   if (typeof window !== "undefined") {
+    const override = localStorage.getItem("ighub_api_base");
+    if (override) return override;
+
     const host = window.location.hostname;
     if (host === "localhost" || host === "127.0.0.1") {
-      return "http://localhost:4000";
+      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
     }
     if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
       return `http://${host}:4000`;
     }
   }
-  return process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+  return process.env.NEXT_PUBLIC_API_URL || REMOTE_API_BASE;
 }
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || REMOTE_API_BASE;
 const TOKEN_KEY = "ighub_token";
 const ACCOUNT_KEY = "ighub_account";
 
@@ -66,17 +86,39 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 
   try {
-    const res = await fetch(`${baseUrl}${path}`, {
-      ...init,
-      signal,
-      headers: {
-        // FormData sets its own multipart boundary header.
-        ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(acct ? { "x-instagram-account": acct } : {}),
-        ...init.headers,
-      },
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        signal,
+        headers: {
+          // FormData sets its own multipart boundary header.
+          ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(acct ? { "x-instagram-account": acct } : {}),
+          ...init.headers,
+        },
+      });
+    } catch (networkErr: any) {
+      if (
+        baseUrl !== REMOTE_API_BASE &&
+        (baseUrl.includes("localhost") || baseUrl.includes("127.0.0.1"))
+      ) {
+        console.warn(`[API] Local backend at ${baseUrl} unreachable, falling back to ${REMOTE_API_BASE}...`);
+        res = await fetch(`${REMOTE_API_BASE}${path}`, {
+          ...init,
+          signal,
+          headers: {
+            ...(init.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(acct ? { "x-instagram-account": acct } : {}),
+            ...init.headers,
+          },
+        });
+      } else {
+        throw networkErr;
+      }
+    }
     if (!res.ok) {
       let message = res.statusText;
       try {

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { activeAccount, api, ApiError, auth, ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus, devBypassLogin, isLocalDev } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
@@ -67,8 +67,13 @@ export default function Dashboard() {
   const handleLoadError = useCallback(
     (err: unknown) => {
       if (err instanceof ApiError && err.status === 401) {
-        auth.clear();
-        router.replace("/login");
+        if (!isLocalDev()) {
+          auth.clear();
+          router.replace("/login");
+        } else {
+          devBypassLogin();
+          setError("Dev session re-armed with dev-bypass-token.");
+        }
       } else {
         setError(err instanceof Error ? err.message : "Could not reach the server");
       }
@@ -81,6 +86,12 @@ export default function Dashboard() {
     const authToken = q.get("auth_token");
     if (authToken) {
       auth.set(authToken);
+    }
+
+    // Auto-bypass login on localhost / local test environments
+    if (isLocalDev() && !auth.get()) {
+      console.log("[Dev Bypass] Auto-authenticating local session with dev-bypass-token");
+      devBypassLogin();
     }
 
     if (!auth.get()) {
