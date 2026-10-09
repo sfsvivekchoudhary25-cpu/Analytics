@@ -672,12 +672,12 @@ export function Dashboard({
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
       {/* ── Top Hero Card (Exact Match to Design Reference) ───────────── */}
-      <div className="relative overflow-hidden rounded-[26px] border border-slate-100 bg-white p-6 sm:p-7 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.03)]">
+      <div className="relative overflow-hidden rounded-[26px] border border-slate-100 bg-white p-5 sm:p-7 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.03)]">
         {/* Subtle ambient violet/purple and blue gradient glow on the right */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-purple-200/40 via-pink-100/25 to-blue-200/30 blur-3xl" />
         <div className="pointer-events-none absolute right-4 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-100/30 to-purple-100/25 blur-2xl" />
 
-        <div className="relative z-10 space-y-4">
+        <div className="relative z-10 space-y-4 sm:space-y-5">
           {/* Title & Live Hub Badge */}
           <div>
             <div className="flex items-center gap-2.5">
@@ -685,7 +685,10 @@ export function Dashboard({
                 Dashboard
               </h1>
               <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/90 border border-blue-200/60 px-3 py-1 text-xs font-semibold text-blue-600 shadow-2xs">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
                 <span>Live Hub</span>
               </div>
             </div>
@@ -694,48 +697,54 @@ export function Dashboard({
             </p>
           </div>
 
-          {/* Action Toolbar */}
-          <div className="flex flex-wrap items-center gap-2.5 pt-1">
-            <Dropdown
-              menu={{
-                items: [
-                  { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
-                  { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
-                  { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
-                ],
-                selectedKeys: [String(days)],
-              }}
-              trigger={["click"]}
-              disabled={isAnyLoading}
-            >
-              <Button className="!flex !items-center !gap-2.5 !h-11 !rounded-xl !border-slate-200/90 !bg-white !px-4 !text-xs sm:!text-sm !font-medium !text-slate-800 hover:!border-slate-300 !shadow-2xs transition-all">
-                <CalendarOutlined className="text-slate-500 text-sm" />
-                <span>{dateRangeLabel(days)}</span>
-                <DownOutlined className="text-[10px] text-slate-400 ml-1" />
-              </Button>
-            </Dropdown>
-
-            <Tooltip title="Refresh data">
-              <Button
-                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700" />}
-                onClick={() => setTick((n) => n + 1)}
+          {/* Action Toolbar - Fully Responsive across Mobile (<480px), Tab (480px - 1024px), and Desktop (>=1024px) */}
+          <div className="flex flex-col min-[480px]:flex-row min-[480px]:items-center gap-2.5 sm:gap-3 pt-1">
+            {/* Date Range Selector + Refresh Button (Full-width row on mobile, compact on tablet/desktop) */}
+            <div className="flex items-center gap-2.5 w-full min-[480px]:w-auto">
+              <Dropdown
+                menu={{
+                  items: [
+                    { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
+                    { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
+                    { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
+                  ],
+                  selectedKeys: [String(days)],
+                }}
+                trigger={["click"]}
                 disabled={isAnyLoading}
-                className="!flex !items-center !justify-center !h-11 !w-11 !rounded-xl !border-slate-200/90 !bg-white hover:!border-slate-300 !shadow-2xs transition-colors"
-              />
-            </Tooltip>
+              >
+                <Button className="!flex-1 min-[480px]:!flex-initial !flex !items-center !justify-between min-[480px]:!justify-start !gap-2.5 !h-11 !rounded-xl !border-slate-200/90 !bg-white !px-3.5 sm:!px-4 !text-xs sm:!text-sm !font-medium !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99]">
+                  <span className="flex items-center gap-2 min-w-0">
+                    <CalendarOutlined className="text-slate-500 text-sm shrink-0" />
+                    <span className="truncate">{dateRangeLabel(days)}</span>
+                  </span>
+                  <DownOutlined className="text-[10px] text-slate-400 ml-1 shrink-0" />
+                </Button>
+              </Dropdown>
 
+              <Tooltip title="Refresh data">
+                <Button
+                  icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700" />}
+                  onClick={() => setTick((n) => n + 1)}
+                  disabled={isAnyLoading}
+                  className="!flex !items-center !justify-center !h-11 !w-11 !shrink-0 !rounded-xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
+                />
+              </Tooltip>
+            </div>
+
+            {/* Primary CTA (Full-width button on narrow mobile, inline button on tablet/desktop) */}
             {onOpenAutomations && (
               <Button
                 type="primary"
                 icon={<PlusOutlined className="text-sm font-bold" />}
                 onClick={onOpenAutomations}
-                className="!flex !items-center !gap-2 !h-11 !rounded-xl !bg-gradient-to-r !from-blue-600 !to-blue-500 hover:!from-blue-700 hover:!to-blue-600 !px-5 !text-xs sm:!text-sm !font-semibold !text-white !shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:!shadow-[0_6px_18px_rgba(37,99,235,0.35)] active:scale-98 transition-all"
+                className="!w-full min-[480px]:!w-auto !flex !items-center !justify-center !gap-2 !h-11 !rounded-xl !bg-gradient-to-r !from-blue-600 !to-blue-500 hover:!from-blue-700 hover:!to-blue-600 !px-5 !text-xs sm:!text-sm !font-semibold !text-white !shadow-[0_4px_14px_rgba(37,99,235,0.25)] hover:!shadow-[0_6px_18px_rgba(37,99,235,0.35)] active:scale-98 transition-all"
               >
                 Open Automations
               </Button>
             )}
 
-            {/* Desktop-only secondary header controls */}
+            {/* Desktop-only secondary header controls (mobile & tablet already have them in the top sticky header) */}
             <div className="hidden lg:flex items-center gap-2.5 ml-auto">
               {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
               {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
