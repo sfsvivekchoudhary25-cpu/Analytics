@@ -56,8 +56,6 @@ type Props = {
   maxReplyLength: number;
 };
 
-const when = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
 export function AutoReplyCard({
@@ -143,16 +141,6 @@ export function AutoReplyCard({
   const aiOn = !!auto?.ai?.enabled;
   const active = rulesOn || aiOn;
 
-  const statusDescription = !auto
-    ? "Loading automation configuration…"
-    : rulesOn && aiOn
-    ? `Your keyword rules answer first, and the AI answers all other incoming ${noun}.`
-    : aiOn
-    ? `The AI answers new ${noun}. Keyword rules are currently disabled.`
-    : rulesOn
-    ? `Your keyword rules answer matching ${noun}. The AI assistant is turned off.`
-    : `Automation is off. No ${noun} are answered automatically.`;
-
   // Dynamic naming, icon, and status badge reflecting exact active behavior
   const behaviorConfig = !auto
     ? {
@@ -192,8 +180,8 @@ export function AutoReplyCard({
         className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5">
-          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs mt-0.5 sm:mt-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
               {behaviorConfig.icon}
             </div>
             <div className="min-w-0 flex-1">
@@ -221,12 +209,6 @@ export function AutoReplyCard({
                   </Tag>
                 )}
               </div>
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed">
-                {statusDescription}
-                {active && auto?.enabledAt ? (
-                  <span className="text-slate-700 font-medium"> Only {noun} received after {when(auto.enabledAt)} are answered.</span>
-                ) : null}
-              </p>
             </div>
           </div>
 

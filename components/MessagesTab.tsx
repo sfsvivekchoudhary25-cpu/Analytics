@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Inbox } from "./Inbox";
 import { MessageAutomation } from "./MessageAutomation";
 
-import { Button, Tag } from "antd";
+import { Tag } from "antd";
 import { ArrowLeftOutlined, ThunderboltOutlined } from "@ant-design/icons";
 
 export function MessagesTab({
@@ -23,22 +23,26 @@ export function MessagesTab({
   if (view === "auto") {
     return (
       <div className="h-full w-full flex flex-col bg-slate-50/50 overflow-hidden">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-6 shadow-2xs gap-2">
-          <Button
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            onClick={() => setView("inbox")}
-            className="!flex !items-center !gap-1.5 !text-xs !font-semibold !text-slate-600 hover:!text-slate-900 !rounded-xl"
-          >
-            Back to Messages
-          </Button>
-          <div className="flex items-center gap-1.5 sm:gap-2 truncate">
-            <span className="text-xs font-semibold text-slate-800 hidden sm:inline">Automated Responses</span>
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-6 shadow-2xs gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => setView("inbox")}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+              aria-label="Back to Messages"
+            >
+              <ArrowLeftOutlined className="text-xs" />
+            </button>
+            <span className="text-sm font-bold text-slate-900 truncate">
+              Automated Responses
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
             <Tag color="blue" icon={<ThunderboltOutlined />} className="!rounded-full !m-0 !text-[11px] shrink-0">
               AI & Rules
             </Tag>
           </div>
-          <div className="w-8 sm:w-24 shrink-0" />
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-6 md:p-8 w-full bg-slate-100/70">
           <div className="w-full">
