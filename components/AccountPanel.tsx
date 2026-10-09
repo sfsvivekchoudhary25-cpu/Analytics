@@ -741,19 +741,19 @@ export function AccountPanel({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
+              <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
                 <Button
-                  icon={<ReloadOutlined className={busy ? "animate-spin text-slate-500" : "text-slate-500"} />}
+                  icon={<ReloadOutlined className={busy ? "animate-spin text-white" : "text-white text-xs"} />}
                   onClick={onConnectInstagram}
                   loading={busy}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-rose-300 !bg-white hover:!bg-rose-50/50 !text-slate-700 hover:!text-rose-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
+                  className="flex-1 sm:flex-initial !rounded-xl !bg-gradient-to-r !from-rose-500 !via-purple-600 !to-indigo-600 hover:!from-rose-600 hover:!via-purple-700 hover:!to-indigo-700 !text-white !border-0 font-bold !text-xs !h-9.5 sm:!h-10 px-4.5 !shadow-md shadow-purple-500/20 hover:shadow-lg hover:shadow-purple-500/30 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   Reconnect
                 </Button>
                 <Button
-                  icon={<KeyOutlined className="text-slate-400" />}
+                  icon={<KeyOutlined className="text-slate-500 text-xs" />}
                   onClick={() => setIgTokenModalOpen(true)}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-purple-300 !bg-white hover:!bg-purple-50/50 !text-slate-600 hover:!text-purple-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200/90 hover:!border-slate-300 !bg-white hover:!bg-slate-50 !text-slate-700 hover:!text-slate-900 font-semibold !text-xs !h-9.5 sm:!h-10 px-4 shadow-xs hover:shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5"
                 >
                   Override
                 </Button>
