@@ -14,14 +14,6 @@ import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { NotificationBell, AccountAvatar } from "@/components/HeaderControls";
 import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
-import {
-  AppstoreOutlined,
-  CommentOutlined,
-  InstagramOutlined,
-  MenuOutlined,
-  MessageOutlined,
-  PictureOutlined,
-} from "@ant-design/icons";
 
 const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
@@ -232,7 +224,7 @@ export default function Dashboard() {
         className={`min-w-0 flex-1 flex flex-col ${
           active === "messages"
             ? "h-full overflow-hidden"
-            : "min-h-screen overflow-y-auto pb-20 sm:pb-6"
+            : "min-h-screen overflow-y-auto pb-8 sm:pb-6"
         }`}
       >
         {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
@@ -336,85 +328,6 @@ export default function Dashboard() {
           {active === "hashtags" && <HashtagSearch />}
           {active === "account" && accountPanel}
         </div>
-
-        {/* Sleek Native Mobile Bottom Navigation Bar (Phones only, < 640px) */}
-        <nav
-          className="fixed bottom-0 inset-x-0 z-40 flex h-16 items-center justify-around border-t border-slate-200/90 bg-white/95 px-2 backdrop-blur-lg shadow-[0_-4px_12px_rgba(0,0,0,0.04)] sm:hidden"
-          aria-label="Mobile Navigation"
-        >
-          {/* 1. Dashboard */}
-          <button
-            type="button"
-            onClick={() => setTab("dashboard")}
-            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
-              active === "dashboard" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "dashboard" ? "bg-blue-50 text-blue-600" : ""}`}>
-              <AppstoreOutlined className="text-base" />
-            </div>
-            <span className="text-[10px] leading-tight">Dashboard</span>
-          </button>
-
-          {/* 2. Comments */}
-          <button
-            type="button"
-            onClick={() => setTab("comments")}
-            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
-              active === "comments" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "comments" ? "bg-blue-50 text-blue-600" : ""}`}>
-              <CommentOutlined className="text-base" />
-            </div>
-            <span className="text-[10px] leading-tight">Comments</span>
-          </button>
-
-          {/* 3. Messages */}
-          <button
-            type="button"
-            onClick={() => setTab("messages")}
-            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
-              active === "messages" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "messages" ? "bg-blue-50 text-blue-600" : ""}`}>
-              <MessageOutlined className="text-base" />
-            </div>
-            <span className="text-[10px] leading-tight">DMs</span>
-          </button>
-
-          {/* 4. Photos */}
-          <button
-            type="button"
-            onClick={() => setTab("photos")}
-            className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-all cursor-pointer ${
-              active === "photos" ? "text-blue-600 font-semibold" : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            <div className={`flex items-center justify-center h-7 w-7 rounded-lg ${active === "photos" ? "bg-blue-50 text-blue-600" : ""}`}>
-              <PictureOutlined className="text-base" />
-            </div>
-            <span className="text-[10px] leading-tight">Photos</span>
-            {pendingPhotos > 0 && (
-              <span className="absolute top-1 right-3 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-bold text-white shadow-xs">
-                {pendingPhotos}
-              </span>
-            )}
-          </button>
-
-          {/* 5. More (Opens Full Drawer Menu) */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
-          >
-            <div className="flex items-center justify-center h-7 w-7 rounded-lg">
-              <MenuOutlined className="text-base" />
-            </div>
-            <span className="text-[10px] leading-tight">More</span>
-          </button>
-        </nav>
       </main>
     </div>
   );
