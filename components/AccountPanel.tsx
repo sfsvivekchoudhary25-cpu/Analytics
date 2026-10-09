@@ -760,45 +760,150 @@ export function AccountPanel({
               </div>
             </div>
 
-            {/* Token Lifetime Meter (Modern Hero Box) */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-slate-50/40 border border-slate-200/80 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-800 font-bold flex items-center gap-2">
-                  <ClockCircleOutlined className="text-indigo-600 text-sm" />
-                  <span>Access Token Lifecycle</span>
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className={lowToken ? "text-amber-600 font-mono font-bold text-xs" : "text-slate-900 font-mono font-bold text-xs"}>
-                    {days} days remaining <span className="text-slate-400 font-normal">({TOKEN_LIFETIME_DAYS}d total)</span>
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
+            {/* Token Lifetime Meter (Modern High-Tech Telemetry Widget) */}
+            <div className="relative overflow-hidden rounded-2xl border border-slate-200/90 bg-gradient-to-b from-white via-slate-50/70 to-indigo-50/20 p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 space-y-4">
+              {/* Subtle Ambient Radial Glow */}
+              <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+
+              {/* Header: Title, Scope Badge & Health Pill */}
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/20">
+                    <ClockCircleOutlined className="text-base" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 tracking-tight leading-tight">
+                        Access Token Lifecycle
+                      </h4>
+                      <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-100 text-slate-600 border border-slate-200/70">
+                        Meta OAuth 2.0
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>60-Day Extended Business Session</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-2xs ${
                     lowToken
-                      ? "bg-amber-50 text-amber-700 border border-amber-200/80"
-                      : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                      ? "bg-amber-50 text-amber-700 border border-amber-200/90"
+                      : "bg-emerald-50 text-emerald-700 border border-emerald-200/90"
                   }`}>
-                    {lowToken ? "Expiring Soon" : "Healthy"}
+                    <span className={`h-2 w-2 rounded-full ${lowToken ? "bg-amber-500" : "bg-emerald-500"} animate-pulse`} />
+                    <span>{lowToken ? "Expiring Soon" : "Healthy & Active"}</span>
                   </span>
                 </div>
               </div>
 
-              {/* Custom Glowing Gradient Progress Meter */}
-              <div className="relative h-2.5 w-full rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 shadow-xs ${
-                    lowToken
-                      ? "bg-gradient-to-r from-amber-500 to-rose-500 shadow-rose-500/20"
-                      : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500 shadow-emerald-500/20"
-                  }`}
-                  style={{
-                    width: `${Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}%`,
-                  }}
-                />
+              {/* Telemetry Micro-Stat Cards (3 Column Grid) */}
+              <div className="relative grid grid-cols-3 gap-2 sm:gap-2.5">
+                {/* Tile 1: Remaining Days */}
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/95 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    Validity
+                  </span>
+                  <div className="mt-1 flex items-baseline gap-1">
+                    <span className="text-base sm:text-lg font-black text-slate-900 font-mono tracking-tight">
+                      {days}
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium">/{TOKEN_LIFETIME_DAYS}d</span>
+                  </div>
+                  <div className="mt-1 text-[10px] font-semibold text-emerald-600 flex items-center gap-1 truncate">
+                    <span>{Math.round((days / TOKEN_LIFETIME_DAYS) * 100)}% remaining</span>
+                  </div>
+                </div>
+
+                {/* Tile 2: Auto-Renew Daemon */}
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/95 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    Auto-Renew
+                  </span>
+                  <div className="mt-1 text-xs sm:text-sm font-black text-slate-800 font-mono tracking-tight">
+                    3:00 AM
+                  </div>
+                  <div className="mt-1 text-[10px] font-semibold text-indigo-600 flex items-center gap-1 truncate">
+                    <SyncOutlined className="text-[9px] animate-spin" />
+                    <span>Daily Daemon</span>
+                  </div>
+                </div>
+
+                {/* Tile 3: Rotate Threshold */}
+                <div className="p-2.5 sm:p-3 rounded-xl bg-white/95 border border-slate-200/80 shadow-2xs flex flex-col justify-between">
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    Threshold
+                  </span>
+                  <div className="mt-1 text-xs sm:text-sm font-black text-slate-800 font-mono tracking-tight">
+                    &lt; 10 Days
+                  </div>
+                  <div className="mt-1 text-[10px] font-semibold text-slate-500 flex items-center gap-1 truncate">
+                    <SafetyCertificateOutlined className="text-emerald-500 text-[10px]" />
+                    <span>Auto-Trigger</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-start sm:items-center justify-between text-[11px] text-slate-500 gap-2 leading-relaxed">
-                <span>
-                  Long-lived Meta OAuth token. System daemon automatically requests a renewed token daily at 3:00 AM once under 10 days remain.
-                </span>
+              {/* High-Tech Glowing Progress Gauge with Milestones */}
+              <div className="relative space-y-1.5 pt-0.5">
+                <div className="flex items-center justify-between text-[11px] font-medium text-slate-600">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                    <span>Token Lifetime Progress</span>
+                  </span>
+                  <span className="font-mono text-slate-800 font-bold">
+                    {days} days left <span className="text-slate-400 font-normal">({TOKEN_LIFETIME_DAYS}d max)</span>
+                  </span>
+                </div>
+
+                {/* Track with Auto-Renew Safety Marker */}
+                <div className="relative h-2.5 w-full rounded-full bg-slate-100 p-0.5 border border-slate-200/80 overflow-hidden shadow-inner">
+                  {/* Renewal Zone Threshold Marker (< 10 days = right ~16.6%) */}
+                  <div
+                    className="absolute right-0 top-0 bottom-0 bg-amber-200/40 border-l border-dashed border-amber-400/80 pointer-events-none"
+                    style={{ width: `${Math.round((10 / TOKEN_LIFETIME_DAYS) * 100)}%` }}
+                    title="Auto-renewal zone (<10 days)"
+                  />
+
+                  {/* Active Gradient Meter */}
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 relative shadow-xs ${
+                      lowToken
+                        ? "bg-gradient-to-r from-amber-500 via-rose-500 to-rose-600 shadow-rose-500/25"
+                        : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-400 shadow-emerald-500/20"
+                    }`}
+                    style={{
+                      width: `${Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}%`,
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent rounded-full" />
+                  </div>
+                </div>
+
+                {/* Milestone Indicators */}
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-0.5">
+                  <span>Day 0 (Issued)</span>
+                  <span className="text-amber-600 font-medium">Day 50 (Renew Zone)</span>
+                  <span>Day 60 (Expiry)</span>
+                </div>
+              </div>
+
+              {/* Informative Daemon Note & Expiration Info */}
+              <div className="relative pt-2.5 border-t border-slate-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-[11px] text-slate-500">
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <ThunderboltOutlined className="text-amber-500 shrink-0 text-xs" />
+                  <span>Self-healing daemon auto-rotates token in background with zero downtime.</span>
+                </div>
+                {status?.expiresAt && (
+                  <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400 shrink-0">
+                    <span>Expires:</span>
+                    <span className="font-semibold text-slate-600">
+                      {new Date(status.expiresAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
