@@ -21,11 +21,12 @@ export function getApiBase(): string {
     if (override) return override;
 
     const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1") {
-      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-    }
-    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
-      return `http://${host}:4000`;
+    if (host === "localhost" || host === "127.0.0.1" || /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
+      // If explicit localhost port is desired via custom env, use it; otherwise proxy via Next.js rewrite
+      if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("localhost:4000")) {
+        return process.env.NEXT_PUBLIC_API_URL;
+      }
+      return "/backend-proxy";
     }
   }
   return process.env.NEXT_PUBLIC_API_URL || REMOTE_API_BASE;

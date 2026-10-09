@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
     "rc-table",
     "rc-tree",
   ],
+  async rewrites() {
+    return [
+      {
+        source: "/backend-proxy/:path*",
+        destination: "https://analytics-backend-vxak.onrender.com/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
