@@ -198,24 +198,24 @@ function ProfileHeroSkeleton() {
   return (
     <Card
       className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-      styles={{ body: { padding: "20px 24px" } }}
+      styles={{ body: { padding: 0 } }}
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div className="flex items-center gap-4 min-w-0">
-          <Skeleton.Avatar active size={56} shape="circle" className="!shrink-0" />
-          <div className="space-y-2 py-1">
+      <div className="p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
+        <div className="flex items-center gap-3.5 min-w-0">
+          <Skeleton.Avatar active size={52} shape="circle" className="!shrink-0" />
+          <div className="space-y-2 py-1 min-w-0 flex-1">
             <Skeleton.Input active size="small" style={{ width: 140, height: 18 }} />
-            <Skeleton.Input active size="small" style={{ width: 220, height: 14 }} />
+            <Skeleton.Input active size="small" style={{ width: 180, height: 14 }} />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-3 shrink-0">
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="flex flex-col items-center justify-center min-w-[80px] rounded-xl border border-slate-200/80 bg-white/90 px-3.5 py-2 shadow-2xs space-y-1.5"
+              className="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 px-2 py-2 sm:px-3.5 sm:py-2.5 shadow-2xs space-y-1.5 text-center min-w-0"
             >
-              <Skeleton.Input active size="small" style={{ width: 44, height: 16 }} />
-              <Skeleton.Input active size="small" style={{ width: 52, height: 12 }} />
+              <Skeleton.Input active size="small" style={{ width: 36, height: 16 }} />
+              <Skeleton.Input active size="small" style={{ width: 48, height: 12 }} />
             </div>
           ))}
         </div>
@@ -784,10 +784,11 @@ export function Dashboard({
         ) : profile ? (
           <Card
             className="!rounded-2xl !border-slate-200/80 !bg-gradient-to-r !from-white !via-slate-50/40 !to-blue-50/20 !shadow-xs"
-            styles={{ body: { padding: "24px 28px" } }}
+            styles={{ body: { padding: 0 } }}
           >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-              <div className="flex items-center gap-4 min-w-0">
+            <div className="p-4 sm:p-6 md:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
+              {/* User Profile Header (Mobile & Desktop) */}
+              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
                 <div className="relative shrink-0">
                   {profile.profile_picture_url ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -795,58 +796,60 @@ export function Dashboard({
                       src={profile.profile_picture_url}
                       alt={profile.username}
                       referrerPolicy="no-referrer"
-                      className="h-16 w-16 rounded-full object-cover ring-2 ring-blue-500/20 shadow-sm"
+                      className="h-13 w-13 sm:h-16 sm:w-16 rounded-full object-cover ring-2 ring-blue-500/20 shadow-sm"
                     />
                   ) : (
-                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-800 text-lg font-bold text-white shadow-sm">
+                    <span className="flex h-13 w-13 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-slate-900 text-base sm:text-lg font-bold text-white shadow-sm">
                       {profile.username?.charAt(0).toUpperCase()}
                     </span>
                   )}
-                  <span className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2 ring-white">
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                  <span className="absolute bottom-0 right-0 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-white ring-2 ring-white">
+                    <span className="h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-emerald-500" />
                   </span>
                 </div>
 
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between sm:justify-start gap-2">
+                    <h2 className="text-sm sm:text-lg font-bold text-slate-950 truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
                       @{profile.username}
                     </h2>
                     <Tag
                       color="success"
-                      className="!m-0 !rounded-full !px-2 !py-0.2 !text-[11px] !font-medium flex items-center gap-1"
+                      className="!m-0 !rounded-full !px-2 !py-0.5 !text-[10px] sm:!text-[11px] !font-medium flex items-center gap-1 shrink-0"
                     >
                       <CheckCircleFilled className="text-[10px]" /> Connected
                     </Tag>
                   </div>
-                  {profile.name && <p className="text-xs font-normal text-slate-500 mt-0.5">{profile.name}</p>}
+                  {profile.name && (
+                    <p className="text-xs font-normal text-slate-500 mt-0.5 truncate">{profile.name}</p>
+                  )}
                   {profile.biography && (
-                    <p className="mt-1 line-clamp-1 text-xs text-slate-600 max-w-xl">{profile.biography}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-600 max-w-xl">{profile.biography}</p>
                   )}
                 </div>
               </div>
 
-              {/* Account Metric Pills - cleanly aligned */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
-                <div className="flex flex-col items-center justify-center min-w-[84px] rounded-xl border border-slate-200/80 bg-white/90 px-4 py-2.5 shadow-2xs">
-                  <span className="text-base font-bold text-slate-900 tabular-nums">
+              {/* Account Metric Pills - Responsive 3-Column Grid on Mobile, Flex on Desktop */}
+              <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-3 shrink-0 pt-1 sm:pt-0">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-white/95 px-2 py-2.5 sm:px-4 sm:min-w-[84px] shadow-2xs hover:shadow-xs transition-shadow text-center min-w-0">
+                  <span className="text-sm sm:text-base font-bold text-slate-950 tabular-nums">
                     {compact(profile.followers_count)}
                   </span>
-                  <span className="text-xs font-normal text-slate-500 mt-0.5">Followers</span>
+                  <span className="text-[11px] sm:text-xs font-normal text-slate-500 mt-0.5">Followers</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center min-w-[84px] rounded-xl border border-slate-200/80 bg-white/90 px-4 py-2.5 shadow-2xs">
-                  <span className="text-base font-bold text-slate-900 tabular-nums">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-white/95 px-2 py-2.5 sm:px-4 sm:min-w-[84px] shadow-2xs hover:shadow-xs transition-shadow text-center min-w-0">
+                  <span className="text-sm sm:text-base font-bold text-slate-950 tabular-nums">
                     {compact(profile.follows_count)}
                   </span>
-                  <span className="text-xs font-normal text-slate-500 mt-0.5">Following</span>
+                  <span className="text-[11px] sm:text-xs font-normal text-slate-500 mt-0.5">Following</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center min-w-[84px] rounded-xl border border-slate-200/80 bg-white/90 px-4 py-2.5 shadow-2xs">
-                  <span className="text-base font-bold text-slate-900 tabular-nums">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200/80 bg-white/95 px-2 py-2.5 sm:px-4 sm:min-w-[84px] shadow-2xs hover:shadow-xs transition-shadow text-center min-w-0">
+                  <span className="text-sm sm:text-base font-bold text-slate-950 tabular-nums">
                     {compact(profile.media_count)}
                   </span>
-                  <span className="text-xs font-normal text-slate-500 mt-0.5">Posts</span>
+                  <span className="text-[11px] sm:text-xs font-normal text-slate-500 mt-0.5">Posts</span>
                 </div>
 
                 {profile.website && (
