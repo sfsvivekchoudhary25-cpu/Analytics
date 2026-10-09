@@ -274,28 +274,22 @@ export function AutoReplyCard({
         variant="outlined"
         className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        {/* Header row: Icon + Title + Switch */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
               <RobotOutlined className="text-lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-base font-semibold text-slate-900">AI replies</h3>
-                {aiOn && (
-                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-700 !font-medium">
-                    AI Enabled
-                  </Tag>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-3xl">
-                Works on its own: no rules needed. The AI reads each new {one} and writes a short, friendly reply. It
-                knows nothing about your prices, stock or delivery, so it never states them: those questions are left for
-                you. It also stays silent whenever it is not sure.
-              </p>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <h3 className="text-base font-bold text-slate-900 leading-tight">AI replies</h3>
+              {aiOn && (
+                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-emerald-50 !border-emerald-200 !text-emerald-700 !font-semibold !m-0 shrink-0">
+                  AI Enabled
+                </Tag>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 pt-1">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">
               {aiOn ? "Enabled" : "Disabled"}
             </span>
@@ -307,6 +301,13 @@ export function AutoReplyCard({
             />
           </div>
         </div>
+
+        {/* Description text full-width */}
+        <p className="mt-2.5 text-xs text-slate-500 leading-relaxed max-w-3xl">
+          Works on its own: no rules needed. The AI reads each new {one} and writes a short, friendly reply. It
+          knows nothing about your prices, stock or delivery, so it never states them: those questions are left for
+          you. It also stays silent whenever it is not sure.
+        </p>
 
         {auto && !auto.ai?.available && (
           <Alert
@@ -345,22 +346,22 @@ export function AutoReplyCard({
         )}
 
         {/* ── Try It - Neutral Sleek Sandbox ── */}
-        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/60 p-5 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="mt-5 sm:mt-6 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <div className="flex items-center gap-2">
-              <ExperimentOutlined className="text-slate-600" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <ExperimentOutlined className="text-slate-600 text-xs sm:text-sm" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Try it (Live Sandbox)
               </span>
             </div>
             <span className="text-[11px] text-slate-400">
-              Draft sandbox preview • Evaluated by active model • No message is sent
+              Draft sandbox preview • No message is sent
             </span>
           </div>
 
-          <div className="flex gap-2.5">
+          <div className="flex items-center gap-2">
             <Input
-              size="large"
+              size="middle"
               value={tryText}
               onChange={(e) => setTryText(e.target.value)}
               onKeyDown={(e) => {
@@ -368,22 +369,22 @@ export function AutoReplyCard({
                   tryIt();
                 }
               }}
-              placeholder={`Type a customer ${one} to see what the AI would answer…`}
-              prefix={<MessageOutlined className="text-slate-400 mr-1" />}
+              placeholder={`Type a message to test AI reply…`}
+              prefix={<MessageOutlined className="text-slate-400 mr-1 text-xs" />}
               maxLength={500}
-              className="!rounded-xl flex-1 !border-slate-200"
+              className="!rounded-xl flex-1 !border-slate-200 text-xs sm:text-sm !h-10"
               disabled={!auto?.ai?.available}
             />
             <Button
               type="primary"
-              size="large"
+              size="middle"
               onClick={tryIt}
               loading={trying}
               disabled={trying || !tryText.trim() || !auto?.ai?.available}
               icon={<SendOutlined />}
-              className="!rounded-xl !px-6"
+              className="!rounded-xl !px-4 sm:!px-6 shrink-0 !h-10 text-xs sm:text-sm font-semibold"
             >
-              {trying ? "Thinking…" : "Try"}
+              {trying ? "…" : "Try"}
             </Button>
           </div>
 
@@ -483,27 +484,22 @@ export function AutoReplyCard({
         variant="outlined"
         className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        {/* Header row: Icon + Title + Switch */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
               <ThunderboltOutlined className="text-lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-base font-semibold text-slate-900">Keyword rules</h3>
-                {rulesOn && (
-                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-700 !font-medium">
-                    Rules Active
-                  </Tag>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-3xl">
-                Your exact wording, used first when a {one} contains one of the keywords. When rules are off, they are
-                ignored and the AI (if on) answers everything.
-              </p>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <h3 className="text-base font-bold text-slate-900 leading-tight">Keyword rules</h3>
+              {rulesOn && (
+                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-blue-50 !border-blue-200 !text-blue-700 !font-semibold !m-0 shrink-0">
+                  Rules Active
+                </Tag>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 pt-1">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">
               {rulesOn ? "Enabled" : "Disabled"}
             </span>
@@ -515,6 +511,12 @@ export function AutoReplyCard({
             />
           </div>
         </div>
+
+        {/* Description text full-width */}
+        <p className="mt-2.5 text-xs text-slate-500 leading-relaxed max-w-3xl">
+          Your exact wording, used first when a {one} contains one of the keywords. When rules are off, they are
+          ignored and the AI (if on) answers everything.
+        </p>
 
         {error && (
           <Alert
