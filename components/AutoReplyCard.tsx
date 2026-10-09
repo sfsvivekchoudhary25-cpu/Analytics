@@ -342,7 +342,7 @@ export function AutoReplyCard({
             </div>
             <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
               <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
-                Trigger Rules
+                KeyWord
               </span>
               <div className="flex items-center gap-1.5">
                 <StatusDot status={rulesStatus} pulse={false} />
@@ -647,15 +647,16 @@ export function AutoReplyCard({
           {auto?.rules.map((r) => (
             <div
               key={r.id}
-              className={`flex items-start justify-between gap-4 rounded-xl border p-4.5 transition-all ${
+              className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:p-4.5 transition-all ${
                 r.enabled && rulesOn
                   ? "border-slate-200/90 bg-white shadow-2xs hover:border-slate-300"
-                  : "border-slate-200/60 bg-slate-50/70 opacity-60"
+                  : "border-slate-200/60 bg-slate-50/70 opacity-70"
               }`}
             >
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-medium text-slate-500">
+              {/* Header row: Keywords & Status badge & Desktop actions */}
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                  <span className="text-xs font-semibold text-slate-500 shrink-0">
                     {r.keywords.trim() ? "Contains:" : "Applies to:"}
                   </span>
                   {(r.keywords.trim()
@@ -664,37 +665,74 @@ export function AutoReplyCard({
                   ).map((k) => (
                     <Tag
                       key={k}
-                      className="!rounded-md !bg-slate-100 !border-slate-200 !text-slate-800 !text-xs !font-medium"
+                      className="!rounded-md !bg-slate-100 !border-slate-200 !text-slate-800 !text-xs !font-medium !m-0"
                     >
                       {k}
                     </Tag>
                   ))}
-                  {r.enabled && rulesOn ? (
-                    <StatusBadge status="enabled" text="Active" className="!ml-auto" />
-                  ) : r.enabled && !rulesOn ? (
-                    <StatusBadge status="warning" text="Rules Inactive" className="!ml-auto" />
-                  ) : (
-                    <StatusBadge status="disabled" text="Paused" className="!ml-auto" />
-                  )}
                 </div>
 
-                <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 text-xs text-slate-800 font-mono whitespace-pre-wrap break-words leading-relaxed">
-                  &ldquo;{r.replyText}&rdquo;
+                <div className="flex items-center gap-2 shrink-0">
+                  {r.enabled && rulesOn ? (
+                    <StatusBadge status="enabled" text="Active" />
+                  ) : r.enabled && !rulesOn ? (
+                    <StatusBadge status="warning" text="Rules Inactive" />
+                  ) : (
+                    <StatusBadge status="disabled" text="Paused" />
+                  )}
+
+                  {/* Desktop Actions */}
+                  <div className="hidden sm:flex items-center gap-1.5 ml-1">
+                    <Tooltip title={r.enabled ? "Pause this rule" : "Resume this rule"}>
+                      <Button
+                        size="small"
+                        icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                        onClick={() => pause(r)}
+                        disabled={busy === `rule-${r.id}`}
+                        className="!text-xs"
+                      >
+                        {r.enabled ? "Pause" : "Resume"}
+                      </Button>
+                    </Tooltip>
+
+                    <Popconfirm
+                      title="Delete this rule?"
+                      description="Are you sure you want to delete this auto-reply rule?"
+                      onConfirm={() => remove(r)}
+                      okText="Delete"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Tooltip title="Delete rule">
+                        <Button
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
+                          disabled={busy === `rule-${r.id}`}
+                          className="!text-xs"
+                        />
+                      </Tooltip>
+                    </Popconfirm>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2 pt-1">
-                <Tooltip title={r.enabled ? "Pause this rule" : "Resume this rule"}>
-                  <Button
-                    size="small"
-                    icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-                    onClick={() => pause(r)}
-                    disabled={busy === `rule-${r.id}`}
-                    className="!text-xs"
-                  >
-                    {r.enabled ? "Pause" : "Resume"}
-                  </Button>
-                </Tooltip>
+              {/* Full width message bubble */}
+              <div className="w-full rounded-lg bg-slate-50 border border-slate-200/60 p-3 text-xs text-slate-800 font-mono whitespace-pre-wrap break-words leading-relaxed">
+                &ldquo;{r.replyText}&rdquo;
+              </div>
+
+              {/* Mobile Action Footer */}
+              <div className="flex sm:hidden items-center justify-end gap-2 pt-1.5 border-t border-slate-100/90">
+                <Button
+                  size="small"
+                  icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                  onClick={() => pause(r)}
+                  disabled={busy === `rule-${r.id}`}
+                  className="!text-xs !h-7 !px-3 !rounded-lg"
+                >
+                  {r.enabled ? "Pause" : "Resume"}
+                </Button>
 
                 <Popconfirm
                   title="Delete this rule?"
@@ -704,15 +742,13 @@ export function AutoReplyCard({
                   cancelText="Cancel"
                   okButtonProps={{ danger: true }}
                 >
-                  <Tooltip title="Delete rule">
-                    <Button
-                      size="small"
-                      danger
-                      icon={<DeleteOutlined />}
-                      disabled={busy === `rule-${r.id}`}
-                      className="!text-xs"
-                    />
-                  </Tooltip>
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    disabled={busy === `rule-${r.id}`}
+                    className="!text-xs !h-7 !w-7 !rounded-lg !flex !items-center !justify-center"
+                  />
                 </Popconfirm>
               </div>
             </div>
@@ -733,22 +769,24 @@ export function AutoReplyCard({
         </div>
 
         {/* ── Add Rule Form ── */}
-        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-semibold text-slate-700 flex items-center gap-1.5 mr-1">
-              <BulbOutlined className="text-slate-500" />
+        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-5 space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+              <BulbOutlined className="text-amber-500 text-xs" />
               <span>Start from template:</span>
-            </span>
-            {templates.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => setNewRule({ keywords: t.keywords, replyText: t.replyText })}
-                className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:border-slate-400 hover:bg-slate-50 transition-colors active:scale-95"
-              >
-                {t.name}
-              </button>
-            ))}
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap no-scrollbar">
+              {templates.map((t) => (
+                <button
+                  key={t.name}
+                  type="button"
+                  onClick={() => setNewRule({ keywords: t.keywords, replyText: t.replyText })}
+                  className="cursor-pointer shrink-0 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:border-slate-400 hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           <form
@@ -757,16 +795,16 @@ export function AutoReplyCard({
               if (newRule.replyText.trim()) addRule();
             }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
               {/* Left Column: Inputs */}
               <div className="lg:col-span-7 space-y-3.5 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">
                       If the {one} contains{" "}
-                      <span className="font-normal text-slate-400">(optional, separate with commas)</span>
+                      <span className="font-normal text-slate-400 text-[11px]">(optional, comma-separated)</span>
                     </label>
-                    <span className="text-[11px] text-slate-400">Leave blank to answer any {one}</span>
+                    <span className="text-[11px] text-slate-400">Leave blank for all {noun}</span>
                   </div>
                   <Input
                     size="large"
@@ -775,26 +813,25 @@ export function AutoReplyCard({
                     placeholder={keywordsExample}
                     prefix={<TagOutlined className="text-slate-400 mr-1" />}
                     maxLength={500}
-                    className="!rounded-xl !border-slate-200"
+                    className="!rounded-xl !border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">Reply with</label>
-                    <Button
-                      size="small"
-                      type="link"
+                    <button
+                      type="button"
                       onClick={() =>
                         setNewRule((r) => ({
                           ...r,
                           replyText: (r.replyText.trim() ? r.replyText + " " : "") + "{username}",
                         }))
                       }
-                      className="!text-xs !p-0 !h-auto !text-blue-600"
+                      className="cursor-pointer text-[11px] font-medium text-blue-600 bg-blue-50/80 hover:bg-blue-100 border border-blue-200/60 rounded-md px-2 py-0.5 transition-colors active:scale-95"
                     >
                       + Insert {"{username}"}
-                    </Button>
+                    </button>
                   </div>
                   <Input.TextArea
                     value={newRule.replyText}
@@ -803,13 +840,13 @@ export function AutoReplyCard({
                     rows={3}
                     maxLength={maxReplyLength}
                     showCount
-                    className="!rounded-xl resize-none !border-slate-200"
+                    className="!rounded-xl resize-none !border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
               </div>
 
               {/* Right Column: Live Follower Preview Box */}
-              <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
+              <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
                     <div className="flex items-center gap-1.5">
@@ -818,16 +855,16 @@ export function AutoReplyCard({
                     </div>
                     <span className="text-slate-400 font-normal">Customer view</span>
                   </div>
-                  <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 min-h-[90px] flex items-center">
+                  <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 min-h-[80px] sm:min-h-[90px] flex items-center">
                     <p className="text-xs text-slate-800 whitespace-pre-wrap break-words leading-relaxed font-mono">
                       {newRule.replyText.trim()
                         ? newRule.replyText.replaceAll("{username}", "riya.styles")
-                        : "Type a reply message on the left to see customer preview…"}
+                        : "Type a reply message to see customer preview…"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-100">
                   <span className="text-[11px] text-slate-400">
                     <code>{"{username}"}</code> is personalized
                   </span>
@@ -838,7 +875,7 @@ export function AutoReplyCard({
                     loading={busy === "add"}
                     disabled={busy === "add" || !newRule.replyText.trim()}
                     icon={<PlusOutlined />}
-                    className="!rounded-xl !px-5"
+                    className="!rounded-xl !h-10 sm:!h-11 w-full sm:w-auto sm:!px-6 font-semibold"
                   >
                     Add Rule
                   </Button>
