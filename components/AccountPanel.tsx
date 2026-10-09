@@ -25,6 +25,7 @@ import {
   HeartOutlined,
   IdcardOutlined,
   InfoCircleOutlined,
+  InstagramFilled,
   InstagramOutlined,
   KeyOutlined,
   LineChartOutlined,
@@ -682,12 +683,17 @@ export function AccountPanel({
       {/* ── ROW 1: THE TWO CORE INTEGRATIONS (Side by Side: Instagram & Facebook) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left: Instagram Professional Connection */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="relative overflow-hidden rounded-3xl border border-rose-200/70 bg-gradient-to-b from-rose-50/50 via-rose-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          {/* Ambient Instagram Gradient Glows */}
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-rose-200/40 via-purple-200/30 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-amber-200/25 blur-2xl pointer-events-none" />
+
+          <div className="relative space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-rose-100/80">
               <div className="flex items-center gap-3.5 min-w-0">
-                <div className="relative h-14 w-14 shrink-0 rounded-2xl overflow-hidden p-0.5 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md">
-                  <div className="h-full w-full rounded-[14px] bg-slate-900 flex items-center justify-center text-lg font-bold text-white uppercase">
+                {/* Glowing Story Gradient Ring Avatar */}
+                <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl p-[2.5px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md shadow-rose-500/25 ring-4 ring-rose-50 group-hover:scale-105 transition-transform">
+                  <div className="h-full w-full rounded-[13px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase shadow-inner">
                     {cleanUsername.charAt(0)}
                   </div>
                   {status.profilePictureUrl && (
@@ -702,97 +708,137 @@ export function AccountPanel({
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                       }}
-                      className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover bg-white"
+                      className="absolute inset-[2.5px] h-[calc(100%-5px)] w-[calc(100%-5px)] rounded-[13px] object-cover bg-white"
                     />
                   )}
+                  {/* Active Live Indicator Dot */}
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs ring-1 ring-emerald-400/50 animate-pulse" />
                 </div>
+
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-slate-900 leading-none truncate">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                       @{cleanUsername}
                     </h3>
-                    <CheckCircleFilled className="text-blue-500 text-sm" />
-                    <Tag color="green" className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0">
-                      Connected
-                    </Tag>
+                    <Tooltip title="Meta Verified Instagram Business Profile">
+                      <span className="inline-flex items-center justify-center h-4.5 w-4.5 rounded-full bg-blue-500 text-white text-[10px] font-bold shadow-2xs cursor-help">
+                        ✓
+                      </span>
+                    </Tooltip>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold shadow-2xs">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Connected</span>
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 truncate">
-                    Instagram Business Account · Graph API OAuth
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
+                    <span className="inline-flex items-center gap-1.5 text-slate-700 font-semibold">
+                      <InstagramFilled className="text-rose-500 text-xs" />
+                      <span>Instagram Business</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-slate-400 text-[11px]">Graph API OAuth</span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
                 <Button
-                  icon={<ReloadOutlined />}
+                  icon={<ReloadOutlined className={busy ? "animate-spin text-slate-500" : "text-slate-500"} />}
                   onClick={onConnectInstagram}
                   loading={busy}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 !text-slate-700 hover:!border-blue-400 !text-xs font-semibold"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-rose-300 !bg-white hover:!bg-rose-50/50 !text-slate-700 hover:!text-rose-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
                 >
                   Reconnect
                 </Button>
                 <Button
-                  icon={<KeyOutlined />}
+                  icon={<KeyOutlined className="text-slate-400" />}
                   onClick={() => setIgTokenModalOpen(true)}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 !text-xs"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-purple-300 !bg-white hover:!bg-purple-50/50 !text-slate-600 hover:!text-purple-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
                 >
                   Override
                 </Button>
               </div>
             </div>
 
-            {/* Token Lifetime Meter */}
-            <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-slate-700 flex items-center gap-1.5">
-                  <ClockCircleOutlined className="text-blue-600" />
+            {/* Token Lifetime Meter (Modern Hero Box) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-slate-50/40 border border-slate-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-800 font-bold flex items-center gap-2">
+                  <ClockCircleOutlined className="text-indigo-600 text-sm" />
                   <span>Access Token Lifecycle</span>
                 </span>
-                <span className={lowToken ? "text-amber-600 font-bold" : "text-slate-700 font-bold"}>
-                  {days} days remaining (of {TOKEN_LIFETIME_DAYS}d)
+                <div className="flex items-center gap-2">
+                  <span className={lowToken ? "text-amber-600 font-mono font-bold text-xs" : "text-slate-900 font-mono font-bold text-xs"}>
+                    {days} days remaining <span className="text-slate-400 font-normal">({TOKEN_LIFETIME_DAYS}d total)</span>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
+                    lowToken
+                      ? "bg-amber-50 text-amber-700 border border-amber-200/80"
+                      : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                  }`}>
+                    {lowToken ? "Expiring Soon" : "Healthy"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Custom Glowing Gradient Progress Meter */}
+              <div className="relative h-2.5 w-full rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 shadow-xs ${
+                    lowToken
+                      ? "bg-gradient-to-r from-amber-500 to-rose-500 shadow-rose-500/20"
+                      : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500 shadow-emerald-500/20"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex items-start sm:items-center justify-between text-[11px] text-slate-500 gap-2 leading-relaxed">
+                <span>
+                  Long-lived Meta OAuth token. System daemon automatically requests a renewed token daily at 3:00 AM once under 10 days remain.
                 </span>
               </div>
-              <Progress
-                percent={Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}
-                size="small"
-                status={lowToken ? "exception" : "normal"}
-                strokeColor={{ "0%": "#6366f1", "50%": "#3b82f6", "100%": "#10b981" }}
-                showInfo={false}
-              />
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Long-lived Meta OAuth token. System daemon automatically requests a renewed token daily at 3:00 AM once fewer than 10 days remain.
-              </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-            <span>OAuth 2.0 PKCE Compliant</span>
-            <span className="text-emerald-600 font-medium flex items-center gap-1">
-              <CheckCircleFilled className="text-[10px]" />
+          <div className="relative flex items-center justify-between pt-3 border-t border-rose-100/70 text-xs">
+            <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+              <LockOutlined className="text-slate-400 text-xs" />
+              <span>OAuth 2.0 PKCE Compliant</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-semibold text-xs shadow-2xs">
+              <CheckCircleFilled className="text-emerald-500 text-xs" />
               <span>Auto-Renew Daemon Active</span>
             </span>
           </div>
         </div>
 
         {/* Right: Facebook Page Authorization */}
-        <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
-          <div>
-            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-slate-100">
-              <div className="flex items-start gap-3 sm:gap-3.5 min-w-0">
-                <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shadow-sm mt-0.5">
-                  <FacebookOutlined className="text-2xl sm:text-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-blue-200/70 bg-gradient-to-b from-blue-50/50 via-blue-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          {/* Ambient Blue Glow */}
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-blue-200/40 via-sky-200/30 to-transparent blur-3xl pointer-events-none" />
+
+          <div className="relative space-y-5">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-blue-100/80">
+              <div className="flex items-start gap-3.5 min-w-0">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 text-white text-3xl shadow-lg shadow-blue-500/25 ring-4 ring-blue-50 group-hover:scale-105 transition-transform mt-0.5">
+                  <FacebookOutlined />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
                       Facebook Page Authorization
                     </h3>
-                    <Tag
-                      color={fbStatus?.connected ? "blue" : "default"}
-                      className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0 shrink-0"
-                    >
-                      {fbStatus?.connected ? "Linked" : "Required"}
-                    </Tag>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-2xs ${
+                      fbStatus?.connected
+                        ? "bg-blue-50 border border-blue-200/80 text-blue-700"
+                        : "bg-slate-100 border border-slate-200 text-slate-600"
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${fbStatus?.connected ? "bg-blue-500 animate-pulse" : "bg-slate-400"}`} />
+                      <span>{fbStatus?.connected ? "Linked" : "Required"}</span>
+                    </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     Meta requires Facebook Page permissions to send automated private replies to comments.
@@ -802,11 +848,11 @@ export function AccountPanel({
             </div>
 
             {/* Status & Actions Box */}
-            <div className="mt-4">
+            <div>
               {fbStatus?.connected ? (
-                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-2xs">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold text-base shadow-md shadow-blue-600/20">
                       {fbStatus.pageName.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -825,7 +871,7 @@ export function AccountPanel({
                       size="small"
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-lg !text-xs font-semibold !border-slate-200"
+                      className="!rounded-xl !text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !h-9 px-3.5 shadow-2xs"
                     >
                       Switch Page
                     </Button>
@@ -834,15 +880,15 @@ export function AccountPanel({
                       danger
                       onClick={handleDisconnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-lg !text-xs font-semibold"
+                      className="!rounded-xl !text-xs font-semibold !h-9 px-3 shadow-2xs"
                     >
                       Disconnect
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-4 sm:p-6 text-center space-y-3">
-                  <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-5 sm:p-6 text-center space-y-3.5">
+                  <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
                     To deliver instant coupon links when customers comment on your Instagram posts, connect the Facebook Page linked to your Instagram account.
                   </p>
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 max-w-sm mx-auto">
@@ -851,14 +897,14 @@ export function AccountPanel({
                       icon={<FacebookOutlined />}
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2"
+                      className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 !border-0 shadow-md shadow-blue-600/20"
                     >
                       Connect Facebook Page
                     </Button>
                     <Button
                       icon={<KeyOutlined />}
                       onClick={() => setFbModalOpen(true)}
-                      className="!w-full sm:!w-auto !rounded-xl !border-slate-200 text-xs text-slate-600 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2"
+                      className="!w-full sm:!w-auto !rounded-xl !border-slate-200 !bg-white hover:!bg-slate-50 text-xs text-slate-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
                     >
                       Paste Page Token
                     </Button>
@@ -868,9 +914,12 @@ export function AccountPanel({
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-            <span>Required for Comment Automation</span>
-            <span className="text-slate-600 font-medium">Private Reply API</span>
+          <div className="relative flex items-center justify-between pt-3 border-t border-blue-100/70 text-xs">
+            <span className="text-slate-500 font-medium">Required for Comment Automation</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 font-semibold text-xs shadow-2xs">
+              <CheckCircleFilled className="text-blue-500 text-xs" />
+              <span>Private Reply API</span>
+            </span>
           </div>
         </div>
       </div>
