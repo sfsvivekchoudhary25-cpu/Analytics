@@ -262,7 +262,7 @@ export function AutoReplyCard({
   const rulesBadgeText = !rulesOn
     ? "Disabled"
     : rulesViolation
-    ? "0 Rules Active"
+    ? "0 Rules"
     : !!error
     ? "Issue"
     : "Active";
@@ -599,7 +599,7 @@ export function AutoReplyCard({
               <ThunderboltOutlined className="text-lg" />
             </div>
             <div className="flex items-center gap-2 flex-wrap min-w-0">
-              <h3 className="text-base font-bold text-slate-900 leading-tight">Keyword rules</h3>
+              <h3 className="text-base font-bold text-slate-900 leading-tight">Keyword</h3>
               <StatusBadge status={rulesStatus} text={rulesBadgeText} />
             </div>
           </div>
