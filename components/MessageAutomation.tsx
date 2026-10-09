@@ -209,24 +209,26 @@ export function MessageAutomation() {
                   className="!rounded-xl"
                 />
               )}
-              <Input.TextArea
-                value={fallbackText}
-                onChange={(e) => setFallbackText(e.target.value)}
-                disabled={!ai.fallbackEnabled}
-                maxLength={500}
-                rows={3}
-                showCount
-                placeholder="e.g. Thanks for reaching out! We've received your message and someone from our team will get back to you shortly."
-                className="!rounded-xl resize-none !border-slate-200"
-              />
-              <div className="flex justify-end">
+              <div className="pb-2">
+                <Input.TextArea
+                  value={fallbackText}
+                  onChange={(e) => setFallbackText(e.target.value)}
+                  disabled={!ai.fallbackEnabled}
+                  maxLength={500}
+                  rows={3}
+                  showCount
+                  placeholder="e.g. Thanks for reaching out! We've received your message and someone from our team will get back to you shortly."
+                  className="!rounded-xl resize-none !border-slate-200 text-xs sm:text-sm"
+                />
+              </div>
+              <div className="pt-3 sm:pt-2 flex justify-end">
                 <Button
                   type="primary"
                   onClick={() => saveFallback({ fallbackText })}
                   disabled={saving || !ai.fallbackEnabled || fallbackText.trim() === (ai.fallbackText ?? "").trim()}
                   loading={saving}
                   icon={<CheckOutlined />}
-                  className="!rounded-xl !px-5"
+                  className="!rounded-xl !h-10 w-full sm:w-auto sm:!px-6 font-semibold"
                 >
                   Save Holding Reply
                 </Button>
