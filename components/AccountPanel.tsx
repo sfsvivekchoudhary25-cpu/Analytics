@@ -546,8 +546,9 @@ export function AccountPanel({
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
         <div className="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-xl shadow-slate-100 text-center space-y-6">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-lg shadow-rose-500/25">
-            <InstagramOutlined className="text-4xl" />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 border border-slate-200/80 shadow-md">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="InstaVeyra" className="h-14 w-14 object-contain" />
           </div>
 
           <div className="space-y-2">
@@ -622,31 +623,26 @@ export function AccountPanel({
   return (
     <div className="space-y-6 pb-12">
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-md shadow-rose-500/20">
-            <InstagramOutlined className="text-2xl" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-2xs p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="InstaVeyra"
+              className="h-full w-full object-contain"
+            />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                Account & Meta Integrations
-              </h1>
-              <Tag color="blue" className="!rounded-full font-semibold !text-[11px] !px-2.5">
-                Meta Graph API v26.0
-              </Tag>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Manage connected Instagram Business profiles, Facebook Page authorizations, automated token health, and API permissions.
-            </p>
-          </div>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            Account & Meta Integrations
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
           <Button
-            icon={<ReloadOutlined className={refreshing ? "animate-spin" : ""} />}
+            icon={<ReloadOutlined className={refreshing ? "animate-spin text-slate-500" : "text-slate-500"} />}
             onClick={handleRefresh}
-            className="!rounded-xl !border-slate-200 !text-slate-700 hover:!border-slate-300 !text-xs font-semibold"
+            className="!w-full sm:!w-auto !rounded-2xl !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !text-xs sm:!text-sm font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
           >
             Refresh Status
           </Button>
@@ -654,10 +650,10 @@ export function AccountPanel({
             href="https://developers.facebook.com/apps"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 shadow-2xs transition-all"
+            className="w-full sm:w-auto rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-blue-600 text-xs sm:text-sm font-semibold h-10 sm:h-10.5 px-4 flex items-center justify-center gap-1.5 shadow-2xs transition-all"
           >
             <span>Meta Dev Portal</span>
-            <ExportOutlined className="text-[10px] text-slate-400" />
+            <ExportOutlined className="text-xs text-blue-600" />
           </a>
         </div>
       </div>
@@ -819,19 +815,19 @@ export function AccountPanel({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
                 <Button
                   icon={<ReloadOutlined />}
                   onClick={onConnectInstagram}
                   loading={busy}
-                  className="!rounded-xl !border-slate-200 !text-slate-700 hover:!border-blue-400 !text-xs font-semibold"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 !text-slate-700 hover:!border-blue-400 !text-xs font-semibold"
                 >
                   Reconnect
                 </Button>
                 <Button
                   icon={<KeyOutlined />}
                   onClick={() => setIgTokenModalOpen(true)}
-                  className="!rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 !text-xs"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 !text-xs"
                 >
                   Override
                 </Button>
@@ -872,21 +868,21 @@ export function AccountPanel({
         </div>
 
         {/* Right: Facebook Page Authorization */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shadow-md">
-                  <FacebookOutlined className="text-3xl" />
+            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-slate-100">
+              <div className="flex items-start gap-3 sm:gap-3.5 min-w-0">
+                <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shadow-sm mt-0.5">
+                  <FacebookOutlined className="text-2xl sm:text-3xl" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-slate-900 leading-none truncate">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
                       Facebook Page Authorization
                     </h3>
                     <Tag
                       color={fbStatus?.connected ? "blue" : "default"}
-                      className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0"
+                      className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0 shrink-0"
                     >
                       {fbStatus?.connected ? "Linked" : "Required"}
                     </Tag>
@@ -938,24 +934,24 @@ export function AccountPanel({
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center space-y-3">
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-4 sm:p-6 text-center space-y-3">
+                  <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
                     To deliver instant coupon links when customers comment on your Instagram posts, connect the Facebook Page linked to your Instagram account.
                   </p>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 max-w-sm mx-auto">
                     <Button
                       type="primary"
                       icon={<FacebookOutlined />}
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold"
+                      className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2"
                     >
                       Connect Facebook Page
                     </Button>
                     <Button
                       icon={<KeyOutlined />}
                       onClick={() => setFbModalOpen(true)}
-                      className="!rounded-xl !border-slate-200 text-xs text-slate-600 font-semibold"
+                      className="!w-full sm:!w-auto !rounded-xl !border-slate-200 text-xs text-slate-600 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2"
                     >
                       Paste Page Token
                     </Button>
@@ -975,23 +971,23 @@ export function AccountPanel({
       {/* ── ROW 2: CAPABILITIES & SYSTEM DIAGNOSTICS (Side by Side) ──────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left: Granted Permissions & API Scopes (7 cols) */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 text-sm mt-0.5">
                   <SafetyCertificateOutlined />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-none">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
                     Granted Permissions & API Scopes
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
                     Specific capabilities authorized by your Instagram Professional account.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                 <Button
                   size="small"
                   type="text"
@@ -1004,7 +1000,7 @@ export function AccountPanel({
                 </Button>
                 <Tag
                   color={missing.length === 0 ? "green" : "gold"}
-                  className="!rounded-full font-semibold !text-[10px]"
+                  className="!rounded-full font-semibold !text-[10px] !m-0"
                 >
                   {missing.length === 0 ? "Core Scopes Active" : `${missing.length} Missing Core`}
                 </Tag>
@@ -1306,13 +1302,13 @@ export function AccountPanel({
             </div>
 
             {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
+            <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-slate-100 flex items-center gap-1.5 sm:gap-2">
               <Button
                 size="small"
                 icon={<ThunderboltOutlined />}
                 onClick={() => pingCloudinary()}
                 loading={cloudinaryLoading}
-                className="flex-1 !rounded-lg text-xs font-semibold !border-sky-200 !text-sky-700 hover:!border-sky-400 !bg-sky-50/60"
+                className="flex-1 min-w-0 !rounded-lg text-xs font-semibold !border-sky-200 !text-sky-700 hover:!border-sky-400 !bg-sky-50/60 !h-8.5 !px-2 truncate"
               >
                 Ping Health
               </Button>
@@ -1320,7 +1316,7 @@ export function AccountPanel({
                 size="small"
                 icon={<SettingOutlined />}
                 onClick={() => setCloudinaryModalOpen(true)}
-                className="!rounded-lg text-xs font-semibold !border-slate-200"
+                className="!rounded-lg text-xs font-semibold !border-slate-200 !h-8.5 !px-2.5 shrink-0"
               >
                 Configure
               </Button>
@@ -1329,7 +1325,7 @@ export function AccountPanel({
                   size="small"
                   danger
                   onClick={handleDisconnectCloudinary}
-                  className="!rounded-lg text-xs font-semibold"
+                  className="!rounded-lg text-xs font-semibold !h-8.5 !px-2 shrink-0"
                 >
                   Reset
                 </Button>
