@@ -471,39 +471,39 @@ export function Dashboard({
   // Funnel setup
   const funnel = data
     ? [
-        {
-          key: "comments",
-          icon: <CommentOutlined className="text-base text-blue-600" />,
-          badgeBg: "bg-blue-50 border-blue-200/60",
-          progressColor: "#2563eb",
-          label: "Comments received",
-          value: data.commentsReceived,
-        },
-        {
-          key: "dms",
-          icon: <SendOutlined className="text-base text-indigo-600" />,
-          badgeBg: "bg-indigo-50 border-indigo-200/60",
-          progressColor: "#6366f1",
-          label: "Comment DMs sent",
-          value: data.dmsSent,
-        },
-        {
-          key: "replies",
-          icon: <MessageOutlined className="text-base text-emerald-600" />,
-          badgeBg: "bg-emerald-50 border-emerald-200/60",
-          progressColor: "#10b981",
-          label: "Replies to those DMs",
-          value: data.replies,
-        },
-        {
-          key: "conversions",
-          icon: <CameraOutlined className="text-base text-purple-600" />,
-          badgeBg: "bg-purple-50 border-purple-200/60",
-          progressColor: "#9333ea",
-          label: "Converted to a photo",
-          value: data.conversions,
-        },
-      ]
+      {
+        key: "comments",
+        icon: <CommentOutlined className="text-base text-blue-600" />,
+        badgeBg: "bg-blue-50 border-blue-200/60",
+        progressColor: "#2563eb",
+        label: "Comments received",
+        value: data.commentsReceived,
+      },
+      {
+        key: "dms",
+        icon: <SendOutlined className="text-base text-indigo-600" />,
+        badgeBg: "bg-indigo-50 border-indigo-200/60",
+        progressColor: "#6366f1",
+        label: "Comment DMs sent",
+        value: data.dmsSent,
+      },
+      {
+        key: "replies",
+        icon: <MessageOutlined className="text-base text-emerald-600" />,
+        badgeBg: "bg-emerald-50 border-emerald-200/60",
+        progressColor: "#10b981",
+        label: "Replies to those DMs",
+        value: data.replies,
+      },
+      {
+        key: "conversions",
+        icon: <CameraOutlined className="text-base text-purple-600" />,
+        badgeBg: "bg-purple-50 border-purple-200/60",
+        progressColor: "#9333ea",
+        label: "Converted to a photo",
+        value: data.conversions,
+      },
+    ]
     : [];
 
   const funnelTop = Math.max(1, funnel[0]?.value || 1);
@@ -645,13 +645,13 @@ export function Dashboard({
               },
               ...(onOpenAutomations
                 ? [
-                    {
-                      key: "automation",
-                      icon: <ThunderboltOutlined />,
-                      label: "Open automation",
-                      onClick: onOpenAutomations,
-                    },
-                  ]
+                  {
+                    key: "automation",
+                    icon: <ThunderboltOutlined />,
+                    label: "Open automation",
+                    onClick: onOpenAutomations,
+                  },
+                ]
                 : []),
             ],
           }}
@@ -677,10 +677,10 @@ export function Dashboard({
         <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-purple-200/40 via-pink-100/25 to-blue-200/30 blur-3xl" />
         <div className="pointer-events-none absolute right-4 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-100/30 to-purple-100/25 blur-2xl" />
 
-        <div className="relative z-10 space-y-3.5 sm:space-y-5">
-          {/* Title & Live Hub Badge */}
-          <div>
-            <div className="flex items-center gap-2.5">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5 sm:gap-4 lg:gap-6">
+          {/* Title & Live Hub Badge with Refresh Button */}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
                 Dashboard
               </h1>
@@ -691,14 +691,23 @@ export function Dashboard({
                 </span>
                 <span>Live Hub</span>
               </div>
+              <Tooltip title="Refresh data">
+                <Button
+                  icon={isAnyLoading ? <LoadingOutlined className="text-blue-600 text-xs sm:text-sm" /> : <ReloadOutlined className="text-slate-600 text-xs sm:text-sm" />}
+                  onClick={() => setTick((n) => n + 1)}
+                  disabled={isAnyLoading}
+                  className="!flex !items-center !justify-center !h-7 sm:!h-8 !w-7 sm:!w-8 !shrink-0 !rounded-lg sm:!rounded-xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/80 !shadow-2xs transition-all active:scale-95"
+                  aria-label="Refresh data"
+                />
+              </Tooltip>
             </div>
-            <p className="mt-1.5 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed max-w-xl">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 font-normal leading-relaxed truncate lg:max-w-md xl:max-w-xl">
               Instagram performance, account growth analytics, and automated messaging.
             </p>
           </div>
 
-          {/* Action Toolbar - Exactly matching design reference in a responsive single row without overflow */}
-          <div className="flex items-center gap-1.5 sm:gap-3 w-full pt-1">
+          {/* Action Toolbar & Header Controls - Single row on desktop/laptops, responsive row on mobile */}
+          <div className="flex items-center gap-2 sm:gap-2.5 w-full lg:w-auto shrink-0 justify-between lg:justify-end">
             {/* 1. Date Range Dropdown with calendar icon and right chevron */}
             <Dropdown
               menu={{
@@ -712,42 +721,34 @@ export function Dashboard({
               trigger={["click"]}
               disabled={isAnyLoading}
             >
-              <Button className="!flex-1 sm:!flex-initial !flex !items-center !justify-between !gap-1.5 sm:!gap-3.5 !h-10 sm:!h-11 md:!h-12 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white !px-2.5 sm:!px-4 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap min-w-0 [&>span]:w-full [&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:gap-1.5">
-                <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0">
+              <Button className="!flex-1 lg:!flex-initial !flex !items-center !justify-between !gap-2 sm:!gap-2.5 !h-10 sm:!h-10.5 md:!h-11 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white !px-3 sm:!px-4 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap min-w-0">
+                <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-0">
                   <CalendarOutlined className="text-slate-600 text-xs sm:text-sm md:text-base shrink-0" />
-                  <span className="whitespace-nowrap font-medium text-slate-800 text-[11px] sm:text-xs md:text-sm">{dateRangeLabel(days)}</span>
+                  <span className="whitespace-nowrap font-medium text-slate-800 text-[11px] sm:text-xs md:text-sm truncate">{dateRangeLabel(days)}</span>
                 </span>
-                <DownOutlined className="text-[9px] sm:text-[10px] text-slate-400 ml-1 shrink-0" />
+                <DownOutlined className="text-[9px] sm:text-[10px] text-slate-400 shrink-0 ml-1.5" />
               </Button>
             </Dropdown>
 
-            {/* 2. Refresh Button */}
-            <Tooltip title="Refresh data">
-              <Button
-                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700 text-sm sm:text-base" />}
-                onClick={() => setTick((n) => n + 1)}
-                disabled={isAnyLoading}
-                className="!flex !items-center !justify-center !h-10 !w-10 sm:!h-11 sm:!w-11 md:!h-12 md:!w-12 !shrink-0 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
-              />
-            </Tooltip>
-
-            {/* 3. Automations Primary CTA */}
+            {/* 2. Automations Primary CTA */}
             {onOpenAutomations && (
               <Button
                 type="primary"
                 icon={<PlusOutlined className="text-xs sm:text-sm font-bold" />}
                 onClick={onOpenAutomations}
-                className="!flex !items-center !justify-center !gap-1 sm:!gap-1.5 !h-10 sm:!h-11 md:!h-12 !shrink-0 !rounded-xl sm:!rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-3 sm:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all whitespace-nowrap"
+                className="!flex !items-center !justify-center !gap-1 sm:!gap-1.5 !h-10 sm:!h-10.5 md:!h-11 !shrink-0 !rounded-xl sm:!rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-3.5 sm:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all whitespace-nowrap"
               >
                 <span>Automations</span>
               </Button>
             )}
 
-            {/* Desktop-only secondary header controls */}
-            <div className="hidden lg:flex items-center gap-2.5 ml-auto">
-              {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
-              {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
-            </div>
+            {/* Desktop-only secondary header controls (Bell & Avatar) in the same line */}
+            {(onOpenPhotos || (username && onOpenAccount)) && (
+              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200/80 ml-1 shrink-0">
+                {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
+                {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
+              </div>
+            )}
           </div>
         </div>
       </div>
