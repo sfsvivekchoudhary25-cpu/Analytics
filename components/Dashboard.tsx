@@ -672,12 +672,12 @@ export function Dashboard({
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
       {/* ── Top Hero Card (Exact Match to Design Reference) ───────────── */}
-      <div className="relative overflow-hidden rounded-[26px] border border-slate-100 bg-white p-5 sm:p-7 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.03)]">
+      <div className="relative overflow-hidden rounded-[26px] border border-slate-100 bg-white p-3.5 sm:p-6 md:p-7 shadow-[0_4px_25px_-4px_rgba(0,0,0,0.03)]">
         {/* Subtle ambient violet/purple and blue gradient glow on the right */}
         <div className="pointer-events-none absolute -right-10 -top-10 h-72 w-72 rounded-full bg-gradient-to-br from-purple-200/40 via-pink-100/25 to-blue-200/30 blur-3xl" />
         <div className="pointer-events-none absolute right-4 bottom-0 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-100/30 to-purple-100/25 blur-2xl" />
 
-        <div className="relative z-10 space-y-4 sm:space-y-5">
+        <div className="relative z-10 space-y-3.5 sm:space-y-5">
           {/* Title & Live Hub Badge */}
           <div>
             <div className="flex items-center gap-2.5">
@@ -697,8 +697,8 @@ export function Dashboard({
             </p>
           </div>
 
-          {/* Action Toolbar - Exactly matching design reference in a responsive single row */}
-          <div className="flex items-center gap-2 sm:gap-3 w-full pt-1">
+          {/* Action Toolbar - Exactly matching design reference in a responsive single row without overflow */}
+          <div className="flex items-center gap-1.5 sm:gap-3 w-full pt-1">
             {/* 1. Date Range Dropdown with calendar icon and right chevron */}
             <Dropdown
               menu={{
@@ -712,22 +712,22 @@ export function Dashboard({
               trigger={["click"]}
               disabled={isAnyLoading}
             >
-              <Button className="!flex-1 sm:!flex-initial !flex !items-center !justify-between !gap-2.5 sm:!gap-3 !h-11 sm:!h-12 !rounded-2xl !border-slate-200/90 !bg-white !px-3.5 sm:!px-4.5 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] min-w-0">
-                <span className="flex items-center gap-2 min-w-0">
-                  <CalendarOutlined className="text-slate-600 text-sm sm:text-base shrink-0" />
-                  <span className="truncate">{dateRangeLabel(days)}</span>
+              <Button className="!flex-1 sm:!flex-initial !flex !items-center !justify-between !gap-1.5 sm:!gap-3.5 !h-10 sm:!h-11 md:!h-12 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white !px-2.5 sm:!px-4 !text-xs sm:!text-sm !font-semibold !text-slate-800 hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap min-w-0 [&>span]:w-full [&>span]:flex [&>span]:items-center [&>span]:justify-between [&>span]:gap-1.5">
+                <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap shrink-0">
+                  <CalendarOutlined className="text-slate-600 text-xs sm:text-sm md:text-base shrink-0" />
+                  <span className="whitespace-nowrap font-medium text-slate-800 text-[11px] sm:text-xs md:text-sm">{dateRangeLabel(days)}</span>
                 </span>
-                <DownOutlined className="text-[10px] sm:text-xs text-slate-400 ml-1.5 shrink-0" />
+                <DownOutlined className="text-[9px] sm:text-[10px] text-slate-400 ml-1 shrink-0" />
               </Button>
             </Dropdown>
 
             {/* 2. Refresh Button */}
             <Tooltip title="Refresh data">
               <Button
-                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700 text-base" />}
+                icon={isAnyLoading ? <LoadingOutlined className="text-blue-600" /> : <ReloadOutlined className="text-slate-700 text-sm sm:text-base" />}
                 onClick={() => setTick((n) => n + 1)}
                 disabled={isAnyLoading}
-                className="!flex !items-center !justify-center !h-11 !w-11 sm:!h-12 sm:!w-12 !shrink-0 !rounded-2xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
+                className="!flex !items-center !justify-center !h-10 !w-10 sm:!h-11 sm:!w-11 md:!h-12 md:!w-12 !shrink-0 !rounded-xl sm:!rounded-2xl !border-slate-200/90 !bg-white hover:!border-slate-300 hover:!bg-slate-50/50 !shadow-2xs transition-colors active:scale-95"
               />
             </Tooltip>
 
@@ -737,7 +737,7 @@ export function Dashboard({
                 type="primary"
                 icon={<PlusOutlined className="text-xs sm:text-sm font-bold" />}
                 onClick={onOpenAutomations}
-                className="!flex !items-center !justify-center !gap-1.5 sm:!gap-2 !h-11 sm:!h-12 !shrink-0 !rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-3.5 sm:!px-5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all"
+                className="!flex !items-center !justify-center !gap-1 sm:!gap-1.5 !h-10 sm:!h-11 md:!h-12 !shrink-0 !rounded-xl sm:!rounded-2xl !bg-[#1677ff] hover:!bg-[#155dfc] !px-3 sm:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !shadow-[0_4px_14px_rgba(22,119,255,0.28)] hover:!shadow-[0_6px_20px_rgba(22,119,255,0.38)] active:scale-98 transition-all whitespace-nowrap"
               >
                 <span>Automations</span>
               </Button>
