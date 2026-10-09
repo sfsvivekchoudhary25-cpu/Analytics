@@ -2211,7 +2211,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div>
                 <h3 className="text-sm font-bold text-[var(--viz-ink)]">Select Instagram Post or Reel</h3>
                 <p className="text-xs text-[var(--viz-muted)]">
-                  Choose which specific post will trigger this automation, or select All Posts.
+                  Choose which specific post will trigger this automation.
                 </p>
               </div>
             </div>
@@ -2227,54 +2227,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
           {/* Modal Body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {/* Option 1: All Posts & Reels */}
-            <div
-              onClick={() => clearPost()}
-              className={`flex items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
-                !rule.mediaId
-                  ? "border-pink-500/50 bg-pink-500/5 ring-1 ring-pink-500/30"
-                  : "border-dashed border-[var(--viz-border)] hover:border-[var(--viz-ink)]/40 hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-white font-bold text-sm shadow-2xs">
-                  ∞
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[var(--viz-ink)]">All Posts &amp; Reels</span>
-                    {!rule.mediaId && (
-                      <span className="rounded-full bg-pink-500/15 px-2 py-0.5 text-[10px] font-bold text-pink-600 dark:text-pink-400">
-                        Active
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-[var(--viz-muted)]">
-                    Triggers across every post and reel published on your profile
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                  !rule.mediaId
-                    ? "bg-pink-600 text-white shadow-2xs"
-                    : "border border-[var(--viz-border)] bg-background text-[var(--viz-ink)] hover:bg-black/5 dark:hover:bg-white/5"
-                }`}
-              >
-                {!rule.mediaId ? "Selected" : "Select All Posts"}
-              </button>
-            </div>
-
-            {/* Section Divider */}
-            <div className="flex items-center gap-3 py-1">
-              <div className="flex-1 border-t border-[var(--viz-border)]" />
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--viz-muted)]">
-                Or select a specific post
-              </span>
-              <div className="flex-1 border-t border-[var(--viz-border)]" />
-            </div>
-
             {/* Error Alert */}
             {postsError && (
               <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-600">
