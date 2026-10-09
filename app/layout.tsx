@@ -15,8 +15,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Instagram Hub",
-  description: "Control your Instagram from one place",
+  title: "InstaVeyra",
+  description: "Control your Instagram from one place with InstaVeyra",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

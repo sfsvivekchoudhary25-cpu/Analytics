@@ -68,16 +68,14 @@ function SidebarInner({
       {/* Brand Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-sm text-white text-lg">
-            <InstagramOutlined />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="InstaVeyra"
+            className="h-9 w-9 object-contain rounded-xl shrink-0"
+          />
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-bold tracking-tight text-slate-900">Instagram Hub</span>
-              <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600 ring-1 ring-inset ring-blue-500/20">
-                PRO
-              </span>
-            </div>
+            <span className="text-base font-bold tracking-tight text-slate-900 leading-tight block">InstaVeyra</span>
             <p className="text-[11px] text-slate-400">Automation & CRM</p>
           </div>
         </div>

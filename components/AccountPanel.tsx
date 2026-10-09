@@ -1207,7 +1207,7 @@ export function AccountPanel({
                 </Tag>
               </div>
               <p className="text-xs text-slate-500 mt-1">
-                External media delivery CDNs, AI reasoning engines, and edge proxy tunnels connected to Instagram Hub.
+                External media delivery CDNs, AI reasoning engines, and edge proxy tunnels connected to InstaVeyra.
               </p>
             </div>
           </div>

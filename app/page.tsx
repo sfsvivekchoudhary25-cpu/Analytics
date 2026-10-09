@@ -197,7 +197,11 @@ export default function Dashboard() {
     return (
       <main className="flex min-h-screen flex-col">
         <header className="flex items-center justify-between border-b border-[var(--viz-border)] px-6 py-4">
-          <span className="text-lg font-semibold tracking-tight text-[var(--viz-ink)]">Instagram Hub.</span>
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="InstaVeyra" className="h-8 w-8 object-contain rounded-lg" />
+            <span className="text-lg font-bold tracking-tight text-slate-950">InstaVeyra</span>
+          </div>
           <button onClick={logout} className="text-sm text-[var(--viz-ink-2)] underline decoration-dotted underline-offset-4">
             Sign out
           </button>
@@ -246,19 +250,16 @@ export default function Dashboard() {
               </svg>
             </button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-xs">
-                <InstagramOutlined className="text-xl" />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5 leading-none">
-                  <span className="text-base font-bold tracking-tight text-slate-950">Instagram Hub</span>
-                  <span className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 ring-1 ring-inset ring-blue-500/20">
-                    PRO
-                  </span>
-                </div>
-                <span className="text-xs text-slate-400 font-medium capitalize mt-1 leading-none">{activeLabel}</span>
-              </div>
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="InstaVeyra"
+                className="h-10 w-10 sm:h-11 sm:w-11 object-contain shrink-0 rounded-xl"
+              />
+              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-950">
+                InstaVeyra
+              </span>
             </div>
           </div>
 
