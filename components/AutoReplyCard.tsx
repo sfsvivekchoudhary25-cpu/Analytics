@@ -58,6 +58,70 @@ type Props = {
 
 const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
+export type StatusType = "enabled" | "disabled" | "warning";
+
+export function StatusDot({
+  status,
+  pulse = true,
+}: {
+  status: StatusType;
+  pulse?: boolean;
+}) {
+  if (status === "enabled") {
+    return (
+      <span className="relative flex h-2 w-2 shrink-0">
+        {pulse && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        )}
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+      </span>
+    );
+  }
+  if (status === "warning") {
+    return (
+      <span className="relative flex h-2 w-2 shrink-0">
+        {pulse && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+        )}
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+      </span>
+    );
+  }
+  return (
+    <span className="relative flex h-2 w-2 shrink-0">
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+    </span>
+  );
+}
+
+export function StatusBadge({
+  status,
+  text,
+  className = "",
+}: {
+  status: StatusType;
+  text?: string;
+  className?: string;
+}) {
+  const styles =
+    status === "enabled"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : status === "warning"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : "border-rose-200 bg-rose-50 text-rose-700";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full ${
+        text ? "px-2.5 py-0.5" : "px-2 py-1"
+      } text-[11px] sm:text-xs font-semibold border shrink-0 ${styles} ${className}`}
+    >
+      <StatusDot status={status} />
+      {text ? <span>{text}</span> : null}
+    </span>
+  );
+}
+
 export function AutoReplyCard({
   basePath,
   noun,
@@ -141,6 +205,68 @@ export function AutoReplyCard({
   const aiOn = !!auto?.ai?.enabled;
   const active = rulesOn || aiOn;
 
+  // Diagnostics & Status detection
+  const rulesCount = auto?.rules.filter((r) => r.enabled).length ?? 0;
+  const rulesViolation = rulesOn && rulesCount === 0;
+  const aiIssue = aiOn && (!auto?.ai?.available || !!auto?.ai?.pausedUntil || !!aiError);
+  const generalIssue = !!error || !!auto?.dryRun;
+  const hasIssue = active && (rulesViolation || aiIssue || generalIssue);
+
+  // Overall status resolution
+  let overallStatus: StatusType = "disabled";
+  let overallBadgeText = "Disabled";
+
+  if (!auto) {
+    overallStatus = "warning";
+    overallBadgeText = "Loading…";
+  } else if (!active) {
+    overallStatus = "disabled";
+    overallBadgeText = "Disabled";
+  } else if (hasIssue) {
+    overallStatus = "warning";
+    if (auto.dryRun) overallBadgeText = "Simulation Mode";
+    else if (rulesViolation) overallBadgeText = "No Rules Active";
+    else if (aiIssue && auto.ai?.pausedUntil) overallBadgeText = "AI Paused";
+    else if (aiIssue && !auto.ai?.available) overallBadgeText = "AI Setup Needed";
+    else if (aiError || error) overallBadgeText = "Issue Detected";
+    else overallBadgeText = "Warning";
+  } else {
+    overallStatus = "enabled";
+    overallBadgeText = "Active";
+  }
+
+  // AI individual status
+  const aiStatus: StatusType = !aiOn
+    ? "disabled"
+    : !auto?.ai?.available || !!auto?.ai?.pausedUntil || !!aiError
+    ? "warning"
+    : "enabled";
+
+  const aiBadgeText = !aiOn
+    ? "Disabled"
+    : !auto?.ai?.available
+    ? "Setup Needed"
+    : auto?.ai?.pausedUntil
+    ? "Paused"
+    : aiError
+    ? "Issue"
+    : "Active";
+
+  // Rules individual status
+  const rulesStatus: StatusType = !rulesOn
+    ? "disabled"
+    : rulesViolation || !!error
+    ? "warning"
+    : "enabled";
+
+  const rulesBadgeText = !rulesOn
+    ? "Disabled"
+    : rulesViolation
+    ? "0 Rules Active"
+    : !!error
+    ? "Issue"
+    : "Active";
+
   // Dynamic naming, icon, and status badge reflecting exact active behavior
   const behaviorConfig = !auto
     ? {
@@ -150,21 +276,21 @@ export function AutoReplyCard({
       }
     : rulesOn && aiOn
     ? {
-        title: "AI & Keyword Auto-reply",
+        title: "AI & Keyword",
         icon: <RobotOutlined className="text-lg" />,
-        badgeText: "AI + Rules Active",
+        badgeText: overallBadgeText,
       }
     : aiOn
     ? {
         title: "AI Auto-responder",
         icon: <RobotOutlined className="text-lg" />,
-        badgeText: "AI Active",
+        badgeText: overallBadgeText,
       }
     : rulesOn
     ? {
         title: "Keyword Auto-reply",
         icon: <ThunderboltOutlined className="text-lg" />,
-        badgeText: "Rules Active",
+        badgeText: overallBadgeText,
       }
     : {
         title: "Auto-reply (Inactive)",
@@ -189,25 +315,7 @@ export function AutoReplyCard({
                 <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
                   {behaviorConfig.title}
                 </h2>
-                {active ? (
-                  <Tag
-                    color="success"
-                    className="!rounded-full !px-2.5 !py-0.5 !text-[11px] sm:!text-xs !font-semibold !flex !items-center !gap-1.5 !m-0 !border-emerald-200 !bg-emerald-50 !text-emerald-700 !shrink-0"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    {behaviorConfig.badgeText}
-                  </Tag>
-                ) : (
-                  <Tag
-                    color="default"
-                    className="!rounded-full !px-2.5 !py-0.5 !text-[11px] sm:!text-xs !font-semibold !m-0 !bg-slate-100 !text-slate-600 !border-slate-200 !shrink-0"
-                  >
-                    ● {behaviorConfig.badgeText}
-                  </Tag>
-                )}
+                <StatusBadge status={overallStatus} text={behaviorConfig.badgeText} />
               </div>
             </div>
           </div>
@@ -217,17 +325,39 @@ export function AutoReplyCard({
               <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
                 AI Replies
               </span>
-              <span className={`text-xs font-bold lg:font-semibold ${aiOn ? "text-slate-900" : "text-slate-500"}`}>
-                {aiOn ? "Enabled" : "Off"}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <StatusDot status={aiStatus} pulse={false} />
+                <span
+                  className={`text-xs font-bold lg:font-semibold ${
+                    aiStatus === "enabled"
+                      ? "text-slate-900"
+                      : aiStatus === "warning"
+                      ? "text-amber-800"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {aiOn ? (aiStatus === "warning" ? "Attention" : "Enabled") : "Off"}
+                </span>
+              </div>
             </div>
             <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
               <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
                 Trigger Rules
               </span>
-              <span className={`text-xs font-bold lg:font-semibold ${rulesOn ? "text-slate-900" : "text-slate-500"}`}>
-                {auto?.rules.filter((r) => r.enabled).length ?? 0} active
-              </span>
+              <div className="flex items-center gap-1.5">
+                <StatusDot status={rulesStatus} pulse={false} />
+                <span
+                  className={`text-xs font-bold lg:font-semibold ${
+                    rulesStatus === "enabled"
+                      ? "text-slate-900"
+                      : rulesStatus === "warning"
+                      ? "text-amber-800"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {rulesOn ? `${rulesCount} active` : "Off"}
+                </span>
+              </div>
             </div>
             <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
               <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
@@ -264,11 +394,7 @@ export function AutoReplyCard({
             </div>
             <div className="flex items-center gap-2 flex-wrap min-w-0">
               <h3 className="text-base font-bold text-slate-900 leading-tight">AI replies</h3>
-              {aiOn && (
-                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-emerald-50 !border-emerald-200 !text-emerald-700 !font-semibold !m-0 shrink-0">
-                  AI Enabled
-                </Tag>
-              )}
+              <StatusBadge status={aiStatus} text={aiBadgeText} />
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -474,11 +600,7 @@ export function AutoReplyCard({
             </div>
             <div className="flex items-center gap-2 flex-wrap min-w-0">
               <h3 className="text-base font-bold text-slate-900 leading-tight">Keyword rules</h3>
-              {rulesOn && (
-                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-blue-50 !border-blue-200 !text-blue-700 !font-semibold !m-0 shrink-0">
-                  Rules Active
-                </Tag>
-              )}
+              <StatusBadge status={rulesStatus} text={rulesBadgeText} />
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -547,10 +669,12 @@ export function AutoReplyCard({
                       {k}
                     </Tag>
                   ))}
-                  {r.enabled ? (
-                    <Tag color="success" className="!rounded-md !text-[11px] !ml-auto">Active</Tag>
+                  {r.enabled && rulesOn ? (
+                    <StatusBadge status="enabled" text="Active" className="!ml-auto" />
+                  ) : r.enabled && !rulesOn ? (
+                    <StatusBadge status="warning" text="Rules Inactive" className="!ml-auto" />
                   ) : (
-                    <Tag color="default" className="!rounded-md !text-[11px] !ml-auto">Paused</Tag>
+                    <StatusBadge status="disabled" text="Paused" className="!ml-auto" />
                   )}
                 </div>
 
