@@ -625,11 +625,11 @@ export function AccountPanel({
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-2xs p-2">
+          <div className="flex h-12 w-16 sm:h-13 sm:w-18 shrink-0 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-2xs p-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/logo.png"
-              alt="InstaVeyra"
+              src="/meta-instagram.png"
+              alt="Meta & Instagram"
               className="h-full w-full object-contain"
             />
           </div>

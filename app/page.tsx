@@ -185,16 +185,43 @@ export default function Dashboard() {
     />
   );
 
+  // Initial Loading Splash: prevents flashing the disconnected header bar before API status resolves
+  if (!view && !error) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="InstaVeyra" className="h-10 w-10 object-contain" />
+            <div className="absolute -inset-1 rounded-2xl border-2 border-blue-500/20 animate-pulse pointer-events-none" />
+          </div>
+          <div className="text-center space-y-1">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">InstaVeyra</h2>
+            <p className="text-xs text-slate-400 font-medium">Checking connection status...</p>
+          </div>
+          <div className="flex items-center gap-1.5 pt-1">
+            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:-0.3s]" />
+            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:-0.15s]" />
+            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!connected) {
     return (
-      <main className="flex min-h-screen flex-col">
-        <header className="flex items-center justify-between border-b border-[var(--viz-border)] px-6 py-4">
+      <main className="flex min-h-screen flex-col bg-slate-50/50">
+        <header className="flex h-[68px] items-center justify-between border-b border-slate-200/80 bg-white px-6 shadow-2xs">
           <div className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="InstaVeyra" className="h-8 w-8 object-contain rounded-lg" />
-            <span className="text-lg font-bold tracking-tight text-slate-950">InstaVeyra</span>
+            <span className="text-lg font-bold tracking-tight text-slate-900">InstaVeyra</span>
           </div>
-          <button onClick={logout} className="text-sm text-[var(--viz-ink-2)] underline decoration-dotted underline-offset-4">
+          <button
+            onClick={logout}
+            className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
+          >
             Sign out
           </button>
         </header>
