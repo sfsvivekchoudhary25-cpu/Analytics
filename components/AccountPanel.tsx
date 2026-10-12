@@ -18,7 +18,9 @@ import {
   CopyOutlined,
   CustomerServiceOutlined,
   DatabaseOutlined,
+  DeleteOutlined,
   DisconnectOutlined,
+  ExclamationCircleOutlined,
   ExportOutlined,
   FacebookOutlined,
   GlobalOutlined,
@@ -45,7 +47,7 @@ import {
   UserOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { api, API_BASE, type ConnectionStatus } from "@/lib/api";
+import { api, API_BASE, auth, type ConnectionStatus } from "@/lib/api";
 
 const PERMISSIONS = [
   {
@@ -500,6 +502,41 @@ export function AccountPanel({
           message.error(err?.message || "Failed to disconnect Facebook Page");
         } finally {
           setFbBusy(false);
+        }
+      },
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    modal.confirm({
+      title: "Delete Account & Wipe Meta Data?",
+      icon: <ExclamationCircleOutlined className="text-rose-500" />,
+      content: (
+        <div className="space-y-2 text-xs text-slate-600">
+          <p>
+            This action is <strong>permanent</strong> and compliant with Meta Platform Terms and GDPR data deletion requirements.
+          </p>
+          <p>
+            All stored Meta user and page access tokens, linked Facebook Pages, Instagram business account associations, and comment automation rules will be permanently erased from our database.
+          </p>
+        </div>
+      ),
+      okText: "Yes, Delete Everything",
+      okType: "danger",
+      cancelText: "Cancel",
+      onOk: async () => {
+        try {
+          await Promise.all([
+            api("/instagram/connection/wipe-data", { method: "POST" }).catch(() => null),
+            api("/facebook-page", { method: "DELETE" }).catch(() => null),
+          ]);
+          message.success("Account and Meta access tokens have been completely deleted.");
+          auth.clear();
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 800);
+        } catch (err: any) {
+          message.error(err?.message || "Failed to execute complete account deletion");
         }
       },
     });
@@ -1506,6 +1543,63 @@ export function AccountPanel({
                 className="w-full !rounded-xl !text-xs font-semibold !border-amber-200 !bg-amber-50 hover:!bg-amber-100/80 !text-amber-800 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 {copiedWebhook ? "Copied Webhook URL" : "Copy Webhook URL"}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CARD 6: Meta Compliance & Data Deletion ──────────────────────── */}
+        <div className="relative overflow-hidden rounded-2xl border border-rose-200/90 bg-white p-5 sm:p-6 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-start justify-between pb-4 border-b border-rose-100">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200/70 shadow-2xs">
+                <DeleteOutlined className="text-lg" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                  Data Privacy &amp; Account Deletion
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Meta Platform Terms and GDPR-compliant data removal tools
+                </p>
+              </div>
+            </div>
+            <Tag color="error" className="!rounded-full !px-2.5 !py-0.5 !text-[10px] !font-bold !m-0">
+              Danger Zone
+            </Tag>
+          </div>
+
+          <div className="mt-4 space-y-4">
+            <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-3.5 text-xs text-rose-900/90 leading-relaxed">
+              <p>
+                <strong>Permanent Wipe:</strong> You can completely erase your account and all associated Meta access tokens at any time. When triggered, our backend will permanently delete your stored Meta User Tokens, Facebook Page tokens, and comment automation rules from our active database.
+              </p>
+            </div>
+
+            {/* Legal documentation links */}
+            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600 pt-1">
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
+                Privacy Policy
+              </a>
+              <span>&middot;</span>
+              <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
+                Data Deletion Instructions
+              </a>
+              <span>&middot;</span>
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
+                Terms of Service
+              </a>
+            </div>
+
+            <div className="pt-2">
+              <Button
+                danger
+                type="primary"
+                icon={<DeleteOutlined />}
+                onClick={handleDeleteAccount}
+                className="!rounded-xl !h-10 !text-xs font-bold shadow-xs hover:!brightness-105"
+              >
+                Delete Account &amp; Wipe All Meta Data
               </Button>
             </div>
           </div>

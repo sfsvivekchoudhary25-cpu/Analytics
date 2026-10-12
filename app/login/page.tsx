@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircleFilled,
@@ -150,6 +151,24 @@ export default function AuthPage() {
       window.location.href = data.url;
     } catch (err: any) {
       setError(err?.message || "Could not reach the Instagram OAuth service. Please ensure the backend server is running.");
+      setBusy(false);
+    }
+  }
+
+  async function handleConnectFacebook() {
+    setBusy(true);
+    setError(null);
+    try {
+      const apiBase = getApiBase();
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const res = await fetch(`${apiBase}/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        throw new Error(data.message || "Failed to generate Facebook OAuth login URL. Check server configuration.");
+      }
+      window.location.href = data.url;
+    } catch (err: any) {
+      setError(err?.message || "Could not reach the Facebook OAuth service. Please ensure the backend server is running.");
       setBusy(false);
     }
   }
@@ -452,88 +471,40 @@ export default function AuthPage() {
           {/* Title & Description */}
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-[28px] font-bold text-slate-900 tracking-tight leading-tight">
-              Sign in with Instagram
+              Sign in to InstaVeyra
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed">
-              Connect your Professional or Creator account to unlock AI conversation flows, automated comments, and audience growth analytics.
+              Connect your Facebook Page &amp; Instagram Professional Account to unlock automated Comment-to-DM flows and audience growth analytics.
             </p>
           </div>
 
-          {/* Primary Action Button */}
-          <div className="space-y-4 pt-1">
-            {/* Dev Quick Bypass Button (Local dev testing) - Commented out
-            <div className="rounded-2xl border border-amber-300 bg-linear-to-br from-amber-50 to-orange-50/50 p-4 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between text-xs">
-                <span className="inline-flex items-center gap-1.5 font-bold text-amber-900">
-                  <ThunderboltFilled className="text-amber-500" />
-                  <span>Local Dev Mode {isLocal ? "(Active)" : ""}</span>
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 border border-amber-200/80 px-2 py-0.5 rounded-full">
-                  Quick Bypass
-                </span>
-              </div>
-              <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                Skip Instagram OAuth authentication and enter the dashboard immediately with <b>@sfs.vivekchoudhary25</b> to test features locally.
-              </p>
-              <button
-                type="button"
-                onClick={handleDevBypass}
-                className="w-full h-11 px-4 rounded-xl bg-linear-to-r from-amber-500 via-amber-600 to-orange-500 hover:brightness-105 active:scale-[0.99] text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <ThunderboltFilled className="text-sm" />
-                <span>⚡ Bypass Login &amp; Open Dashboard</span>
-              </button>
-            </div>
-
-            <div className="relative flex items-center justify-center my-1">
-              <div className="border-t border-slate-200 w-full" />
-              <span className="bg-slate-50/60 px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider absolute">
-                or authenticate with meta
-              </span>
-            </div>
-            */}
-
+          {/* Primary Action Buttons */}
+          <div className="space-y-3.5 pt-1">
+            {/* 1. Official Meta: Log in with Facebook */}
             <button
               type="button"
-              onClick={handleConnectInstagram}
+              onClick={handleConnectFacebook}
               disabled={busy}
-              className="group relative w-full h-[54px] px-4 sm:px-5 rounded-2xl text-white font-medium shadow-[0_4px_16px_-2px_rgba(225,48,108,0.32)] hover:shadow-[0_8px_24px_-2px_rgba(225,48,108,0.42)] hover:brightness-[1.03] active:scale-[0.99] transition-all duration-200 flex items-center justify-between cursor-pointer disabled:opacity-60 overflow-hidden"
-              style={{
-                background:
-                  "linear-gradient(115deg, #7928ca 0%, #d6249f 30%, #e1306c 60%, #fd1d1d 85%, #f77737 100%)",
-              }}
+              className="group relative w-full h-[52px] px-4 sm:px-5 rounded-2xl text-white font-medium shadow-[0_4px_16px_-2px_rgba(24,119,242,0.35)] hover:shadow-[0_8px_24px_-2px_rgba(24,119,242,0.45)] hover:brightness-[1.03] active:scale-[0.99] transition-all duration-200 flex items-center justify-between cursor-pointer disabled:opacity-60 overflow-hidden bg-[#1877F2]"
             >
-              {/* Subtle top light sheen for tactile finish */}
               <div className="absolute inset-0 bg-gradient-to-b from-white/12 to-transparent pointer-events-none" />
 
-              {/* Left: Instagram Glyph + Typography */}
               <div className="relative z-10 flex items-center gap-3 min-w-0">
-                <div className="w-8.5 h-8.5 rounded-xl bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 border border-white/25 shadow-xs">
-                  <svg
-                    className="w-5 h-5 text-white"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="2" y="2" width="20" height="20" rx="5.5" ry="5.5" />
-                    <circle cx="12" cy="12" r="4.2" />
-                    <circle cx="17.6" cy="6.4" r="0.9" fill="currentColor" />
+                <div className="w-8.5 h-8.5 rounded-xl bg-white text-[#1877F2] flex items-center justify-center flex-shrink-0 shadow-2xs font-bold text-lg">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                   </svg>
                 </div>
                 <div className="text-left min-w-0">
                   <span className="block font-semibold text-[15px] leading-tight text-white tracking-tight truncate">
-                    Continue with Instagram
+                    Log in with Facebook
                   </span>
                   <span className="block text-[11px] text-white/85 font-normal leading-tight mt-0.5 truncate">
-                    Professional or Creator Account
+                    Connect Facebook Page &amp; Instagram Business
                   </span>
                 </div>
               </div>
 
-              {/* Right: Modern Arrow / Spinner */}
               <div className="relative z-10 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:translate-x-0.5 group-hover:bg-white/25 transition-all">
                 {busy ? (
                   <LoadingOutlined className="text-sm text-white animate-spin" />
@@ -553,6 +524,93 @@ export default function AuthPage() {
                 )}
               </div>
             </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center my-1">
+              <div className="border-t border-slate-200/80 w-full" />
+              <span className="bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider absolute">
+                or authenticate with instagram
+              </span>
+            </div>
+
+            {/* 2. Secondary: Continue with Instagram */}
+            <button
+              type="button"
+              onClick={handleConnectInstagram}
+              disabled={busy}
+              className="group relative w-full h-[48px] px-4 sm:px-5 rounded-2xl text-white font-medium shadow-[0_3px_12px_-2px_rgba(225,48,108,0.25)] hover:shadow-[0_6px_20px_-2px_rgba(225,48,108,0.35)] hover:brightness-[1.03] active:scale-[0.99] transition-all duration-200 flex items-center justify-between cursor-pointer disabled:opacity-60 overflow-hidden"
+              style={{
+                background:
+                  "linear-gradient(115deg, #7928ca 0%, #d6249f 30%, #e1306c 60%, #fd1d1d 85%, #f77737 100%)",
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-white/12 to-transparent pointer-events-none" />
+
+              <div className="relative z-10 flex items-center gap-3 min-w-0">
+                <div className="w-7.5 h-7.5 rounded-lg bg-white/20 backdrop-blur-xs flex items-center justify-center flex-shrink-0 border border-white/25 shadow-xs">
+                  <svg
+                    className="w-4.5 h-4.5 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.1"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="5.5" ry="5.5" />
+                    <circle cx="12" cy="12" r="4.2" />
+                    <circle cx="17.6" cy="6.4" r="0.9" fill="currentColor" />
+                  </svg>
+                </div>
+                <div className="text-left min-w-0">
+                  <span className="block font-semibold text-[14px] leading-tight text-white tracking-tight truncate">
+                    Continue with Instagram
+                  </span>
+                </div>
+              </div>
+
+              <div className="relative z-10 w-7 h-7 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0 group-hover:translate-x-0.5 group-hover:bg-white/25 transition-all">
+                {busy ? (
+                  <LoadingOutlined className="text-xs text-white animate-spin" />
+                ) : (
+                  <svg
+                    className="w-3.5 h-3.5 text-white"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="M12 5l7 7-7 7" />
+                  </svg>
+                )}
+              </div>
+            </button>
+
+            {/* 3. Reviewer Demo Access Mode */}
+            <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/80 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
+                  <ThunderboltFilled className="text-indigo-600 text-xs" />
+                  <span>Meta App Reviewer Demo Mode</span>
+                </span>
+                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
+                  Instant Access
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
+              </p>
+              <button
+                type="button"
+                onClick={handleDevBypass}
+                className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              >
+                <span>⚡ Launch Reviewer Demo Dashboard</span>
+              </button>
+            </div>
 
             {/* Error Message */}
             {error && (
@@ -678,13 +736,17 @@ export default function AuthPage() {
             {/* Terms notice */}
             <p className="text-[11px] text-slate-400 text-center leading-relaxed pt-1">
               By connecting your account, you agree to our{" "}
-              <a href="/legal/terms" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
+              <Link href="/terms" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
                 Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="/legal/privacy" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
+              </Link>
+              ,{" "}
+              <Link href="/privacy" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
                 Privacy Policy
-              </a>
+              </Link>
+              , and{" "}
+              <Link href="/data-deletion" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
+                Data Deletion Instructions
+              </Link>
               .
             </p>
           </div>

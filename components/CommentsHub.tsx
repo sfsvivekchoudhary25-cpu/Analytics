@@ -34,7 +34,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
       <div
         role="tablist"
         aria-label="Comments"
-        className="inline-flex gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-2xs"
+        className="flex w-full sm:w-auto sm:inline-flex gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-2xs"
       >
         {TABS.map((t) => {
           const isActive = tab === t.id;
@@ -44,7 +44,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
               role="tab"
               aria-selected={isActive}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 isActive
                   ? "bg-blue-50 text-blue-600 shadow-2xs ring-1 ring-blue-500/20"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
