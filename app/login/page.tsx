@@ -479,7 +479,12 @@ export default function AuthPage() {
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/meta-logo.jpg"
+                alt="Meta"
+                className="h-3 w-auto object-contain mix-blend-multiply shrink-0"
+              />
               <span>Official Meta Partner</span>
             </div>
           </div>
@@ -647,9 +652,12 @@ export default function AuthPage() {
             <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-[#0081fb]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16.96 4.02c-1.74 0-3.32.74-4.96 2.37-1.64-1.63-3.22-2.37-4.96-2.37C3.12 4.02 0 7.27 0 11.4c0 4.67 3.79 8.58 8.16 8.58 2.03 0 3.86-.88 5.84-2.85 1.98 1.97 3.81 2.85 5.84 2.85 4.37 0 8.16-3.91 8.16-8.58 0-4.13-3.12-7.38-7.04-7.38zm-9.96 13.5c-3.15 0-5.7-2.73-5.7-6.12 0-3.39 2.55-6.12 5.7-6.12 1.33 0 2.56.57 3.86 1.83-2.31 3.29-3.86 7.42-3.86 10.41zm9.96 0c0-2.99-1.55-7.12-3.86-10.41 1.3-1.26 2.53-1.83 3.86-1.83 3.15 0 5.7 2.73 5.7 6.12 0 3.39-2.55 6.12-5.7 6.12z" />
-                  </svg>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/meta-logo.jpg"
+                    alt="Meta"
+                    className="h-5 w-auto object-contain rounded-xs shrink-0 mix-blend-multiply"
+                  />
                   <span className="text-xs font-bold text-slate-800 tracking-tight">
                     Official Meta Graph API Integration
                   </span>
