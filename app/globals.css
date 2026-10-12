@@ -11,6 +11,42 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Fabulate Design Tokens */
+  --base--white: #ffffff;
+  --base--black: #000000;
+  --base--grey: #e9e9ee;
+  --grey--400: #3c3c3fb3;
+
+  /* Fabulate Site Pink */
+  --site-pink--200: #f7cbdf;
+  --site-pink--300: #ed83b3;
+  --site-pink--400: #e13181;
+  --site-pink--text: #871d4d;
+
+  /* Fabulate Site Orange */
+  --site-orange--200: #f8d7ca;
+  --site-orange--300: #eea07f;
+  --site-orange--400: #e3622b;
+  --site-orange--text: #883a19;
+
+  /* Fabulate Site Yellow */
+  --site-yellow--200: #ffefb2;
+  --site-yellow--300: #ffe006;
+  --site-yellow--400: #ffcc00;
+  --site-yellow--text: #997a00;
+
+  /* Fabulate Site Blue */
+  --site-blue--200: #bfbff9;
+  --site-blue--300: #6666f1;
+  --site-blue--400: #0000e9;
+  --site-blue--text: #00008b;
+
+  /* Fabulate Purple */
+  --purple--200: #ede9fe;
+  --purple--300: #c6b6ff;
+  --purple--400: #9579ff;
+  --purple--text: #2e1065;
 }
 
 @theme inline {

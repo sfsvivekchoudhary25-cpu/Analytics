@@ -503,10 +503,10 @@ export default function AuthPage() {
             <p className="text-sm text-slate-500 leading-relaxed">
               Connect your Facebook Page &amp; Instagram Business Account to unlock automated Comment-to-DM funnels and audience analytics.
             </p>
-            <div className="pt-0.5">
+            <div className="pt-1">
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#871d4d] hover:text-black bg-[#f7cbdf] hover:bg-[#ed83b3] border border-[#ed83b3] px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
               >
                 <span>✨ Explore Platform Features &amp; Live Simulator</span>
                 <span>&rarr;</span>
