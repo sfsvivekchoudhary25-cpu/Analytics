@@ -217,12 +217,12 @@ export default function AuthPage() {
                   <div className="flex items-center gap-2">
                     <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-0.5">
                       <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center text-[10px] font-bold">
-                        MP
+                        FB
                       </div>
                     </div>
                     <div>
-                      <div className="font-bold text-white leading-tight">muted_poetry</div>
-                      <div className="text-[10px] text-white/50">Sponsored</div>
+                      <div className="font-bold text-white leading-tight">fabroniee</div>
+                      <div className="text-[10px] text-white/50">Verified Creator</div>
                     </div>
                   </div>
                   <span className="text-white/40">&bull;&bull;&bull;</span>
@@ -457,24 +457,40 @@ export default function AuthPage() {
       </div>
 
       {/* ── RIGHT HALF: AUTHENTICATION FORM (50% on desktop) ─────────── */}
-      <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 sm:p-12 lg:p-16 xl:p-20 bg-slate-50/30 relative">
-        <div className="w-full max-w-[410px] space-y-7 animate-page-entrance">
-          {/* Header Row: Logo & Partner Badge */}
+      <div className="w-full lg:w-1/2 min-h-screen flex flex-col items-center justify-center p-6 sm:p-10 lg:p-12 xl:p-16 bg-slate-50/50 relative overflow-y-auto">
+        <div className="w-full max-w-[420px] space-y-6 my-auto py-8 animate-page-entrance">
+          {/* Header Row: Official InstaVeyra Logo & Meta Partner Badge */}
           <div className="flex items-center justify-between">
-            <InroLogo />
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-200/70 text-[11px] font-medium text-slate-600">
+            <div className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.png"
+                alt="InstaVeyra"
+                className="w-9 h-9 object-contain rounded-xl shadow-xs"
+              />
+              <div>
+                <span className="text-lg font-bold tracking-tight text-slate-900 block leading-tight">
+                  InstaVeyra
+                </span>
+                <span className="text-[11px] font-medium text-slate-400">
+                  Automation &amp; CRM
+                </span>
+              </div>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Meta Partner</span>
+              <span>Official Meta Partner</span>
             </div>
           </div>
 
           {/* Title & Description */}
-          <div className="space-y-2">
-            <h1 className="text-2xl sm:text-[28px] font-bold text-slate-900 tracking-tight leading-tight">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 tracking-tight leading-tight">
               Sign in to InstaVeyra
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed">
-              Connect your Facebook Page &amp; Instagram Professional Account to unlock automated Comment-to-DM flows and audience growth analytics.
+              Connect your Facebook Page &amp; Instagram Business Account to unlock automated Comment-to-DM funnels and audience analytics.
             </p>
           </div>
 
@@ -525,10 +541,10 @@ export default function AuthPage() {
               </div>
             </button>
 
-            {/* Divider */}
-            <div className="relative flex items-center justify-center my-1">
-              <div className="border-t border-slate-200/80 w-full" />
-              <span className="bg-white px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider absolute">
+            {/* Clear, Non-Overlapping Divider */}
+            <div className="relative flex items-center justify-center py-2.5">
+              <div className="w-full border-t border-slate-200" />
+              <span className="bg-slate-50 px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider absolute">
                 or authenticate with instagram
               </span>
             </div>
@@ -589,29 +605,6 @@ export default function AuthPage() {
               </div>
             </button>
 
-            {/* 3. Reviewer Demo Access Mode */}
-            <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/80 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
-                  <ThunderboltFilled className="text-indigo-600 text-xs" />
-                  <span>Meta App Reviewer Demo Mode</span>
-                </span>
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
-                  Instant Access
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
-              </p>
-              <button
-                type="button"
-                onClick={handleDevBypass}
-                className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
-              >
-                <span>⚡ Launch Reviewer Demo Dashboard</span>
-              </button>
-            </div>
-
             {/* Error Message */}
             {error && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug">
@@ -627,108 +620,58 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* ── Official Meta Trust Panel (Minimalist, Clean, Modern) ── */}
-            <div className="rounded-2xl border border-slate-200/80 bg-white p-4.5 sm:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] space-y-4">
-              {/* Card Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            {/* 3. Reviewer Demo Access Mode */}
+            <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/90 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2.5 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
+                  <ThunderboltFilled className="text-indigo-600 text-xs" />
+                  <span>Meta App Reviewer Demo Mode</span>
+                </span>
+                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
+                  Instant Access
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed">
+                Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
+              </p>
+              <button
+                type="button"
+                onClick={handleDevBypass}
+                className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              >
+                <span>⚡ Launch Reviewer Demo Dashboard</span>
+              </button>
+            </div>
+
+            {/* 4. Streamlined Official Meta Integration & Security Trust Badge */}
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  {/* Meta Infinity Logo */}
-                  <svg
-                    className="w-4 h-4 text-[#0081fb]"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg className="w-4 h-4 text-[#0081fb]" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M16.96 4.02c-1.74 0-3.32.74-4.96 2.37-1.64-1.63-3.22-2.37-4.96-2.37C3.12 4.02 0 7.27 0 11.4c0 4.67 3.79 8.58 8.16 8.58 2.03 0 3.86-.88 5.84-2.85 1.98 1.97 3.81 2.85 5.84 2.85 4.37 0 8.16-3.91 8.16-8.58 0-4.13-3.12-7.38-7.04-7.38zm-9.96 13.5c-3.15 0-5.7-2.73-5.7-6.12 0-3.39 2.55-6.12 5.7-6.12 1.33 0 2.56.57 3.86 1.83-2.31 3.29-3.86 7.42-3.86 10.41zm9.96 0c0-2.99-1.55-7.12-3.86-10.41 1.3-1.26 2.53-1.83 3.86-1.83 3.15 0 5.7 2.73 5.7 6.12 0 3.39-2.55 6.12-5.7 6.12z" />
                   </svg>
-                  <span className="text-[11px] font-bold tracking-wider text-slate-700 uppercase">
-                    Official Meta Integration
+                  <span className="text-xs font-bold text-slate-800 tracking-tight">
+                    Official Meta Graph API Integration
                   </span>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-50 border border-slate-200/60 text-[10px] font-medium text-slate-600">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-[10px] font-semibold text-emerald-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Graph API v21.0
+                  v21.0
                 </span>
               </div>
 
-              {/* Security & Access Points */}
-              <div className="space-y-3">
-                {/* Feature 1: Direct OAuth */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                      <path d="M9 12l2 2 4-4" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-900 leading-tight">
-                      Direct OAuth authentication
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
-                      Secure authentication via official Meta login dialogue
-                    </div>
-                  </div>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-slate-600">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span className="truncate">Direct OAuth</span>
                 </div>
-
-                {/* Feature 2: Instant Access */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="4" y="14" width="3.5" height="7" rx="1" />
-                      <rect x="10.25" y="9" width="3.5" height="12" rx="1" />
-                      <rect x="16.5" y="4" width="3.5" height="17" rx="1" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-900 leading-tight">
-                      Real-time social insights &amp; DMs
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
-                      Granular permissions for posts, reels, comments &amp; audience data
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span className="truncate">Real-time DMs</span>
                 </div>
-
-                {/* Feature 3: Token Security */}
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200/70 text-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="5" y="11" width="14" height="10" rx="2.5" />
-                      <path d="M8 11V7a4 4 0 018 0v4" />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-900 leading-tight">
-                      Zero password sharing
-                    </div>
-                    <div className="text-[11px] text-slate-500 leading-relaxed mt-0.5">
-                      100% encrypted token exchange • Revoke access anytime
-                    </div>
-                  </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-500 font-bold">✓</span>
+                  <span className="truncate">AES Encrypted</span>
                 </div>
               </div>
             </div>
