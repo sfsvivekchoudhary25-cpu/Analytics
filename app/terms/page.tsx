@@ -99,8 +99,8 @@ export default function TermsPage() {
               </h2>
               <p>
                 For questions regarding these Terms, contact our legal and support team at{" "}
-                <a href="mailto:vivek.choudhary.0022@gmail.com" className="text-blue-600 font-semibold underline">
-                  vivek.choudhary.0022@gmail.com
+                <a href="mailto:support@fabroniee.store" className="text-blue-600 font-semibold underline">
+                  support@fabroniee.store
                 </a>
                 .
               </p>

@@ -143,8 +143,8 @@ export default function PrivacyPolicyPage() {
               </h2>
               <p>
                 If you have any questions or concerns regarding our privacy policies or data handling, please contact our Data Protection Team at{" "}
-                <a href="mailto:vivek.choudhary.0022@gmail.com" className="text-blue-600 hover:text-blue-700 font-semibold">
-                  vivek.choudhary.0022@gmail.com
+                <a href="mailto:support@fabroniee.store" className="text-blue-600 hover:text-blue-700 font-semibold">
+                  support@fabroniee.store
                 </a>
                 .
               </p>

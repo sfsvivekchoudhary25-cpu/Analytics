@@ -92,8 +92,8 @@ export default function DataDeletionPage() {
                 <ol className="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700">
                   <li>
                     Send an email to{" "}
-                    <a href="mailto:vivek.choudhary.0022@gmail.com" className="text-blue-600 font-semibold underline">
-                      vivek.choudhary.0022@gmail.com
+                    <a href="mailto:support@fabroniee.store" className="text-blue-600 font-semibold underline">
+                      support@fabroniee.store
                     </a>{" "}
                     with the subject line: <strong>&ldquo;Delete my data&rdquo;</strong>.
                   </li>
