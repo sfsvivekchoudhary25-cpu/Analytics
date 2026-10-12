@@ -141,7 +141,8 @@ export default function AuthPage() {
     setError(null);
     try {
       const apiBase = getApiBase();
-      const res = await fetch(`${apiBase}/instagram/oauth/url`);
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const res = await fetch(`${apiBase}/instagram/oauth/url?origin=${encodeURIComponent(origin)}`);
       const data = await res.json();
       if (!res.ok || !data.url) {
         throw new Error(data.message || "Failed to generate Instagram OAuth login URL. Check server configuration.");

@@ -132,7 +132,8 @@ export default function Dashboard() {
   async function connectWithInstagram() {
     setError(null);
     try {
-      const { url } = await api<{ url: string }>("/instagram/oauth/url");
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { url } = await api<{ url: string }>(`/instagram/oauth/url?origin=${encodeURIComponent(origin)}`);
       window.location.href = url;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start Instagram login");

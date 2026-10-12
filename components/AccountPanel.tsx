@@ -453,7 +453,8 @@ export function AccountPanel({
   const handleConnectFacebook = async () => {
     setFbBusy(true);
     try {
-      const { url } = await api<{ url: string }>("/facebook-page/oauth/url");
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
       window.location.href = url;
     } catch (err: any) {
       message.error(err?.message || "Failed to initiate Facebook Page connection");
@@ -583,11 +584,20 @@ export function AccountPanel({
             </Button>
             <Button
               size="large"
+              icon={<FacebookOutlined />}
+              onClick={handleConnectFacebook}
+              loading={fbBusy}
+              className="!h-11 !px-6 !rounded-xl !border-blue-200 !bg-blue-50/60 hover:!bg-blue-100/60 !text-blue-700 !font-bold shadow-xs"
+            >
+              Connect via Facebook Page
+            </Button>
+            <Button
+              size="large"
               icon={<KeyOutlined />}
               onClick={() => setIgTokenModalOpen(true)}
-              className="!h-11 !px-5 !rounded-xl !border-slate-200 !text-slate-700 hover:!border-slate-300 font-semibold"
+              className="!h-11 !px-4 !rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 text-xs font-semibold"
             >
-              Paste Access Token
+              Manual Token (Advanced)
             </Button>
           </div>
         </div>

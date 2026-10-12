@@ -23,7 +23,8 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
     setBusy(true);
     setLocalError(null);
     try {
-      const { url } = await api<{ url: string }>("/facebook-page/oauth/url");
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
       window.location.href = url;
     } catch (err) {
       setLocalError((err as Error).message);

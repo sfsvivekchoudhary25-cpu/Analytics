@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+
 const nextConfig: NextConfig = {
   // Lets a second copy (e.g. a preview on another port) build into its own folder without touching a running site.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
@@ -19,7 +21,8 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/backend-proxy/:path*",
-        destination: "https://analytics-backend-vxak.onrender.com/:path*",
+        // Proxy to whatever NEXT_PUBLIC_API_URL is set to (localhost:4000 for dev, production URL otherwise)
+        destination: `${apiUrl}/:path*`,
       },
     ];
   },
