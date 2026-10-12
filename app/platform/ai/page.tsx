@@ -69,7 +69,7 @@ export default function AiPlatformPage() {
               style={{ backgroundColor: "#f8d7ca", color: "#883a19", border: "2px solid #eea07f" }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
             >
-              <span>⚡ Test in Reviewer Sandbox</span>
+              <span>Test in Reviewer Sandbox</span>
             </Link>
           </div>
         </div>

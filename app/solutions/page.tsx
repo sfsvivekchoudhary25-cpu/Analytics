@@ -143,7 +143,7 @@ export default function SolutionsPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-emerald-500 text-sm" />
-                    <span>24h story emoji reaction funnels (`🔥` triggers coaching link)</span>
+                    <span>24h story reaction funnels (Automated coaching links)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-emerald-500 text-sm" />

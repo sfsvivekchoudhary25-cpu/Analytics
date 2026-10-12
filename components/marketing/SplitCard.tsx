@@ -16,7 +16,7 @@ export interface SplitCardProps {
   imageSrc: string;
   imageAlt: string;
   statBadge?: {
-    icon?: string;
+    icon?: React.ReactNode;
     text: string;
   };
   actionText: string;

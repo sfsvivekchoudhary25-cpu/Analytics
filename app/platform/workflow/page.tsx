@@ -16,7 +16,7 @@ import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
 
 export default function WorkflowPage() {
-  const [testComment, setTestComment] = useState("Where can I buy this dress? Need the link! 🔥");
+  const [testComment, setTestComment] = useState("Where can I buy this dress? Need the link!");
   const [simulatedReply, setSimulatedReply] = useState<string | null>(
     "Trigger detected: 'LINK' matched -> Sent DM with direct checkout link in 0.8s"
   );
@@ -67,7 +67,7 @@ export default function WorkflowPage() {
               style={{ backgroundColor: "#bfbff9", color: "#00008b", border: "2px solid #6666f1" }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
             >
-              <span>⚡ Launch Sandbox Simulator</span>
+              <span>Launch Sandbox Simulator</span>
             </Link>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function WorkflowPage() {
                 Protect your Instagram account score by automatically rotating between multiple friendly public comments. Prevents robotic repetition flags.
               </p>
               <div className="p-3 rounded-xl bg-slate-50 font-mono text-[11px] text-slate-700 border border-slate-200">
-                replies: ["Check your DMs! 🚀", "Sent the link! ✨"]
+                replies: ["Check your DMs!", "Sent the link!"]
               </div>
             </div>
 

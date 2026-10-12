@@ -254,7 +254,6 @@ export default function AuthPage() {
                   {/* Customer Comment Bubble */}
                   <div className="absolute top-3 left-3 z-20 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold shadow-lg flex items-center gap-1.5">
                     <span>I want to register for your next drop!</span>
-                    <span>🔥</span>
                   </div>
 
                   {/* Trigger Pill */}
@@ -266,7 +265,7 @@ export default function AuthPage() {
                   {/* Automated Blue DM Card */}
                   <div className="absolute bottom-2 inset-x-2 z-20 p-3 rounded-xl bg-blue-600 text-white shadow-xl space-y-2 text-xs">
                     <p className="leading-snug text-[11px] font-medium">
-                      Fantastic! Here is the link to our upcoming drop! 🚀 You can register as VIP and get notified first!
+                      Fantastic! Here is the link to our upcoming drop! You can register as VIP and get notified first!
                     </p>
                     <div className="p-2 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-between">
                       <div>
@@ -306,7 +305,6 @@ export default function AuthPage() {
                     </div>
                     <span className="font-bold text-white">@jane.doe</span>
                   </div>
-                  <span className="text-white/40">📞 📹</span>
                 </div>
 
                 {/* Customer Question Bubble */}
@@ -319,7 +317,7 @@ export default function AuthPage() {
                 {/* AI Automated Answer Bubble */}
                 <div className="flex justify-end">
                   <div className="max-w-[85%] rounded-2xl rounded-tr-xs px-3.5 py-2.5 bg-blue-600 text-white text-xs leading-relaxed shadow-lg">
-                    No problem! You can book a consultation here! 🚀
+                    No problem! You can book a consultation here!
                   </div>
                 </div>
 
@@ -345,7 +343,6 @@ export default function AuthPage() {
                   <div className="flex-1 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px]">
                     Message...
                   </div>
-                  <span>🎙 📷 😃</span>
                 </div>
               </div>
             </div>
@@ -364,9 +361,9 @@ export default function AuthPage() {
                 </div>
 
                 <div className="aspect-16/9 rounded-xl bg-gradient-to-tr from-purple-800 via-pink-700 to-rose-600 p-4 flex flex-col justify-between text-white shadow-inner">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Flash Drop Alert 🔥</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Flash Drop Alert</div>
                   <div className="text-base font-bold leading-tight">
-                    React with 🔥 to get instant 25% OFF coupon in your DMs!
+                    Reply DROP to get instant 25% OFF coupon in your DMs!
                   </div>
                   <div className="text-[10px] text-white/70">512 followers reacted in last 2 hours</div>
                 </div>
@@ -514,7 +511,7 @@ export default function AuthPage() {
                 href="/explore"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#871d4d] hover:text-black bg-[#f7cbdf] hover:bg-[#ed83b3] border border-[#ed83b3] px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
               >
-                <span>✨ Explore Platform Features &amp; Live Simulator</span>
+                <span>Explore Platform Features &amp; Live Simulator</span>
                 <span>&rarr;</span>
               </Link>
             </div>
@@ -666,7 +663,7 @@ export default function AuthPage() {
                   onClick={handleDevBypass}
                   className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
                 >
-                  <span>⚡ Launch Reviewer Demo Dashboard</span>
+                  <span>Launch Reviewer Demo Dashboard</span>
                 </button>
               </div>
             )}
@@ -713,7 +710,7 @@ export default function AuthPage() {
                 href="/explore"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-blue-600 transition-colors"
               >
-                <span>✨ Explore Platform &bull; Live Interactive Simulator</span>
+                <span>Explore Platform &bull; Live Interactive Simulator</span>
                 <span>&rarr;</span>
               </Link>
             </div>

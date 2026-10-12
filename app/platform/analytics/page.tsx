@@ -52,7 +52,7 @@ export default function AnalyticsPlatformPage() {
               style={{ backgroundColor: "#f7cbdf", color: "#871d4d", border: "2px solid #ed83b3" }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
             >
-              <span>⚡ Reviewer Sandbox</span>
+              <span>Reviewer Sandbox</span>
             </Link>
           </div>
         </div>

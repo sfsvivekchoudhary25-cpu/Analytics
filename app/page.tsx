@@ -21,6 +21,7 @@ import {
   GiftOutlined,
   StarFilled,
   AppstoreOutlined,
+  GlobalOutlined,
 } from "@ant-design/icons";
 import { auth } from "@/lib/api";
 import MarketingNav from "@/components/marketing/MarketingNav";
@@ -32,17 +33,17 @@ import TechText from "@/components/TechText";
 const DEMO_PRESETS = [
   {
     keyword: "LINK",
-    comment: "Where can I get this jacket? Need the link! 🔥",
-    reply: "Sent you the VIP checkout link in your DMs! Check your message requests 🚀",
+    comment: "Where can I get this jacket? Need the link!",
+    reply: "Sent you the VIP checkout link in your DMs! Check your message requests",
     dmTitle: "VIP Drop Access: Oversized Vintage Jacket",
-    dmDesc: "Hey Sarah! 👋 Here is your exclusive direct link with 15% off applied at checkout:",
+    dmDesc: "Hey Sarah! Here is your exclusive direct link with 15% off applied at checkout:",
     dmButton: "Shop Vintage Jacket ($68.00)",
     tag: "E-Commerce",
   },
   {
     keyword: "PRICE",
-    comment: "How much is this coaching program? 💬",
-    reply: "Just messaged you the full program syllabus and early-bird pricing! ✨",
+    comment: "How much is this coaching program?",
+    reply: "Just messaged you the full program syllabus and early-bird pricing!",
     dmTitle: "Creator Accelerator 2026 Syllabus",
     dmDesc: "Hey Alex! Early bird pricing is $199 (reg $399). Click below to view the syllabus and book your onboarding call:",
     dmButton: "View Syllabus & Enroll ($199)",
@@ -50,8 +51,8 @@ const DEMO_PRESETS = [
   },
   {
     keyword: "VIP",
-    comment: "VIP please! Can't wait for Friday's launch 🎉",
-    reply: "You're on the VIP list! Check your DMs for your secret 1-hour early access pass 🔑",
+    comment: "VIP please! Can't wait for Friday's launch",
+    reply: "You're on the VIP list! Check your DMs for your secret 1-hour early access pass",
     dmTitle: "Exclusive VIP Early Access Pass",
     dmDesc: "Welcome to the inner circle! You get access 60 minutes before the public release on Friday at 9 AM EST:",
     dmButton: "Activate VIP Pass (#VIP-841)",
@@ -59,8 +60,8 @@ const DEMO_PRESETS = [
   },
   {
     keyword: "FREEBIE",
-    comment: "Would love the free Notion content template! 📚",
-    reply: "DM sent with your free Notion template download link! Enjoy! 🎁",
+    comment: "Would love the free Notion content template!",
+    reply: "DM sent with your free Notion template download link! Enjoy!",
     dmTitle: "Free Notion Content Planner Template",
     dmDesc: "Hey! Tap below to duplicate the template directly into your Notion workspace in 1 click:",
     dmButton: "Download Notion Template (Free)",
@@ -72,7 +73,7 @@ const DEMO_PRESETS = [
 const ENGINE_PRESETS = [
   {
     id: "workflow",
-    label: "⚡ Comment-to-DM",
+    label: "Comment-to-DM",
     keyword: "COMMENT-TO-DM",
     title: "Instant Comment Trigger Funnels",
     desc: "Dispatches private VIP checkout links in < 1.8s the millisecond a follower comments on your reels or posts.",
@@ -84,7 +85,7 @@ const ENGINE_PRESETS = [
   },
   {
     id: "ai",
-    label: "🤖 AI Co-Pilot",
+    label: "AI Co-Pilot",
     keyword: "AI CO-PILOT",
     title: "Autonomous Conversational Agent",
     desc: "Answers complex customer questions about sizing, inventory, and order status 24/7 in 40+ languages.",
@@ -96,10 +97,10 @@ const ENGINE_PRESETS = [
   },
   {
     id: "stories",
-    label: "🔥 Story Funnels",
+    label: "Story Funnels",
     keyword: "STORY FUNNELS",
     title: "24h Story Reaction Automation",
-    desc: "Captures high-intent leads from expiring stories by converting emoji reactions into ongoing DM conversations.",
+    desc: "Captures high-intent leads from expiring stories by converting reactions into ongoing DM conversations.",
     bgColor: "#f7cbdf",
     borderColor: "border-[#ed83b3]",
     textColor: "text-[#871d4d]",
@@ -108,7 +109,7 @@ const ENGINE_PRESETS = [
   },
   {
     id: "ugc",
-    label: "🎁 UGC Ingestion",
+    label: "UGC Ingestion",
     keyword: "UGC INGESTION",
     title: "Customer Photo Moderation & Rewards",
     desc: "Curates tagged customer unboxings, republishes to feed with 1 click, and fires automatic reward discount coupons.",
@@ -482,7 +483,7 @@ export default function HomePage() {
                 </span>
               </div>
               <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-white/60 font-mono">
-                ⚡ Kinetic Wireframe Physics &bull; Drag Any Letter
+                Kinetic Wireframe Physics &bull; Drag Any Letter
               </span>
             </div>
 
@@ -566,7 +567,7 @@ export default function HomePage() {
               description="Turn viral reel comments into private VIP checkout links in under 2 seconds. Rotate randomized replies to maintain organic algorithmic safety."
               imageSrc="/card-workflow.jpg"
               imageAlt="Person in knit blue sweater holding shopping bags and tapping phone"
-              statBadge={{ icon: "⚡", text: "< 1.8s Response Latency" }}
+              statBadge={{ icon: <ThunderboltFilled className="text-white text-xs" />, text: "< 1.8s Response Latency" }}
               actionText="Comment-to-DM Engine"
               href="/platform/workflow"
             />
@@ -582,7 +583,7 @@ export default function HomePage() {
               description="Deploy a conversational AI agent with strict guardrails trained on your catalog and store policies in 40+ native languages."
               imageSrc="/card-ai.jpg"
               imageAlt="Entrepreneur happily managing customer chats on mobile"
-              statBadge={{ icon: "🤖", text: "40+ Languages Supported" }}
+              statBadge={{ icon: <GlobalOutlined className="text-white text-xs" />, text: "40+ Languages Supported" }}
               actionText="Autonomous AI Co-Pilot"
               href="/platform/ai"
             />
@@ -598,7 +599,7 @@ export default function HomePage() {
               description="Capture leads before stories vanish. Intercept emoji fire reactions and poll votes to fire personalized direct message discounts."
               imageSrc="/card-stories.jpg"
               imageAlt="Content creator reviewing Instagram stories at golden hour"
-              statBadge={{ icon: "🔥", text: "89.4% Story Open Rate" }}
+              statBadge={{ icon: <RiseOutlined className="text-white text-xs" />, text: "89.4% Story Open Rate" }}
               actionText="Story Reaction Automation"
               href="/platform/workflow"
             />
@@ -614,7 +615,7 @@ export default function HomePage() {
               description="Moderate tagged photos in your moderation inbox, republish to feed with 1 click, and fire automatic thank-you reward codes on autopilot."
               imageSrc="/card-ugc.jpg"
               imageAlt="Customer receiving and unboxing authentic brand order"
-              statBadge={{ icon: "🎁", text: "+34% Repeat Purchases" }}
+              statBadge={{ icon: <GiftOutlined className="text-white text-xs" />, text: "+34% Repeat Purchases" }}
               actionText="UGC Moderation & Rewards"
               href="/solutions"
             />
@@ -835,7 +836,7 @@ export default function HomePage() {
                 style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
                 className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-slate-50 font-semibold text-sm transition-all shadow-xs"
               >
-                ⚡ Launch Reviewer Demo Mode
+                Launch Reviewer Demo Mode
               </Link>
             </div>
           </div>
