@@ -64,10 +64,10 @@ export default function WorkflowPage() {
 
             <Link
               href="/login?demo=1"
-              style={{ backgroundColor: "#bfbff9", color: "#00008b", border: "2px solid #6666f1" }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
+              style={{ backgroundColor: "#bfbff9", color: "#000000", border: "2px solid #000000" }}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold !text-black transition-all shadow-2xs"
             >
-              <span>Launch Sandbox Simulator</span>
+              <span className="!text-black">Launch Sandbox Simulator</span>
             </Link>
           </div>
         </div>

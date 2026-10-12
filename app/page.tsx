@@ -79,7 +79,7 @@ const ENGINE_PRESETS = [
     desc: "Dispatches private VIP checkout links in < 1.8s the millisecond a follower comments on your reels or posts.",
     bgColor: "#bfbff9",
     borderColor: "border-[#6666f1]",
-    textColor: "text-[#00008b]",
+    textColor: "#000000",
     accentColor: "#bfbff9",
     href: "/platform/workflow",
   },
@@ -91,7 +91,7 @@ const ENGINE_PRESETS = [
     desc: "Answers complex customer questions about sizing, inventory, and order status 24/7 in 40+ languages.",
     bgColor: "#f8d7ca",
     borderColor: "border-[#eea07f]",
-    textColor: "text-[#883a19]",
+    textColor: "#000000",
     accentColor: "#f8d7ca",
     href: "/platform/ai",
   },
@@ -103,7 +103,7 @@ const ENGINE_PRESETS = [
     desc: "Captures high-intent leads from expiring stories by converting reactions into ongoing DM conversations.",
     bgColor: "#f7cbdf",
     borderColor: "border-[#ed83b3]",
-    textColor: "text-[#871d4d]",
+    textColor: "#000000",
     accentColor: "#f7cbdf",
     href: "/platform/workflow",
   },
@@ -115,7 +115,7 @@ const ENGINE_PRESETS = [
     desc: "Curates tagged customer unboxings, republishes to feed with 1 click, and fires automatic reward discount coupons.",
     bgColor: "#ffefb2",
     borderColor: "border-[#ffe006]",
-    textColor: "text-[#997a00]",
+    textColor: "#000000",
     accentColor: "#ffefb2",
     href: "/solutions",
   },
@@ -476,8 +476,8 @@ export default function HomePage() {
                   Meta Graph API v21.0 Active
                 </span>
                 <span
-                  className="px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ backgroundColor: currentEngine.bgColor, color: currentEngine.textColor }}
+                  className="px-3 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider !text-black"
+                  style={{ backgroundColor: currentEngine.bgColor, color: "#000000" }}
                 >
                   Engine 0{activeEngineIdx + 1}
                 </span>
@@ -527,13 +527,13 @@ export default function HomePage() {
                 href={currentEngine.href}
                 style={{
                   backgroundColor: currentEngine.bgColor,
-                  color: currentEngine.textColor,
+                  color: "#000000",
                   border: "2px solid #000000",
                 }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-xs hover:brightness-105 transition-all shrink-0 shadow-md"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-xs !text-black hover:brightness-105 transition-all shrink-0 shadow-md"
               >
-                <span>Explore Engine Blueprint</span>
-                <ArrowRightOutlined className="text-[10px]" />
+                <span className="!text-black font-semibold">Explore Engine Blueprint</span>
+                <ArrowRightOutlined className="text-[10px] !text-black font-bold" />
               </Link>
             </div>
           </div>
