@@ -127,17 +127,15 @@ function SidebarInner({
                     if (isDrawer) onClose?.();
                   }}
                   aria-current={isSelected ? "page" : undefined}
-                  className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer ${
-                    isSelected
+                  className={`group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all cursor-pointer ${isSelected
                       ? "bg-blue-50/90 text-blue-600 shadow-xs ring-1 ring-blue-500/20"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={`transition-colors ${
-                        isSelected ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
-                      }`}
+                      className={`transition-colors ${isSelected ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                        }`}
                     >
                       {icon}
                     </span>

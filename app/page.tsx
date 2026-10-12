@@ -307,11 +307,10 @@ export default function Dashboard({
       />
 
       <main
-        className={`min-w-0 flex-1 flex flex-col ${
-          active === "messages"
+        className={`min-w-0 flex-1 flex flex-col ${active === "messages"
             ? "h-full overflow-hidden"
             : "min-h-screen overflow-y-auto pb-8 sm:pb-6"
-        }`}
+          }`}
       >
         {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
         <header className="sticky top-0 z-30 flex h-[72px] w-full shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 sm:px-6 lg:hidden shadow-xs">
@@ -382,8 +381,8 @@ export default function Dashboard({
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
               : active === "hashtags"
-              ? "animate-page-entrance w-full space-y-6 p-4 sm:p-6"
-              : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-4 sm:p-6"
+                ? "animate-page-entrance w-full space-y-6 p-4 sm:p-6"
+                : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-4 sm:p-6"
           }
         >
           {active === "dashboard" && (

@@ -437,13 +437,12 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all duration-200 ${
-                isDragging
+              className={`rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all duration-200 ${isDragging
                   ? "border-purple-500 bg-purple-50/50 scale-[0.99]"
                   : file
-                  ? "border-emerald-300 bg-emerald-50/20"
-                  : "border-slate-200 hover:border-purple-300 hover:bg-slate-50/60"
-              }`}
+                    ? "border-emerald-300 bg-emerald-50/20"
+                    : "border-slate-200 hover:border-purple-300 hover:bg-slate-50/60"
+                }`}
             >
               {file ? (
                 <div className="flex items-center justify-between gap-4 text-left">
@@ -561,11 +560,10 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               onClick={handlePostStory}
               disabled={!file || busy}
               loading={busy}
-              className={`flex-1 !h-12 !rounded-2xl font-bold text-sm shadow-md transition-all duration-200 ${
-                !file || busy
+              className={`flex-1 !h-12 !rounded-2xl font-bold text-sm shadow-md transition-all duration-200 ${!file || busy
                   ? "!bg-slate-100 !text-slate-400 !border-slate-200 !cursor-not-allowed"
                   : "!bg-gradient-to-r !from-purple-600 !via-pink-600 !to-rose-500 hover:!opacity-95 text-white shadow-pink-500/25 !border-0"
-              }`}
+                }`}
             >
               {busy
                 ? file?.type.startsWith("video/")
@@ -601,11 +599,10 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                     key={dev}
                     type="button"
                     onClick={() => setPreviewDevice(dev)}
-                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                      previewDevice === dev
+                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${previewDevice === dev
                         ? "bg-white font-semibold text-slate-900 shadow-xs"
                         : "text-slate-500 hover:text-slate-900"
-                    }`}
+                      }`}
                   >
                     {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
                   </button>

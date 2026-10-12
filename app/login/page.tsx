@@ -50,6 +50,7 @@ function InroLogo({ className = "" }: { className?: string }) {
   );
 }
 
+
 // ── Carousel Showcase Slides ──────────────────────────────────────────────────
 const CAROUSEL_SLIDES = [
   {
@@ -87,6 +88,7 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLocal, setIsLocal] = useState(false);
+  const [showReviewerDemo, setShowReviewerDemo] = useState(false);
 
   useEffect(() => {
     setIsLocal(isLocalDev());
@@ -125,6 +127,11 @@ export default function AuthPage() {
 
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
+    }
+
+    const demoParam = (q.get("demo") || q.get("reviewer") || q.get("test") || "").toLowerCase();
+    if (demoParam === "1" || demoParam === "true" || demoParam === "yes") {
+      setShowReviewerDemo(true);
     }
 
     if (authToken) {
@@ -444,11 +451,10 @@ export default function AuthPage() {
                 key={slide.id}
                 type="button"
                 onClick={() => setActiveSlide(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  activeSlide === idx
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${activeSlide === idx
                     ? "w-12 bg-white"
                     : "w-5 bg-white/25 hover:bg-white/50"
-                }`}
+                  }`}
                 aria-label={`Jump to slide ${idx + 1}`}
               />
             ))}
@@ -625,28 +631,30 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* 3. Reviewer Demo Access Mode */}
-            <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/90 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2.5 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
-                  <ThunderboltFilled className="text-indigo-600 text-xs" />
-                  <span>Meta App Reviewer Demo Mode</span>
-                </span>
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
-                  Instant Access
-                </span>
+            {/* 3. Reviewer Demo Access Mode (Only shown if URL has ?demo=1 or ?reviewer=1) */}
+            {showReviewerDemo && (
+              <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/90 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2.5 shadow-2xs animate-page-entrance">
+                <div className="flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
+                    <ThunderboltFilled className="text-indigo-600 text-xs" />
+                    <span>Meta App Reviewer Demo Mode</span>
+                  </span>
+                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
+                    Instant Access
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleDevBypass}
+                  className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                >
+                  <span>⚡ Launch Reviewer Demo Dashboard</span>
+                </button>
               </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed">
-                Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
-              </p>
-              <button
-                type="button"
-                onClick={handleDevBypass}
-                className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
-              >
-                <span>⚡ Launch Reviewer Demo Dashboard</span>
-              </button>
-            </div>
+            )}
 
             {/* 4. Streamlined Official Meta Integration & Security Trust Badge */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs space-y-2.5">

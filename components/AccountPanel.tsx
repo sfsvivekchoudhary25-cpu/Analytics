@@ -818,11 +818,10 @@ export function AccountPanel({
                   <span className={lowToken ? "text-amber-600 font-mono font-bold text-xs" : "text-slate-900 font-mono font-bold text-xs"}>
                     {days} days remaining <span className="text-slate-400 font-normal">({TOKEN_LIFETIME_DAYS}d total)</span>
                   </span>
-                  <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${
-                    lowToken
+                  <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${lowToken
                       ? "bg-amber-50 text-amber-700 border border-amber-200/80"
                       : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                  }`}>
+                    }`}>
                     {lowToken ? "Expiring Soon" : "Healthy"}
                   </span>
                 </div>
@@ -831,11 +830,10 @@ export function AccountPanel({
               {/* Custom Glowing Gradient Progress Meter */}
               <div className="relative h-2.5 w-full rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-700 shadow-xs ${
-                    lowToken
+                  className={`h-full rounded-full transition-all duration-700 shadow-xs ${lowToken
                       ? "bg-gradient-to-r from-amber-500 to-rose-500 shadow-rose-500/20"
                       : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500 shadow-emerald-500/20"
-                  }`}
+                    }`}
                   style={{
                     width: `${Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}%`,
                   }}
@@ -878,11 +876,10 @@ export function AccountPanel({
                     <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
                       Facebook Page Authorization
                     </h3>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-2xs ${
-                      fbStatus?.connected
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-2xs ${fbStatus?.connected
                         ? "bg-blue-50 border border-blue-200/80 text-blue-700"
                         : "bg-slate-100 border border-slate-200 text-slate-600"
-                    }`}>
+                      }`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${fbStatus?.connected ? "bg-blue-500 animate-pulse" : "bg-slate-400"}`} />
                       <span>{fbStatus?.connected ? "Linked" : "Required"}</span>
                     </span>
