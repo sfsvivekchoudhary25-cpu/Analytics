@@ -481,9 +481,9 @@ export default function AuthPage() {
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/meta-logo.jpg"
+                src="/meta-logo.png"
                 alt="Meta"
-                className="h-3 w-auto object-contain mix-blend-multiply shrink-0"
+                className="h-3 w-auto object-contain shrink-0"
               />
               <span>Official Meta Partner</span>
             </div>
@@ -654,9 +654,9 @@ export default function AuthPage() {
                 <div className="flex items-center gap-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src="/meta-logo.jpg"
+                    src="/meta-logo.png"
                     alt="Meta"
-                    className="h-5 w-auto object-contain rounded-xs shrink-0 mix-blend-multiply"
+                    className="h-4.5 w-auto object-contain shrink-0"
                   />
                   <span className="text-xs font-bold text-slate-800 tracking-tight">
                     Official Meta Graph API Integration
