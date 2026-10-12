@@ -2,24 +2,38 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRightOutlined,
   GlobalOutlined,
   MenuOutlined,
   CloseOutlined,
-  DownOutlined,
-  MessageOutlined,
-  RobotOutlined,
-  LineChartOutlined,
   ThunderboltFilled,
 } from "@ant-design/icons";
 import { auth } from "@/lib/api";
+import GooeyNav, { type GooeyNavItem } from "@/components/GooeyNav";
+
+const NAV_ITEMS: GooeyNavItem[] = [
+  { label: "Home", href: "/" },
+  { label: "Platform", href: "/platform/workflow" },
+  { label: "Solutions", href: "/solutions" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Case Studies", href: "/case-studies" },
+];
+
+const getActiveIndex = (path: string) => {
+  if (path === "/") return 0;
+  if (path.startsWith("/platform")) return 1;
+  if (path.startsWith("/solutions")) return 2;
+  if (path.startsWith("/pricing")) return 3;
+  if (path.startsWith("/case-studies")) return 4;
+  return 0;
+};
 
 export default function MarketingNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [platformDropdownOpen, setPlatformDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -28,7 +42,15 @@ export default function MarketingNav() {
     }
   }, []);
 
-  const isActive = (href: string) => pathname === href;
+  const currentNavIndex = getActiveIndex(pathname);
+
+  const handleNavChange = (index: number, item: GooeyNavItem) => {
+    if (item.href && item.href !== "#" && item.href !== pathname) {
+      setTimeout(() => {
+        router.push(item.href as string);
+      }, 120);
+    }
+  };
 
   return (
     <>
@@ -60,11 +82,11 @@ export default function MarketingNav() {
         </div>
       </div>
 
-      {/* ── 2. STICKY CLEAN NAVBAR ────────────────────────────────────────────── */}
+      {/* ── 2. STICKY CLEAN NAVBAR WITH KINETIC GOOEY NAV ───────────────────────── */}
       <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/95 border-b border-[#e9e9ee] transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo.png"
@@ -86,95 +108,31 @@ export default function MarketingNav() {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-700">
-            {/* Platform Dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={() => setPlatformDropdownOpen(true)}
-              onMouseLeave={() => setPlatformDropdownOpen(false)}
-            >
-              <button
-                type="button"
-                className={`inline-flex items-center gap-1.5 py-2 hover:text-black transition-colors cursor-pointer ${
-                  pathname.startsWith("/platform") ? "text-[#e13181] font-semibold" : ""
-                }`}
-              >
-                <span>Platform</span>
-                <DownOutlined className="text-[10px] text-slate-400" />
-              </button>
-
-              {platformDropdownOpen && (
-                <div className="absolute top-full left-0 w-80 p-3 bg-white border border-[#e9e9ee] rounded-2xl shadow-xl space-y-1 animate-page-entrance">
-                  <Link
-                    href="/platform/workflow"
-                    onClick={() => setPlatformDropdownOpen(false)}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#e0f2fe]/60 transition-colors group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#bfbff9] text-[#00008b] flex items-center justify-center text-sm shrink-0">
-                      <MessageOutlined />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#00008b]">Comment-to-DM Engine</div>
-                      <div className="text-[11px] text-slate-500 font-normal leading-snug">Instant keyword triggers and automated private replies.</div>
-                    </div>
-                  </Link>
-
-                  <Link
-                    href="/platform/ai"
-                    onClick={() => setPlatformDropdownOpen(false)}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#fff2e8]/60 transition-colors group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#f8d7ca] text-[#883a19] flex items-center justify-center text-sm shrink-0">
-                      <RobotOutlined />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#883a19]">Autonomous AI Co-Pilot</div>
-                      <div className="text-[11px] text-slate-500 font-normal leading-snug">24/7 multilingual product & sizing assistant.</div>
-                    </div>
-                  </Link>
-
-                  <Link
-                    href="/platform/analytics"
-                    onClick={() => setPlatformDropdownOpen(false)}
-                    className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#f7cbdf]/40 transition-colors group"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-[#f7cbdf] text-[#871d4d] flex items-center justify-center text-sm shrink-0">
-                      <LineChartOutlined />
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#871d4d]">Verified Meta Analytics</div>
-                      <div className="text-[11px] text-slate-500 font-normal leading-snug">Authenticated open rates, link CTR, and conversion lift.</div>
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <Link
-              href="/solutions"
-              className={`hover:text-black transition-colors ${isActive("/solutions") ? "text-[#e13181] font-semibold" : ""}`}
-            >
-              Solutions
-            </Link>
-
-            <Link
-              href="/pricing"
-              className={`hover:text-black transition-colors ${isActive("/pricing") ? "text-[#e13181] font-semibold" : ""}`}
-            >
-              Pricing
-            </Link>
-
-            <Link
-              href="/case-studies"
-              className={`hover:text-black transition-colors ${isActive("/case-studies") ? "text-[#e13181] font-semibold" : ""}`}
-            >
-              Case Studies
-            </Link>
-          </nav>
+          {/* Desktop Kinetic Gooey Navigation Bar */}
+          <div className="hidden lg:flex items-center justify-center">
+            <GooeyNav
+              items={NAV_ITEMS}
+              activeIndex={currentNavIndex}
+              initialActiveIndex={currentNavIndex}
+              theme="light"
+              size="sm"
+              frame
+              color="#000000"
+              activeTextColor="#ffffff"
+              colors={["#bfbff9", "#f8d7ca", "#f7cbdf", "#ffefb2"]}
+              particleCount={16}
+              spread={56}
+              animationTime={550}
+              timeVariance={250}
+              gooeyness={0.5}
+              wobble={0.5}
+              hoverEffect
+              onChange={handleNavChange}
+            />
+          </div>
 
           {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
@@ -209,7 +167,7 @@ export default function MarketingNav() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="sm:hidden p-2 text-slate-700 hover:text-black focus:outline-none"
+            className="lg:hidden p-2 text-slate-700 hover:text-black focus:outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? <CloseOutlined className="text-xl" /> : <MenuOutlined className="text-xl" />}
@@ -218,7 +176,7 @@ export default function MarketingNav() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="sm:hidden bg-white border-b border-[#e9e9ee] px-6 py-6 space-y-4 animate-page-entrance shadow-xl">
+          <div className="lg:hidden bg-white border-b border-[#e9e9ee] px-6 py-6 space-y-4 animate-page-entrance shadow-xl">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
