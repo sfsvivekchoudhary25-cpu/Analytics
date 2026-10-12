@@ -63,6 +63,11 @@ body {
   letter-spacing: -0.012em;
 }
 
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
 /* Chart tokens (dataviz reference palette; single blue series) */
 :root {
   --viz-surface: #fcfcfb;

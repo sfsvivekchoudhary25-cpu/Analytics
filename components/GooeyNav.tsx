@@ -115,14 +115,14 @@ const THEMES: Record<Palette, Record<string, string>> = {
     '--gn-frame-edge': 'rgba(24, 24, 27, 0.07)',
     '--gn-frame-highlight': 'rgba(255, 255, 255, 0.95)',
     '--gn-frame-shadow': '0 22px 44px -22px rgba(24, 24, 27, 0.3), 0 6px 16px -10px rgba(24, 24, 27, 0.16)',
-    '--gn-ink': '#27272a',
-    '--gn-muted': 'rgba(39, 39, 42, 0.62)'
+    '--gn-ink': '#000000',
+    '--gn-muted': '#000000'
   }
 };
 
 const PILLS: Record<Palette, { color: string; hover: string; shadow: number }> = {
   dark: { color: '#f4f4f5', hover: 'rgba(255, 255, 255, 0.08)', shadow: 0.4 },
-  light: { color: '#27272a', hover: 'rgba(24, 24, 27, 0.06)', shadow: 0.2 }
+  light: { color: '#000000', hover: 'rgba(0, 0, 0, 0.06)', shadow: 0.2 }
 };
 
 const SIZES: Record<Size, Record<string, string>> = {
@@ -136,10 +136,10 @@ const FRAMED =
   'rounded-full p-[var(--gn-pad)] backdrop-blur-[20px] backdrop-saturate-[1.6] [background:var(--gn-frame)] [box-shadow:var(--gn-frame-shadow)]';
 const LIST_BASE = 'm-0 flex list-none flex-wrap gap-[var(--gn-gap)] p-0';
 const LIST = `relative ${LIST_BASE}`;
-const OVERLAY = `${LIST_BASE} pointer-events-none invisible absolute inset-0 text-[var(--gn-active-ink)] [clip-path:inset(100%)]`;
+const OVERLAY = `${LIST_BASE} pointer-events-none invisible absolute inset-0 [clip-path:inset(100%)]`;
 const LINK_BASE =
   'inline-flex items-center gap-2 whitespace-nowrap rounded-full border-none bg-transparent px-[var(--gn-x)] py-[var(--gn-y)] [font-family:inherit] [font-size:inherit] [line-height:inherit] font-medium no-underline';
-const LINK = `${LINK_BASE} cursor-pointer text-[var(--gn-muted)] transition-colors duration-200 [-webkit-tap-highlight-color:transparent] group-data-[active]:text-[var(--gn-ink)] hover:text-[var(--gn-ink)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gn-ink)]`;
+const LINK = `${LINK_BASE} cursor-pointer !text-black text-black hover:!text-black transition-colors duration-200 [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black`;
 const GHOST = `${LINK_BASE} text-inherit`;
 const ICON = 'inline-flex flex-none [&_svg]:h-[1.15em] [&_svg]:w-[1.15em]';
 const RIM =
@@ -873,12 +873,13 @@ const GooeyNav = ({
       if (!interactive) {
         return (
           <li key={index} className="flex">
-            <span className={GHOST}>{content}</span>
+            <span className={GHOST} style={{ color: textColor }}>{content}</span>
           </li>
         );
       }
       const shared = {
         className: LINK,
+        style: { color: '#000000', textDecoration: 'none' },
         'aria-current': index === current ? ('page' as const) : undefined,
         onClick: (event: MouseEvent) => {
           if (!item.href || item.href === '#' || onChange) {
@@ -928,10 +929,10 @@ const GooeyNav = ({
           className="pointer-events-none absolute left-0 top-0 hidden rounded-full bg-[var(--gn-pill)]"
           aria-hidden="true"
         />
-        <ul ref={listRef} className={LIST}>
+        <ul ref={listRef} className={LIST} style={{ color: '#000000' }}>
           {labels(true)}
         </ul>
-        <ul ref={overlayRef} className={OVERLAY} aria-hidden="true">
+        <ul ref={overlayRef} className={OVERLAY} style={{ color: textColor }} aria-hidden="true">
           {labels(false)}
         </ul>
       </div>
