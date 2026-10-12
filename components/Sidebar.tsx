@@ -71,12 +71,12 @@ function SidebarInner({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.png"
-            alt="InstaVeyra"
+            alt="Fabroniee"
             className="h-9 w-9 object-contain rounded-xl shrink-0"
           />
           <div>
-            <span className="text-base font-bold tracking-tight text-slate-900 leading-tight block">InstaVeyra</span>
-            <p className="text-[11px] text-slate-400">Automation & CRM</p>
+            <span className="text-base font-bold tracking-tight text-slate-900 leading-tight block">Fabroniee</span>
+            <p className="text-[11px] text-slate-400">Social Commerce OS</p>
           </div>
         </div>
 

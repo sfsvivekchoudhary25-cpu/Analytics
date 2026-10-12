@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function HashtagsRoute() {
-  return <Dashboard initialTab="hashtags" />;
+  return <AppDashboard initialTab="hashtags" />;
 }

@@ -1,419 +1,791 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { activeAccount, api, ApiError, auth, ConnectionStatus, devBypassLogin, isLocalDev } from "@/lib/api";
-import { Dashboard as DashboardOverview } from "@/components/Dashboard";
-import { Submissions } from "@/components/Submissions";
-import { MessagesTab } from "@/components/MessagesTab";
-import { Stories } from "@/components/Stories";
-import { CommentsHub } from "@/components/CommentsHub";
-import { AccountPanel } from "@/components/AccountPanel";
-import { FacebookPageCard } from "@/components/FacebookPageCard";
-import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
-import { NotificationBell, AccountAvatar } from "@/components/HeaderControls";
-import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
-import { HashtagSearch } from "@/components/HashtagSearch";
+import {
+  ThunderboltFilled,
+  RobotOutlined,
+  InstagramOutlined,
+  CheckCircleFilled,
+  ArrowRightOutlined,
+  SafetyCertificateFilled,
+  LockOutlined,
+  FireOutlined,
+  MessageOutlined,
+  CheckOutlined,
+  DownOutlined,
+  UpOutlined,
+  RiseOutlined,
+  ClockCircleOutlined,
+  GiftOutlined,
+  StarFilled,
+} from "@ant-design/icons";
+import { auth } from "@/lib/api";
+import MarketingNav from "@/components/marketing/MarketingNav";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 
-const SECTIONS: Section[] = [
-  { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
-  { id: "messages", label: "Conversations", icon: <ChatIcon /> },
-  { id: "comments", label: "Comments", icon: <CommentIcon /> },
-  { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
-  { id: "stories", label: "Stories", icon: <StoriesIcon /> },
-  { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
-  { id: "account", label: "Account", icon: <GearIcon /> },
+// ── TRIGGER KEYWORD DEMO PRESETS ──────────────────────────────────────────────
+const DEMO_PRESETS = [
+  {
+    keyword: "LINK",
+    comment: "Where can I get this jacket? Need the link! 🔥",
+    reply: "Sent you the VIP checkout link in your DMs! Check your message requests 🚀",
+    dmTitle: "VIP Drop Access: Oversized Vintage Jacket",
+    dmDesc: "Hey Sarah! 👋 Here is your exclusive direct link with 15% off applied at checkout:",
+    dmButton: "Shop Vintage Jacket ($68.00)",
+    tag: "E-Commerce",
+  },
+  {
+    keyword: "PRICE",
+    comment: "How much is this coaching program? 💬",
+    reply: "Just messaged you the full program syllabus and early-bird pricing! ✨",
+    dmTitle: "Creator Accelerator 2026 Syllabus",
+    dmDesc: "Hey Alex! Early bird pricing is $199 (reg $399). Click below to view the syllabus and book your onboarding call:",
+    dmButton: "View Syllabus & Enroll ($199)",
+    tag: "Digital Product",
+  },
+  {
+    keyword: "VIP",
+    comment: "VIP please! Can't wait for Friday's launch 🎉",
+    reply: "You're on the VIP list! Check your DMs for your secret 1-hour early access pass 🔑",
+    dmTitle: "Exclusive VIP Early Access Pass",
+    dmDesc: "Welcome to the inner circle! You get access 60 minutes before the public release on Friday at 9 AM EST:",
+    dmButton: "Activate VIP Pass (#VIP-841)",
+    tag: "Event & Launch",
+  },
+  {
+    keyword: "FREEBIE",
+    comment: "Would love the free Notion content template! 📚",
+    reply: "DM sent with your free Notion template download link! Enjoy! 🎁",
+    dmTitle: "Free Notion Content Planner Template",
+    dmDesc: "Hey! Tap below to duplicate the template directly into your Notion workspace in 1 click:",
+    dmButton: "Download Notion Template (Free)",
+    tag: "Lead Magnet",
+  },
 ];
 
-type View = { status: ConnectionStatus; daysLeft: number | null };
+// ── FAQ DATA ──────────────────────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  {
+    q: "Will automating comments and DMs get my Instagram account flagged or banned?",
+    a: "No! Fabroniee connects exclusively through the official Meta Graph API v21.0 using official Facebook Login for Business OAuth. We never ask for your Instagram password, and we strictly follow Meta's rate limits and randomized reply spacing to ensure 100% platform safety.",
+  },
+  {
+    q: "Do I need an Instagram Business or Creator Account?",
+    a: "Yes. Meta's official Graph API requires your Instagram account to be set as a Business or Creator account and linked to a Facebook Page you manage. The setup takes under 60 seconds directly through our guided onboarding.",
+  },
+  {
+    q: "How does the AI Co-Pilot handle customer questions?",
+    a: "Our AI assistant uses strict contextual boundaries defined by you. It can answer shipping questions, product availability, and sizing in the customer's native language. If asked about unknown facts, it gracefully directs them to human support without guessing.",
+  },
+  {
+    q: "Can I test the platform before connecting my live production account?",
+    a: "Yes! You can explore this entire interactive page, or click 'Launch Reviewer Demo' to explore a fully pre-populated sandbox dashboard with live simulator rules and mock analytics.",
+  },
+  {
+    q: "What happens if a customer wants their data deleted?",
+    a: "We comply 100% with Meta Platform Terms and GDPR. Users can request automated data deletion in 1 click from their account panel or via our dedicated /data-deletion compliance endpoint.",
+  },
+];
 
-async function fetchView(): Promise<View> {
-  const status = await api<ConnectionStatus>("/instagram/connection");
-  if (status.connected && status.username) {
-    activeAccount.set(status.username);
-  }
-  const daysLeft = status.connected
-    ? Math.max(0, Math.round((new Date(status.expiresAt).getTime() - Date.now()) / 86_400_000))
-    : null;
-  return { status, daysLeft };
-}
-
-export default function Dashboard({
-  initialTab,
-  initialCommentsTab,
-}: {
-  initialTab?: SectionId;
-  initialCommentsTab?: "inbox" | "automation";
-} = {}) {
+export default function HomePage() {
   const router = useRouter();
-  const [view, setView] = useState<View | null>(null);
-  const [token, setToken] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [tab, setTabState] = useState<SectionId>(initialTab || "dashboard");
-  const [pendingPhotos, setPendingPhotos] = useState(0);
-  const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">(initialCommentsTab || "inbox");
-  const [messagesTargetUser, setMessagesTargetUser] = useState<string | null>(null);
-  const [messagesInitialText, setMessagesInitialText] = useState<string | null>(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activePresetIdx, setActivePresetIdx] = useState(0);
+  const [simState, setSimState] = useState<"idle" | "triggered" | "delivered">("delivered");
+  const [simStepText, setSimStepText] = useState("Delivered in 0.8s");
+  const [monthlyComments, setMonthlyComments] = useState(2500);
+  const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
 
-  const setTab = useCallback((newTab: SectionId) => {
-    setTabState(newTab);
-    if (typeof window !== "undefined") {
-      const targetPath = newTab === "dashboard" ? "/" : `/${newTab}`;
-      if (window.location.pathname !== targetPath) {
-        window.history.pushState(null, "", targetPath);
-      }
-    }
-  }, []);
-
-  const openMessagesWithUser = useCallback((user?: string, text?: string) => {
-    if (user) setMessagesTargetUser(user);
-    if (text) setMessagesInitialText(text);
-    setTab("messages");
-  }, [setTab]);
-
-  // Jump straight into the Comments page's "DM Automation" tab, used by the Dashboard's and the automation
-  // page's own "Open Automations"/"View analytics" style buttons.
-  const openAutomations = useCallback(() => {
-    setCommentsTab("automation");
-    setTab("comments");
-    if (typeof window !== "undefined") {
-      window.history.pushState(null, "", "/automations");
-    }
-  }, [setTab]);
-
-  const handleLoadError = useCallback(
-    (err: unknown) => {
-      if (err instanceof ApiError && err.status === 401) {
-        if (!isLocalDev()) {
-          auth.clear();
-          router.replace("/login");
-        } else {
-          devBypassLogin();
-          setError("Dev session re-armed with dev-bypass-token.");
-        }
-      } else {
-        setError(err instanceof Error ? err.message : "Could not reach the server");
-      }
-    },
-    [router],
-  );
-
+  // Catch any OAuth token landed on "/" and immediately forward to /dashboard
   useEffect(() => {
-    // If no explicit initialTab prop was provided, detect from URL path
-    if (!initialTab && typeof window !== "undefined") {
-      const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      if (path === "comments") {
-        setTabState("comments");
-      } else if (path === "automations") {
-        setTabState("comments");
-        setCommentsTab("automation");
-      } else if (path === "messages") {
-        setTabState("messages");
-      } else if (path === "account" || path === "settings") {
-        setTabState("account");
-      } else if (path === "photos") {
-        setTabState("photos");
-      } else if (path === "stories") {
-        setTabState("stories");
-      } else if (path === "hashtags") {
-        setTabState("hashtags");
-      }
-    }
-
-    const handlePopState = () => {
-      const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      if (SECTIONS.some((s) => s.id === path)) {
-        setTabState(path as SectionId);
-      } else if (path === "automations") {
-        setTabState("comments");
-        setCommentsTab("automation");
-      } else if (path === "settings") {
-        setTabState("account");
-      } else if (path === "" || path === "dashboard") {
-        setTabState("dashboard");
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [initialTab]);
-
-  useEffect(() => {
+    if (typeof window === "undefined") return;
     const q = new URLSearchParams(window.location.search);
     const authToken = q.get("auth_token");
     if (authToken) {
       auth.set(authToken);
+      router.replace("/dashboard");
     }
+  }, [router]);
 
-    // Auto-bypass login on localhost / local test environments
-    if (isLocalDev() && !auth.get()) {
-      console.log("[Dev Bypass] Auto-authenticating local session with dev-bypass-token");
-      devBypassLogin();
-    }
+  const currentPreset = DEMO_PRESETS[activePresetIdx];
 
-    if (!auth.get()) {
-      router.replace("/login");
-      return;
-    }
-    fetchView().then((v) => {
-      setView(v);
-      // Instagram/Facebook send the browser back here with ?connected=<user>, ?fbPageConnected=<page>, or ?error=<why>.
-      const q = new URLSearchParams(window.location.search);
-      if (q.get("error")) setError(q.get("error"));
-      if (q.get("connected")) setNotice(`Connected @${q.get("connected")}.`);
-      if (q.get("fbPageConnected")) setNotice(`Facebook Page "${q.get("fbPageConnected")}" connected.`);
-      if (q.size) {
-        setTab("account"); // that's where the result message is shown
-        window.history.replaceState(null, "", "/account");
-      }
-    }, handleLoadError);
-  }, [router, handleLoadError, setTab]);
+  const handleSelectPreset = (idx: number) => {
+    setActivePresetIdx(idx);
+    setSimState("triggered");
+    setSimStepText("Trigger Detected...");
+    setTimeout(() => {
+      setSimState("delivered");
+      setSimStepText("Delivered in 0.8s");
+    }, 600);
+  };
 
-  // Real notification count: customer photos waiting for approval.
-  useEffect(() => {
-    if (!view?.status.connected) return;
-    let cancelled = false;
-    const load = () =>
-      api<{ status: string }[]>("/submissions").then((rows) => {
-        if (!cancelled) setPendingPhotos(rows.filter((r) => r.status === "pending").length);
-      }, () => { });
-    load();
-    const id = setInterval(load, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [view?.status.connected, view?.status.connected ? view.status.username : undefined]);
-
-  async function connectWithInstagram() {
-    setError(null);
-    try {
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const { url } = await api<{ url: string }>(`/instagram/oauth/url?origin=${encodeURIComponent(origin)}`);
-      window.location.href = url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not start Instagram login");
-    }
-  }
-
-  async function connect(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await api("/instagram/connection", {
-        method: "POST",
-        body: JSON.stringify({ accessToken: token.trim() }),
-      });
-      setToken("");
-      setView(await fetchView());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function logout() {
-    auth.clear();
-    activeAccount.clear();
-    router.replace("/login");
-  }
-
-  const status = view?.status;
-  const daysLeft = view?.daysLeft;
-  const connected = status?.connected === true;
-  // Until an account is connected there is nothing to show except the connect screen.
-  const active: SectionId = connected ? tab : "account";
-  const activeLabel = SECTIONS.find((s) => s.id === active)?.label ?? "";
-
-  const accountPanel = (
-    <AccountPanel
-      status={status}
-      daysLeft={daysLeft}
-      notice={notice}
-      error={error}
-      token={token}
-      setToken={setToken}
-      busy={busy}
-      onConnectInstagram={connectWithInstagram}
-      onPasteConnect={connect}
-      onSignOut={logout}
-    />
-  );
-
-  // Initial Loading Splash: prevents flashing the disconnected header bar before API status resolves
-  if (!view && !error) {
-    return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="InstaVeyra" className="h-10 w-10 object-contain" />
-            <div className="absolute -inset-1 rounded-2xl border-2 border-blue-500/20 animate-pulse pointer-events-none" />
-          </div>
-          <div className="text-center space-y-1">
-            <h2 className="text-base font-bold text-slate-900 tracking-tight">InstaVeyra</h2>
-            <p className="text-xs text-slate-400 font-medium">Checking connection status...</p>
-          </div>
-          <div className="flex items-center gap-1.5 pt-1">
-            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:-0.3s]" />
-            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce [animation-delay:-0.15s]" />
-            <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!connected) {
-    return (
-      <main className="flex min-h-screen flex-col bg-slate-50/50">
-        <header className="flex h-[68px] items-center justify-between border-b border-slate-200/80 bg-white px-6 shadow-2xs">
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="InstaVeyra" className="h-8 w-8 object-contain rounded-lg" />
-            <span className="text-lg font-bold tracking-tight text-slate-900">InstaVeyra</span>
-          </div>
-          <button
-            onClick={logout}
-            className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors"
-          >
-            Sign out
-          </button>
-        </header>
-        <div className="flex flex-1 items-center justify-center p-6">{accountPanel}</div>
-      </main>
-    );
-  }
+  const hoursSaved = Math.round((monthlyComments * 42) / 3600);
+  const qualifiedLeads = Math.round(monthlyComments * 0.62);
+  const estimatedRevenue = Math.round(qualifiedLeads * 0.08 * 45);
 
   return (
-    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-slate-50/50`}>
-      <Sidebar
-        sections={SECTIONS}
-        active={active}
-        onSelect={(id) => {
-          setTab(id);
-          setMobileMenuOpen(false);
-        }}
-        username={status.username.replace(/^@/, "")}
-        daysLeft={daysLeft ?? null}
-        onSignOut={logout}
-        pendingPhotos={pendingPhotos}
-        mobileOpen={mobileMenuOpen}
-        onMobileClose={() => setMobileMenuOpen(false)}
-      />
+    <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased selection:bg-[#f7cbdf] selection:text-[#871d4d] overflow-x-hidden">
+      {/* ── SHARED MARKETING HEADER ── */}
+      <MarketingNav />
 
-      <main
-        className={`min-w-0 flex-1 flex flex-col ${active === "messages"
-            ? "h-full overflow-hidden"
-            : "min-h-screen overflow-y-auto pb-8 sm:pb-6"
-          }`}
-      >
-        {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
-        <header className="sticky top-0 z-30 flex h-[72px] w-full shrink-0 items-center justify-between border-b border-slate-100 bg-white px-4 sm:px-6 lg:hidden shadow-xs">
-          {/* Left: Hamburger Button + Brand */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open navigation menu"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/70 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+      {/* ── 3. HERO SECTION WITH SPLIT INTERACTIVE SIMULATOR ────────────────── */}
+      <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-white">
+        {/* Soft Ambient Radiance using Fabulate Signature Pastels */}
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#f7cbdf] rounded-full blur-[140px] pointer-events-none opacity-70" />
+        <div className="absolute top-1/3 left-1/4 w-[420px] h-[420px] bg-[#f8d7ca] rounded-full blur-[140px] pointer-events-none opacity-60" />
+        <div className="absolute bottom-0 right-10 w-[350px] h-[350px] bg-[#bfbff9] rounded-full blur-[140px] pointer-events-none opacity-40" />
 
-            <div className="flex items-center gap-2.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo.png"
-                alt="InstaVeyra"
-                className="h-10 w-10 sm:h-11 sm:w-11 object-contain shrink-0 rounded-xl"
-              />
-              <span className="text-lg sm:text-xl font-black tracking-tight text-slate-950">
-                InstaVeyra
-              </span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            {/* Left Headline & Value Prop (7 cols) */}
+            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+              {/* Top Tag Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f7cbdf] border-2 border-[#ed83b3] text-xs font-black text-[#871d4d] shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-[#e13181] animate-pulse" />
+                <span>The Operating System for Instagram Commerce</span>
+                <span className="text-[#ed83b3]">&bull;</span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/meta-logo.png" alt="Meta" className="h-3.5 w-auto object-contain shrink-0" />
+                <span className="font-extrabold">v21.0</span>
+              </div>
+
+              {/* Main Headline */}
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-950 leading-[1.12]">
+                Turn Every Instagram Comment Into An{" "}
+                <span className="text-[#e13181]">
+                  Instant Sales DM
+                </span>
+              </h1>
+
+              {/* Description */}
+              <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 font-normal leading-relaxed">
+                Stop letting high-intent reel comments slip away. Automatically dispatch direct checkout links, answer product questions with AI, and convert 24h story viewers into ongoing buyers in under 2 seconds.
+              </p>
+
+              {/* CTA Row */}
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+                <Link
+                  href="/login"
+                  style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-900 !text-white font-black text-sm shadow-xl active:scale-[0.99] transition-all"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/meta-logo.png" alt="Meta" className="h-4 w-auto object-contain shrink-0 brightness-0 invert" />
+                  <span className="!text-white">Connect with Facebook Login</span>
+                  <ArrowRightOutlined className="text-xs !text-white" />
+                </Link>
+
+                <a
+                  href="#simulator"
+                  style={{ backgroundColor: "#f7cbdf", color: "#871d4d", border: "2px solid #ed83b3" }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-black transition-all shadow-2xs"
+                >
+                  <ThunderboltFilled className="text-[#e13181]" />
+                  <span>Test Live Simulator Below</span>
+                </a>
+              </div>
+
+              {/* Trust Micro-Row */}
+              <div className="pt-4 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-xs font-bold text-slate-600">
+                <div className="flex items-center gap-1.5">
+                  <CheckCircleFilled className="text-emerald-500" />
+                  <span>Zero Password Storage</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircleFilled className="text-emerald-500" />
+                  <span>AES-256 Encrypted Tokens</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <CheckCircleFilled className="text-emerald-500" />
+                  <span>Anti-Spam Delay Variance</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Live Interactive Simulator Card (5 cols) */}
+            <div id="simulator" className="lg:col-span-5 relative">
+              <div className="rounded-3xl border-2 border-[#e9e9ee] bg-white p-5 sm:p-6 shadow-2xl relative overflow-hidden space-y-5">
+                {/* Header Row */}
+                <div className="flex items-center justify-between pb-3 border-b border-[#e9e9ee]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#e13181] animate-pulse" />
+                    <span className="text-xs font-black text-slate-900 tracking-tight uppercase">
+                      Interactive Live Simulator
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold text-[#871d4d] bg-[#f7cbdf] border border-[#ed83b3] px-2.5 py-0.5 rounded-full">
+                    {simStepText}
+                  </span>
+                </div>
+
+                {/* Preset Keywords Switcher */}
+                <div>
+                  <div className="text-[11px] font-semibold text-slate-500 mb-2">
+                    Click a trigger keyword to simulate instant automation:
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {DEMO_PRESETS.map((p, idx) => (
+                      <button
+                        key={p.keyword}
+                        type="button"
+                        onClick={() => handleSelectPreset(idx)}
+                        className={`px-2 py-2 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer ${
+                          activePresetIdx === idx
+                            ? "bg-[#e13181] text-white shadow-md shadow-[#e13181]/30 ring-2 ring-[#e13181]"
+                            : "bg-[#e9e9ee] text-slate-800 hover:bg-[#f7cbdf] hover:text-[#871d4d]"
+                        }`}
+                      >
+                        {p.keyword}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 1. Simulated Public Instagram Comment */}
+                <div className="p-4 rounded-2xl bg-[#fafaf9] border border-[#e9e9ee] space-y-2.5">
+                  <div className="flex items-center justify-between text-[11px] text-slate-500">
+                    <span className="flex items-center gap-1.5 font-bold text-slate-800">
+                      <InstagramOutlined className="text-pink-500 text-sm" />
+                      <span>Public Instagram Reel Comment</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Just now</span>
+                  </div>
+
+                  <div className="flex items-start gap-2.5 pt-1">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-[1.5px] shrink-0">
+                      <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-[10px] font-black text-slate-900">
+                        S
+                      </div>
+                    </div>
+                    <div className="flex-1 text-xs">
+                      <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>@sarah_creator</span>
+                        <span className="text-[10px] text-slate-400 font-normal">Fan</span>
+                      </div>
+                      <p className="text-slate-700 mt-0.5 leading-snug font-medium">
+                        {currentPreset.comment}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Public Reply Generated */}
+                  <div className="ml-9 p-2.5 rounded-xl bg-white border border-[#e9e9ee] text-[11px] text-slate-700 flex items-start gap-2 shadow-2xs">
+                    <CheckOutlined className="text-[#e13181] text-xs shrink-0 mt-0.5 font-bold" />
+                    <span>
+                      <strong className="text-slate-900">@fabroniee:</strong> {currentPreset.reply}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Simulated Instant Private DM Card Delivered (Fabulate Soft Pink Accent) */}
+                <div
+                  className={`p-4 rounded-2xl bg-[#f7cbdf] border-2 border-[#ed83b3] space-y-2.5 transition-all duration-300 ${
+                    simState === "delivered" ? "opacity-100 scale-100" : "opacity-60 scale-[0.99]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[11px] text-[#871d4d] font-bold">
+                    <span className="flex items-center gap-1.5">
+                      <MessageOutlined /> Instant Direct Message (DM)
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-white border border-[#ed83b3] text-[#e13181] text-[10px] font-bold shadow-2xs">
+                      Delivered in 0.8s
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-white border border-[#f7cbdf] space-y-2 shadow-xs">
+                    <div className="text-xs font-bold text-slate-900">{currentPreset.dmTitle}</div>
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      {currentPreset.dmDesc}
+                    </p>
+
+                    {/* Rich Action Button inside DM */}
+                    <button
+                      type="button"
+                      style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
+                      className="w-full py-2.5 px-3 rounded-full hover:bg-neutral-900 text-white text-xs font-black flex items-center justify-between shadow-md transition-all cursor-pointer"
+                    >
+                      <span className="text-white">{currentPreset.dmButton}</span>
+                      <ArrowRightOutlined className="text-[10px] text-white" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Conversion Tag */}
+                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                  <span>Targeted Funnel: <strong className="text-slate-900">{currentPreset.tag}</strong></span>
+                  <span className="text-emerald-600 font-bold">+42% Higher Click-Through</span>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate max-w-[130px]">@{status.username.replace(/^@/, "")}</span>
-            </div>
-
-            {/* Notification Bell with indicator */}
-            <button
-              type="button"
-              onClick={() => setTab("photos")}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/90 bg-slate-50/70 text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
-              aria-label="Notifications"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              {pendingPhotos > 0 && (
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-white" />
-              )}
-            </button>
-
-            {/* User Avatar */}
-            <button
-              type="button"
-              onClick={() => setTab("account")}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0f172a] text-white font-bold text-base shadow-xs hover:ring-2 hover:ring-blue-500/20 active:scale-95 transition-all cursor-pointer"
-              aria-label="Account Settings"
-            >
-              {status.username.replace(/^@/, "").charAt(0).toUpperCase() || "S"}
-            </button>
-          </div>
-        </header>
-
-        {/* Main Section Content */}
-        <div
-          key={`${active}-${status.username}`}
-          className={
-            active === "messages"
-              ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
-              : active === "hashtags"
-                ? "animate-page-entrance w-full space-y-6 p-4 sm:p-6"
-                : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-4 sm:p-6"
-          }
-        >
-          {active === "dashboard" && (
-            <DashboardOverview
-              onOpenAutomations={openAutomations}
-              pendingPhotos={pendingPhotos}
-              onOpenPhotos={() => setTab("photos")}
-              username={status.username}
-              onOpenAccount={() => setTab("account")}
-              onOpenMessages={openMessagesWithUser}
-            />
-          )}
-          {active === "photos" && <Submissions />}
-          {active === "messages" && (
-            <MessagesTab
-              username={status.username}
-              ownAvatar={status.profilePictureUrl}
-              targetUsername={messagesTargetUser}
-              initialMessageText={messagesInitialText}
-            />
-          )}
-          {active === "comments" && (
-            <CommentsHub tab={commentsTab} onTabChange={setCommentsTab} onOpenDashboard={() => setTab("dashboard")} />
-          )}
-          {active === "stories" && (
-            <Stories username={status.username} ownAvatar={status.profilePictureUrl} />
-          )}
-          {active === "hashtags" && <HashtagSearch />}
-          {active === "account" && accountPanel}
         </div>
-      </main>
+      </section>
+
+      {/* ── 4. LIVE METRICS & PERFORMANCE BANNER ──────────────────────────────── */}
+      <section className="border-y border-[#e9e9ee] bg-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-5xl font-black text-black tracking-tight font-mono">
+                &lt; 1.8s
+              </div>
+              <p className="text-xs font-bold text-slate-500">
+                Average DM Delivery Latency
+              </p>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-5xl font-black text-[#e13181] tracking-tight font-mono">
+                89.4%
+              </div>
+              <p className="text-xs font-bold text-slate-500">
+                Average Direct Message Open Rate
+              </p>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-5xl font-black text-[#0000e9] tracking-tight font-mono">
+                +34.8%
+              </div>
+              <p className="text-xs font-bold text-slate-500">
+                Conversion Lift vs. "Link-in-Bio"
+              </p>
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl sm:text-5xl font-black text-[#e3622b] tracking-tight font-mono">
+                100%
+              </div>
+              <p className="text-xs font-bold text-slate-500">
+                Official Meta Graph API Compliant
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. DYNAMIC PILL TICKER (Fabulate 'We help brands win at:') ────────── */}
+      <section className="py-8 bg-[#fafaf9] border-b border-[#e9e9ee]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-3">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-500">
+            We help modern brands &amp; creators win at:
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/platform/workflow"
+              className="px-5 py-2.5 rounded-full bg-[#bfbff9] border-2 border-[#6666f1] text-[#00008b] font-black text-xs shadow-2xs hover:scale-105 transition-transform"
+            >
+              ⚡ Instant Comment-to-DM &rarr;
+            </Link>
+            <Link
+              href="/platform/ai"
+              className="px-5 py-2.5 rounded-full bg-[#f8d7ca] border-2 border-[#eea07f] text-[#883a19] font-black text-xs shadow-2xs hover:scale-105 transition-transform"
+            >
+              🤖 Autonomous AI Co-Pilot &rarr;
+            </Link>
+            <Link
+              href="/platform/workflow"
+              className="px-5 py-2.5 rounded-full bg-[#f7cbdf] border-2 border-[#ed83b3] text-[#871d4d] font-black text-xs shadow-2xs hover:scale-105 transition-transform"
+            >
+              🔥 24h Story Reaction Funnels &rarr;
+            </Link>
+            <Link
+              href="/solutions"
+              className="px-5 py-2.5 rounded-full bg-[#ffefb2] border-2 border-[#ffe006] text-[#997a00] font-black text-xs shadow-2xs hover:scale-105 transition-transform"
+            >
+              🎁 Customer UGC Ingestion &rarr;
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. THE 4 CORE PLATFORM PILLARS (Fabulate's Signature 4 Color Cards) ── */}
+      <section id="pillars" className="py-20 lg:py-28 relative bg-[#fafaf9]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#f7cbdf] border border-[#ed83b3] text-xs font-bold text-[#871d4d]">
+              <ThunderboltFilled className="text-[#e13181]" /> The Complete Social Commerce Suite
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight">
+              Four Engines. Zero Manual Typing.
+            </h2>
+            <p className="text-base text-slate-600 leading-relaxed">
+              Everything modern creators, DTC brands, and digital agencies need to capture leads and turn Instagram engagement into real revenue.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Pillar 1: Comment-to-DM Engine (Fabulate Site-Blue #bfbff9) */}
+            <div className="rounded-3xl border-2 border-[#6666f1] bg-[#bfbff9] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#0000e9] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
+                  <MessageOutlined />
+                </div>
+                <Link
+                  href="/platform/workflow"
+                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#6666f1] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
+                >
+                  Explore Workflow &rarr;
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-[#00008b] tracking-tight">
+                  Instant Comment-to-DM Funnels
+                </h3>
+                <p className="text-sm text-[#082f49] leading-relaxed font-medium">
+                  Trigger targeted direct messages the millisecond a follower comments specific keywords (`PRICE`, `LINK`, `VIP`, `RECIPE`). Automatically rotate randomized public replies to keep your engagement organic and safe from algorithmic spam limits.
+                </p>
+              </div>
+              <ul className="space-y-2 text-xs text-[#082f49] font-bold pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#0000e9]" />
+                  <span>Exact, partial, or wildcard keyword matching</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#0000e9]" />
+                  <span>Configurable delay timers (0s to 120s)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#0000e9]" />
+                  <span>Single-use checkout discounts &amp; link tracking</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Pillar 2: AI Autonomous Co-Pilot (Fabulate Site-Orange #f8d7ca) */}
+            <div className="rounded-3xl border-2 border-[#eea07f] bg-[#f8d7ca] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#e3622b] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
+                  <RobotOutlined />
+                </div>
+                <Link
+                  href="/platform/ai"
+                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#e3622b] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
+                >
+                  Explore AI Agent &rarr;
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-[#883a19] tracking-tight">
+                  Autonomous AI Conversational Co-Pilot
+                </h3>
+                <p className="text-sm text-[#883a19]/90 leading-relaxed font-medium">
+                  Train an intelligent AI that knows your products, sizing, hours, and catalog. When customers ask complex questions in DMs or comments, it responds warmly in their language (English, Spanish, Hindi, French) with strict guardrails against hallucinations.
+                </p>
+              </div>
+              <ul className="space-y-2 text-xs text-[#883a19] font-bold pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e3622b]" />
+                  <span>Custom business knowledge &amp; strict safety rules</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e3622b]" />
+                  <span>Automatic language &amp; script detection</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e3622b]" />
+                  <span>Seamless human takeover trigger whenever requested</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Pillar 3: 24h Story Reaction Funnels (Fabulate Site-Pink #f7cbdf) */}
+            <div className="rounded-3xl border-2 border-[#ed83b3] bg-[#f7cbdf] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#e13181] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
+                  <FireOutlined />
+                </div>
+                <Link
+                  href="/platform/workflow"
+                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#e13181] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
+                >
+                  Explore Stories &rarr;
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-[#871d4d] tracking-tight">
+                  24-Hour Story Reaction Automation
+                </h3>
+                <p className="text-sm text-[#871d4d]/90 leading-relaxed font-medium">
+                  Instagram Stories expire in 24 hours, but their leads don't have to. Turn emoji fire reactions (`🔥`), quick poll replies, and story question stickers into automated personalized DM conversations with instant download links.
+                </p>
+              </div>
+              <ul className="space-y-2 text-xs text-[#871d4d] font-bold pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e13181]" />
+                  <span>Detects emoji reactions (`🔥`, `❤️`, `👏`)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e13181]" />
+                  <span>Interactive mobile device simulator in dashboard</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#e13181]" />
+                  <span>Direct Cloudinary media ingestion &amp; story posting</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Pillar 4: Customer UGC Engine (Fabulate Site-Yellow #ffefb2) */}
+            <div className="rounded-3xl border-2 border-[#ffe006] bg-[#ffefb2] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
+              <div className="flex items-center justify-between">
+                <div className="w-12 h-12 rounded-2xl bg-white text-[#997a00] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
+                  <GiftOutlined />
+                </div>
+                <Link
+                  href="/solutions"
+                  className="text-[11px] font-black uppercase tracking-wider text-black bg-[#ffcc00] px-3.5 py-1 rounded-full hover:bg-black hover:text-white transition-colors"
+                >
+                  Explore UGC &rarr;
+                </Link>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-[#451a03] tracking-tight">
+                  Customer UGC Ingestion &amp; Reward Engine
+                </h3>
+                <p className="text-sm text-[#451a03]/90 leading-relaxed font-medium">
+                  When loyal customers tag your handle in their photos, Fabroniee intercepts the webhook, queues the image in an admin moderation inbox, and with 1 click republishes it to your feed while firing a thank-you discount DM back to the customer.
+                </p>
+              </div>
+              <ul className="space-y-2 text-xs text-[#451a03] font-bold pt-2">
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#997a00]" />
+                  <span>Webhook moderation inbox with 1-click approvals</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#997a00]" />
+                  <span>Automatic thank-you reward DMs to creator</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircleFilled className="text-[#997a00]" />
+                  <span>Generates endless viral social proof organically</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. INTERACTIVE ROI & TIME-SAVED CALCULATOR ────────────────────────── */}
+      <section id="calculator" className="py-20 bg-white border-y border-[#e9e9ee] relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#f7cbdf] border border-[#ed83b3] text-xs font-bold text-[#871d4d]">
+              <RiseOutlined /> Interactive ROI Calculator
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+              How Much Revenue &amp; Time Are You Leaving on the Table?
+            </h2>
+            <p className="text-sm text-slate-600">
+              Drag the slider below to estimate how much manual labor and lost sales Fabroniee recovers for your business every month.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto rounded-3xl border-2 border-[#e9e9ee] bg-[#fafaf9] p-6 sm:p-10 shadow-xl space-y-8">
+            {/* Slider Control */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-800">
+                  Monthly Instagram Comments on Your Account:
+                </span>
+                <span className="text-2xl font-black text-[#e13181] font-mono">
+                  {monthlyComments.toLocaleString()} comments/mo
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min="500"
+                max="25000"
+                step="500"
+                value={monthlyComments}
+                onChange={(e) => setMonthlyComments(Number(e.target.value))}
+                className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#e13181]"
+              />
+
+              <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+                <span>500 comments</span>
+                <span>10,000 comments</span>
+                <span>25,000+ comments</span>
+              </div>
+            </div>
+
+            {/* Calculated Impact Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#e9e9ee]">
+              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+                <div className="text-xs text-slate-500 font-bold">Manual Hours Saved</div>
+                <div className="text-3xl font-black text-slate-950 font-mono flex items-center justify-center gap-1.5">
+                  <ClockCircleOutlined className="text-[#e3622b] text-xl" />
+                  <span>~{hoursSaved} hrs</span>
+                </div>
+                <div className="text-[11px] text-slate-400">No copy-pasting DMs by hand</div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+                <div className="text-xs text-slate-500 font-bold">Qualified Leads Captured</div>
+                <div className="text-3xl font-black text-[#0000e9] font-mono flex items-center justify-center gap-1.5">
+                  <CheckCircleFilled className="text-[#0000e9] text-xl" />
+                  <span>{qualifiedLeads.toLocaleString()}</span>
+                </div>
+                <div className="text-[11px] text-slate-400">Directly into chat inbox</div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+                <div className="text-xs text-slate-500 font-bold">Projected Extra Sales</div>
+                <div className="text-3xl font-black text-[#e13181] font-mono">
+                  ${estimatedRevenue.toLocaleString()}
+                </div>
+                <div className="text-[11px] text-slate-400">Based on 8% DM conversion lift</div>
+              </div>
+            </div>
+
+            {/* Bottom CTA within Calculator */}
+            <div className="p-4 rounded-2xl bg-[#f7cbdf] border-2 border-[#ed83b3] flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs font-bold text-[#871d4d]">
+                Ready to automate your comments and reclaim <strong className="text-[#e13181]">{hoursSaved} hours</strong> this month?
+              </div>
+              <Link
+                href="/login"
+                style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
+                className="px-6 py-3 rounded-full hover:bg-neutral-900 !text-white font-black text-xs shadow-md transition-all shrink-0"
+              >
+                <span className="!text-white">Start Free Trial &rarr;</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 8. OFFICIAL META SECURITY & COMPLIANCE ARCHITECTURE ───────────────── */}
+      <section id="security" className="py-20 lg:py-28 relative bg-[#fafaf9]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#e9e9ee] text-xs font-bold text-[#871d4d] shadow-2xs">
+              <SafetyCertificateFilled className="text-[#e13181]" /> Official Security Architecture
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-950 tracking-tight">
+              Built on Official Meta Graph APIs.
+              <br />
+              Zero Scrapers. Zero Banning Risk.
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              Third-party web scrapers that log into your Instagram account with your password put your entire business at risk of permanent deletion. Fabroniee operates strictly through authorized Meta developer endpoints.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-[#bfbff9] text-[#00008b] flex items-center justify-center text-xl font-bold">
+                <LockOutlined />
+              </div>
+              <h4 className="text-lg font-black text-slate-950">Direct Meta OAuth 2.0</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                You never give us your Instagram password. Authentication happens on Meta's official login dialog, granting scoped permissions exclusively for page comments and messages.
+              </p>
+            </div>
+
+            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-[#f7cbdf] text-[#871d4d] flex items-center justify-center text-xl font-bold">
+                <SafetyCertificateFilled />
+              </div>
+              <h4 className="text-lg font-black text-slate-950">AES-256 Encrypted Tokens</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                All long-lived Page access tokens and Instagram credentials are encrypted at rest using military-grade 256-bit AES symmetric keys before entering our PostgreSQL database.
+              </p>
+            </div>
+
+            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-[#ffefb2] text-[#997a00] flex items-center justify-center text-xl font-bold">
+                <CheckCircleFilled />
+              </div>
+              <h4 className="text-lg font-black text-slate-950">Automated Data Deletion</h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Users can permanently delete all associated tokens, automations, and logs at any time from their settings panel or through our live Meta compliance endpoint at <Link href="/data-deletion" className="text-[#e13181] underline font-bold">/data-deletion</Link>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 9. FREQUENTLY ASKED QUESTIONS (FAQ) ────────────────────────────────── */}
+      <section id="faq" className="py-20 bg-white border-t border-[#e9e9ee]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+          <div className="text-center space-y-3">
+            <span className="text-xs font-black uppercase tracking-wider text-[#e13181]">
+              Got Questions?
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+              Frequently Asked Questions
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, idx) => {
+              const isOpen = openFaqIdx === idx;
+              return (
+                <div
+                  key={item.q}
+                  className="rounded-2xl border border-[#e9e9ee] bg-[#fafaf9] overflow-hidden transition-all shadow-2xs"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[#e9e9ee]/40 transition-colors"
+                  >
+                    <span className="text-sm font-bold text-slate-900">{item.q}</span>
+                    <span className="text-slate-500 text-xs shrink-0">
+                      {isOpen ? <UpOutlined /> : <DownOutlined />}
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-[#e9e9ee] pt-3">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 10. FINAL HIGH-CONVERSION CTA (Fabulate Soft Radiant Card) ─────────── */}
+      <section className="py-20 relative overflow-hidden bg-[#fafaf9]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="rounded-3xl border-2 border-[#ed83b3] bg-gradient-to-br from-[#f7cbdf] via-[#ffefb2] to-[#f8d7ca] p-10 sm:p-14 space-y-6 shadow-xl">
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-[#ed83b3] text-xs font-bold text-[#871d4d] shadow-2xs">
+              <StarFilled className="text-amber-400" /> Start Converting Today
+            </div>
+
+            <h2 className="text-3xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+              Ready to Put Your Instagram Comments On Autopilot?
+            </h2>
+
+            <p className="text-base text-slate-700 max-w-xl mx-auto font-normal">
+              Join hundreds of creators and brands turning social engagement into measurable revenue. Connect in under 60 seconds with official Meta Login.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+              <Link
+                href="/login"
+                style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
+                className="w-full sm:w-auto px-8 py-4 rounded-full hover:bg-neutral-900 !text-white font-black text-sm shadow-xl active:scale-[0.99] transition-all"
+              >
+                <span className="!text-white">Get Started with Meta Login &rarr;</span>
+              </Link>
+
+              <Link
+                href="/login?demo=1"
+                style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
+                className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-slate-50 font-black text-sm transition-all shadow-xs"
+              >
+                ⚡ Launch Reviewer Demo Mode
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SHARED MARKETING FOOTER ── */}
+      <MarketingFooter />
     </div>
   );
 }

@@ -98,7 +98,7 @@ export default function AuthPage() {
     devBypassLogin();
     setSuccessMsg("Dev bypass token activated (@sfs.vivekchoudhary25). Redirecting to dashboard...");
     setTimeout(() => {
-      router.replace("/");
+      router.replace("/dashboard");
     }, 300);
   }
 
@@ -139,8 +139,14 @@ export default function AuthPage() {
       const name = connectedUser ? `@${connectedUser}` : fbPage ? `Page "${fbPage}"` : "your account";
       setSuccessMsg(`Successfully authenticated ${name}! Redirecting to dashboard...`);
       setTimeout(() => {
-        router.replace("/");
+        router.replace("/dashboard");
       }, 500);
+      return;
+    }
+
+    // If user is already authenticated and lands on login with no special params, send to dashboard
+    if (auth.get() && !q.get("logout") && !errorParam && !demoParam) {
+      router.replace("/dashboard");
     }
   }, [router]);
 

@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function AutomationsRoute() {
-  return <Dashboard initialTab="comments" initialCommentsTab="automation" />;
+  return <AppDashboard initialTab="comments" initialCommentsTab="automation" />;
 }

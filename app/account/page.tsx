@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function AccountRoute() {
-  return <Dashboard initialTab="account" />;
+  return <AppDashboard initialTab="account" />;
 }

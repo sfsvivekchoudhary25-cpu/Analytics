@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function StoriesRoute() {
-  return <Dashboard initialTab="stories" />;
+  return <AppDashboard initialTab="stories" />;
 }

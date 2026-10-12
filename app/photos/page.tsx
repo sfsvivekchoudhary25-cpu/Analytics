@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function PhotosRoute() {
-  return <Dashboard initialTab="photos" />;
+  return <AppDashboard initialTab="photos" />;
 }

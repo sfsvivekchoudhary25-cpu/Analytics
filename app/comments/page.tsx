@@ -1,7 +1,7 @@
 "use client";
 
-import Dashboard from "../page";
+import AppDashboard from "@/components/AppDashboard";
 
 export default function CommentsRoute() {
-  return <Dashboard initialTab="comments" />;
+  return <AppDashboard initialTab="comments" />;
 }
