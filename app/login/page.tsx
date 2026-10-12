@@ -471,12 +471,12 @@ export default function AuthPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
-                alt="InstaVeyra"
+                alt="Fabroniee"
                 className="w-9 h-9 object-contain rounded-xl shadow-xs"
               />
               <div>
                 <span className="text-lg font-bold tracking-tight text-slate-900 block leading-tight">
-                  InstaVeyra
+                  Fabroniee
                 </span>
                 <span className="text-[11px] font-medium text-slate-400">
                   Automation &amp; CRM
@@ -498,11 +498,20 @@ export default function AuthPage() {
           {/* Title & Description */}
           <div className="space-y-1.5">
             <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 tracking-tight leading-tight">
-              Sign in to InstaVeyra
+              Sign in to Fabroniee
             </h1>
             <p className="text-sm text-slate-500 leading-relaxed">
               Connect your Facebook Page &amp; Instagram Business Account to unlock automated Comment-to-DM funnels and audience analytics.
             </p>
+            <div className="pt-0.5">
+              <Link
+                href="/explore"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <span>✨ Explore Platform Features &amp; Live Simulator</span>
+                <span>&rarr;</span>
+              </Link>
+            </div>
           </div>
 
           {/* Primary Action Buttons */}
@@ -692,8 +701,19 @@ export default function AuthPage() {
               </div>
             </div>
 
+            {/* Explore Platform Link */}
+            <div className="text-center pt-1">
+              <Link
+                href="/explore"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-blue-600 transition-colors"
+              >
+                <span>✨ Explore Platform &bull; Live Interactive Simulator</span>
+                <span>&rarr;</span>
+              </Link>
+            </div>
+
             {/* Terms notice */}
-            <p className="text-[11px] text-slate-400 text-center leading-relaxed pt-1">
+            <p className="text-[11px] text-slate-400 text-center leading-relaxed">
               By connecting your account, you agree to our{" "}
               <Link href="/terms" className="text-slate-600 hover:text-slate-900 underline underline-offset-2">
                 Terms of Service
