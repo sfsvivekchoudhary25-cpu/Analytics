@@ -49,7 +49,15 @@ export default function TermsPage() {
           {/* Body */}
           <div className="space-y-6 text-sm text-slate-600 leading-relaxed">
             <p className="text-base text-slate-700 leading-normal">
-              By accessing or using <strong>InstaVeyra</strong>, connecting your Facebook Page or Instagram Business Account, or creating automated messaging workflows, you agree to comply with and be bound by these Terms of Service.
+              By accessing or using <strong>InstaVeyra</strong>, accessible from{" "}
+              <a href="https://fabroniee.store" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://fabroniee.store
+              </a>{" "}
+              and{" "}
+              <a href="https://analytics-delta-sage.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://analytics-delta-sage.vercel.app
+              </a>
+              , connecting your Facebook Page or Instagram Business Account, or creating automated messaging workflows, you agree to comply with and be bound by these Terms of Service.
             </p>
 
             <section className="space-y-3">

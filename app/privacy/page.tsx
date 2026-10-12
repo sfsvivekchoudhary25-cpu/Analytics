@@ -49,7 +49,15 @@ export default function PrivacyPolicyPage() {
           {/* Policy Body */}
           <div className="space-y-6 text-sm text-slate-600 leading-relaxed">
             <p className="text-base text-slate-700 leading-normal">
-              At <strong>InstaVeyra</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), we take your privacy and the security of your Meta accounts seriously. This Privacy Policy document outlines the categories of data we collect and process when you integrate your Facebook Page and Instagram Professional Account with our platform, and how that information is utilized solely to deliver our Comment-to-DM automation software.
+              At <strong>InstaVeyra</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), accessible from{" "}
+              <a href="https://fabroniee.store" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://fabroniee.store
+              </a>{" "}
+              and{" "}
+              <a href="https://analytics-delta-sage.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://analytics-delta-sage.vercel.app
+              </a>
+              , we take your privacy and the security of your Meta accounts seriously. This Privacy Policy document outlines the categories of data we collect and process when you integrate your Facebook Page and Instagram Professional Account with our platform, and how that information is utilized solely to deliver our Comment-to-DM automation software.
             </p>
 
             <section className="space-y-3">
@@ -125,7 +133,11 @@ export default function PrivacyPolicyPage() {
               <div className="rounded-2xl border border-slate-200/90 bg-slate-50 p-4 space-y-2">
                 <span className="font-semibold text-slate-900">Instant In-App Deletion:</span>
                 <p className="text-xs text-slate-600">
-                  Navigate to your <strong>Account Settings</strong> panel and click <strong>&ldquo;Delete Account &amp; Wipe Data&rdquo;</strong>. Upon execution, all stored Meta access tokens, linked Page records, and cached comment logs are immediately and permanently wiped from our active databases.
+                  Navigate to your{" "}
+                  <Link href="/account" className="text-blue-600 font-semibold underline">
+                    Account Settings (/account)
+                  </Link>{" "}
+                  panel and click <strong>&ldquo;Delete Account &amp; Wipe Data&rdquo;</strong>. Upon execution, all stored Meta access tokens, linked Page records, and cached comment logs are immediately and permanently wiped from our active databases.
                 </p>
               </div>
               <p>

@@ -49,7 +49,15 @@ export default function DataDeletionPage() {
           {/* Description */}
           <div className="space-y-6 text-sm text-slate-600 leading-relaxed">
             <p className="text-base text-slate-700 leading-normal">
-              In accordance with Meta Platform Terms, GDPR, and global data privacy standards, <strong>InstaVeyra</strong> provides multiple transparent and automated channels for users to permanently delete their account records, Meta OAuth tokens, and automation settings from our databases.
+              In accordance with Meta Platform Terms, GDPR, and global data privacy standards, <strong>InstaVeyra</strong>, accessible from{" "}
+              <a href="https://fabroniee.store" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://fabroniee.store
+              </a>{" "}
+              and{" "}
+              <a href="https://analytics-delta-sage.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
+                https://analytics-delta-sage.vercel.app
+              </a>
+              , provides multiple transparent and automated channels for users to permanently delete their account records, Meta OAuth tokens, and automation settings from our databases.
             </p>
 
             {/* Methods */}
@@ -68,8 +76,20 @@ export default function DataDeletionPage() {
                   You can immediately wipe all your data directly inside your user dashboard:
                 </p>
                 <ol className="list-decimal pl-5 space-y-1.5 text-xs sm:text-sm text-slate-700">
-                  <li>Log in to your InstaVeyra account at <code>https://analytics-delta-sage.vercel.app</code>.</li>
-                  <li>Click on your profile avatar in the navigation bar to open <strong>Account Settings</strong>.</li>
+                  <li>
+                    Log in to your InstaVeyra account at{" "}
+                    <a href="https://analytics-delta-sage.vercel.app" className="text-blue-600 font-semibold underline">
+                      https://analytics-delta-sage.vercel.app
+                    </a>
+                    .
+                  </li>
+                  <li>
+                    Navigate directly to{" "}
+                    <Link href="/account" className="text-blue-600 font-semibold underline">
+                      Account Settings (/account)
+                    </Link>{" "}
+                    or click your profile avatar in the navigation bar.
+                  </li>
                   <li>Scroll down to the <strong>Data &amp; Security / Danger Zone</strong> section.</li>
                   <li>Click the button labeled <strong>&ldquo;Delete Account &amp; Wipe Data&rdquo;</strong>.</li>
                   <li>Confirm the modal dialog. All stored Meta access tokens, linked Page tokens, and comment automation data will be deleted instantly and permanently.</li>

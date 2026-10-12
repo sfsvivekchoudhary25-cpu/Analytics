@@ -38,32 +38,51 @@ async function fetchView(): Promise<View> {
   return { status, daysLeft };
 }
 
-export default function Dashboard() {
+export default function Dashboard({
+  initialTab,
+  initialCommentsTab,
+}: {
+  initialTab?: SectionId;
+  initialCommentsTab?: "inbox" | "automation";
+} = {}) {
   const router = useRouter();
   const [view, setView] = useState<View | null>(null);
   const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const [tab, setTab] = useState<SectionId>("dashboard");
+  const [tab, setTabState] = useState<SectionId>(initialTab || "dashboard");
   const [pendingPhotos, setPendingPhotos] = useState(0);
-  const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">("inbox");
+  const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">(initialCommentsTab || "inbox");
   const [messagesTargetUser, setMessagesTargetUser] = useState<string | null>(null);
   const [messagesInitialText, setMessagesInitialText] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const setTab = useCallback((newTab: SectionId) => {
+    setTabState(newTab);
+    if (typeof window !== "undefined") {
+      const targetPath = newTab === "dashboard" ? "/" : `/${newTab}`;
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState(null, "", targetPath);
+      }
+    }
+  }, []);
 
   const openMessagesWithUser = useCallback((user?: string, text?: string) => {
     if (user) setMessagesTargetUser(user);
     if (text) setMessagesInitialText(text);
     setTab("messages");
-  }, []);
+  }, [setTab]);
 
   // Jump straight into the Comments page's "DM Automation" tab, used by the Dashboard's and the automation
   // page's own "Open Automations"/"View analytics" style buttons.
   const openAutomations = useCallback(() => {
     setCommentsTab("automation");
     setTab("comments");
-  }, []);
+    if (typeof window !== "undefined") {
+      window.history.pushState(null, "", "/automations");
+    }
+  }, [setTab]);
 
   const handleLoadError = useCallback(
     (err: unknown) => {
@@ -81,6 +100,45 @@ export default function Dashboard() {
     },
     [router],
   );
+
+  useEffect(() => {
+    // If no explicit initialTab prop was provided, detect from URL path
+    if (!initialTab && typeof window !== "undefined") {
+      const path = window.location.pathname.replace(/^\//, "").split("/")[0];
+      if (path === "comments") {
+        setTabState("comments");
+      } else if (path === "automations") {
+        setTabState("comments");
+        setCommentsTab("automation");
+      } else if (path === "messages") {
+        setTabState("messages");
+      } else if (path === "account" || path === "settings") {
+        setTabState("account");
+      } else if (path === "photos") {
+        setTabState("photos");
+      } else if (path === "stories") {
+        setTabState("stories");
+      } else if (path === "hashtags") {
+        setTabState("hashtags");
+      }
+    }
+
+    const handlePopState = () => {
+      const path = window.location.pathname.replace(/^\//, "").split("/")[0];
+      if (SECTIONS.some((s) => s.id === path)) {
+        setTabState(path as SectionId);
+      } else if (path === "automations") {
+        setTabState("comments");
+        setCommentsTab("automation");
+      } else if (path === "settings") {
+        setTabState("account");
+      } else if (path === "" || path === "dashboard") {
+        setTabState("dashboard");
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [initialTab]);
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
@@ -108,10 +166,10 @@ export default function Dashboard() {
       if (q.get("fbPageConnected")) setNotice(`Facebook Page "${q.get("fbPageConnected")}" connected.`);
       if (q.size) {
         setTab("account"); // that's where the result message is shown
-        window.history.replaceState(null, "", "/");
+        window.history.replaceState(null, "", "/account");
       }
     }, handleLoadError);
-  }, [router, handleLoadError]);
+  }, [router, handleLoadError, setTab]);
 
   // Real notification count: customer photos waiting for approval.
   useEffect(() => {
