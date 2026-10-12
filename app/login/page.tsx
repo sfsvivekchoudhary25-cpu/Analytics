@@ -88,19 +88,10 @@ export default function AuthPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLocal, setIsLocal] = useState(false);
-  const [showReviewerDemo, setShowReviewerDemo] = useState(false);
 
   useEffect(() => {
     setIsLocal(isLocalDev());
   }, []);
-
-  function handleDevBypass() {
-    devBypassLogin();
-    setSuccessMsg("Dev bypass token activated (@sfs.vivekchoudhary25). Redirecting to dashboard...");
-    setTimeout(() => {
-      router.replace("/dashboard");
-    }, 300);
-  }
 
   // Carousel
   const [activeSlide, setActiveSlide] = useState(0);
@@ -129,11 +120,6 @@ export default function AuthPage() {
       setError(decodeURIComponent(errorParam));
     }
 
-    const demoParam = (q.get("demo") || q.get("reviewer") || q.get("test") || "").toLowerCase();
-    if (demoParam === "1" || demoParam === "true" || demoParam === "yes") {
-      setShowReviewerDemo(true);
-    }
-
     if (authToken) {
       auth.set(authToken);
       const name = connectedUser ? `@${connectedUser}` : fbPage ? `Page "${fbPage}"` : "your account";
@@ -145,7 +131,7 @@ export default function AuthPage() {
     }
 
     // If user is already authenticated and lands on login with no special params, send to dashboard
-    if (auth.get() && !q.get("logout") && !errorParam && !demoParam) {
+    if (auth.get() && !q.get("logout") && !errorParam) {
       router.replace("/dashboard");
     }
   }, [router]);
@@ -511,7 +497,7 @@ export default function AuthPage() {
                 href="/explore"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#871d4d] hover:text-black bg-[#f7cbdf] hover:bg-[#ed83b3] border border-[#ed83b3] px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
               >
-                <span>Explore Platform Features &amp; Live Simulator</span>
+                <span>Explore Platform Features &amp; Architecture</span>
                 <span>&rarr;</span>
               </Link>
             </div>
@@ -643,32 +629,7 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* 3. Reviewer Demo Access Mode (Only shown if URL has ?demo=1 or ?reviewer=1) */}
-            {showReviewerDemo && (
-              <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-br from-indigo-50/90 via-blue-50/50 to-purple-50/70 p-3.5 space-y-2.5 shadow-2xs animate-page-entrance">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-950">
-                    <ThunderboltFilled className="text-indigo-600 text-xs" />
-                    <span>Meta App Reviewer Demo Mode</span>
-                  </span>
-                  <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-semibold text-indigo-700 border border-indigo-200/70">
-                    Instant Access
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Evaluating without linked production assets? Launch pre-configured demo account to test the Comment-to-DM triggers, simulator, and analytics dashboard.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleDevBypass}
-                  className="flex w-full h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white active:scale-[0.99] text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                >
-                  <span>Launch Reviewer Demo Dashboard</span>
-                </button>
-              </div>
-            )}
-
-            {/* 4. Streamlined Official Meta Integration & Security Trust Badge */}
+            {/* Streamlined Official Meta Integration & Security Trust Badge */}
             <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-2xs space-y-2.5">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
@@ -708,9 +669,9 @@ export default function AuthPage() {
             <div className="text-center pt-1">
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-blue-600 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-black transition-colors"
               >
-                <span>Explore Platform &bull; Live Interactive Simulator</span>
+                <span>Explore Platform Architecture &bull; Meta API v21.0</span>
                 <span>&rarr;</span>
               </Link>
             </div>

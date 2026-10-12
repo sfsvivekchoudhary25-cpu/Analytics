@@ -199,7 +199,7 @@ export default function SolutionsPage() {
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
                   className="inline-flex px-7 py-3.5 rounded-full font-semibold text-xs hover:bg-neutral-800 !text-white shadow-md transition-all"
                 >
-                  <span>Explore Agency Sandbox &rarr;</span>
+                  <span>Get Started for Agencies &rarr;</span>
                 </Link>
               </div>
 

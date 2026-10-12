@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
+import PlatformTabs from "@/components/marketing/PlatformTabs";
 
 const AI_PRESETS = [
   {
@@ -35,6 +36,7 @@ export default function AiPlatformPage() {
   return (
     <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased selection:bg-[#f8d7ca] selection:text-[#883a19] overflow-x-hidden">
       <MarketingNav />
+      <PlatformTabs />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-16 pb-20 bg-white border-b border-[#e9e9ee]">
@@ -65,17 +67,17 @@ export default function AiPlatformPage() {
             </Link>
 
             <Link
-              href="/login?demo=1"
+              href="/pricing"
               style={{ backgroundColor: "#f8d7ca", color: "#883a19", border: "2px solid #eea07f" }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs !text-[#883a19]"
             >
-              <span>Test in Reviewer Sandbox</span>
+              <span>Explore Plans &amp; Pricing &rarr;</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── INTERACTIVE AI CONVERSATION SIMULATOR ─────────────────────────────── */}
+      {/* ── CONVERSATIONAL AI REASONING SHOWCASE ───────────────────────────── */}
       <section className="py-20 bg-[#fafaf9]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center space-y-2">

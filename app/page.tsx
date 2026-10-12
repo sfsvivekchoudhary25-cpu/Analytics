@@ -137,7 +137,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I test the platform before connecting my live production account?",
-    a: "Yes! You can explore this entire interactive page, or click 'Launch Reviewer Demo' to explore a fully pre-populated sandbox dashboard with live simulator rules and mock analytics.",
+    a: "Yes! You can connect your Instagram Business or Creator account in development mode or test with Meta test users before launching live customer automations.",
   },
   {
     q: "What happens if a customer wants their data deleted?",
@@ -147,10 +147,7 @@ const FAQ_ITEMS = [
 
 export default function HomePage() {
   const router = useRouter();
-  const [activePresetIdx, setActivePresetIdx] = useState(0);
   const [activeEngineIdx, setActiveEngineIdx] = useState(0);
-  const [simState, setSimState] = useState<"idle" | "triggered" | "delivered">("delivered");
-  const [simStepText, setSimStepText] = useState("Delivered in 0.8s");
   const [monthlyComments, setMonthlyComments] = useState(2500);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
 
@@ -165,18 +162,8 @@ export default function HomePage() {
     }
   }, [router]);
 
-  const currentPreset = DEMO_PRESETS[activePresetIdx];
+  const currentPreset = DEMO_PRESETS[0];
   const currentEngine = ENGINE_PRESETS[activeEngineIdx];
-
-  const handleSelectPreset = (idx: number) => {
-    setActivePresetIdx(idx);
-    setSimState("triggered");
-    setSimStepText("Trigger Detected...");
-    setTimeout(() => {
-      setSimState("delivered");
-      setSimStepText("Delivered in 0.8s");
-    }, 600);
-  };
 
   const hoursSaved = Math.round((monthlyComments * 42) / 3600);
   const qualifiedLeads = Math.round(monthlyComments * 0.62);
@@ -187,7 +174,7 @@ export default function HomePage() {
       {/* ── SHARED MARKETING HEADER ── */}
       <MarketingNav />
 
-      {/* ── 3. HERO SECTION WITH SPLIT INTERACTIVE SIMULATOR ────────────────── */}
+      {/* ── 3. HERO SECTION WITH COMMENT-TO-DM PIPELINE SHOWCASE ─────────────── */}
       <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28 bg-white">
         {/* Soft Ambient Radiance using Fabulate Signature Pastels */}
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-[#f7cbdf] rounded-full blur-[140px] pointer-events-none opacity-70" />
@@ -234,14 +221,13 @@ export default function HomePage() {
                   <ArrowRightOutlined className="text-xs !text-white" />
                 </Link>
 
-                <a
-                  href="#simulator"
-                  style={{ backgroundColor: "#f7cbdf", color: "#871d4d", border: "2px solid #ed83b3" }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
+                <Link
+                  href="/pricing"
+                  style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-slate-50 text-sm font-semibold transition-all shadow-2xs !text-black"
                 >
-                  <ThunderboltFilled className="text-[#e13181]" />
-                  <span>Test Live Simulator Below</span>
-                </a>
+                  <span className="!text-black">Explore Pricing &amp; Plans &rarr;</span>
+                </Link>
               </div>
 
               {/* Trust Micro-Row */}
@@ -261,53 +247,44 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Live Interactive Simulator Card (5 cols) */}
-            <div id="simulator" className="lg:col-span-5 relative">
+            {/* Right Live Production Automation Architecture Card (5 cols) */}
+            <div className="lg:col-span-5 relative">
               <div className="rounded-3xl border border-[#e9e9ee] bg-white p-5 sm:p-6 shadow-2xl relative overflow-hidden space-y-5">
                 {/* Header Row */}
                 <div className="flex items-center justify-between pb-3 border-b border-[#e9e9ee]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#e13181] animate-pulse" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-semibold text-slate-900 tracking-tight uppercase">
-                      Interactive Live Simulator
+                      Official Meta Webhook Pipeline
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono font-medium text-[#871d4d] bg-[#f7cbdf] border border-[#ed83b3] px-2.5 py-0.5 rounded-full">
-                    {simStepText}
+                  <span className="text-[10px] font-mono font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                    Latency &lt; 0.8s
                   </span>
                 </div>
 
-                {/* Preset Keywords Switcher */}
-                <div>
-                  <div className="text-[11px] font-normal text-slate-500 mb-2">
-                    Click a trigger keyword to simulate instant automation:
+                {/* Active Funnel Trigger Config Info */}
+                <div className="p-3 rounded-2xl bg-[#fafaf9] border border-[#e9e9ee] flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-semibold uppercase text-slate-400">Trigger Keyword Rule</span>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded-md bg-[#e13181]/10 text-[#e13181] font-mono font-bold">LINK</span>
+                      <span>&bull; Exact &amp; Fuzzy Match</span>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {DEMO_PRESETS.map((p, idx) => (
-                      <button
-                        key={p.keyword}
-                        type="button"
-                        onClick={() => handleSelectPreset(idx)}
-                        className={`px-2 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer ${
-                          activePresetIdx === idx
-                            ? "bg-[#e13181] text-white shadow-md shadow-[#e13181]/30"
-                            : "bg-[#e9e9ee] text-slate-700 hover:bg-[#f7cbdf] hover:text-[#871d4d]"
-                        }`}
-                      >
-                        {p.keyword}
-                      </button>
-                    ))}
-                  </div>
+                  <span className="text-[11px] font-semibold text-[#871d4d] bg-[#f7cbdf] border border-[#ed83b3] px-2.5 py-1 rounded-full">
+                    Auto-Dispatched
+                  </span>
                 </div>
 
-                {/* 1. Simulated Public Instagram Comment */}
+                {/* 1. Public Instagram Comment */}
                 <div className="p-4 rounded-2xl bg-[#fafaf9] border border-[#e9e9ee] space-y-2.5">
                   <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span className="flex items-center gap-1.5 font-medium text-slate-800">
                       <InstagramOutlined className="text-pink-500 text-sm" />
                       <span>Public Instagram Reel Comment</span>
                     </span>
-                    <span className="text-[10px] text-slate-400">Just now</span>
+                    <span className="text-[10px] text-slate-400">Verified</span>
                   </div>
 
                   <div className="flex items-start gap-2.5 pt-1">
@@ -319,10 +296,10 @@ export default function HomePage() {
                     <div className="flex-1 text-xs">
                       <div className="font-semibold text-slate-900 flex items-center gap-1.5">
                         <span>@sarah_creator</span>
-                        <span className="text-[10px] text-slate-400 font-normal">Fan</span>
+                        <span className="text-[10px] text-slate-400 font-normal">Follower</span>
                       </div>
                       <p className="text-slate-700 mt-0.5 leading-snug font-normal">
-                        {currentPreset.comment}
+                        Where can I get this jacket? Need the link!
                       </p>
                     </div>
                   </div>
@@ -331,17 +308,13 @@ export default function HomePage() {
                   <div className="ml-9 p-2.5 rounded-xl bg-white border border-[#e9e9ee] text-[11px] text-slate-700 flex items-start gap-2 shadow-2xs">
                     <CheckOutlined className="text-[#e13181] text-xs shrink-0 mt-0.5 font-bold" />
                     <span>
-                      <strong className="text-slate-900 font-semibold">@fabroniee:</strong> {currentPreset.reply}
+                      <strong className="text-slate-900 font-semibold">@fabroniee:</strong> Sent you the VIP checkout link in your DMs! Check your message requests
                     </span>
                   </div>
                 </div>
 
-                {/* 2. Simulated Instant Private DM Card Delivered (Fabulate Soft Pink Accent) */}
-                <div
-                  className={`p-4 rounded-2xl bg-[#f7cbdf] border border-[#ed83b3] space-y-2.5 transition-all duration-300 ${
-                    simState === "delivered" ? "opacity-100 scale-100" : "opacity-60 scale-[0.99]"
-                  }`}
-                >
+                {/* 2. Instant Private DM Card Delivered */}
+                <div className="p-4 rounded-2xl bg-[#f7cbdf] border border-[#ed83b3] space-y-2.5">
                   <div className="flex items-center justify-between text-[11px] text-[#871d4d] font-semibold">
                     <span className="flex items-center gap-1.5">
                       <MessageOutlined /> Instant Direct Message (DM)
@@ -352,26 +325,25 @@ export default function HomePage() {
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-white border border-[#f7cbdf] space-y-2 shadow-xs">
-                    <div className="text-xs font-semibold text-slate-900">{currentPreset.dmTitle}</div>
+                    <div className="text-xs font-semibold text-slate-900">VIP Drop Access: Oversized Vintage Jacket</div>
                     <p className="text-[11px] text-slate-600 leading-relaxed font-normal">
-                      {currentPreset.dmDesc}
+                      Hey Sarah! Here is your exclusive direct link with 15% off applied at checkout:
                     </p>
 
                     {/* Rich Action Button inside DM */}
-                    <button
-                      type="button"
+                    <div
                       style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                      className="w-full py-2.5 px-3 rounded-full hover:bg-neutral-800 text-white text-xs font-semibold flex items-center justify-between shadow-md transition-all cursor-pointer"
+                      className="w-full py-2.5 px-3 rounded-full text-white text-xs font-semibold flex items-center justify-between shadow-md"
                     >
-                      <span className="text-white">{currentPreset.dmButton}</span>
+                      <span className="text-white">Shop Vintage Jacket ($68.00)</span>
                       <ArrowRightOutlined className="text-[10px] text-white" />
-                    </button>
+                    </div>
                   </div>
                 </div>
 
                 {/* Conversion Tag */}
                 <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                  <span>Targeted Funnel: <strong className="text-slate-900 font-medium">{currentPreset.tag}</strong></span>
+                  <span>Targeted Funnel: <strong className="text-slate-900 font-medium">E-Commerce Checkout</strong></span>
                   <span className="text-emerald-600 font-semibold">+42% Higher Click-Through</span>
                 </div>
               </div>
@@ -832,11 +804,11 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/login?demo=1"
+                href="/pricing"
                 style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
-                className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-slate-50 font-semibold text-sm transition-all shadow-xs"
+                className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-slate-50 font-semibold text-sm transition-all shadow-xs !text-black"
               >
-                Launch Reviewer Demo Mode
+                <span className="!text-black">View Plans &amp; Pricing</span>
               </Link>
             </div>
           </div>

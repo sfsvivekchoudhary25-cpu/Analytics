@@ -9,6 +9,9 @@ import {
   MenuOutlined,
   CloseOutlined,
   ThunderboltFilled,
+  MessageOutlined,
+  RobotOutlined,
+  LineChartOutlined,
 } from "@ant-design/icons";
 import { auth } from "@/lib/api";
 import GooeyNav, { type GooeyNavItem } from "@/components/GooeyNav";
@@ -69,14 +72,14 @@ export default function MarketingNav() {
 
           <div className="hidden sm:flex items-center gap-3 text-[11px]">
             <Link
-              href="/login?demo=1"
+              href="/login"
               style={{ backgroundColor: "#f7cbdf", color: "#871d4d" }}
-              className="inline-flex items-center gap-1 px-3.5 py-1 rounded-full font-semibold hover:bg-white transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1 px-3.5 py-1 rounded-full font-semibold hover:bg-white hover:text-black transition-colors shadow-2xs"
             >
-              Reviewer Sandbox &rarr;
+              Connect Meta &rarr;
             </Link>
             <span className="inline-flex items-center gap-1 text-white/90">
-              <GlobalOutlined /> Global API
+              <GlobalOutlined /> Global API v21.0
             </span>
           </div>
         </div>
@@ -180,30 +183,30 @@ export default function MarketingNav() {
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm font-bold text-slate-700 hover:text-black"
+              className="block text-sm font-bold text-slate-800 hover:text-black"
             >
               Home Showcase
             </Link>
             <div className="space-y-2 pl-3 border-l-2 border-[#f7cbdf]">
-              <span className="text-[10px] font-semibold uppercase text-slate-400">Platform Features</span>
+              <span className="text-[10px] font-semibold uppercase text-slate-400">Platform Engines</span>
               <Link
                 href="/platform/workflow"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-medium text-slate-800 hover:text-[#00008b]"
+                className="block text-xs font-medium text-slate-700 hover:text-black"
               >
                 &bull; Comment-to-DM Engine
               </Link>
               <Link
                 href="/platform/ai"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-medium text-slate-800 hover:text-[#883a19]"
+                className="block text-xs font-medium text-slate-700 hover:text-black"
               >
                 &bull; Autonomous AI Co-Pilot
               </Link>
               <Link
                 href="/platform/analytics"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-medium text-slate-800 hover:text-[#871d4d]"
+                className="block text-xs font-medium text-slate-700 hover:text-black"
               >
                 &bull; Verified Meta Analytics
               </Link>
@@ -229,6 +232,30 @@ export default function MarketingNav() {
             >
               Case Studies
             </Link>
+            <div className="space-y-1.5 pl-3 border-l-2 border-slate-200 pt-1">
+              <span className="text-[10px] font-semibold uppercase text-slate-400">Compliance &amp; Legal</span>
+              <Link
+                href="/terms"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-xs font-normal text-slate-600 hover:text-black"
+              >
+                &bull; Terms of Service
+              </Link>
+              <Link
+                href="/privacy"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-xs font-normal text-slate-600 hover:text-black"
+              >
+                &bull; Privacy Policy
+              </Link>
+              <Link
+                href="/data-deletion"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-xs font-normal text-slate-600 hover:text-black"
+              >
+                &bull; Data Deletion Instructions
+              </Link>
+            </div>
             <div className="pt-4 border-t border-[#e9e9ee] flex flex-col gap-2.5">
               {isLoggedIn ? (
                 <Link

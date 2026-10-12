@@ -14,25 +14,13 @@ import {
 } from "@ant-design/icons";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
+import PlatformTabs from "@/components/marketing/PlatformTabs";
 
 export default function WorkflowPage() {
-  const [testComment, setTestComment] = useState("Where can I buy this dress? Need the link!");
-  const [simulatedReply, setSimulatedReply] = useState<string | null>(
-    "Trigger detected: 'LINK' matched -> Sent DM with direct checkout link in 0.8s"
-  );
-
-  const handleTestTrigger = (keyword: string) => {
-    setSimulatedReply(`Processing... Matched keyword: '${keyword}'`);
-    setTimeout(() => {
-      setSimulatedReply(
-        `Trigger: '${keyword}' detected! Random public reply posted & private DM dispatched with 15% discount link in 0.9s.`
-      );
-    }, 400);
-  };
-
   return (
     <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased selection:bg-[#f7cbdf] selection:text-[#871d4d] overflow-x-hidden">
       <MarketingNav />
+      <PlatformTabs />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-16 pb-20 bg-white border-b border-[#e9e9ee]">
@@ -63,11 +51,11 @@ export default function WorkflowPage() {
             </Link>
 
             <Link
-              href="/login?demo=1"
+              href="/pricing"
               style={{ backgroundColor: "#bfbff9", color: "#000000", border: "2px solid #000000" }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold !text-black transition-all shadow-2xs"
             >
-              <span className="!text-black">Launch Sandbox Simulator</span>
+              <span className="!text-black">View Plans &amp; Pricing</span>
             </Link>
           </div>
         </div>
@@ -131,55 +119,70 @@ export default function WorkflowPage() {
         </div>
       </section>
 
-      {/* ── INTERACTIVE WORKFLOW RULE BUILDER SIMULATION ──────────────────────── */}
+      {/* ── PRODUCTION WORKFLOW RULE EXECUTION ARCHITECTURE ─────────────────── */}
       <section className="py-20 bg-white border-y border-[#e9e9ee]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#00008b]">
-              Interactive Rule Playground
+              Rule Execution Architecture
             </span>
             <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Test How the Engine Processes Trigger Rules
+              Enterprise Graph API v21.0 Execution Standards
             </h2>
           </div>
 
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-6 shadow-md">
-            <div>
-              <label className="block text-xs font-semibold text-slate-800 mb-2">
-                Simulated Public Comment on Your Post:
-              </label>
-              <input
-                type="text"
-                value={testComment}
-                onChange={(e) => setTestComment(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 font-medium text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#00008b]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <span className="block text-xs font-semibold text-slate-700">Quick Test Trigger Keywords:</span>
-              <div className="flex flex-wrap gap-2">
-                {["LINK", "PRICE", "VIP", "DISCOUNT", "SYLLABUS"].map((kw) => (
-                  <button
-                    key={kw}
-                    type="button"
-                    onClick={() => handleTestTrigger(kw)}
-                    className="px-3.5 py-1.5 rounded-full bg-white border border-[#6666f1] text-[#00008b] font-semibold text-xs hover:bg-[#bfbff9] transition-colors cursor-pointer"
-                  >
-                    Test '{kw}'
-                  </button>
-                ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 text-[#00008b]">
+                <FilterOutlined className="text-lg" />
+                <h4 className="text-sm font-bold text-slate-900">Regex &amp; Fuzzy Intent Matching</h4>
+              </div>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                Rules capture high-intent buyers even through typos, punctuation, and multi-lingual slang. Supports both exact keywords and complex contextual regex rules.
+              </p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-700">
+                matchRule: keyword(&quot;LINK&quot;) || intent(&quot;checkout&quot;)
               </div>
             </div>
 
-            {simulatedReply && (
-              <div className="p-4 rounded-2xl bg-[#bfbff9] border-2 border-[#6666f1] space-y-1 animate-page-entrance">
-                <span className="text-[10px] font-semibold uppercase text-[#00008b]">Engine Execution Log:</span>
-                <p className="text-xs font-medium text-[#00008b] font-mono leading-relaxed">
-                  {simulatedReply}
-                </p>
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 text-[#871d4d]">
+                <ClockCircleOutlined className="text-lg" />
+                <h4 className="text-sm font-bold text-slate-900">Adaptive Rate Limiting &amp; Jitter</h4>
               </div>
-            )}
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                Automated delays vary between 800ms and 2400ms to mimic human typing and maintain a pristine 100% Meta compliance standing with zero account blocks.
+              </p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-700">
+                antiSpamVariance: jitter(800ms, 2400ms)
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 text-emerald-700">
+                <SafetyCertificateFilled className="text-lg text-emerald-600" />
+                <h4 className="text-sm font-bold text-slate-900">Multi-Variant Organic Rotation</h4>
+              </div>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                Rotates between dozens of customizable public replies to maintain authentic comment engagement metrics that Instagram&apos;s algorithm favors.
+              </p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-700">
+                replyPool: 12 randomized organic variants
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-4 shadow-sm">
+              <div className="flex items-center gap-2.5 text-[#00008b]">
+                <SendOutlined className="text-lg" />
+                <h4 className="text-sm font-bold text-slate-900">First-Party Direct Message Dispatch</h4>
+              </div>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                Dispatches rich interactive cards with tracked coupon codes, Shopify product deep-links, and webhook delivery confirmations via Meta Graph v21.0.
+              </p>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-700">
+                deliveryPipe: Meta Messenger Platform API v21.0
+              </div>
+            </div>
           </div>
         </div>
       </section>

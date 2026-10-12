@@ -13,11 +13,13 @@ import {
 } from "@ant-design/icons";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
+import PlatformTabs from "@/components/marketing/PlatformTabs";
 
 export default function AnalyticsPlatformPage() {
   return (
     <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased selection:bg-[#f7cbdf] selection:text-[#871d4d] overflow-x-hidden">
       <MarketingNav />
+      <PlatformTabs />
 
       {/* ── HERO ─────────────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden pt-16 pb-20 bg-white border-b border-[#e9e9ee]">
@@ -43,16 +45,16 @@ export default function AnalyticsPlatformPage() {
               style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-900 !text-white font-semibold text-sm shadow-xl transition-all"
             >
-              <span>View Live Sandbox Analytics</span>
+              <span>Access First-Party Analytics</span>
               <ArrowRightOutlined className="text-xs !text-white" />
             </Link>
 
             <Link
-              href="/login?demo=1"
+              href="/pricing"
               style={{ backgroundColor: "#f7cbdf", color: "#871d4d", border: "2px solid #ed83b3" }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-white text-sm font-semibold transition-all shadow-2xs !text-[#871d4d]"
             >
-              <span>Reviewer Sandbox</span>
+              <span>Explore Plans &amp; Pricing &rarr;</span>
             </Link>
           </div>
         </div>

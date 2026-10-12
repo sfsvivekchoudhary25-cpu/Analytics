@@ -88,20 +88,17 @@ export default function MarketingFooter() {
               >
                 Platform
               </Link>
-              <Link
-                href="/login?demo=1"
-                style={{ color: "#52525b" }}
-                className="hover:!text-black transition-colors"
-              >
-                Sandbox
-              </Link>
             </div>
 
             {/* Bottom Copyright & Utility Row */}
             <div className="flex items-center justify-between lg:justify-end gap-6 w-full pt-1">
-              <span className="text-slate-400">
-                &copy; {new Date().getFullYear()} Fabroniee. All rights reserved.
-              </span>
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="Fabroniee" className="w-5 h-5 object-contain rounded-md shrink-0" />
+                <span className="text-slate-400">
+                  &copy; {new Date().getFullYear()} Fabroniee. All rights reserved.
+                </span>
+              </div>
               <div className="flex items-center gap-3.5 text-slate-500">
                 {/* Moon Icon */}
                 <button

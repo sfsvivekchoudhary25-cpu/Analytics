@@ -590,7 +590,7 @@ export function AccountPanel({
         <div className="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-xl shadow-slate-100 text-center space-y-6">
           <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 border border-slate-200/80 shadow-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="InstaVeyra" className="h-14 w-14 object-contain" />
+            <img src="/logo.png" alt="Fabroniee" className="h-14 w-14 object-contain" />
           </div>
 
           <div className="space-y-2">

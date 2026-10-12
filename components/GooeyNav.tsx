@@ -16,10 +16,20 @@ type Palette = 'dark' | 'light';
 type Size = 'sm' | 'md' | 'lg';
 type Rgba = number[];
 
+export interface GooeyNavItemChild {
+  label: string;
+  description?: string;
+  href: string;
+  icon?: ReactNode;
+  badgeBg?: string;
+  badgeColor?: string;
+}
+
 export interface GooeyNavItem {
   label?: string;
   href?: string;
   icon?: ReactNode;
+  children?: GooeyNavItemChild[];
 }
 
 export interface GooeyNavProps {
@@ -891,7 +901,7 @@ const GooeyNav = ({
       return (
         <li
           key={index}
-          className="group flex"
+          className="group relative flex"
           data-gooey-index={index}
           data-active={index === current ? '' : undefined}
         >
