@@ -365,7 +365,7 @@ export default function AuthPage() {
 
                 <div className="aspect-16/9 rounded-xl bg-gradient-to-tr from-purple-800 via-pink-700 to-rose-600 p-4 flex flex-col justify-between text-white shadow-inner">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-white/80">Flash Drop Alert 🔥</div>
-                  <div className="text-base font-black leading-tight">
+                  <div className="text-base font-bold leading-tight">
                     React with 🔥 to get instant 25% OFF coupon in your DMs!
                   </div>
                   <div className="text-[10px] text-white/70">512 followers reacted in last 2 hours</div>
@@ -423,16 +423,16 @@ export default function AuthPage() {
                 <div className="p-3.5 rounded-xl bg-blue-600/20 border border-blue-500/30 space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-white">
                     <span>Order #INRO-4891</span>
-                    <span className="text-emerald-400 font-extrabold">$128.00 Paid</span>
+                    <span className="text-emerald-400 font-bold">$128.00 Paid</span>
                   </div>
-                  <div className="text-[11px] text-white/80 leading-relaxed">
+                  <div className="text-[11px] text-white/80 leading-relaxed font-normal">
                     Lead converted from Instagram reel comment into Stripe checkout in 42 seconds.
                   </div>
                 </div>
 
                 <div className="p-2.5 rounded-xl bg-white/10 flex items-center justify-between text-xs">
-                  <span className="text-white/70">Conversion Rate</span>
-                  <span className="font-bold text-emerald-400">+34.8% vs Bio Link</span>
+                  <span className="text-white/70 font-normal">Conversion Rate</span>
+                  <span className="font-semibold text-emerald-400">+34.8% vs Bio Link</span>
                 </div>
               </div>
             </div>
@@ -442,7 +442,7 @@ export default function AuthPage() {
         {/* ── BOTTOM HEADLINE & SLIDER INDICATORS ────────────────────── */}
         <div className="relative z-10 space-y-5">
           <div className="space-y-1.5 max-w-lg">
-            <h3 className="text-2xl xl:text-3xl font-extrabold text-white tracking-tight leading-tight">
+            <h3 className="text-2xl xl:text-3xl font-bold text-white tracking-tight leading-tight">
               {currentSlide.title}
             </h3>
             <p className="text-sm xl:text-base text-white/70 leading-relaxed">
@@ -512,7 +512,7 @@ export default function AuthPage() {
             <div className="pt-1">
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#871d4d] hover:text-black bg-[#f7cbdf] hover:bg-[#ed83b3] border border-[#ed83b3] px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#871d4d] hover:text-black bg-[#f7cbdf] hover:bg-[#ed83b3] border border-[#ed83b3] px-3.5 py-1.5 rounded-full transition-all shadow-2xs"
               >
                 <span>✨ Explore Platform Features &amp; Live Simulator</span>
                 <span>&rarr;</span>

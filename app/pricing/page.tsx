@@ -25,21 +25,21 @@ export default function PricingPage() {
         <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-[#bfbff9] rounded-full blur-[140px] pointer-events-none opacity-50" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f7cbdf] border-2 border-[#ed83b3] text-xs font-black text-[#871d4d]">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#f7cbdf] border border-[#ed83b3] text-xs font-semibold text-[#871d4d]">
             <StarFilled className="text-amber-400" /> Transparent Pricing
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-950 leading-[1.1]">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
             Simple Plans. <span className="text-[#e13181]">Immediate ROI.</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
             Choose the plan that matches your monthly comment volume. Every plan includes official Meta Graph API v21.0 compliance, zero password storage, and 1-click setup.
           </p>
 
           {/* Monthly / Annual Toggle */}
           <div className="flex items-center justify-center gap-3 pt-4">
-            <span className={`text-xs font-black ${!annual ? "text-slate-950" : "text-slate-400"}`}>
+            <span className={`text-xs font-semibold ${!annual ? "text-slate-900" : "text-slate-500"}`}>
               Monthly
             </span>
             <button
@@ -55,10 +55,10 @@ export default function PricingPage() {
               />
             </button>
             <div className="flex items-center gap-1.5">
-              <span className={`text-xs font-black ${annual ? "text-slate-950" : "text-slate-400"}`}>
+              <span className={`text-xs font-semibold ${annual ? "text-slate-900" : "text-slate-500"}`}>
                 Annual Billing
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#f7cbdf] text-[#871d4d] border border-[#ed83b3] text-[10px] font-black uppercase">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#f7cbdf] text-[#871d4d] border border-[#ed83b3] text-[10px] font-semibold uppercase tracking-wide">
                 Save 20%
               </span>
             </div>
@@ -73,21 +73,21 @@ export default function PricingPage() {
             {/* Tier 1: Starter Creator */}
             <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-sm hover:border-black transition-all">
               <div className="space-y-4">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-wider">Starter Creator</span>
+                <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Starter Creator</span>
                 <div className="space-y-1">
-                  <div className="text-4xl font-black text-slate-950 font-mono">
+                  <div className="text-4xl font-bold text-slate-900 font-mono">
                     ${annual ? "23" : "29"}
-                    <span className="text-sm font-semibold text-slate-500">/mo</span>
+                    <span className="text-sm font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 font-normal">
                     {annual ? "Billed annually ($276/yr)" : "Billed monthly"}
                   </p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 font-normal leading-relaxed">
                   Perfect for growing creators, personal brands, and info-product sellers launching lead magnets.
                 </p>
 
-                <ul className="space-y-2.5 text-xs text-slate-700 font-bold pt-4 border-t border-slate-100">
+                <ul className="space-y-2.5 text-xs text-slate-700 font-normal pt-4 border-t border-slate-100">
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-emerald-500" />
                     <span>Up to 2,500 automated comments/mo</span>
@@ -115,7 +115,7 @@ export default function PricingPage() {
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-3.5 rounded-full text-center block font-black text-xs hover:bg-neutral-900 !text-white shadow-xs transition-all"
+                  className="w-full py-3.5 rounded-full text-center block font-semibold text-xs hover:bg-neutral-900 !text-white shadow-xs transition-all"
                 >
                   Start 14-Day Free Trial
                 </Link>
@@ -124,29 +124,29 @@ export default function PricingPage() {
 
             {/* Tier 2: Growth Brand (Most Popular in Fabulate Pink) */}
             <div className="p-8 sm:p-10 rounded-3xl bg-[#f7cbdf] border-2 border-[#ed83b3] space-y-6 flex flex-col justify-between shadow-xl relative scale-105 z-10">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#e13181] text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#e13181] text-white text-[10px] font-semibold uppercase tracking-wider shadow-sm">
                 Most Popular
               </div>
 
               <div className="space-y-4">
-                <span className="text-xs font-black uppercase text-[#871d4d] tracking-wider">Growth Brand</span>
+                <span className="text-xs font-semibold uppercase text-[#871d4d] tracking-wider">Growth Brand</span>
                 <div className="space-y-1">
-                  <div className="text-4xl font-black text-[#871d4d] font-mono">
+                  <div className="text-4xl font-bold text-[#871d4d] font-mono">
                     ${annual ? "63" : "79"}
-                    <span className="text-sm font-semibold text-[#871d4d]/80">/mo</span>
+                    <span className="text-sm font-medium text-[#871d4d]/80">/mo</span>
                   </div>
-                  <p className="text-[11px] text-[#871d4d]/80">
+                  <p className="text-[11px] text-[#871d4d]/80 font-normal">
                     {annual ? "Billed annually ($756/yr)" : "Billed monthly"}
                   </p>
                 </div>
-                <p className="text-xs text-[#871d4d] leading-relaxed font-medium">
+                <p className="text-xs text-[#871d4d] leading-relaxed font-normal">
                   Engineered for fast-growing DTC brands, e-commerce stores, and high-engagement influencers.
                 </p>
 
-                <ul className="space-y-2.5 text-xs text-[#871d4d] font-bold pt-4 border-t border-[#ed83b3]">
+                <ul className="space-y-2.5 text-xs text-[#871d4d] font-normal pt-4 border-t border-[#ed83b3]">
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-[#e13181]" />
-                    <span>Up to 10,000 automated comments/mo</span>
+                    <span className="font-medium">Up to 10,000 automated comments/mo</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-[#e13181]" />
@@ -175,7 +175,7 @@ export default function PricingPage() {
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-3.5 rounded-full text-center block font-black text-xs hover:bg-neutral-900 !text-white shadow-md transition-all"
+                  className="w-full py-3.5 rounded-full text-center block font-semibold text-xs hover:bg-neutral-900 !text-white shadow-md transition-all"
                 >
                   Start 14-Day Free Trial
                 </Link>
@@ -185,21 +185,21 @@ export default function PricingPage() {
             {/* Tier 3: Scale & Agency */}
             <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-sm hover:border-black transition-all">
               <div className="space-y-4">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-wider">Scale &amp; Agency</span>
+                <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Scale &amp; Agency</span>
                 <div className="space-y-1">
-                  <div className="text-4xl font-black text-slate-950 font-mono">
+                  <div className="text-4xl font-bold text-slate-900 font-mono">
                     ${annual ? "159" : "199"}
-                    <span className="text-sm font-semibold text-slate-500">/mo</span>
+                    <span className="text-sm font-medium text-slate-500">/mo</span>
                   </div>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-400 font-normal">
                     {annual ? "Billed annually ($1,908/yr)" : "Billed monthly"}
                   </p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
+                <p className="text-xs text-slate-600 font-normal leading-relaxed">
                   For enterprise brands, multi-account creators, and marketing agencies managing client portfolios.
                 </p>
 
-                <ul className="space-y-2.5 text-xs text-slate-700 font-bold pt-4 border-t border-slate-100">
+                <ul className="space-y-2.5 text-xs text-slate-700 font-normal pt-4 border-t border-slate-100">
                   <li className="flex items-center gap-2">
                     <CheckCircleFilled className="text-emerald-500" />
                     <span>Unlimited automated comments &amp; DMs</span>
@@ -227,7 +227,7 @@ export default function PricingPage() {
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-3.5 rounded-full text-center block font-black text-xs hover:bg-neutral-900 !text-white shadow-xs transition-all"
+                  className="w-full py-3.5 rounded-full text-center block font-semibold text-xs hover:bg-neutral-900 !text-white shadow-xs transition-all"
                 >
                   Contact Agency Sales
                 </Link>
@@ -241,28 +241,28 @@ export default function PricingPage() {
       <section className="py-20 bg-white border-t border-[#e9e9ee]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="text-center space-y-2">
-            <span className="text-xs font-black uppercase text-[#e13181]">Billing Questions</span>
-            <h2 className="text-3xl font-black text-slate-950 tracking-tight">Frequently Asked Questions</h2>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[#e13181]">Billing Questions</span>
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Frequently Asked Questions</h2>
           </div>
 
           <div className="space-y-4">
             <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
-              <h4 className="text-sm font-black text-slate-900">Can I change or cancel my plan at any time?</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h4 className="text-sm font-semibold text-slate-900">Can I change or cancel my plan at any time?</h4>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 Yes! There are no long-term contracts. You can upgrade, downgrade, or cancel your subscription anytime directly inside your account billing panel.
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
-              <h4 className="text-sm font-black text-slate-900">Are there any hidden Meta or Facebook API fees?</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h4 className="text-sm font-semibold text-slate-900">Are there any hidden Meta or Facebook API fees?</h4>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 No. Connecting via official Meta Graph API v21.0 using Facebook Login for Business is completely free. You only pay for your Fabroniee software subscription.
               </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
-              <h4 className="text-sm font-black text-slate-900">What happens if I exceed my monthly comment limit?</h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <h4 className="text-sm font-semibold text-slate-900">What happens if I exceed my monthly comment limit?</h4>
+              <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 We never shut down your funnels abruptly. We will notify you when you reach 85% and 100% of your tier, giving you the choice to upgrade seamlessly without missing a customer.
               </p>
             </div>

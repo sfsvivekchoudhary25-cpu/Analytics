@@ -50,7 +50,7 @@ export default function SplitCard({
       >
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-4">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-slate-950 border border-black/85 text-xs font-bold tracking-tight shadow-2xs group-hover:border-black transition-colors">
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-slate-900 border border-black/80 text-xs font-semibold tracking-tight shadow-2xs group-hover:border-black transition-colors">
             {badgeIcon}
             <span>{badge}</span>
           </span>
@@ -61,11 +61,11 @@ export default function SplitCard({
 
         {/* Headline & Description */}
         <div className="pt-6 sm:pt-8 space-y-2">
-          <h3 className={`text-xl sm:text-2xl font-black ${textColor} tracking-tight leading-snug group-hover:text-black transition-colors`}>
+          <h3 className={`text-xl sm:text-2xl font-bold ${textColor} tracking-tight leading-snug group-hover:text-black transition-colors`}>
             {title}
           </h3>
           {description && (
-            <p className="text-xs sm:text-sm font-semibold text-slate-800/85 leading-relaxed">
+            <p className="text-xs sm:text-sm font-normal text-slate-800/80 leading-relaxed">
               {description}
             </p>
           )}
@@ -85,7 +85,7 @@ export default function SplitCard({
         {/* Floating Stat Badge (Top Left of Image - Differentiator) */}
         {statBadge && (
           <div className="absolute top-4 left-4 z-10">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-md">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/65 backdrop-blur-md text-white text-[11px] font-medium border border-white/20 shadow-md">
               {statBadge.icon && <span>{statBadge.icon}</span>}
               <span>{statBadge.text}</span>
             </span>
@@ -95,16 +95,16 @@ export default function SplitCard({
         {/* Bottom Scrim & Action Bar */}
         <div className="absolute inset-x-0 bottom-0 pt-16 pb-5 px-6 sm:px-7 bg-gradient-to-t from-black/90 via-black/45 to-transparent flex items-end justify-between gap-4 z-10">
           <div className="space-y-0.5">
-            <span className="block text-white/75 text-xs font-bold tracking-wide uppercase">
+            <span className="block text-white/70 text-xs font-medium tracking-wide uppercase">
               Find out more
             </span>
-            <span className="block text-white font-extrabold text-base sm:text-lg tracking-tight group-hover:translate-x-1 transition-transform drop-shadow-xs">
+            <span className="block text-white font-bold text-base sm:text-lg tracking-tight group-hover:translate-x-1 transition-transform drop-shadow-xs">
               {actionText}
             </span>
           </div>
 
           {/* White Circular Action Button with Black Border & Arrow */}
-          <div className="w-12 h-12 rounded-full bg-white text-black border-2 border-black flex items-center justify-center font-black text-lg shadow-md group-hover:bg-black group-hover:text-white group-hover:scale-110 group-hover:rotate-[-45deg] transition-all duration-300 shrink-0">
+          <div className="w-12 h-12 rounded-full bg-white text-black border-2 border-black flex items-center justify-center font-bold text-lg shadow-md group-hover:bg-black group-hover:text-white group-hover:scale-110 group-hover:rotate-[-45deg] transition-all duration-300 shrink-0">
             <ArrowRightOutlined />
           </div>
         </div>

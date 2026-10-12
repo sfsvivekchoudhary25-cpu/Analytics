@@ -38,7 +38,7 @@ export default function DataDeletionPage() {
               <DeleteOutlined className="text-xs" />
               <span>User Rights &amp; Data Deletion Policy</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
               User Data Deletion Instructions
             </h1>
             <p className="text-sm text-slate-500 font-medium">

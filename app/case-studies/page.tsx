@@ -23,15 +23,15 @@ export default function CaseStudiesPage() {
         <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-[#f7cbdf] rounded-full blur-[140px] pointer-events-none opacity-40" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6 text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#bfbff9] border-2 border-[#6666f1] text-xs font-black text-[#00008b]">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#bfbff9] border border-[#6666f1] text-xs font-semibold text-[#00008b]">
             <RiseOutlined /> Customer Case Studies
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-950 leading-[1.1]">
+          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
             Real Brands. Real DMs. <span className="text-[#00008b]">Measurable Revenue.</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
             Discover how modern DTC stores, creators, and social agencies use Fabroniee to capture qualified buyers right when their interest is at its absolute peak.
           </p>
 
@@ -39,7 +39,7 @@ export default function CaseStudiesPage() {
             <Link
               href="/login"
               style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-black text-sm hover:bg-neutral-900 !text-white shadow-xl transition-all"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-sm hover:bg-neutral-900 !text-white shadow-xl transition-all"
             >
               <span>Start Your Growth Story Free</span>
               <ArrowRightOutlined className="text-xs !text-white" />
@@ -54,13 +54,13 @@ export default function CaseStudiesPage() {
           {/* Case Study 1: Streetwear E-Commerce */}
           <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#e9e9ee] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-md">
             <div className="lg:col-span-7 space-y-4">
-              <span className="text-xs font-black uppercase text-[#e13181] tracking-wider">
+              <span className="text-xs font-semibold uppercase text-[#e13181] tracking-wider">
                 Luxury Apparel &bull; Limited Drop
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 How a Vintage Streetwear Brand Generated $42,000 in 48h from 14,200 Reel Comments
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
                 Before Fabroniee, their team struggled to manually respond to comments during flash drops, causing 80% of interested buyers to bounce. By setting a `DROP` keyword trigger, buyers received instant checkout DMs with their unique discount applied.
               </p>
               <div className="p-4 rounded-2xl bg-[#fdf1f7] border border-[#f7cbdf] text-xs font-medium text-[#871d4d] italic">
@@ -70,17 +70,17 @@ export default function CaseStudiesPage() {
 
             <div className="lg:col-span-5 p-6 rounded-2xl bg-[#f8d7ca] border-2 border-[#eea07f] space-y-4 text-center">
               <div>
-                <div className="text-4xl font-black text-[#883a19] font-mono">$42,000</div>
-                <div className="text-xs font-black text-[#883a19] uppercase">Drop Revenue in 48 Hours</div>
+                <div className="text-4xl font-bold text-[#883a19] font-mono">$42,000</div>
+                <div className="text-xs font-semibold text-[#883a19] uppercase tracking-wide">Drop Revenue in 48 Hours</div>
               </div>
               <div className="pt-3 border-t border-[#eea07f]/50 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-2xl font-black text-[#883a19] font-mono">14,200</div>
-                  <div className="text-[10px] text-[#883a19]/80 font-bold">Comments Handled</div>
+                  <div className="text-2xl font-bold text-[#883a19] font-mono">14,200</div>
+                  <div className="text-[10px] text-[#883a19]/80 font-medium">Comments Handled</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-[#883a19] font-mono">1.2s</div>
-                  <div className="text-[10px] text-[#883a19]/80 font-bold">Average DM Latency</div>
+                  <div className="text-2xl font-bold text-[#883a19] font-mono">1.2s</div>
+                  <div className="text-[10px] text-[#883a19]/80 font-medium">Average DM Latency</div>
                 </div>
               </div>
             </div>
@@ -89,13 +89,13 @@ export default function CaseStudiesPage() {
           {/* Case Study 2: Digital Creator */}
           <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#e9e9ee] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-md">
             <div className="lg:col-span-7 space-y-4">
-              <span className="text-xs font-black uppercase text-[#00008b] tracking-wider">
+              <span className="text-xs font-semibold uppercase text-[#00008b] tracking-wider">
                 Creator &bull; Coaching Course
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 89.4% DM Open Rate and 4.8x Higher Course Enrollment vs Linktree
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
                 Rather than asking 120,000 followers to click an external link-in-bio, Alex prompted viewers to comment "SYLLABUS". Fabroniee instantly messaged the curriculum download and early-bird checkout link directly in Instagram chat.
               </p>
               <div className="p-4 rounded-2xl bg-[#e6f7ff] border border-[#91d5ff] text-xs font-medium text-[#002766] italic">
@@ -105,17 +105,17 @@ export default function CaseStudiesPage() {
 
             <div className="lg:col-span-5 p-6 rounded-2xl bg-[#bfbff9] border-2 border-[#6666f1] space-y-4 text-center">
               <div>
-                <div className="text-4xl font-black text-[#00008b] font-mono">89.4%</div>
-                <div className="text-xs font-black text-[#00008b] uppercase">DM Open Rate</div>
+                <div className="text-4xl font-bold text-[#00008b] font-mono">89.4%</div>
+                <div className="text-xs font-semibold text-[#00008b] uppercase tracking-wide">DM Open Rate</div>
               </div>
               <div className="pt-3 border-t border-[#6666f1]/50 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-2xl font-black text-[#00008b] font-mono">4.8x</div>
-                  <div className="text-[10px] text-[#00008b]/80 font-bold">Conversion vs Linktree</div>
+                  <div className="text-2xl font-bold text-[#00008b] font-mono">4.8x</div>
+                  <div className="text-[10px] text-[#00008b]/80 font-medium">Conversion vs Linktree</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-[#00008b] font-mono">1,840</div>
-                  <div className="text-[10px] text-[#00008b]/80 font-bold">Leads Captured</div>
+                  <div className="text-2xl font-bold text-[#00008b] font-mono">1,840</div>
+                  <div className="text-[10px] text-[#00008b]/80 font-medium">Leads Captured</div>
                 </div>
               </div>
             </div>
@@ -124,13 +124,13 @@ export default function CaseStudiesPage() {
           {/* Case Study 3: Beauty Skincare UGC */}
           <div className="p-8 sm:p-12 rounded-3xl bg-white border-2 border-[#e9e9ee] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center shadow-md">
             <div className="lg:col-span-7 space-y-4">
-              <span className="text-xs font-black uppercase text-[#997a00] tracking-wider">
+              <span className="text-xs font-semibold uppercase text-[#997a00] tracking-wider">
                 Beauty &amp; Skincare &bull; Customer UGC
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
                 2,400 Customer Tagged Photos Automated into Feed Social Proof &amp; Repeat Sales
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
                 By enabling Fabroniee's UGC moderation engine, whenever customers tagged their unboxing photos, the brand reviewed submissions in 1 click and auto-published them to their official feed, rewarding the customer with an automated $10 thank-you coupon.
               </p>
               <div className="p-4 rounded-2xl bg-[#fefbe8] border border-[#ffe58f] text-xs font-medium text-[#613400] italic">
@@ -140,17 +140,17 @@ export default function CaseStudiesPage() {
 
             <div className="lg:col-span-5 p-6 rounded-2xl bg-[#ffefb2] border-2 border-[#ffe006] space-y-4 text-center">
               <div>
-                <div className="text-4xl font-black text-[#451a03] font-mono">2,400+</div>
-                <div className="text-xs font-black text-[#451a03] uppercase">UGC Photos Curated</div>
+                <div className="text-4xl font-bold text-[#451a03] font-mono">2,400+</div>
+                <div className="text-xs font-semibold text-[#451a03] uppercase tracking-wide">UGC Photos Curated</div>
               </div>
               <div className="pt-3 border-t border-[#ffe006]/50 grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-2xl font-black text-[#451a03] font-mono">612</div>
-                  <div className="text-[10px] text-[#451a03]/80 font-bold">Repeat Coupon Orders</div>
+                  <div className="text-2xl font-bold text-[#451a03] font-mono">612</div>
+                  <div className="text-[10px] text-[#451a03]/80 font-medium">Repeat Coupon Orders</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-black text-[#451a03] font-mono">100%</div>
-                  <div className="text-[10px] text-[#451a03]/80 font-bold">Automated Ingestion</div>
+                  <div className="text-2xl font-bold text-[#451a03] font-mono">100%</div>
+                  <div className="text-[10px] text-[#451a03]/80 font-medium">Automated Ingestion</div>
                 </div>
               </div>
             </div>
@@ -161,17 +161,17 @@ export default function CaseStudiesPage() {
       {/* ── FINAL CTA ────────────────────────────────────────────────────────── */}
       <section className="py-20 bg-white border-t border-[#e9e9ee]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
             Ready to Generate Similar Results for Your Brand?
           </h2>
-          <p className="text-sm text-slate-600 max-w-lg mx-auto">
+          <p className="text-sm text-slate-600 font-normal leading-relaxed max-w-lg mx-auto">
             Set up your first automated comment trigger in under 60 seconds with official Meta Login.
           </p>
           <div className="pt-2">
             <Link
               href="/login"
               style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-              className="inline-flex px-8 py-4 rounded-full font-black text-sm hover:bg-neutral-900 !text-white shadow-xl transition-all"
+              className="inline-flex px-8 py-4 rounded-full font-semibold text-sm hover:bg-neutral-900 !text-white shadow-xl transition-all"
             >
               <span className="!text-white">Get Started with Meta Login &rarr;</span>
             </Link>

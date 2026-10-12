@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
               <SafetyCertificateOutlined className="text-xs" />
               <span>Official Regulatory &amp; App Review Compliance</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
               Privacy Policy
             </h1>
             <p className="text-sm text-slate-500 font-medium">

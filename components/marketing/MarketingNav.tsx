@@ -36,11 +36,11 @@ export default function MarketingNav() {
       <div className="relative z-50 bg-[#e13181] text-white text-xs font-semibold py-2.5 px-4 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 mx-auto sm:mx-0">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-xs text-[11px] font-extrabold text-white">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 backdrop-blur-xs text-[11px] font-semibold text-white">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               Official Meta Verified
             </span>
-            <span className="truncate">
+            <span className="truncate font-normal">
               Direct Meta Graph API v21.0 Certified &bull; Official Facebook Login for Business Integration
             </span>
           </div>
@@ -49,7 +49,7 @@ export default function MarketingNav() {
             <Link
               href="/login?demo=1"
               style={{ backgroundColor: "#f7cbdf", color: "#871d4d" }}
-              className="inline-flex items-center gap-1 px-3.5 py-1 rounded-full font-extrabold hover:bg-white transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1 px-3.5 py-1 rounded-full font-semibold hover:bg-white transition-colors shadow-2xs"
             >
               Reviewer Sandbox &rarr;
             </Link>
@@ -73,21 +73,21 @@ export default function MarketingNav() {
             />
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-slate-950 leading-none">
+                <span className="text-lg font-bold tracking-tight text-slate-900 leading-none">
                   Fabroniee
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#871d4d] bg-[#f7cbdf] border border-[#ed83b3] px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#871d4d] bg-[#f7cbdf] border border-[#ed83b3] px-2 py-0.5 rounded-full">
                   OS
                 </span>
               </div>
-              <span className="text-[11px] text-slate-500 font-medium">
+              <span className="text-[11px] text-slate-500 font-normal">
                 Instagram Social Commerce
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-700">
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-700">
             {/* Platform Dropdown */}
             <div
               className="relative"
@@ -97,7 +97,7 @@ export default function MarketingNav() {
               <button
                 type="button"
                 className={`inline-flex items-center gap-1.5 py-2 hover:text-black transition-colors cursor-pointer ${
-                  pathname.startsWith("/platform") ? "text-[#e13181]" : ""
+                  pathname.startsWith("/platform") ? "text-[#e13181] font-semibold" : ""
                 }`}
               >
                 <span>Platform</span>
@@ -105,7 +105,7 @@ export default function MarketingNav() {
               </button>
 
               {platformDropdownOpen && (
-                <div className="absolute top-full left-0 w-80 p-3 bg-white border-2 border-[#e9e9ee] rounded-2xl shadow-xl space-y-1 animate-page-entrance">
+                <div className="absolute top-full left-0 w-80 p-3 bg-white border border-[#e9e9ee] rounded-2xl shadow-xl space-y-1 animate-page-entrance">
                   <Link
                     href="/platform/workflow"
                     onClick={() => setPlatformDropdownOpen(false)}
@@ -115,8 +115,8 @@ export default function MarketingNav() {
                       <MessageOutlined />
                     </div>
                     <div>
-                      <div className="text-xs font-black text-slate-900 group-hover:text-[#00008b]">Comment-to-DM Engine</div>
-                      <div className="text-[11px] text-slate-500 leading-snug">Instant keyword triggers and automated private replies.</div>
+                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#00008b]">Comment-to-DM Engine</div>
+                      <div className="text-[11px] text-slate-500 font-normal leading-snug">Instant keyword triggers and automated private replies.</div>
                     </div>
                   </Link>
 
@@ -129,8 +129,8 @@ export default function MarketingNav() {
                       <RobotOutlined />
                     </div>
                     <div>
-                      <div className="text-xs font-black text-slate-900 group-hover:text-[#883a19]">Autonomous AI Co-Pilot</div>
-                      <div className="text-[11px] text-slate-500 leading-snug">24/7 multilingual product & sizing assistant.</div>
+                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#883a19]">Autonomous AI Co-Pilot</div>
+                      <div className="text-[11px] text-slate-500 font-normal leading-snug">24/7 multilingual product & sizing assistant.</div>
                     </div>
                   </Link>
 
@@ -143,8 +143,8 @@ export default function MarketingNav() {
                       <LineChartOutlined />
                     </div>
                     <div>
-                      <div className="text-xs font-black text-slate-900 group-hover:text-[#871d4d]">Verified Meta Analytics</div>
-                      <div className="text-[11px] text-slate-500 leading-snug">Authenticated open rates, link CTR, and conversion lift.</div>
+                      <div className="text-xs font-semibold text-slate-900 group-hover:text-[#871d4d]">Verified Meta Analytics</div>
+                      <div className="text-[11px] text-slate-500 font-normal leading-snug">Authenticated open rates, link CTR, and conversion lift.</div>
                     </div>
                   </Link>
                 </div>
@@ -153,21 +153,21 @@ export default function MarketingNav() {
 
             <Link
               href="/solutions"
-              className={`hover:text-black transition-colors ${isActive("/solutions") ? "text-[#e13181]" : ""}`}
+              className={`hover:text-black transition-colors ${isActive("/solutions") ? "text-[#e13181] font-semibold" : ""}`}
             >
               Solutions
             </Link>
 
             <Link
               href="/pricing"
-              className={`hover:text-black transition-colors ${isActive("/pricing") ? "text-[#e13181]" : ""}`}
+              className={`hover:text-black transition-colors ${isActive("/pricing") ? "text-[#e13181] font-semibold" : ""}`}
             >
               Pricing
             </Link>
 
             <Link
               href="/case-studies"
-              className={`hover:text-black transition-colors ${isActive("/case-studies") ? "text-[#e13181]" : ""}`}
+              className={`hover:text-black transition-colors ${isActive("/case-studies") ? "text-[#e13181] font-semibold" : ""}`}
             >
               Case Studies
             </Link>
@@ -179,7 +179,7 @@ export default function MarketingNav() {
               <Link
                 href="/dashboard"
                 style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full hover:bg-neutral-800 !text-white text-xs font-extrabold shadow-xs active:scale-[0.98] transition-all"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full hover:bg-neutral-800 !text-white text-xs font-semibold shadow-xs active:scale-[0.98] transition-all"
               >
                 <ThunderboltFilled className="text-[#e13181]" />
                 <span className="!text-white">Go to Dashboard</span>
@@ -189,14 +189,14 @@ export default function MarketingNav() {
               <>
                 <Link
                   href="/login"
-                  className="text-xs font-bold text-slate-800 hover:text-black px-4 py-2.5 rounded-full hover:bg-[#e9e9ee]/60 transition-colors"
+                  className="text-xs font-medium text-slate-700 hover:text-black px-4 py-2.5 rounded-full hover:bg-[#e9e9ee]/60 transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full hover:bg-neutral-800 !text-white text-xs font-extrabold shadow-xs active:scale-[0.98] transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full hover:bg-neutral-800 !text-white text-xs font-semibold shadow-xs active:scale-[0.98] transition-all"
                 >
                   <span className="!text-white">Get Started Free</span>
                   <ArrowRightOutlined className="text-[10px] !text-white" />
@@ -227,25 +227,25 @@ export default function MarketingNav() {
               Home Showcase
             </Link>
             <div className="space-y-2 pl-3 border-l-2 border-[#f7cbdf]">
-              <span className="text-[10px] font-black uppercase text-slate-400">Platform Features</span>
+              <span className="text-[10px] font-semibold uppercase text-slate-400">Platform Features</span>
               <Link
                 href="/platform/workflow"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-bold text-slate-800 hover:text-[#00008b]"
+                className="block text-xs font-medium text-slate-800 hover:text-[#00008b]"
               >
                 &bull; Comment-to-DM Engine
               </Link>
               <Link
                 href="/platform/ai"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-bold text-slate-800 hover:text-[#883a19]"
+                className="block text-xs font-medium text-slate-800 hover:text-[#883a19]"
               >
                 &bull; Autonomous AI Co-Pilot
               </Link>
               <Link
                 href="/platform/analytics"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-xs font-bold text-slate-800 hover:text-[#871d4d]"
+                className="block text-xs font-medium text-slate-800 hover:text-[#871d4d]"
               >
                 &bull; Verified Meta Analytics
               </Link>
@@ -253,21 +253,21 @@ export default function MarketingNav() {
             <Link
               href="/solutions"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm font-bold text-slate-700 hover:text-black"
+              className="block text-sm font-medium text-slate-700 hover:text-black"
             >
               Solutions
             </Link>
             <Link
               href="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm font-bold text-slate-700 hover:text-black"
+              className="block text-sm font-medium text-slate-700 hover:text-black"
             >
               Pricing
             </Link>
             <Link
               href="/case-studies"
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-sm font-bold text-slate-700 hover:text-black"
+              className="block text-sm font-medium text-slate-700 hover:text-black"
             >
               Case Studies
             </Link>
@@ -276,7 +276,7 @@ export default function MarketingNav() {
                 <Link
                   href="/dashboard"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-2.5 text-center text-sm font-extrabold rounded-full !text-white shadow-md"
+                  className="w-full py-2.5 text-center text-sm font-semibold rounded-full !text-white shadow-md"
                 >
                   Go to Dashboard &rarr;
                 </Link>
