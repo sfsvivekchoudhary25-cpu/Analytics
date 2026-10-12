@@ -20,10 +20,12 @@ import {
   ClockCircleOutlined,
   GiftOutlined,
   StarFilled,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { auth } from "@/lib/api";
 import MarketingNav from "@/components/marketing/MarketingNav";
 import MarketingFooter from "@/components/marketing/MarketingFooter";
+import SplitCard from "@/components/marketing/SplitCard";
 
 // ── TRIGGER KEYWORD DEMO PRESETS ──────────────────────────────────────────────
 const DEMO_PRESETS = [
@@ -412,154 +414,70 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Pillar 1: Comment-to-DM Engine (Fabulate Site-Blue #bfbff9) */}
-            <div className="rounded-3xl border-2 border-[#6666f1] bg-[#bfbff9] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#0000e9] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
-                  <MessageOutlined />
-                </div>
-                <Link
-                  href="/platform/workflow"
-                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#6666f1] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
-                >
-                  Explore Workflow &rarr;
-                </Link>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#00008b] tracking-tight">
-                  Instant Comment-to-DM Funnels
-                </h3>
-                <p className="text-sm text-[#082f49] leading-relaxed font-medium">
-                  Trigger targeted direct messages the millisecond a follower comments specific keywords (`PRICE`, `LINK`, `VIP`, `RECIPE`). Automatically rotate randomized public replies to keep your engagement organic and safe from algorithmic spam limits.
-                </p>
-              </div>
-              <ul className="space-y-2 text-xs text-[#082f49] font-bold pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#0000e9]" />
-                  <span>Exact, partial, or wildcard keyword matching</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#0000e9]" />
-                  <span>Configurable delay timers (0s to 120s)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#0000e9]" />
-                  <span>Single-use checkout discounts &amp; link tracking</span>
-                </li>
-              </ul>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+            {/* Card 1: Comment-to-DM Funnel (Signature Periwinkle Pastel) */}
+            <SplitCard
+              badge="Instant Automation"
+              badgeIcon={<ThunderboltFilled className="text-[#0000e9] text-xs" />}
+              headerIcon={<AppstoreOutlined />}
+              bgColor="#bfbff9"
+              borderColor="border-[#9e9efa]"
+              title="Automate repetitive tasks to free resources for higher-value results."
+              description="Turn viral reel comments into private VIP checkout links in under 2 seconds. Rotate randomized replies to maintain organic algorithmic safety."
+              imageSrc="/card-workflow.jpg"
+              imageAlt="Person in knit blue sweater holding shopping bags and tapping phone"
+              statBadge={{ icon: "⚡", text: "< 1.8s Response Latency" }}
+              actionText="Comment-to-DM Engine"
+              href="/platform/workflow"
+            />
 
-            {/* Pillar 2: AI Autonomous Co-Pilot (Fabulate Site-Orange #f8d7ca) */}
-            <div className="rounded-3xl border-2 border-[#eea07f] bg-[#f8d7ca] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#e3622b] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
-                  <RobotOutlined />
-                </div>
-                <Link
-                  href="/platform/ai"
-                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#e3622b] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
-                >
-                  Explore AI Agent &rarr;
-                </Link>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#883a19] tracking-tight">
-                  Autonomous AI Conversational Co-Pilot
-                </h3>
-                <p className="text-sm text-[#883a19]/90 leading-relaxed font-medium">
-                  Train an intelligent AI that knows your products, sizing, hours, and catalog. When customers ask complex questions in DMs or comments, it responds warmly in their language (English, Spanish, Hindi, French) with strict guardrails against hallucinations.
-                </p>
-              </div>
-              <ul className="space-y-2 text-xs text-[#883a19] font-bold pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e3622b]" />
-                  <span>Custom business knowledge &amp; strict safety rules</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e3622b]" />
-                  <span>Automatic language &amp; script detection</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e3622b]" />
-                  <span>Seamless human takeover trigger whenever requested</span>
-                </li>
-              </ul>
-            </div>
+            {/* Card 2: AI Conversational Co-Pilot (Signature Rose Pink Pastel - Matching Reference Image!) */}
+            <SplitCard
+              badge="Measurement & AI"
+              badgeIcon={<RobotOutlined className="text-[#e13181] text-xs" />}
+              headerIcon={<AppstoreOutlined />}
+              bgColor="#f7cbdf"
+              borderColor="border-[#ed83b3]"
+              title="Answer customer sizing, shipping, and order questions 24/7 without guessing."
+              description="Deploy a conversational AI agent with strict guardrails trained on your catalog and store policies in 40+ native languages."
+              imageSrc="/card-ai.jpg"
+              imageAlt="Entrepreneur happily managing customer chats on mobile"
+              statBadge={{ icon: "🤖", text: "40+ Languages Supported" }}
+              actionText="Autonomous AI Co-Pilot"
+              href="/platform/ai"
+            />
 
-            {/* Pillar 3: 24h Story Reaction Funnels (Fabulate Site-Pink #f7cbdf) */}
-            <div className="rounded-3xl border-2 border-[#ed83b3] bg-[#f7cbdf] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#e13181] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
-                  <FireOutlined />
-                </div>
-                <Link
-                  href="/platform/workflow"
-                  className="text-[11px] font-black uppercase tracking-wider text-white bg-[#e13181] px-3.5 py-1 rounded-full hover:bg-black transition-colors"
-                >
-                  Explore Stories &rarr;
-                </Link>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#871d4d] tracking-tight">
-                  24-Hour Story Reaction Automation
-                </h3>
-                <p className="text-sm text-[#871d4d]/90 leading-relaxed font-medium">
-                  Instagram Stories expire in 24 hours, but their leads don't have to. Turn emoji fire reactions (`🔥`), quick poll replies, and story question stickers into automated personalized DM conversations with instant download links.
-                </p>
-              </div>
-              <ul className="space-y-2 text-xs text-[#871d4d] font-bold pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e13181]" />
-                  <span>Detects emoji reactions (`🔥`, `❤️`, `👏`)</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e13181]" />
-                  <span>Interactive mobile device simulator in dashboard</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#e13181]" />
-                  <span>Direct Cloudinary media ingestion &amp; story posting</span>
-                </li>
-              </ul>
-            </div>
+            {/* Card 3: 24h Story Funnels (Signature Peach Coral Pastel) */}
+            <SplitCard
+              badge="Story Funnels"
+              badgeIcon={<FireOutlined className="text-[#e3622b] text-xs" />}
+              headerIcon={<AppstoreOutlined />}
+              bgColor="#f8d7ca"
+              borderColor="border-[#eea07f]"
+              title="Convert temporary 24h story reactions into permanent buying relationships."
+              description="Capture leads before stories vanish. Intercept emoji fire reactions and poll votes to fire personalized direct message discounts."
+              imageSrc="/card-stories.jpg"
+              imageAlt="Content creator reviewing Instagram stories at golden hour"
+              statBadge={{ icon: "🔥", text: "89.4% Story Open Rate" }}
+              actionText="Story Reaction Automation"
+              href="/platform/workflow"
+            />
 
-            {/* Pillar 4: Customer UGC Engine (Fabulate Site-Yellow #ffefb2) */}
-            <div className="rounded-3xl border-2 border-[#ffe006] bg-[#ffefb2] p-8 sm:p-10 space-y-5 hover:shadow-xl transition-all group">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#997a00] flex items-center justify-center text-xl shadow-xs group-hover:scale-110 transition-transform">
-                  <GiftOutlined />
-                </div>
-                <Link
-                  href="/solutions"
-                  className="text-[11px] font-black uppercase tracking-wider text-black bg-[#ffcc00] px-3.5 py-1 rounded-full hover:bg-black hover:text-white transition-colors"
-                >
-                  Explore UGC &rarr;
-                </Link>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-black text-[#451a03] tracking-tight">
-                  Customer UGC Ingestion &amp; Reward Engine
-                </h3>
-                <p className="text-sm text-[#451a03]/90 leading-relaxed font-medium">
-                  When loyal customers tag your handle in their photos, Fabroniee intercepts the webhook, queues the image in an admin moderation inbox, and with 1 click republishes it to your feed while firing a thank-you discount DM back to the customer.
-                </p>
-              </div>
-              <ul className="space-y-2 text-xs text-[#451a03] font-bold pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#997a00]" />
-                  <span>Webhook moderation inbox with 1-click approvals</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#997a00]" />
-                  <span>Automatic thank-you reward DMs to creator</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircleFilled className="text-[#997a00]" />
-                  <span>Generates endless viral social proof organically</span>
-                </li>
-              </ul>
-            </div>
+            {/* Card 4: Customer UGC Engine (Signature Butter Yellow Pastel) */}
+            <SplitCard
+              badge="UGC Engine"
+              badgeIcon={<GiftOutlined className="text-[#997a00] text-xs" />}
+              headerIcon={<AppstoreOutlined />}
+              bgColor="#ffefb2"
+              borderColor="border-[#ffe006]"
+              title="Curate tagged customer unboxings and fire automatic thank-you rewards."
+              description="Moderate tagged photos in your moderation inbox, republish to feed with 1 click, and fire automatic thank-you reward codes on autopilot."
+              imageSrc="/card-ugc.jpg"
+              imageAlt="Customer receiving and unboxing authentic brand order"
+              statBadge={{ icon: "🎁", text: "+34% Repeat Purchases" }}
+              actionText="UGC Moderation & Rewards"
+              href="/solutions"
+            />
           </div>
         </div>
       </section>
