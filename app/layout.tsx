@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AntdProvider } from "@/components/AntdProvider";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -39,7 +40,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#fafaf9] text-slate-900 font-sans">
         <AntdRegistry>
-          <AntdProvider>{children}</AntdProvider>
+          <AntdProvider>
+            {children}
+            <CookieConsent />
+          </AntdProvider>
         </AntdRegistry>
       </body>
     </html>

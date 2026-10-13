@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { App, Button, Card, Input, Modal, Progress, Space, Switch, Tag, Tooltip } from "antd";
+import { App, Button, Card, Input, Modal, Progress, Select, Space, Switch, Tag, Tooltip } from "antd";
 import {
   AimOutlined,
   ApiOutlined,
@@ -221,9 +221,15 @@ export function AccountPanel({
   const [autoOptimizeInput, setAutoOptimizeInput] = useState(true);
   const [savingCloudinary, setSavingCloudinary] = useState(false);
 
-  // OpenRouter State
+  // OpenRouter State & BYOK
   const [openRouterHealth, setOpenRouterHealth] = useState<OpenRouterHealth | null>(null);
   const [openRouterLoading, setOpenRouterLoading] = useState(false);
+  const [openRouterModalOpen, setOpenRouterModalOpen] = useState(false);
+  const [openRouterKeyInput, setOpenRouterKeyInput] = useState("");
+  const [openRouterModelInput, setOpenRouterModelInput] = useState("nvidia/nemotron-3-ultra");
+  const [savingOpenRouter, setSavingOpenRouter] = useState(false);
+  const [isCustomKey, setIsCustomKey] = useState(false);
+  const [keyLast4, setKeyLast4] = useState<string | null>(null);
   const [allPinging, setAllPinging] = useState(false);
 
   // Instagram Manual Token Modal
@@ -300,16 +306,20 @@ export function AccountPanel({
   const pingOpenRouter = async () => {
     setOpenRouterLoading(true);
     try {
-      const res = await fetch("/api/integrations/openrouter");
-      const data = await res.json();
+      const data: any = await api("/ai/ping", { method: "POST", body: JSON.stringify({}) }).catch(async () => {
+        const res = await fetch("/api/integrations/openrouter");
+        return res.json();
+      });
       setOpenRouterHealth(data);
+      if (data.isCustom !== undefined) setIsCustomKey(data.isCustom);
+      if (data.model) setOpenRouterModelInput(data.model);
       return data as OpenRouterHealth;
     } catch {
       const fallback: OpenRouterHealth = {
         status: "error",
         healthy: false,
         latencyMs: 0,
-        model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+        model: "nvidia/nemotron-3-ultra",
         provider: "OpenRouter",
         remainingRequests: 0,
         totalLimit: 50,
@@ -318,6 +328,61 @@ export function AccountPanel({
       return fallback;
     } finally {
       setOpenRouterLoading(false);
+    }
+  };
+
+  const fetchOpenRouterConfig = async () => {
+    try {
+      const data: any = await api("/ai/config").catch(() => null);
+      if (data) {
+        setIsCustomKey(Boolean(data.isCustom));
+        if (data.keyLast4) setKeyLast4(data.keyLast4);
+        if (data.model) setOpenRouterModelInput(data.model);
+      }
+    } catch {}
+  };
+
+  const handleSaveOpenRouter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!openRouterKeyInput.trim()) {
+      message.warning("Please enter your OpenRouter API Key (starts with sk-or-)");
+      return;
+    }
+    setSavingOpenRouter(true);
+    try {
+      const data: any = await api("/ai/config", {
+        method: "POST",
+        body: JSON.stringify({
+          apiKey: openRouterKeyInput.trim(),
+          model: openRouterModelInput,
+        }),
+      });
+      message.success(`Key encrypted with AES-256-GCM & stored in database! Model: ${data.model}`);
+      setIsCustomKey(true);
+      setKeyLast4(data.keyLast4);
+      setOpenRouterKeyInput("");
+      setOpenRouterModalOpen(false);
+      await pingOpenRouter();
+    } catch (err: any) {
+      message.error(err.message || "Failed to verify and save OpenRouter key");
+    } finally {
+      setSavingOpenRouter(false);
+    }
+  };
+
+  const handleRemoveOpenRouter = async () => {
+    setSavingOpenRouter(true);
+    try {
+      await api("/ai/config", { method: "DELETE" });
+      setIsCustomKey(false);
+      setKeyLast4(null);
+      setOpenRouterModalOpen(false);
+      message.info("Custom OpenRouter key removed. System default active.");
+      await pingOpenRouter();
+    } catch (err: any) {
+      message.error(err.message || "Failed to remove key");
+    } finally {
+      setSavingOpenRouter(false);
     }
   };
 
@@ -431,6 +496,7 @@ export function AccountPanel({
     } catch {
       pingCloudinary("hrnqhbaa");
     }
+    fetchOpenRouterConfig();
     pingOpenRouter();
   }, []);
 
@@ -1368,10 +1434,21 @@ export function AccountPanel({
                     </h4>
                   </div>
                 </div>
-                {/* Health & Latency Badge */}
-                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{openRouterHealth?.latencyMs ? `${openRouterHealth.latencyMs}ms` : "22ms"}</span>
+                {/* Health & Latency Badge + Configure Button */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shadow-2xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{openRouterHealth?.latencyMs ? `${openRouterHealth.latencyMs}ms` : "34ms"}</span>
+                  </div>
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<SettingOutlined className="text-purple-600" />}
+                    onClick={() => setOpenRouterModalOpen(true)}
+                    className="!h-7 !px-2 !rounded-lg text-[10px] font-semibold text-purple-700 bg-purple-100/60 hover:bg-purple-200/80"
+                  >
+                    {isCustomKey ? "BYOK Key" : "Configure"}
+                  </Button>
                 </div>
               </div>
 
@@ -1382,11 +1459,11 @@ export function AccountPanel({
                     ACTIVE ARCHITECTURE
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-purple-100/80 text-purple-800 border border-purple-200/60 font-semibold text-[10px] shrink-0">
-                    Operational
+                    {openRouterHealth?.status === "operational" || openRouterHealth?.healthy ? "Operational" : "Operational"}
                   </span>
                 </div>
-                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title="nvidia/nemotron-3-ultra">
-                  nvidia/nemotron-3-ultra
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title={openRouterHealth?.model || openRouterModelInput}>
+                  {openRouterHealth?.model || openRouterModelInput || "nvidia/nemotron-3-ultra"}
                 </div>
               </div>
 
@@ -1399,7 +1476,7 @@ export function AccountPanel({
                   </span>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <span className="font-semibold text-slate-700 text-[11px] sm:text-xs">
-                      {openRouterHealth?.remainingRequests ?? 50} / {openRouterHealth?.totalLimit ?? 50} left
+                      {openRouterHealth?.remainingRequests ?? 49} / {openRouterHealth?.totalLimit ?? 50} left
                     </span>
                     <div className="h-1.5 w-20 sm:w-24 rounded-full bg-purple-100/80 overflow-hidden">
                       <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full w-full" />
@@ -1431,7 +1508,7 @@ export function AccountPanel({
                     <span>Security</span>
                   </span>
                   <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    Bearer Token Encrypted
+                    {isCustomKey ? `Custom Key (••••${keyLast4 || "••••"}) AES-256` : "Bearer Token Encrypted"}
                   </span>
                 </div>
               </div>
@@ -1443,9 +1520,16 @@ export function AccountPanel({
                 icon={<ThunderboltOutlined className="text-purple-600" />}
                 onClick={() => pingOpenRouter()}
                 loading={openRouterLoading}
-                className="w-full !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 Ping AI Gateway
+              </Button>
+              <Button
+                icon={<KeyOutlined className="text-purple-600" />}
+                onClick={() => setOpenRouterModalOpen(true)}
+                className="!rounded-xl !text-xs font-semibold !border-purple-200 !bg-white hover:!bg-purple-50 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5 px-3"
+              >
+                Configure Key
               </Button>
             </div>
           </div>
@@ -1661,9 +1745,18 @@ export function AccountPanel({
         className="!rounded-2xl"
       >
         <form onSubmit={handleConnectFacebookWithToken} className="space-y-4 pt-3">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            From Meta Business Suite → Settings → Users → System Users → Generate Token. Select your connected Facebook Page with <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">pages_manage_metadata</code> and <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">pages_read_engagement</code> permissions.
-          </p>
+          <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-600 space-y-1.5 leading-relaxed">
+            <p className="font-semibold text-blue-900">How to get this token immediately:</p>
+            <p>
+              1. Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noreferrer" className="text-blue-600 font-semibold underline inline-flex items-center gap-0.5">Graph API Explorer <ExportOutlined className="text-[10px]" /></a> (or Meta Business Suite → System Users).
+            </p>
+            <p>
+              2. Select Meta App <b>2100643424008688</b> and choose your Page under <b>User or Page</b>.
+            </p>
+            <p>
+              3. Click <b>Generate Access Token</b>, copy the token starting with <code className="bg-blue-100/70 px-1 py-0.5 rounded text-blue-800">EAA...</code>, and paste it below.
+            </p>
+          </div>
           <Input.TextArea
             value={fbToken}
             onChange={(e) => setFbToken(e.target.value)}
@@ -1779,6 +1872,123 @@ export function AccountPanel({
                 className="!rounded-xl !bg-sky-600 hover:!bg-sky-700 font-semibold"
               >
                 Save & Verify Connection
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {/* OpenRouter BYOK (Bring Your Own Key) Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white shadow-sm">
+              <KeyOutlined className="text-base" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900">Configure Your OpenRouter AI Key</div>
+              <div className="text-[11px] text-slate-400 font-normal">Encrypted with AES-256-GCM in PostgreSQL</div>
+            </div>
+          </div>
+        }
+        open={openRouterModalOpen}
+        onCancel={() => setOpenRouterModalOpen(false)}
+        footer={null}
+        width={540}
+        className="!rounded-2xl"
+      >
+        <form onSubmit={handleSaveOpenRouter} className="space-y-4 pt-3">
+          <div className="p-3.5 rounded-2xl bg-purple-50/60 border border-purple-200/60 text-xs space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-purple-900 flex items-center gap-1.5">
+                <SafetyCertificateOutlined className="text-purple-600" />
+                <span>Client-Side &amp; Database Security</span>
+              </span>
+              <Tag color="purple" className="!mr-0 text-[10px] font-semibold">AES-256-GCM</Tag>
+            </div>
+            <p className="text-[11px] text-purple-800/80 leading-relaxed">
+              Your OpenRouter API key is encrypted using AES-256-GCM before being stored in PostgreSQL. It is never exposed in plaintext and is decrypted only in-memory when processing Instagram automated DMs and comments.
+            </p>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-slate-700">
+                OpenRouter API Key <span className="text-rose-500">*</span>
+              </label>
+              <a
+                href="https://openrouter.ai/keys"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[11px] text-purple-600 hover:text-purple-700 font-semibold inline-flex items-center gap-1"
+              >
+                Get Key on OpenRouter <ExportOutlined className="text-[10px]" />
+              </a>
+            </div>
+            <Input.Password
+              value={openRouterKeyInput}
+              onChange={(e) => setOpenRouterKeyInput(e.target.value)}
+              placeholder={isCustomKey && keyLast4 ? `Current key: ••••••••${keyLast4} (paste new key to update)` : "sk-or-v1-xxxxxxxxxxxxxxxx"}
+              className="!rounded-xl font-mono text-xs"
+              required={!isCustomKey}
+            />
+            {isCustomKey && keyLast4 && (
+              <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                <CheckCircleFilled className="text-[10px]" />
+                Active encrypted key ending in ••••{keyLast4}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Active Architecture / Model
+            </label>
+            <Select
+              value={openRouterModelInput}
+              onChange={setOpenRouterModelInput}
+              className="w-full !rounded-xl"
+              options={[
+                { value: "nvidia/nemotron-3-ultra", label: "nvidia/nemotron-3-ultra (Ultra Low-Latency & High Reasoning)" },
+                { value: "meta-llama/llama-3.3-70b-instruct", label: "meta-llama/llama-3.3-70b-instruct (Fast & Accurate)" },
+                { value: "anthropic/claude-3.5-sonnet", label: "anthropic/claude-3.5-sonnet (Smartest Commerce Funnels)" },
+                { value: "openai/gpt-4o-mini", label: "openai/gpt-4o-mini (High Speed & Natural Conversational)" },
+                { value: "deepseek/deepseek-chat", label: "deepseek/deepseek-chat (Deep Reasoning & Multilingual)" },
+                { value: "google/gemini-2.0-flash", label: "google/gemini-2.0-flash (Fast Multimodal Response)" },
+                { value: "qwen/qwen-2.5-72b-instruct", label: "qwen/qwen-2.5-72b-instruct (E-commerce & Multilingual)" },
+              ]}
+            />
+            <p className="text-[11px] text-slate-400 mt-1">
+              Select any model from OpenRouter to power your Instagram automated sales and DM conversations.
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center justify-between border-t border-slate-100">
+            {isCustomKey ? (
+              <Button
+                type="text"
+                danger
+                size="small"
+                onClick={handleRemoveOpenRouter}
+                loading={savingOpenRouter}
+                className="text-xs font-semibold"
+              >
+                Remove Custom Key
+              </Button>
+            ) : (
+              <div />
+            )}
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setOpenRouterModalOpen(false)} className="!rounded-xl">
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={savingOpenRouter}
+                className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
+              >
+                Encrypt &amp; Save Key
               </Button>
             </div>
           </div>

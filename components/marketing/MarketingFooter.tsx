@@ -88,6 +88,18 @@ export default function MarketingFooter() {
               >
                 Platform
               </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-cookie-preferences"));
+                  }
+                }}
+                style={{ color: "#52525b" }}
+                className="hover:!text-black transition-colors cursor-pointer text-[11px]"
+              >
+                Cookies
+              </button>
             </div>
 
             {/* Bottom Copyright & Utility Row */}

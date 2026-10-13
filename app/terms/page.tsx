@@ -9,19 +9,28 @@ export default function TermsPage() {
       {/* Navigation Header */}
       <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link
-            href="/login"
-            className="group inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors"
-          >
-            <ArrowLeftOutlined className="text-xs transition-transform group-hover:-translate-x-0.5" />
-            <span>Back to Login</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
-              V
-            </div>
-            <span className="text-sm font-bold tracking-tight text-slate-900">InstaVeyra</span>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="group inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              <ArrowLeftOutlined className="text-xs transition-transform group-hover:-translate-x-0.5" />
+              <span>Back to Home</span>
+            </Link>
+            <span className="text-slate-300 text-xs">|</span>
+            <Link
+              href="/login"
+              className="text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors"
+            >
+              Login
+            </Link>
           </div>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="h-6 w-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
+              F
+            </div>
+            <span className="text-sm font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">Fabroniee</span>
+          </Link>
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
             <SafetyCertificateFilled className="text-emerald-500 text-xs" />
             <span>Meta Platform Compliant</span>
