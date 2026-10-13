@@ -522,7 +522,7 @@ export function AccountPanel({
     setFbBusy(true);
     try {
       const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
+      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}&return_path=/account`);
       window.location.href = url;
     } catch (err: any) {
       message.error(err?.message || "Failed to initiate Facebook Page connection");
