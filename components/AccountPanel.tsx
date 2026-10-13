@@ -863,13 +863,6 @@ export function AccountPanel({
                 >
                   Reconnect
                 </Button>
-                <Button
-                  icon={<KeyOutlined className="text-slate-400" />}
-                  onClick={() => setIgTokenModalOpen(true)}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-purple-300 !bg-white hover:!bg-purple-50/50 !text-slate-600 hover:!text-purple-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
-                >
-                  Override
-                </Button>
               </div>
             </div>
 
@@ -1010,13 +1003,6 @@ export function AccountPanel({
                       className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 !border-0 shadow-md shadow-blue-600/20"
                     >
                       Connect Facebook Page
-                    </Button>
-                    <Button
-                      icon={<KeyOutlined />}
-                      onClick={() => setFbModalOpen(true)}
-                      className="!w-full sm:!w-auto !rounded-xl !border-slate-200 !bg-white hover:!bg-slate-50 text-xs text-slate-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
-                    >
-                      Paste Page Token
                     </Button>
                   </div>
                 </div>
@@ -1687,100 +1673,7 @@ export function AccountPanel({
         </div>
       </div>
 
-      {/* ── MODAL 1: Instagram Manual Token Override ─────────────────── */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <KeyOutlined className="text-purple-600 text-base" />
-            <span className="font-bold text-slate-900">Manual Instagram Token Override</span>
-          </div>
-        }
-        open={igTokenModalOpen}
-        onCancel={() => setIgTokenModalOpen(false)}
-        footer={null}
-        width={500}
-        className="!rounded-2xl"
-      >
-        <form onSubmit={handleInstagramTokenSubmit} className="space-y-4 pt-3">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Paste a long-lived user access token generated in Meta Graph API Explorer or Meta Business Suite. The token will be encrypted with AES-256-GCM before saving to your database.
-          </p>
-          <Input.TextArea
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            rows={4}
-            placeholder="Paste IGAA... or EAA... long-lived access token"
-            className="font-mono text-xs !rounded-xl"
-            required
-          />
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button onClick={() => setIgTokenModalOpen(false)} className="!rounded-xl">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={busy}
-              disabled={!token.trim()}
-              className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
-            >
-              Verify & Save Token
-            </Button>
-          </div>
-        </form>
-      </Modal>
 
-      {/* ── MODAL 2: Facebook Page Token Override ─────────────────────── */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <FacebookOutlined className="text-blue-600 text-base" />
-            <span className="font-bold text-slate-900">Facebook Page Token Override</span>
-          </div>
-        }
-        open={fbModalOpen}
-        onCancel={() => setFbModalOpen(false)}
-        footer={null}
-        width={500}
-        className="!rounded-2xl"
-      >
-        <form onSubmit={handleConnectFacebookWithToken} className="space-y-4 pt-3">
-          <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-slate-600 space-y-1.5 leading-relaxed">
-            <p className="font-semibold text-blue-900">How to get this token immediately:</p>
-            <p>
-              1. Open <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noreferrer" className="text-blue-600 font-semibold underline inline-flex items-center gap-0.5">Graph API Explorer <ExportOutlined className="text-[10px]" /></a> (or Meta Business Suite → System Users).
-            </p>
-            <p>
-              2. Select Meta App <b>2100643424008688</b> and choose your Page under <b>User or Page</b>.
-            </p>
-            <p>
-              3. Click <b>Generate Access Token</b>, copy the token starting with <code className="bg-blue-100/70 px-1 py-0.5 rounded text-blue-800">EAA...</code>, and paste it below.
-            </p>
-          </div>
-          <Input.TextArea
-            value={fbToken}
-            onChange={(e) => setFbToken(e.target.value)}
-            rows={4}
-            placeholder="Paste Page Access Token (EAA...)"
-            className="font-mono text-xs !rounded-xl"
-            required
-          />
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button onClick={() => setFbModalOpen(false)} className="!rounded-xl">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={fbBusy}
-              disabled={!fbToken.trim()}
-              className="!rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold"
-            >
-              Verify & Connect Page
-            </Button>
-          </div>
-        </form>
-      </Modal>
       {/* ── MODAL 3: Cloudinary Configuration ───────────────────────── */}
       <Modal
         title={

@@ -87,31 +87,6 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
           >
             {busy ? "Redirecting…" : "Connect a Facebook Page"}
           </button>
-
-          <details className="group text-sm">
-            <summary className="cursor-pointer list-none text-xs text-[var(--viz-muted)] hover:text-[var(--viz-ink)]">
-              <span className="underline decoration-dotted underline-offset-4">Paste a Page access token instead</span>
-            </summary>
-            <form onSubmit={connectWithToken} className="mt-3 space-y-2">
-              <p className="text-xs text-[var(--viz-muted)]">
-                From Meta Business Suite → Business Settings → Users → System Users → your system user → Generate New Token.
-              </p>
-              <textarea
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                rows={3}
-                aria-label="Facebook Page access token"
-                placeholder="Page access token"
-                className="w-full rounded-lg border border-[var(--viz-border)] bg-transparent px-3 py-2 font-mono text-xs outline-none focus:border-[var(--viz-ink)]"
-              />
-              <button
-                disabled={busy || !token.trim()}
-                className="rounded-full border border-[var(--viz-border)] px-4 py-1.5 text-xs hover:bg-black/5 disabled:opacity-40 dark:hover:bg-white/10"
-              >
-                {busy ? "Verifying…" : "Verify and connect"}
-              </button>
-            </form>
-          </details>
         </div>
       )}
 
