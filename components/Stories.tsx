@@ -621,7 +621,6 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
             showToolbar={false}
             theme="dark"
             fullBleed={true}
-            className="drop-shadow-2xl"
           >
             {/* Inner Story Canvas */}
             <div className="relative w-full h-full overflow-hidden bg-slate-950 flex flex-col justify-between select-none">

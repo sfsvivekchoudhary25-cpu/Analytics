@@ -323,6 +323,8 @@ export function MobilePreview({
     const frameStyle: React.CSSProperties = {
       transformOrigin: "top center",
       margin: 0,
+      boxShadow:
+        "inset 0 0 0 1px rgba(255, 255, 255, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.25), 0 10px 24px -10px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.25)",
     };
 
     switch (activeDevice) {
@@ -400,7 +402,7 @@ export function MobilePreview({
   };
 
   return (
-    <div className={`relative flex items-center justify-center w-full max-w-full select-none overflow-hidden ${className}`}>
+    <div className={`relative flex items-center justify-center w-full max-w-full select-none ${className}`}>
       {/* ── Scaled Hardware Canvas Wrapper (Centered) ────────────────── */}
       <div
         style={{
@@ -408,7 +410,7 @@ export function MobilePreview({
           height: containerH,
           maxWidth: "100%",
         }}
-        className="relative mx-auto transition-all duration-300 ease-out overflow-hidden"
+        className="relative mx-auto transition-all duration-300 ease-out"
       >
         <div
           style={{

@@ -1600,7 +1600,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
 
           {/* Right Column: Authentic Flagship Device Mockup */}
-          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0 overflow-hidden">
+          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
             <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Instagram Direct</span>
@@ -1635,7 +1635,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               height={650}
               device={previewDevice}
               showToolbar={false}
-              className="drop-shadow-2xl"
             >
               <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
                 {/* Instagram Direct Header */}
@@ -2179,7 +2178,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             </div>
 
             {/* Right Column: Authentic Flagship Device Mockup (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0 overflow-hidden">
+            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
               <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Follow-Gate Direct</span>
@@ -2214,7 +2213,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 height={650}
                 device={previewDevice}
                 showToolbar={false}
-                className="drop-shadow-2xl"
               >
                 <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
                   {/* Instagram Direct Header */}
