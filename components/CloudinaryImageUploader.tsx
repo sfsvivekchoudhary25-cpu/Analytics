@@ -153,15 +153,7 @@ export function CloudinaryImageUploader({
     <div className="space-y-2">
       {/* Header bar */}
       <div className="flex flex-wrap items-center justify-between gap-1.5">
-        <div className="flex items-center gap-1.5">
-          <label className="text-[11px] font-semibold text-[var(--viz-ink-2)]">{label}</label>
-          <span className="inline-flex items-center gap-0.5 rounded-md bg-sky-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-sky-600 dark:text-sky-400 border border-sky-500/20">
-            <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" />
-            </svg>
-            Cloudinary
-          </span>
-        </div>
+        <label className="text-[11px] font-semibold text-[var(--viz-ink-2)]">{label}</label>
 
         {value ? (
           <div className="flex items-center gap-2">
@@ -169,7 +161,7 @@ export function CloudinaryImageUploader({
               <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              {isCloudinary ? "Cloudinary Active" : "Image Set"}
+              {isCloudinary ? "Active Image" : "Image Set"}
             </span>
             <button
               type="button"
@@ -226,7 +218,7 @@ export function CloudinaryImageUploader({
             {/* Info and Actions */}
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-[var(--viz-ink)] truncate">
-                {isCloudinary ? "Hosted on Cloudinary CDN" : "Linked Image Asset"}
+                {isCloudinary ? "Optimized Cloud Image" : "Linked Image Asset"}
               </p>
               <p className="text-[11px] font-mono text-[var(--viz-muted)] truncate mt-0.5">
                 {value}
@@ -303,7 +295,7 @@ export function CloudinaryImageUploader({
               <span className={theme.iconText}>Click to upload image</span> or drag & drop
             </p>
             <p className="text-[11px] text-[var(--viz-muted)]">
-              PNG, JPG, WebP up to 15MB • Uploads straight to Cloudinary CDN
+              PNG, JPG, WebP up to 15MB • Fast Cloud CDN Delivery
             </p>
           </div>
         </div>
