@@ -198,6 +198,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleId, onDeleted]);
 
+  // Always reset scroll to top when mounting or switching automation rules
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [ruleId]);
+
   function addButton(preset?: Partial<MessageButton>) {
     if (cardButtons.length >= 3) return;
     setCardButtons((prev) => [
@@ -230,6 +237,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   }
 
   function selectTemplate(type: "text" | "button" | "product" | "file" | "card") {
+    const currentScrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setTemplateType(type);
     setDirty(true);
     if (type === "product") {
@@ -254,6 +262,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       if (cardButtons.length === 0) {
         setCardButtons([{ type: "web_url", title: "Learn More", url: "https://instagram.com" }]);
       }
+    }
+
+    // Prevent any unwanted automatic scroll down to bottom upon template change
+    if (typeof window !== "undefined") {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: currentScrollY, behavior: "instant" });
+      });
     }
   }
 
@@ -921,7 +936,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
 
           {/* Modern Template Format Tiles */}
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-5 w-full min-w-0">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-5 w-full min-w-0 [overflow-anchor:none]">
             {[
               {
                 id: "text",
@@ -970,7 +985,16 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => selectTemplate(tab.id as any)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentScrollY = window.scrollY;
+                    selectTemplate(tab.id as any);
+                    e.currentTarget.blur();
+                    requestAnimationFrame(() => {
+                      window.scrollTo({ top: currentScrollY, behavior: "instant" });
+                    });
+                  }}
                   className={`group relative flex flex-col justify-between rounded-2xl p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
                     idx === 4 ? "col-span-2 sm:col-span-1" : ""
                   } ${

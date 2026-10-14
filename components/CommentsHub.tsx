@@ -52,6 +52,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
   const handleOpenAutomation = useCallback((id: string) => {
     setOpenAutomationId(id);
     if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "instant" });
       const url = new URL(window.location.href);
       url.searchParams.set("ruleId", id);
       window.history.pushState(null, "", url.pathname + url.search);
