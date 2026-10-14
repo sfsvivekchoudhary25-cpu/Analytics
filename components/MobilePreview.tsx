@@ -400,14 +400,15 @@ export function MobilePreview({
   };
 
   return (
-    <div className={`relative flex items-center justify-center w-full select-none ${className}`}>
+    <div className={`relative flex items-center justify-center w-full max-w-full select-none overflow-hidden ${className}`}>
       {/* ── Scaled Hardware Canvas Wrapper (Centered) ────────────────── */}
       <div
         style={{
           width: containerW,
           height: containerH,
+          maxWidth: "100%",
         }}
-        className="relative mx-auto transition-all duration-300 ease-out"
+        className="relative mx-auto transition-all duration-300 ease-out overflow-hidden"
       >
         <div
           style={{

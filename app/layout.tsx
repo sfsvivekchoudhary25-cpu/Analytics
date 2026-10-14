@@ -1,9 +1,15 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AntdProvider } from "@/components/AntdProvider";
 import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 const montserrat = Montserrat({
   subsets: ["latin"],

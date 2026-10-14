@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CommentOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Comments } from "./Comments";
 import { CommentDmAutomation } from "./CommentDmAutomation";
@@ -28,8 +28,60 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
   const setTab = onTabChange ?? setUncontrolledTab;
   const [openAutomationId, setOpenAutomationId] = useState<string | null>(null);
 
+  // Sync openAutomationId from URL on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search);
+      const ruleId = q.get("ruleId");
+      if (ruleId) {
+        setOpenAutomationId(ruleId);
+      }
+    }
+  }, []);
+
+  // Listen to browser Back / Forward (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const q = new URLSearchParams(window.location.search);
+      setOpenAutomationId(q.get("ruleId") || null);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleOpenAutomation = useCallback((id: string) => {
+    setOpenAutomationId(id);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("ruleId", id);
+      window.history.pushState(null, "", url.pathname + url.search);
+    }
+  }, []);
+
+  const handleCloseAutomation = useCallback(() => {
+    setOpenAutomationId(null);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("ruleId");
+      const cleanPath = url.pathname + (url.search ? url.search : "");
+      window.history.pushState(null, "", cleanPath);
+    }
+  }, []);
+
+  const handleTabClick = (nextTab: Tab) => {
+    if (nextTab === "inbox" && openAutomationId) {
+      setOpenAutomationId(null);
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("ruleId");
+        window.history.replaceState(null, "", url.pathname + (url.search ? url.search : ""));
+      }
+    }
+    setTab(nextTab);
+  };
+
   return (
-    <div className="w-full space-y-8 animate-page-entrance">
+    <div className="w-full max-w-full min-w-0 space-y-6 sm:space-y-8 animate-page-entrance">
       {/* ── Modern Ant Design Styled Sub-Navigation Tabs ── */}
       <div
         role="tablist"
@@ -43,7 +95,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
               key={t.id}
               role="tab"
               aria-selected={isActive}
-              onClick={() => setTab(t.id)}
+              onClick={() => handleTabClick(t.id)}
               className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
                 isActive
                   ? "bg-blue-50 text-blue-600 shadow-2xs ring-1 ring-blue-500/20"
@@ -62,11 +114,11 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
         (openAutomationId ? (
           <CommentDmAutomation
             ruleId={openAutomationId}
-            onBack={() => setOpenAutomationId(null)}
-            onDeleted={() => setOpenAutomationId(null)}
+            onBack={handleCloseAutomation}
+            onDeleted={handleCloseAutomation}
           />
         ) : (
-          <CommentDmAutomationList onOpen={setOpenAutomationId} onOpenDashboard={onOpenDashboard} />
+          <CommentDmAutomationList onOpen={handleOpenAutomation} onOpenDashboard={onOpenDashboard} />
         ))}
     </div>
   );

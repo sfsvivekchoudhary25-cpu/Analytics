@@ -56,15 +56,33 @@ export default function AppDashboard({
   const [messagesInitialText, setMessagesInitialText] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const handleCommentsTabChange = useCallback((nextSubTab: "inbox" | "automation") => {
+    setCommentsTab(nextSubTab);
+    if (typeof window !== "undefined") {
+      if (nextSubTab === "automation") {
+        if (window.location.pathname !== "/automations") {
+          window.history.pushState(null, "", "/automations");
+        }
+      } else {
+        if (window.location.pathname !== "/comments" || window.location.search) {
+          window.history.pushState(null, "", "/comments");
+        }
+      }
+    }
+  }, []);
+
   const setTab = useCallback((newTab: SectionId) => {
     setTabState(newTab);
     if (typeof window !== "undefined") {
-      const targetPath = `/${newTab}`;
+      let targetPath = `/${newTab}`;
+      if (newTab === "comments") {
+        targetPath = commentsTab === "automation" ? "/automations" : "/comments";
+      }
       if (window.location.pathname !== targetPath) {
         window.history.pushState(null, "", targetPath);
       }
     }
-  }, []);
+  }, [commentsTab]);
 
   const openMessagesWithUser = useCallback((user?: string, text?: string) => {
     if (user) setMessagesTargetUser(user);
@@ -74,11 +92,11 @@ export default function AppDashboard({
 
   const openAutomations = useCallback(() => {
     setCommentsTab("automation");
-    setTab("comments");
+    setTabState("comments");
     if (typeof window !== "undefined") {
       window.history.pushState(null, "", "/automations");
     }
-  }, [setTab]);
+  }, []);
 
   const handleLoadError = useCallback(
     (err: unknown) => {
@@ -98,38 +116,46 @@ export default function AppDashboard({
   );
 
   useEffect(() => {
-    if (!initialTab && typeof window !== "undefined") {
+    if (typeof window !== "undefined") {
       const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      if (path === "comments") {
-        setTabState("comments");
-      } else if (path === "automations") {
-        setTabState("comments");
+      const q = new URLSearchParams(window.location.search);
+
+      // Detect sub-tab for comments/automations
+      if (path === "automations" || q.get("tab") === "automation") {
         setCommentsTab("automation");
-      } else if (path === "messages") {
-        setTabState("messages");
-      } else if (path === "account" || path === "settings") {
+        setTabState("comments");
+      } else if (path === "comments") {
+        setTabState("comments");
+        if (q.get("tab") !== "automation") {
+          setCommentsTab("inbox");
+        }
+      } else if (path === "settings") {
         setTabState("account");
-      } else if (path === "photos") {
-        setTabState("photos");
-      } else if (path === "stories") {
-        setTabState("stories");
-      } else if (path === "hashtags") {
-        setTabState("hashtags");
-      } else if (path === "dashboard") {
+      } else if (SECTIONS.some((s) => s.id === path)) {
+        setTabState(path as SectionId);
+      } else if (!path && !initialTab) {
         setTabState("dashboard");
+      }
+
+      if (q.get("user")) {
+        setMessagesTargetUser(q.get("user"));
       }
     }
 
     const handlePopState = () => {
       const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      if (SECTIONS.some((s) => s.id === path)) {
-        setTabState(path as SectionId);
-      } else if (path === "automations") {
+      const q = new URLSearchParams(window.location.search);
+      if (path === "automations") {
         setTabState("comments");
         setCommentsTab("automation");
+      } else if (path === "comments") {
+        setTabState("comments");
+        setCommentsTab(q.get("tab") === "automation" ? "automation" : "inbox");
       } else if (path === "settings") {
         setTabState("account");
-      } else if (path === "dashboard") {
+      } else if (SECTIONS.some((s) => s.id === path)) {
+        setTabState(path as SectionId);
+      } else if (!path) {
         setTabState("dashboard");
       }
     };
@@ -159,7 +185,13 @@ export default function AppDashboard({
       if (q.get("error")) setError(q.get("error"));
       if (q.get("connected")) setNotice(`Connected @${q.get("connected")}.`);
       if (q.get("fbPageConnected")) setNotice(`Facebook Page "${q.get("fbPageConnected")}" connected.`);
-      if (q.size) {
+      const isOAuthRedirect =
+        q.has("connected") ||
+        q.has("fbPageConnected") ||
+        q.has("error") ||
+        q.has("code") ||
+        q.has("state");
+      if (isOAuthRedirect) {
         setTab("account");
         window.history.replaceState(null, "", "/account");
       }
@@ -373,8 +405,8 @@ export default function AppDashboard({
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
               : active === "hashtags"
-                ? "animate-page-entrance w-full space-y-6 p-4 sm:p-6"
-                : "animate-page-entrance mx-auto w-full max-w-[100rem] space-y-6 p-4 sm:p-6"
+                ? "animate-page-entrance w-full space-y-6 p-3 sm:p-6"
+                : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6"
           }
         >
           {active === "dashboard" && (
@@ -397,7 +429,11 @@ export default function AppDashboard({
             />
           )}
           {active === "comments" && (
-            <CommentsHub tab={commentsTab} onTabChange={setCommentsTab} onOpenDashboard={() => setTab("dashboard")} />
+            <CommentsHub
+              tab={commentsTab}
+              onTabChange={handleCommentsTabChange}
+              onOpenDashboard={() => setTab("dashboard")}
+            />
           )}
           {active === "stories" && (
             <Stories username={status.username} ownAvatar={status.profilePictureUrl} />

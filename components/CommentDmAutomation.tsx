@@ -117,7 +117,7 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
   );
 }
 
-const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-sm";
+const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-sm w-full min-w-0";
 
 type Props = { ruleId: string; onBack: () => void; onDeleted: () => void };
 
@@ -418,7 +418,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const gatePreviewText = followGateText.replaceAll("{username}", "there") || "Oh no! It seems you're not following me 👀\nVisit my profile and hit that follow button 😁.\nOnce you do, I'll send you what you asked for!";
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6">
       {/* Top Navigation Row */}
       <div className="flex items-center justify-between gap-2">
         <button
@@ -557,9 +557,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       </div>
 
       {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
-      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
         {/* Step 1: Trigger Condition */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all">
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
             <div className="flex items-center justify-between gap-2">
@@ -601,7 +601,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     setDirty(true);
                   }
                 }}
-                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer ${
+                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer truncate ${
                   triggerMode === "keywords"
                     ? "bg-background text-[var(--viz-ink)] shadow-xs"
                     : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
@@ -619,7 +619,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   setKeywordDraft("");
                   setDirty(true);
                 }}
-                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer ${
+                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer truncate ${
                   triggerMode === "any"
                     ? "bg-background text-[var(--viz-ink)] shadow-xs"
                     : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
@@ -734,7 +734,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* Step 2: Target Post */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all">
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
             <div className="flex items-center justify-between gap-2">
@@ -876,12 +876,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 );
               })()
             ) : (
-              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all">
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
                     <InstagramIcon className="h-5 w-5" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
                     <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
                   </div>
@@ -889,7 +889,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <button
                   type="button"
                   onClick={openPicker}
-                  className="shrink-0 rounded-xl bg-foreground px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
+                  className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
                   Choose Post
                 </button>
@@ -921,7 +921,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
 
           {/* Modern Template Format Tiles */}
-          <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-3 lg:grid-cols-5 w-full min-w-0">
             {[
               {
                 id: "text",
@@ -971,7 +971,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   key={tab.id}
                   type="button"
                   onClick={() => selectTemplate(tab.id as any)}
-                  className={`group relative flex flex-col justify-between rounded-2xl p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[118px] ${
+                  className={`group relative flex flex-col justify-between rounded-2xl p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
                     idx === 4 ? "col-span-2 sm:col-span-1" : ""
                   } ${
                     active
@@ -1016,31 +1016,45 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* 2-Column Modern Studio: Editor Form + Sticky iPhone Mockup */}
-        <div className="grid gap-6 lg:grid-cols-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
           {/* Left Column: Form Controls */}
-          <div className="space-y-4 lg:col-span-7">
+          <div className="space-y-4 lg:col-span-7 w-full min-w-0">
             {/* Primary message caption card */}
-            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <label className="text-xs font-bold text-[var(--viz-ink)]">Message Text / Caption</label>
-                    <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-semibold text-blue-600 dark:text-blue-400">
+            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5">
+              {/* Header: Title, Subtitle, & Monospace Character Counter */}
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <label className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">
+                      Message Text / Caption
+                    </label>
+                    <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 border border-blue-500/20">
                       Primary DM
                     </span>
                   </div>
-                  <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">
+                  <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
                     Sent directly to the commenter&apos;s Instagram DM inbox.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-black/[0.04] dark:bg-white/[0.08] px-2 py-0.5 font-mono text-[10px] font-medium text-[var(--viz-muted)]">
-                    {dmText.length} / 1000
+                <div className="shrink-0 pt-0.5">
+                  <span
+                    className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
+                      dmText.length > 900
+                        ? "text-red-500 bg-red-500/10 border-red-500/25"
+                        : dmText.length > 700
+                        ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
+                        : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
+                    }`}
+                  >
+                    <span>{dmText.length}</span>
+                    <span className="opacity-40">/</span>
+                    <span>1000</span>
                   </span>
                 </div>
               </div>
 
-              <div className="relative">
+              {/* Textarea Composer */}
+              <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
                 <textarea
                   value={dmText}
                   onChange={(e) => {
@@ -1050,43 +1064,56 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   maxLength={1000}
                   rows={3}
                   placeholder="Hey! 👋 Thanks for your comment. Here is the link you requested:"
-                  className="w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-3 text-xs outline-none transition-all focus:border-blue-500 focus:bg-transparent focus:ring-2 focus:ring-blue-500/15 resize-none leading-relaxed"
+                  className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[5.5rem]"
                 />
               </div>
 
-              {/* Dynamic variable insertion pills */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                <span className="text-[10px] font-medium text-[var(--viz-muted)]">Quick Insert:</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                    setDirty(true);
-                  }}
-                  className="inline-flex items-center gap-1 rounded-full border border-purple-500/20 bg-purple-500/5 px-2.5 py-1 text-[10px] font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/40 transition-all"
-                >
-                  <span className="font-mono font-bold">@username</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                    setDirty(true);
-                  }}
-                  className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all cursor-pointer"
-                >
-                  <span>+ Friendly Greeting</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
-                    setDirty(true);
-                  }}
-                  className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/5 px-2.5 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all cursor-pointer"
-                >
-                  <span>+ Call to Action</span>
-                </button>
+              {/* Quick Insert Variables: Symmetric 3-Column Grid */}
+              <div className="space-y-1.5 pt-0.5">
+                <div className="flex items-center justify-between px-0.5">
+                  <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
+                    Quick Insert
+                  </span>
+                  <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
+                    Tap to append
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                      setDirty(true);
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                  >
+                    <span className="font-mono text-[10px] opacity-75">@</span>
+                    <span className="truncate">username</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                      setDirty(true);
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                  >
+                    <span>👋</span>
+                    <span className="truncate">Greeting</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
+                      setDirty(true);
+                    }}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2 py-2 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                  >
+                    <span>👇</span>
+                    <span className="truncate sm:hidden">CTA</span>
+                    <span className="truncate hidden sm:inline">Call to Action</span>
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1470,7 +1497,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
 
           {/* Right Column: Authentic Flagship Device Mockup */}
-          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start">
+          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0 overflow-hidden">
             <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Instagram Direct</span>
@@ -1843,69 +1870,98 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {requireFollow && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full min-w-0">
             {/* Left Column: Editor & Workflow Explanation (7 cols) */}
-            <div className="lg:col-span-7 space-y-5">
+            <div className="lg:col-span-7 space-y-5 w-full min-w-0">
               {/* Message Editor Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5">
+                {/* Header: Title, Subtitle, & Character Counter */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
                         <MessageSquareIcon className="h-3.5 w-3.5" />
                       </span>
                       <p className="text-xs font-bold text-[var(--viz-ink)]">Follow-Gate Private Message</p>
                     </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
                       Sent automatically to commenters who do not follow your account yet.
                     </p>
                   </div>
-                  <span className="rounded-full bg-black/5 dark:bg-white/10 px-2 py-0.5 text-[10px] font-mono text-[var(--viz-muted)]">
-                    {followGateText.length} / 1000
-                  </span>
+                  <div className="shrink-0 pt-0.5">
+                    <span
+                      className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
+                        followGateText.length > 900
+                          ? "text-red-500 bg-red-500/10 border-red-500/25"
+                          : followGateText.length > 700
+                          ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
+                          : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
+                      }`}
+                    >
+                      <span>{followGateText.length}</span>
+                      <span className="opacity-40">/</span>
+                      <span>1000</span>
+                    </span>
+                  </div>
                 </div>
 
-                <textarea
-                  value={followGateText}
-                  onChange={(e) => { setFollowGateText(e.target.value.slice(0, 1000)); setDirty(true); }}
-                  rows={4}
-                  placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
-                  className="w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-3 text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 leading-relaxed resize-none transition-all"
-                />
+                {/* Textarea */}
+                <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
+                  <textarea
+                    value={followGateText}
+                    onChange={(e) => { setFollowGateText(e.target.value.slice(0, 1000)); setDirty(true); }}
+                    rows={4}
+                    placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
+                    className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[6rem]"
+                  />
+                </div>
 
-                {/* Quick Insert Pills */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span className="text-[10px] font-medium text-[var(--viz-muted)]">Quick Insert:</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                      setDirty(true);
-                    }}
-                    className="inline-flex items-center gap-1 rounded-full border border-purple-500/20 bg-purple-500/5 px-2.5 py-1 text-[10px] font-medium text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 hover:border-purple-500/40 transition-all cursor-pointer"
-                  >
-                    <span className="font-mono font-bold">@username</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                      setDirty(true);
-                    }}
-                    className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all cursor-pointer"
-                  >
-                    <span>+ Friendly Greeting</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
-                      setDirty(true);
-                    }}
-                    className="inline-flex items-center gap-1 rounded-full border border-blue-500/20 bg-blue-500/5 px-2.5 py-1 text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/40 transition-all cursor-pointer"
-                  >
-                    <span>+ Hit Follow CTA</span>
-                  </button>
+                {/* Quick Insert Variables: Symmetric 3-Column Grid */}
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="flex items-center justify-between px-0.5">
+                    <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
+                      Quick Insert
+                    </span>
+                    <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
+                      Tap to append
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                        setDirty(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span className="font-mono text-[10px] opacity-75">@</span>
+                      <span className="truncate">username</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                        setDirty(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span>👋</span>
+                      <span className="truncate">Greeting</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
+                        setDirty(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/8 px-2 py-2 text-[11px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/15 hover:border-blue-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span>👇</span>
+                      <span className="truncate sm:hidden">Follow CTA</span>
+                      <span className="truncate hidden sm:inline">Hit Follow CTA</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Preset Templates */}
@@ -2003,7 +2059,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             </div>
 
             {/* Right Column: Authentic Flagship Device Mockup (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start">
+            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0 overflow-hidden">
               <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Follow-Gate Direct</span>
@@ -2674,14 +2730,14 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
       {/* Floating Unsaved Changes Bar */}
       {dirty && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-[var(--viz-border)] bg-background/95 px-5 py-2.5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <span className="flex h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse" />
-          <span className="text-xs font-semibold text-[var(--viz-ink)]">You have unsaved changes</span>
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 sm:gap-3 rounded-full border border-[var(--viz-border)] bg-background/95 px-3.5 sm:px-5 py-2 sm:py-2.5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <span className="flex h-2 sm:h-2.5 w-2 sm:w-2.5 shrink-0 rounded-full bg-amber-500 animate-pulse" />
+          <span className="text-[11px] sm:text-xs font-semibold text-[var(--viz-ink)] truncate">Unsaved changes</span>
           <button
             type="button"
             onClick={save}
             disabled={saving}
-            className="flex items-center gap-1.5 rounded-full bg-foreground px-4 py-1.5 text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-50 transition-all"
+            className="shrink-0 flex items-center gap-1.5 rounded-full bg-foreground px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-50 transition-all"
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>

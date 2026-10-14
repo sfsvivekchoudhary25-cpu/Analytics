@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Inbox } from "./Inbox";
 import { MessageAutomation } from "./MessageAutomation";
 
@@ -20,6 +20,43 @@ export function MessagesTab({
 }) {
   const [view, setView] = useState<"inbox" | "auto">("inbox");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search);
+      if (q.get("view") === "auto") {
+        setView("auto");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const q = new URLSearchParams(window.location.search);
+      setView(q.get("view") === "auto" ? "auto" : "inbox");
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleOpenAutomations = useCallback(() => {
+    setView("auto");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("view", "auto");
+      window.history.pushState(null, "", url.pathname + url.search);
+    }
+  }, []);
+
+  const handleBackToInbox = useCallback(() => {
+    setView("inbox");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("view");
+      const cleanPath = url.pathname + (url.search ? url.search : "");
+      window.history.pushState(null, "", cleanPath);
+    }
+  }, []);
+
   if (view === "auto") {
     return (
       <div className="h-full w-full flex flex-col bg-slate-50/50 overflow-hidden">
@@ -27,7 +64,7 @@ export function MessagesTab({
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               type="button"
-              onClick={() => setView("inbox")}
+              onClick={handleBackToInbox}
               className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
               aria-label="Back to Messages"
             >
@@ -58,7 +95,7 @@ export function MessagesTab({
       <Inbox
         username={username}
         ownAvatar={ownAvatar}
-        onOpenAutomations={() => setView("auto")}
+        onOpenAutomations={handleOpenAutomations}
         targetUsername={targetUsername}
         initialMessageText={initialMessageText}
       />
