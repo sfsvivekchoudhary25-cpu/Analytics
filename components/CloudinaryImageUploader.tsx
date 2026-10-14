@@ -148,7 +148,7 @@ export function CloudinaryImageUploader({
   const isCloudinary = value && (value.includes("cloudinary.com") || value.includes("res.cloudinary"));
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 [overflow-anchor:none]">
       {/* Header bar */}
       <div className="flex flex-wrap items-center justify-between gap-1.5">
         <label className="text-[11px] font-semibold text-[var(--viz-ink-2)]">{label}</label>
@@ -175,7 +175,7 @@ export function CloudinaryImageUploader({
       {/* Main Upload / Preview Area */}
       {value ? (
         /* Image Preview State */
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-2.5 transition-all">
+        <div className="relative overflow-hidden rounded-2xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-2.5 transition-all [overflow-anchor:none]">
           <div className="flex items-center gap-3">
             {/* Thumbnail Preview */}
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs group">
@@ -209,8 +209,13 @@ export function CloudinaryImageUploader({
                 <button
                   type="button"
                   disabled={isUploading}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium shadow-xs transition-all ${theme.btnPrimary} disabled:opacity-50`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    (e.currentTarget as HTMLElement)?.blur();
+                    fileInputRef.current?.click();
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium shadow-xs transition-all ${theme.btnPrimary} disabled:opacity-50 cursor-pointer`}
                 >
                   <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -222,10 +227,19 @@ export function CloudinaryImageUploader({
 
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    (e.currentTarget as HTMLElement)?.blur();
+                    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
                     onChange("");
+                    if (typeof window !== "undefined") {
+                      requestAnimationFrame(() => {
+                        window.scrollTo({ top: scrollY, behavior: "instant" });
+                      });
+                    }
                   }}
-                  className="inline-flex items-center gap-1 rounded-lg border border-[var(--viz-border)] bg-transparent px-2.5 py-1 text-[11px] font-medium text-[var(--viz-muted)] hover:text-red-600 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
+                  className="inline-flex items-center gap-1 rounded-lg border border-[var(--viz-border)] bg-transparent px-2.5 py-1 text-[11px] font-medium text-[var(--viz-muted)] hover:text-red-600 hover:bg-red-500/10 hover:border-red-500/20 transition-all cursor-pointer"
                   title="Remove image"
                 >
                   <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

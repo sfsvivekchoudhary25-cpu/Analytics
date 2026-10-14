@@ -117,7 +117,43 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
   );
 }
 
-const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-sm w-full min-w-0";
+const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-sm w-full min-w-0 [overflow-anchor:none]";
+
+/**
+ * Captures current scroll position and locks it across consecutive
+ * animation frames so asynchronous React reconciliation or browser layout
+ * shifts cannot automatically scroll the page down.
+ */
+function preserveScroll<T>(action: () => T): T {
+  const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
+  const result = action();
+  if (typeof window !== "undefined") {
+    window.scrollTo({ top: scrollY, behavior: "instant" });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: scrollY, behavior: "instant" });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: scrollY, behavior: "instant" });
+      });
+    });
+  }
+  return result;
+}
+
+/**
+ * Universal click wrapper for buttons:
+ * 1. Stops default browser navigation/jump
+ * 2. Stops event bubbling
+ * 3. Immediately blurs the button so browser focus engine does not scroll it into view
+ * 4. Preserves scroll position across React state transitions
+ */
+function handleButtonClick(e: React.MouseEvent<any>, action: () => void) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.currentTarget && typeof (e.currentTarget as HTMLElement).blur === "function") {
+    (e.currentTarget as HTMLElement).blur();
+  }
+  preserveScroll(action);
+}
 
 type Props = { ruleId: string; onBack: () => void; onDeleted: () => void };
 
@@ -206,70 +242,70 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   }, [ruleId]);
 
   function addButton(preset?: Partial<MessageButton>) {
-    if (cardButtons.length >= 3) return;
-    setCardButtons((prev) => [
-      ...prev,
-      {
-        type: preset?.type || "web_url",
-        title: (preset?.title || "Click Here").slice(0, 20),
-        url: preset?.url || "https://instagram.com",
-        payload: preset?.payload || "ACTION",
-      },
-    ]);
-    setDirty(true);
+    preserveScroll(() => {
+      if (cardButtons.length >= 3) return;
+      setCardButtons((prev) => [
+        ...prev,
+        {
+          type: preset?.type || "web_url",
+          title: (preset?.title || "Click Here").slice(0, 20),
+          url: preset?.url || "https://instagram.com",
+          payload: preset?.payload || "ACTION",
+        },
+      ]);
+      setDirty(true);
+    });
   }
 
   function updateButton(index: number, patch: Partial<MessageButton>) {
-    setCardButtons((prev) => {
-      const copy = [...prev];
-      copy[index] = { ...copy[index], ...patch };
-      if (copy[index].title.length > 20) {
-        copy[index].title = copy[index].title.slice(0, 20);
-      }
-      return copy;
+    preserveScroll(() => {
+      setCardButtons((prev) => {
+        const copy = [...prev];
+        copy[index] = { ...copy[index], ...patch };
+        if (copy[index].title.length > 20) {
+          copy[index].title = copy[index].title.slice(0, 20);
+        }
+        return copy;
+      });
+      setDirty(true);
     });
-    setDirty(true);
   }
 
   function removeButton(index: number) {
-    setCardButtons((prev) => prev.filter((_, i) => i !== index));
-    setDirty(true);
+    preserveScroll(() => {
+      setCardButtons((prev) => prev.filter((_, i) => i !== index));
+      setDirty(true);
+    });
   }
 
   function selectTemplate(type: "text" | "button" | "product" | "file" | "card") {
-    const currentScrollY = typeof window !== "undefined" ? window.scrollY : 0;
-    setTemplateType(type);
-    setDirty(true);
-    if (type === "product") {
-      if (!cardTitle) setCardTitle("Featured Product");
-      if (!cardSubtitle) setCardSubtitle("$29.99 • Special Offer");
-      if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Shop Now", url: cardFileUrl || "https://instagram.com" }]);
+    preserveScroll(() => {
+      setTemplateType(type);
+      setDirty(true);
+      if (type === "product") {
+        if (!cardTitle) setCardTitle("Featured Product");
+        if (!cardSubtitle) setCardSubtitle("$29.99 • Special Offer");
+        if (cardButtons.length === 0) {
+          setCardButtons([{ type: "web_url", title: "Shop Now", url: cardFileUrl || "https://instagram.com" }]);
+        }
+      } else if (type === "file") {
+        if (!cardTitle) setCardTitle("Free Resource Guide");
+        if (!cardSubtitle) setCardSubtitle("Instant PDF Download");
+        if (cardButtons.length === 0) {
+          setCardButtons([{ type: "web_url", title: "Download PDF", url: cardFileUrl || "https://instagram.com" }]);
+        }
+      } else if (type === "button") {
+        if (cardButtons.length === 0) {
+          setCardButtons([{ type: "web_url", title: "Visit Website", url: "https://instagram.com" }]);
+        }
+      } else if (type === "card") {
+        if (!cardTitle) setCardTitle("Special Offer");
+        if (!cardSubtitle) setCardSubtitle("Tap below to learn more");
+        if (cardButtons.length === 0) {
+          setCardButtons([{ type: "web_url", title: "Learn More", url: "https://instagram.com" }]);
+        }
       }
-    } else if (type === "file") {
-      if (!cardTitle) setCardTitle("Free Resource Guide");
-      if (!cardSubtitle) setCardSubtitle("Instant PDF Download");
-      if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Download PDF", url: cardFileUrl || "https://instagram.com" }]);
-      }
-    } else if (type === "button") {
-      if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Visit Website", url: "https://instagram.com" }]);
-      }
-    } else if (type === "card") {
-      if (!cardTitle) setCardTitle("Special Offer");
-      if (!cardSubtitle) setCardSubtitle("Tap below to learn more");
-      if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Learn More", url: "https://instagram.com" }]);
-      }
-    }
-
-    // Prevent any unwanted automatic scroll down to bottom upon template change
-    if (typeof window !== "undefined") {
-      requestAnimationFrame(() => {
-        window.scrollTo({ top: currentScrollY, behavior: "instant" });
-      });
-    }
+    });
   }
 
   const refreshLogs = useCallback(async () => {
@@ -309,18 +345,23 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
   const keywords = keywordDraft.split(",").map((k) => k.trim()).filter(Boolean);
   const removeKeyword = (k: string) => {
-    setKeywordDraft(keywords.filter((x) => x !== k).join(", "));
-    setDirty(true);
+    preserveScroll(() => {
+      setKeywordDraft(keywords.filter((x) => x !== k).join(", "));
+      setDirty(true);
+    });
   };
   const addKeyword = (raw: string) => {
     const k = raw.trim();
     if (!k || keywords.includes(k)) return;
-    setKeywordDraft([...keywords, k].join(", "));
-    setDirty(true);
+    preserveScroll(() => {
+      setKeywordDraft([...keywords, k].join(", "));
+      setDirty(true);
+    });
   };
 
   async function save() {
     if (!rule) return;
+    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setSaving(true);
     setError(null);
     const cleanedButtons = cardButtons.map((b) => {
@@ -361,6 +402,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       setEditingName(false);
       setSavedNote("Saved");
       setTimeout(() => setSavedNote(null), 2000);
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: scrollY, behavior: "instant" });
+        });
+      }
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -370,10 +416,16 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
   async function toggleActive() {
     if (!rule) return;
+    const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
     setError(null);
     try {
       const updated = await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ enabled: !rule.enabled }) });
       setRule(updated);
+      if (typeof window !== "undefined") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: scrollY, behavior: "instant" });
+        });
+      }
     } catch (err) {
       setError((err as Error).message);
     }
@@ -433,7 +485,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const gatePreviewText = followGateText.replaceAll("{username}", "there") || "Oh no! It seems you're not following me 👀\nVisit my profile and hit that follow button 😁.\nOnce you do, I'll send you what you asked for!";
 
   return (
-    <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6">
+    <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6 [overflow-anchor:none]">
       {/* Top Navigation Row */}
       <div className="flex items-center justify-between gap-2">
         <button
@@ -457,7 +509,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             <TrashIcon className="h-4 w-4" />
           </button>
           <button
-            onClick={save}
+            type="button"
+            onClick={(e) => handleButtonClick(e, save)}
             disabled={saving || !dirty}
             className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all shadow-xs ${
               dirty
@@ -473,7 +526,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       {error && <p role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs sm:text-sm text-red-600">{error}</p>}
 
       {/* Header Card: Icon, editable name, status pill, mobile action bar */}
-      <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs">
+      <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs [overflow-anchor:none]">
         <div className="flex items-start gap-3 sm:gap-4">
           <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-foreground text-background shadow-xs">
             <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -503,7 +556,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 )}
                 {!editingName && (
                   <button
-                    onClick={() => setEditingName(true)}
+                    type="button"
+                    onClick={(e) => handleButtonClick(e, () => setEditingName(true))}
                     aria-label="Rename automation"
                     title="Rename automation"
                     className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
@@ -515,7 +569,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
               {/* Status Toggle Badge */}
               <button
-                onClick={toggleActive}
+                type="button"
+                onClick={(e) => handleButtonClick(e, toggleActive)}
                 className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
                   rule.enabled
                     ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
@@ -539,7 +594,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
             <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
               <button
-                onClick={save}
+                type="button"
+                onClick={(e) => handleButtonClick(e, save)}
                 disabled={saving || !dirty}
                 className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
                   dirty
@@ -551,6 +607,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               </button>
 
               <button
+                type="button"
                 onClick={removeAutomation}
                 disabled={deleting}
                 title="Delete this automation"
@@ -574,7 +631,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
         {/* Step 1: Trigger Condition */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0">
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
             <div className="flex items-center justify-between gap-2">
@@ -607,15 +664,15 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             <div className="grid grid-cols-2 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.03] p-1 dark:bg-white/[0.04] shadow-2xs">
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setTriggerMode("keywords");
-                  if (keywords.length === 0) {
-                    setKeywordDraft("NICE, PERFECT");
-                    setDirty(true);
-                  }
-                }}
+                onClick={(e) =>
+                  handleButtonClick(e, () => {
+                    setTriggerMode("keywords");
+                    if (keywords.length === 0) {
+                      setKeywordDraft("NICE, PERFECT");
+                      setDirty(true);
+                    }
+                  })
+                }
                 className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer truncate ${
                   triggerMode === "keywords"
                     ? "bg-background text-[var(--viz-ink)] shadow-xs"
@@ -627,13 +684,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               </button>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setTriggerMode("any");
-                  setKeywordDraft("");
-                  setDirty(true);
-                }}
+                onClick={(e) =>
+                  handleButtonClick(e, () => {
+                    setTriggerMode("any");
+                    setKeywordDraft("");
+                    setDirty(true);
+                  })
+                }
                 className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer truncate ${
                   triggerMode === "any"
                     ? "bg-background text-[var(--viz-ink)] shadow-xs"
@@ -657,9 +714,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <span className="font-mono text-[11px] tracking-wide">{k.toUpperCase()}</span>
                       <button
                         type="button"
-                        onClick={() => removeKeyword(k)}
+                        onClick={(e) => handleButtonClick(e, () => removeKeyword(k))}
                         aria-label={`Remove keyword ${k}`}
-                        className="flex h-3.5 w-3.5 items-center justify-center rounded text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                        className="flex h-3.5 w-3.5 items-center justify-center rounded text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                       >
                         ×
                       </button>
@@ -689,11 +746,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   {keywordInput.trim() && (
                     <button
                       type="button"
-                      onClick={() => {
-                        addKeyword(keywordInput);
-                        setKeywordInput("");
-                      }}
-                      className="rounded-lg bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background shadow-2xs hover:opacity-90 active:scale-95 transition-all"
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          addKeyword(keywordInput);
+                          setKeywordInput("");
+                        })
+                      }
+                      className="rounded-lg bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background shadow-2xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                     >
                       + Add
                     </button>
@@ -717,8 +776,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <button
                         key={preset}
                         type="button"
-                        onClick={() => addKeyword(preset)}
-                        className="rounded-full border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-2.5 py-0.5 text-[10px] font-medium text-[var(--viz-ink-2)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all select-none focus:outline-none"
+                        onClick={(e) => handleButtonClick(e, () => addKeyword(preset))}
+                        className="rounded-full border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-2.5 py-0.5 text-[10px] font-medium text-[var(--viz-ink-2)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all select-none focus:outline-none cursor-pointer"
                       >
                         + {preset}
                       </button>
@@ -749,7 +808,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* Step 2: Target Post */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0">
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
             <div className="flex items-center justify-between gap-2">
@@ -867,7 +926,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={openPicker}
+                          onClick={(e) => handleButtonClick(e, openPicker)}
                           className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
                         >
                           <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
@@ -875,7 +934,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         </button>
                         <button
                           type="button"
-                          onClick={clearPost}
+                          onClick={(e) => handleButtonClick(e, clearPost)}
                           className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
                         >
                           <TrashIcon className="h-3 w-3" />
@@ -903,7 +962,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 </div>
                 <button
                   type="button"
-                  onClick={openPicker}
+                  onClick={(e) => handleButtonClick(e, openPicker)}
                   className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                 >
                   Choose Post
@@ -985,16 +1044,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const currentScrollY = window.scrollY;
-                    selectTemplate(tab.id as any);
-                    e.currentTarget.blur();
-                    requestAnimationFrame(() => {
-                      window.scrollTo({ top: currentScrollY, behavior: "instant" });
-                    });
-                  }}
+                  onClick={(e) => handleButtonClick(e, () => selectTemplate(tab.id as any))}
                   className={`group relative flex flex-col justify-between rounded-2xl p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
                     idx === 4 ? "col-span-2 sm:col-span-1" : ""
                   } ${
@@ -1040,11 +1090,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* 2-Column Modern Studio: Editor Form + Sticky iPhone Mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
           {/* Left Column: Form Controls */}
-          <div className="space-y-4 lg:col-span-7 w-full min-w-0">
+          <div className="space-y-4 lg:col-span-7 w-full min-w-0 [overflow-anchor:none]">
             {/* Primary message caption card */}
-            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5">
+            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
               {/* Header: Title, Subtitle, & Monospace Character Counter */}
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1 min-w-0">
@@ -1105,10 +1155,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                        setDirty(true);
+                      })
+                    }
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                   >
                     <span className="font-mono text-[10px] opacity-75">@</span>
@@ -1116,10 +1168,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                        setDirty(true);
+                      })
+                    }
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                   >
                     <span>👋</span>
@@ -1127,10 +1181,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
+                        setDirty(true);
+                      })
+                    }
                     className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2 py-2 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                   >
                     <span>👇</span>
@@ -1347,7 +1403,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     {cardButtons.length < 3 && (
                       <button
                         type="button"
-                        onClick={() => addButton()}
+                        onClick={(e) => handleButtonClick(e, () => addButton())}
                         className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 px-3 py-1.5 text-xs font-bold shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
                       >
                         <span className="text-sm leading-none">+</span>
@@ -1377,7 +1433,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         <button
                           key={pIdx}
                           type="button"
-                          onClick={() => addButton({ title: preset.title, url: preset.url })}
+                          onClick={(e) => handleButtonClick(e, () => addButton({ title: preset.title, url: preset.url }))}
                           className="inline-flex items-center gap-1.5 rounded-full border border-[var(--viz-border)] bg-background hover:bg-[var(--viz-surface)] hover:border-blue-500/40 px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs active:scale-95 transition-all cursor-pointer whitespace-nowrap"
                         >
                           <span className="text-xs">{preset.icon}</span>
@@ -1419,7 +1475,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
                           <button
                             type="button"
-                            onClick={() => removeButton(idx)}
+                            onClick={(e) => handleButtonClick(e, () => removeButton(idx))}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                             title="Remove button"
                           >
@@ -1433,7 +1489,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--viz-border)]/60">
                           <button
                             type="button"
-                            onClick={() => updateButton(idx, { type: "web_url" })}
+                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "web_url" }))}
                             className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                               btn.type === "web_url"
                                 ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
@@ -1445,7 +1501,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           </button>
                           <button
                             type="button"
-                            onClick={() => updateButton(idx, { type: "postback" })}
+                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "postback" }))}
                             className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                               btn.type === "postback"
                                 ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
@@ -1560,8 +1616,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <button
                     key={dev}
                     type="button"
-                    onClick={() => setPreviewDevice(dev)}
-                    className={`rounded-md px-2 py-0.5 transition-all ${
+                    onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
+                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
                       previewDevice === dev
                         ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
                         : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
@@ -1873,9 +1929,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
           <button
             type="button"
-            onClick={save}
+            onClick={(e) => handleButtonClick(e, save)}
             disabled={saving || !dirty}
-            className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-40 transition-all"
+            className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-40 transition-all cursor-pointer"
           >
             {saving ? "Saving…" : "Save Template Changes"}
           </button>
@@ -1903,7 +1959,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             id="require-follow-toggle"
             role="switch"
             aria-checked={requireFollow}
-            onClick={() => { setRequireFollow((v) => !v); setDirty(true); }}
+            onClick={(e) =>
+              handleButtonClick(e, () => {
+                setRequireFollow((v) => !v);
+                setDirty(true);
+              })
+            }
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
               requireFollow ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
             }`}
@@ -1917,11 +1978,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {requireFollow && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
             {/* Left Column: Editor & Workflow Explanation (7 cols) */}
-            <div className="lg:col-span-7 space-y-5 w-full min-w-0">
+            <div className="lg:col-span-7 space-y-5 w-full min-w-0 [overflow-anchor:none]">
               {/* Message Editor Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5">
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
                 {/* Header: Title, Subtitle, & Character Counter */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 min-w-0">
@@ -1976,10 +2037,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
-                      onClick={() => {
-                        setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                        setDirty(true);
-                      }}
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                          setDirty(true);
+                        })
+                      }
                       className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                     >
                       <span className="font-mono text-[10px] opacity-75">@</span>
@@ -1987,10 +2050,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                        setDirty(true);
-                      }}
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                          setDirty(true);
+                        })
+                      }
                       className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                     >
                       <span>👋</span>
@@ -1998,10 +2063,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
-                        setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
-                        setDirty(true);
-                      }}
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
+                          setDirty(true);
+                        })
+                      }
                       className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/8 px-2 py-2 text-[11px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/15 hover:border-blue-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
                     >
                       <span>👇</span>
@@ -2016,30 +2083,36 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
                   <button
                     type="button"
-                    onClick={() => {
-                      setFollowGateText("Oh no! It seems you're not following me 🙈\n\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!");
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Oh no! It seems you're not following me 🙈\n\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!");
+                        setDirty(true);
+                      })
+                    }
                     className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     Gentle & Friendly
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setFollowGateText("Hey {username}! 🎁 This download is exclusive to our Instagram community.\n\nHit follow on our profile, then tap 'I\\'m following' below to unlock your instant access!");
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Hey {username}! 🎁 This download is exclusive to our Instagram community.\n\nHit follow on our profile, then tap 'I\\'m following' below to unlock your instant access!");
+                        setDirty(true);
+                      })
+                    }
                     className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     VIP Community
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      setFollowGateText("Almost there! ✨ Follow our page first, then I\\'ll instantly send your link over!");
-                      setDirty(true);
-                    }}
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Almost there! ✨ Follow our page first, then I\\'ll instantly send your link over!");
+                        setDirty(true);
+                      })
+                    }
                     className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                   >
                     Short & Crisp
@@ -2048,7 +2121,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               </div>
 
               {/* How it Works Workflow Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5">
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -2122,7 +2195,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     <button
                       key={dev}
                       type="button"
-                      onClick={() => setPreviewDevice(dev)}
+                      onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
                       className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
                         previewDevice === dev
                           ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
@@ -2599,9 +2672,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             </p>
           </div>
           <button
-            onClick={refreshLogs}
+            type="button"
+            onClick={(e) => handleButtonClick(e, refreshLogs)}
             disabled={logsLoading}
-            className="flex items-center gap-1.5 rounded-lg border border-[var(--viz-border)] px-3 py-1.5 text-xs font-medium text-[var(--viz-ink-2)] transition-colors hover:bg-black/[0.04] disabled:opacity-50 dark:hover:bg-white/[0.06]"
+            className="flex items-center gap-1.5 rounded-lg border border-[var(--viz-border)] px-3 py-1.5 text-xs font-medium text-[var(--viz-ink-2)] transition-colors hover:bg-black/[0.04] disabled:opacity-50 dark:hover:bg-white/[0.06] cursor-pointer"
           >
             <svg className={`h-3 w-3 ${logsLoading ? "animate-spin" : ""}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" strokeLinecap="round" strokeLinejoin="round" />
@@ -2777,35 +2851,37 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
       {/* Floating Unsaved Changes Bar */}
       {dirty && (
-        <div className="fixed bottom-4 sm:bottom-6 left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 sm:gap-3 rounded-full border border-[var(--viz-border)] bg-background/95 px-3.5 sm:px-5 py-2 sm:py-2.5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200">
+        <div className="fixed bottom-4 sm:bottom-6 left-1/2 z-50 flex max-w-[calc(100vw-1.5rem)] -translate-x-1/2 items-center gap-2 sm:gap-3 rounded-full border border-[var(--viz-border)] bg-background/95 px-3.5 sm:px-5 py-2 sm:py-2.5 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200 [overflow-anchor:none]">
           <span className="flex h-2 sm:h-2.5 w-2 sm:w-2.5 shrink-0 rounded-full bg-amber-500 animate-pulse" />
           <span className="text-[11px] sm:text-xs font-semibold text-[var(--viz-ink)] truncate">Unsaved changes</span>
           <button
             type="button"
-            onClick={save}
+            onClick={(e) => handleButtonClick(e, save)}
             disabled={saving}
-            className="shrink-0 flex items-center gap-1.5 rounded-full bg-foreground px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-50 transition-all"
+            className="shrink-0 flex items-center gap-1.5 rounded-full bg-foreground px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-semibold text-background shadow hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (!rule) return;
-              setName(rule.name);
-              setKeywordDraft(rule.keywords);
-              setDmText(rule.dmText);
-              setRequireFollow(rule.requireFollow ?? false);
-              setFollowGateText(rule.followGateText ?? "");
-              setTemplateType(rule.templateType || "text");
-              setCardTitle(rule.cardTitle ?? "");
-              setCardSubtitle(rule.cardSubtitle ?? "");
-              setCardImageUrl(rule.cardImageUrl ?? "");
-              setCardFileUrl(rule.cardFileUrl ?? "");
-              setCardButtons(rule.cardButtons ?? []);
-              setDirty(false);
-            }}
-            className="rounded-full px-2.5 py-1 text-xs text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors"
+            onClick={(e) =>
+              handleButtonClick(e, () => {
+                if (!rule) return;
+                setName(rule.name);
+                setKeywordDraft(rule.keywords);
+                setDmText(rule.dmText);
+                setRequireFollow(rule.requireFollow ?? false);
+                setFollowGateText(rule.followGateText ?? "");
+                setTemplateType(rule.templateType || "text");
+                setCardTitle(rule.cardTitle ?? "");
+                setCardSubtitle(rule.cardSubtitle ?? "");
+                setCardImageUrl(rule.cardImageUrl ?? "");
+                setCardFileUrl(rule.cardFileUrl ?? "");
+                setCardButtons(rule.cardButtons ?? []);
+                setDirty(false);
+              })
+            }
+            className="rounded-full px-2.5 py-1 text-xs text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors cursor-pointer"
           >
             Discard
           </button>

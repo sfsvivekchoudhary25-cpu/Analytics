@@ -330,9 +330,9 @@ export default function AppDashboard({
       />
 
       <main
-        className={`min-w-0 flex-1 flex flex-col ${active === "messages"
+        className={`min-w-0 flex-1 flex flex-col [overflow-anchor:none] ${active === "messages"
             ? "h-full overflow-hidden"
-            : "min-h-screen overflow-y-auto pb-8 sm:pb-6"
+            : "min-h-screen pb-8 sm:pb-6"
           }`}
       >
         {/* Unified Tablet & Mobile Top Header Bar (< 1024px) */}
