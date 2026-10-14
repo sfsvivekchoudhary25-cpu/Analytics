@@ -21,8 +21,6 @@ export function CloudinaryImageUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("Uploading...");
   const [isDragging, setIsDragging] = useState(false);
-  const [showUrlInput, setShowUrlInput] = useState(false);
-  const [manualUrl, setManualUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamic theme styling based on accent color
@@ -155,30 +153,13 @@ export function CloudinaryImageUploader({
       <div className="flex flex-wrap items-center justify-between gap-1.5">
         <label className="text-[11px] font-semibold text-[var(--viz-ink-2)]">{label}</label>
 
-        {value ? (
-          <div className="flex items-center gap-2">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border ${theme.badge}`}>
-              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {isCloudinary ? "Active Image" : "Image Set"}
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowUrlInput(!showUrlInput)}
-              className="text-[10px] text-[var(--viz-muted)] hover:text-[var(--viz-ink)] underline transition-colors"
-            >
-              {showUrlInput ? "Hide Link" : "View Link"}
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowUrlInput(!showUrlInput)}
-            className="text-[10px] text-[var(--viz-muted)] hover:text-[var(--viz-ink)] underline transition-colors"
-          >
-            {showUrlInput ? "Upload image file instead" : "Or paste image link"}
-          </button>
+        {value && (
+          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium border ${theme.badge}`}>
+            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            {isCloudinary ? "Active Image" : "Image Set"}
+          </span>
         )}
       </div>
 
@@ -243,7 +224,6 @@ export function CloudinaryImageUploader({
                   type="button"
                   onClick={() => {
                     onChange("");
-                    setManualUrl("");
                   }}
                   className="inline-flex items-center gap-1 rounded-lg border border-[var(--viz-border)] bg-transparent px-2.5 py-1 text-[11px] font-medium text-[var(--viz-muted)] hover:text-red-600 hover:bg-red-500/10 hover:border-red-500/20 transition-all"
                   title="Remove image"
@@ -297,39 +277,6 @@ export function CloudinaryImageUploader({
             <p className="text-[11px] text-[var(--viz-muted)]">
               PNG, JPG, WebP up to 15MB • Fast Cloud CDN Delivery
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* Manual URL Input drawer (if user toggles or if they prefer pasting a URL) */}
-      {showUrlInput && (
-        <div className="rounded-xl border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.02] p-2.5 space-y-1.5 animate-fadeIn">
-          <label className="text-[10px] font-medium text-[var(--viz-muted)]">
-            Direct Image URL (or paste external image link)
-          </label>
-          <div className="flex items-center gap-1.5">
-            <input
-              value={manualUrl || value || ""}
-              onChange={(e) => {
-                setManualUrl(e.target.value);
-                onChange(e.target.value);
-              }}
-              placeholder="https://assets.myntassets.com/... or https://res.cloudinary.com/..."
-              className={`flex-1 rounded-lg border border-[var(--viz-border)] bg-white dark:bg-black/40 px-2.5 py-1.5 text-xs outline-none font-mono text-[11px] transition-all ${theme.focusRing}`}
-            />
-            {value && (
-              <button
-                type="button"
-                onClick={() => {
-                  onChange("");
-                  setManualUrl("");
-                }}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--viz-border)] text-xs text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
-                title="Clear URL"
-              >
-                ✕
-              </button>
-            )}
           </div>
         </div>
       )}
