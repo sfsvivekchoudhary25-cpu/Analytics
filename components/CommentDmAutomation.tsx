@@ -1301,191 +1301,214 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Interactive Action Buttons Builder */}
             {templateType !== "text" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-[var(--viz-ink)]">Interactive Action Buttons</p>
-                      <div className="flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
-                        <span>{cardButtons.length} / 3</span>
-                        <div className="flex items-center gap-0.5 ml-1">
-                          {[0, 1, 2].map((i) => (
-                            <span
-                              key={i}
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                i < cardButtons.length ? "bg-blue-600 dark:bg-blue-400" : "bg-black/20 dark:bg-white/20"
-                              }`}
-                            />
-                          ))}
-                        </div>
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/90 backdrop-blur-xs p-4 sm:p-5 shadow-2xs space-y-3.5">
+                {/* Header: Title, Inline Counter Badge & Add Button */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shadow-2xs">
+                        <MessageButtonsIcon className="h-4 w-4" />
+                      </span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h4 className="text-xs sm:text-sm font-bold text-[var(--viz-ink)] tracking-tight">
+                          <span className="sm:hidden">Action Buttons</span>
+                          <span className="hidden sm:inline">Interactive Action Buttons</span>
+                        </h4>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0 shadow-2xs">
+                          {cardButtons.length}/3
+                        </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">
-                      Instagram supports up to 3 clickable buttons (max 20 characters per button title).
-                    </p>
+
+                    {cardButtons.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={() => addButton()}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-100 text-white dark:text-neutral-900 px-3 py-1.5 text-xs font-bold shadow-2xs active:scale-95 transition-all shrink-0 cursor-pointer"
+                      >
+                        <span className="text-sm leading-none">+</span>
+                        <span className="whitespace-nowrap">Add Button</span>
+                      </button>
+                    )}
                   </div>
-                  {cardButtons.length < 3 && (
-                    <button
-                      type="button"
-                      onClick={() => addButton()}
-                      className="flex items-center gap-1.5 rounded-xl bg-neutral-900 dark:bg-white px-3.5 py-1.5 text-xs font-bold text-white dark:text-black hover:opacity-90 shadow-sm transition-all"
-                    >
-                      <span>+</span>
-                      <span>Add Button</span>
-                    </button>
-                  )}
+                  <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
+                    Instagram supports up to 3 clickable buttons (max 20 characters per button title).
+                  </p>
                 </div>
 
-                {/* Quick Preset Buttons */}
+                {/* Quick Presets: Responsive Wrapping Chips */}
                 {cardButtons.length < 3 && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[var(--viz-border)]">
-                    <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
-                    <button
-                      type="button"
-                      onClick={() => addButton({ title: "Shop Now", url: cardFileUrl || "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
-                    >
-                      + Shop Now
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => addButton({ title: "Download PDF", url: cardFileUrl || "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
-                    >
-                      + Download PDF
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => addButton({ title: "Visit Website", url: "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
-                    >
-                      + Visit Website
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => addButton({ title: "Claim Offer", url: "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
-                    >
-                      + Claim Offer
-                    </button>
+                  <div className="space-y-1.5 pt-2 border-t border-[var(--viz-border)]/60">
+                    <div className="flex items-center justify-between text-[10px] text-[var(--viz-muted)] px-0.5">
+                      <span className="font-bold tracking-wider uppercase text-[9px] text-[var(--viz-ink-2)]">QUICK PRESETS</span>
+                      <span className="text-[10px] text-[var(--viz-muted)]">Tap to add</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {[
+                        { title: "Shop Now", icon: "🛍️", url: cardFileUrl || "https://instagram.com" },
+                        { title: "Download PDF", icon: "📥", url: cardFileUrl || "https://instagram.com" },
+                        { title: "Visit Website", icon: "🌐", url: "https://instagram.com" },
+                        { title: "Claim Offer", icon: "🎁", url: "https://instagram.com" },
+                      ].map((preset, pIdx) => (
+                        <button
+                          key={pIdx}
+                          type="button"
+                          onClick={() => addButton({ title: preset.title, url: preset.url })}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--viz-border)] bg-background hover:bg-[var(--viz-surface)] hover:border-blue-500/40 px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                        >
+                          <span className="text-xs">{preset.icon}</span>
+                          <span>+ {preset.title}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {/* Buttons List */}
                 {cardButtons.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-[var(--viz-border)] p-6 text-center">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-muted)] mx-auto">
-                      <MessageButtonsIcon className="h-4.5 w-4.5" />
+                  <div className="rounded-2xl border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 mx-auto border border-blue-500/20">
+                      <MessageButtonsIcon className="h-5 w-5" />
                     </div>
-                    <p className="text-xs font-semibold text-[var(--viz-ink)] mt-2">No buttons attached</p>
-                    <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">
-                      Click &quot;+ Add Button&quot; or choose a preset above to attach interactive links.
+                    <p className="text-xs font-bold text-[var(--viz-ink)] mt-2.5">No buttons attached</p>
+                    <p className="text-[11px] text-[var(--viz-muted)] mt-0.5 max-w-xs mx-auto">
+                      Click &quot;+ Add Button&quot; or tap a preset above to attach clickable CTAs to your Instagram DM.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2.5 pt-1">
+                  <div className="space-y-3 pt-1">
                     {cardButtons.map((btn, idx) => (
                       <div
                         key={idx}
-                        className="group relative rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-3 text-xs space-y-2.5 transition-all hover:border-[var(--viz-ink)]/40 hover:shadow-2xs"
+                        className="group relative rounded-2xl border border-[var(--viz-border)] bg-background p-3.5 sm:p-4 text-xs space-y-3.5 transition-all hover:border-[var(--viz-ink)]/25 shadow-2xs"
                       >
-                        {/* Button card header */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-[10px] shadow-xs">
+                        {/* Top Header Row: Badge, Title & Remove Button */}
+                        <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--viz-border)]/60">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[var(--viz-ink)] text-background font-mono font-bold text-xs shadow-2xs">
                               {idx + 1}
                             </span>
-                            <span className="font-bold text-xs text-[var(--viz-ink)]">
+                            <span className="font-bold text-xs sm:text-sm text-[var(--viz-ink)] truncate">
                               {btn.title ? btn.title : `Button #${idx + 1}`}
                             </span>
                           </div>
 
-                          {/* Segmented type switcher */}
-                          <div className="flex items-center gap-2">
-                            <div className="flex rounded-lg border border-[var(--viz-border)] p-0.5 bg-black/[0.03] dark:bg-white/[0.05]">
-                              <button
-                                type="button"
-                                onClick={() => updateButton(idx, { type: "web_url" })}
-                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
-                                  btn.type === "web_url"
-                                    ? "bg-foreground text-background shadow-xs"
-                                    : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                                }`}
-                              >
-                                <span className="flex items-center gap-1">
-                                  <LinkIcon className="h-3 w-3" />
-                                  <span>Web Link</span>
-                                </span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => updateButton(idx, { type: "postback" })}
-                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
-                                  btn.type === "postback"
-                                    ? "bg-foreground text-background shadow-xs"
-                                    : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                                }`}
-                              >
-                                <span className="flex items-center gap-1">
-                                  <BoltIcon className="h-3 w-3" />
-                                  <span>Action Reply</span>
-                                </span>
-                              </button>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => removeButton(idx)}
-                              className="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--viz-muted)] hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
-                              title="Remove button"
-                            >
-                              ✕
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeButton(idx)}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                            title="Remove button"
+                          >
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M18 6L6 18M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
 
-                        {/* Button inputs grid */}
-                        <div className="grid gap-2.5 sm:grid-cols-2">
+                        {/* Full-Width 2-Tab Segmented Control */}
+                        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--viz-border)]/60">
+                          <button
+                            type="button"
+                            onClick={() => updateButton(idx, { type: "web_url" })}
+                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                              btn.type === "web_url"
+                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
+                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
+                            }`}
+                          >
+                            <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
+                            <span>Web Link</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateButton(idx, { type: "postback" })}
+                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                              btn.type === "postback"
+                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
+                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
+                            }`}
+                          >
+                            <BoltIcon className="h-3.5 w-3.5 text-amber-500" />
+                            <span>Action Reply</span>
+                          </button>
+                        </div>
+
+                        {/* Form Fields: Button Label & Destination URL */}
+                        <div className="space-y-3">
                           <div>
-                            <div className="flex justify-between text-[10px] text-[var(--viz-muted)] mb-1">
-                              <span>Button Label</span>
-                              <span>{btn.title.length}/20</span>
+                            <div className="flex justify-between items-center text-[11px] mb-1.5">
+                              <span className="font-semibold text-[var(--viz-ink)]">Button Label</span>
+                              <span className={`font-mono text-[10px] font-medium ${btn.title.length >= 20 ? 'text-red-500' : btn.title.length >= 17 ? 'text-amber-500' : 'text-[var(--viz-muted)]'}`}>
+                                {btn.title.length}/20
+                              </span>
                             </div>
                             <input
                               value={btn.title}
                               maxLength={20}
                               onChange={(e) => updateButton(idx, { title: e.target.value })}
                               placeholder="e.g. Shop Now"
-                              className="w-full rounded-xl border border-[var(--viz-border)] bg-transparent px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 font-medium transition-all"
+                              className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--viz-ink)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                             />
                           </div>
 
                           <div>
-                            <div className="flex justify-between text-[10px] text-[var(--viz-muted)] mb-1">
-                              <span>{btn.type === "web_url" ? "Destination URL" : "Action Identifier"}</span>
-                              {btn.type === "web_url" && <span className="text-emerald-600 dark:text-emerald-400 font-mono">https://</span>}
+                            <div className="flex justify-between items-center text-[11px] mb-1.5">
+                              <span className="font-semibold text-[var(--viz-ink)]">
+                                {btn.type === "web_url" ? "Destination URL" : "Action Identifier"}
+                              </span>
+                              {btn.type === "web_url" ? (
+                                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                                  https://
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-medium">
+                                  TRIGGER_ID
+                                </span>
+                              )}
                             </div>
                             {btn.type === "web_url" ? (
                               <div className="relative flex items-center">
-                                <LinkIcon className="absolute left-2.5 h-3.5 w-3.5 text-[var(--viz-muted)] pointer-events-none" />
+                                <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-blue-500 pointer-events-none" />
                                 <input
                                   value={btn.url || ""}
                                   onChange={(e) => updateButton(idx, { url: e.target.value })}
-                                  placeholder="https://yourbrand.com/item"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-transparent pl-7 pr-2.5 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 font-mono text-[11px] transition-all"
+                                  placeholder="https://instagram.com"
+                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                                 />
                               </div>
                             ) : (
                               <div className="relative flex items-center">
-                                <BoltIcon className="absolute left-2.5 h-3.5 w-3.5 text-amber-500 pointer-events-none" />
+                                <BoltIcon className="absolute left-3.5 h-3.5 w-3.5 text-amber-500 pointer-events-none" />
                                 <input
                                   value={btn.payload || ""}
                                   onChange={(e) => updateButton(idx, { payload: e.target.value })}
                                   placeholder="ACTION_KEYWORD"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-transparent pl-7 pr-2.5 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 font-mono text-[11px] transition-all"
+                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                                 />
                               </div>
                             )}
+                          </div>
+                        </div>
+
+                        {/* Native Instagram Direct DM Preview Box */}
+                        <div className="pt-0.5">
+                          <div className="flex items-center justify-between text-[10px] text-[var(--viz-muted)] mb-1 px-0.5">
+                            <span className="font-medium text-[9px] uppercase tracking-wider">Preview in Instagram DM</span>
+                            <span className="text-[9px] opacity-75">Tap action</span>
+                          </div>
+                          <div className="w-full rounded-xl border border-blue-500/25 bg-blue-500/[0.04] hover:bg-blue-500/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
+                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1.5">
+                              <span>{btn.title || "Button Label"}</span>
+                              {btn.type === "web_url" ? (
+                                <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+                                  <polyline points="15 3 21 3 21 9" />
+                                  <line x1="10" y1="14" x2="21" y2="3" />
+                                </svg>
+                              ) : (
+                                <BoltIcon className="h-3 w-3 opacity-70" />
+                              )}
+                            </span>
                           </div>
                         </div>
                       </div>
