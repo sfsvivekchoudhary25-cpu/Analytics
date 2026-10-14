@@ -257,3 +257,165 @@ export function HashtagIcon({ className = base }: IconProps) {
   );
 }
 
+export function InfoIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <circle cx="12" cy="8" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function MessageTextIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+      <path d="M8 10h8M8 14h5" />
+    </svg>
+  );
+}
+
+export function MessageButtonsIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+      <rect x="7" y="7" width="10" height="3" rx="1.5" />
+      <path d="M8 13h8" />
+    </svg>
+  );
+}
+
+export function ShoppingBagIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+      <path d="M3 6h18" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  );
+}
+
+export function FileDownloadIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14 2 14 8 20 8" />
+      <path d="M12 12v6M9 15l3 3 3-3" />
+    </svg>
+  );
+}
+
+export function MediaCardIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="3" />
+      <path d="M3 10h18" />
+      <circle cx="7.5" cy="6.5" r="1.25" fill="currentColor" stroke="none" />
+      <path d="M7 14h10M7 17h6" />
+    </svg>
+  );
+}
+
+export function GlobeIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <path d="M12 3a14.5 14.5 0 0 0 0 18M12 3a14.5 14.5 0 0 1 0 18" />
+    </svg>
+  );
+}
+
+export function TagIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
+    </svg>
+  );
+}
+
+export function LinkIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+export function PhoneIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+export function VideoCameraIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <polygon points="23 7 16 12 23 17 23 7" />
+      <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+    </svg>
+  );
+}
+
+export function CameraIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+export function MicrophoneIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" y1="19" x2="12" y2="23" />
+      <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+}
+
+export function SparklesIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z" />
+    </svg>
+  );
+}
+
+export function UserIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+export function MessageSquareIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+export function ExternalLinkIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
+
+

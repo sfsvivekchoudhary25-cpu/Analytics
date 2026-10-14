@@ -1,10 +1,41 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Modal } from "antd";
+import { Modal, Tooltip } from "antd";
 import { api } from "@/lib/api";
-import { ArrowLeftIcon, BoltIcon, GearIcon, InstagramIcon, SendIcon, TrashIcon } from "./icons";
+import {
+  ArrowLeftIcon,
+  BoltIcon,
+  GearIcon,
+  InstagramIcon,
+  SendIcon,
+  TrashIcon,
+  InfoIcon,
+  PhotoIcon,
+  MessageTextIcon,
+  MessageButtonsIcon,
+  ShoppingBagIcon,
+  FileDownloadIcon,
+  MediaCardIcon,
+  GlobeIcon,
+  TagIcon,
+  LinkIcon,
+  CameraIcon,
+  MicrophoneIcon,
+  PhoneIcon,
+  VideoCameraIcon,
+  SparklesIcon,
+  UserIcon,
+  MessageSquareIcon,
+  CheckCircleIcon,
+  HeartIcon,
+  CommentIcon,
+  RefreshIcon,
+  PlayIcon,
+  ExternalLinkIcon,
+} from "./icons";
 import { MobilePreview, SupportedDevice } from "./MobilePreview";
+import { CloudinaryImageUploader } from "./CloudinaryImageUploader";
 
 export type MessageButton = {
   type: "web_url" | "postback";
@@ -153,6 +184,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         setCardImageUrl(r.cardImageUrl ?? "");
         setCardFileUrl(r.cardFileUrl ?? "");
         setCardButtons(r.cardButtons ?? []);
+        if (r.mediaId) {
+          api<Post[]>("/comment-dm/posts").then(setPosts).catch(() => {});
+        }
       },
       (e: any) => {
         setError(e.message);
@@ -202,23 +236,23 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       if (!cardTitle) setCardTitle("Featured Product");
       if (!cardSubtitle) setCardSubtitle("$29.99 • Special Offer");
       if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Shop Now 🛍️", url: cardFileUrl || "https://instagram.com" }]);
+        setCardButtons([{ type: "web_url", title: "Shop Now", url: cardFileUrl || "https://instagram.com" }]);
       }
     } else if (type === "file") {
       if (!cardTitle) setCardTitle("Free Resource Guide");
       if (!cardSubtitle) setCardSubtitle("Instant PDF Download");
       if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Download PDF 📥", url: cardFileUrl || "https://instagram.com" }]);
+        setCardButtons([{ type: "web_url", title: "Download PDF", url: cardFileUrl || "https://instagram.com" }]);
       }
     } else if (type === "button") {
       if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Visit Website 🌐", url: "https://instagram.com" }]);
+        setCardButtons([{ type: "web_url", title: "Visit Website", url: "https://instagram.com" }]);
       }
     } else if (type === "card") {
       if (!cardTitle) setCardTitle("Special Offer");
       if (!cardSubtitle) setCardSubtitle("Tap below to learn more");
       if (cardButtons.length === 0) {
-        setCardButtons([{ type: "web_url", title: "Learn More 🚀", url: "https://instagram.com" }]);
+        setCardButtons([{ type: "web_url", title: "Learn More", url: "https://instagram.com" }]);
       }
     }
   }
@@ -384,157 +418,233 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const gatePreviewText = followGateText.replaceAll("{username}", "there") || "Oh no! It seems you're not following me 👀\nVisit my profile and hit that follow button 😁.\nOnce you do, I'll send you what you asked for!";
 
   return (
-    <div className="space-y-6">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-[var(--viz-ink-2)] hover:text-[var(--viz-ink)]">
-        <ArrowLeftIcon className="h-4 w-4" />
-        All automations
-      </button>
+    <div className="space-y-5 sm:space-y-6">
+      {/* Top Navigation Row */}
+      <div className="flex items-center justify-between gap-2">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-1.5 rounded-lg px-1 sm:px-2 py-1 text-xs sm:text-sm font-medium text-[var(--viz-ink-2)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          <span>All automations</span>
+        </button>
 
-      {error && <p role="alert" className="rounded-md border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-600">{error}</p>}
-
-      {/* Header: icon, editable name, status pill, save */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-foreground text-background">
-            <BoltIcon className="h-5 w-5" />
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              {editingName ? (
-                <input
-                  autoFocus
-                  value={name}
-                  onChange={(e) => {
-                    setName(e.target.value);
-                    setDirty(true);
-                  }}
-                  onBlur={() => setEditingName(false)}
-                  onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
-                  maxLength={100}
-                  className="rounded-md border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-xl font-semibold text-[var(--viz-ink)] outline-none focus:border-[var(--viz-ink)]"
-                />
-              ) : (
-                <h1 className="text-xl font-semibold tracking-tight text-[var(--viz-ink)]">{name}</h1>
-              )}
-              {!editingName && (
-                <button onClick={() => setEditingName(true)} aria-label="Rename automation" className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)]">
-                  <GearIcon className="h-3.5 w-3.5" />
-                </button>
-              )}
-              <button
-                onClick={toggleActive}
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  rule.enabled
-                    ? "bg-green-500/15 text-green-700 dark:text-green-300"
-                    : "bg-black/[0.06] text-[var(--viz-ink-2)] dark:bg-white/10"
-                }`}
-              >
-                {rule.enabled ? "Active" : "Paused"}
-              </button>
-            </div>
-            <p className="mt-0.5 text-sm text-[var(--viz-muted)]">
-              When someone comments a keyword, reply with a link that opens a DM — then send the real message once they tap it.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {savedNote && <span className="text-xs text-green-600 dark:text-green-400">{savedNote}</span>}
+        {/* Desktop Save & Actions (hidden on mobile) */}
+        <div className="hidden sm:flex items-center gap-2">
+          {savedNote && <span className="text-xs text-green-600 dark:text-green-400 font-medium">{savedNote}</span>}
           <button
             onClick={removeAutomation}
             disabled={deleting}
             title="Delete this automation"
             aria-label="Delete this automation"
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--viz-border)] text-[var(--viz-ink-2)] transition-colors hover:bg-red-500/10 hover:text-red-600 disabled:opacity-50"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] transition-colors hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 disabled:opacity-50"
           >
             <TrashIcon className="h-4 w-4" />
           </button>
           <button
             onClick={save}
             disabled={saving || !dirty}
-            className="rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-40"
+            className={`rounded-xl px-4 py-2 text-sm font-semibold transition-all shadow-xs ${
+              dirty
+                ? "bg-foreground text-background hover:opacity-90 active:scale-95"
+                : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
+            }`}
           >
             {saving ? "Saving…" : "Save Changes"}
           </button>
         </div>
       </div>
 
-      {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
-      <div className={card}>
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Step 1: When this happens */}
-          <div className="flex flex-col justify-between space-y-4">
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                    <BoltIcon className="h-4 w-4" />
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--viz-ink)]">1. Trigger Condition</span>
-                    <span className="rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-                      {triggerMode === "any" ? "Any Comment" : `${keywords.length} Keyword${keywords.length === 1 ? "" : "s"}`}
-                    </span>
-                  </div>
-                </div>
+      {error && <p role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs sm:text-sm text-red-600">{error}</p>}
 
-                {/* Mode Selector */}
-                <div className="inline-flex rounded-lg border border-[var(--viz-border)] bg-black/[0.03] p-0.5 dark:bg-white/[0.04]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTriggerMode("keywords");
-                      if (keywords.length === 0) {
-                        setKeywordDraft("NICE, PERFECT");
-                        setDirty(true);
-                      }
-                    }}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
-                      triggerMode === "keywords"
-                        ? "bg-background text-[var(--viz-ink)] shadow-2xs font-semibold"
-                        : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                    }`}
-                  >
-                    🏷️ Specific Keywords
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTriggerMode("any");
-                      setKeywordDraft("");
+      {/* Header Card: Icon, editable name, status pill, mobile action bar */}
+      <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-foreground text-background shadow-xs">
+            <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+          </span>
+
+          <div className="flex-1 min-w-0">
+            {/* Top row: Title and Status Badge */}
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                {editingName ? (
+                  <input
+                    autoFocus
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
                       setDirty(true);
                     }}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-all ${
-                      triggerMode === "any"
-                        ? "bg-background text-[var(--viz-ink)] shadow-2xs font-semibold"
-                        : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                    }`}
+                    onBlur={() => setEditingName(false)}
+                    onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
+                    maxLength={100}
+                    className="w-full sm:w-auto rounded-lg border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-base sm:text-xl font-bold text-[var(--viz-ink)] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                ) : (
+                  <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--viz-ink)] truncate max-w-full">
+                    {name}
+                  </h1>
+                )}
+                {!editingName && (
+                  <button
+                    onClick={() => setEditingName(true)}
+                    aria-label="Rename automation"
+                    title="Rename automation"
+                    className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                   >
-                    💬 Any Comment
+                    <GearIcon className="h-3.5 w-3.5" />
                   </button>
-                </div>
+                )}
               </div>
-              <p className="mt-1.5 text-xs text-[var(--viz-muted)]">
-                {triggerMode === "any"
-                  ? "Replies automatically whenever any follower or user leaves a comment."
-                  : "Only triggers when a comment includes at least one of the keywords below."}
-              </p>
+
+              {/* Status Toggle Badge */}
+              <button
+                onClick={toggleActive}
+                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
+                  rule.enabled
+                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
+                    : "bg-black/[0.06] text-[var(--viz-ink-2)] dark:bg-white/10 border border-black/5 dark:border-white/10"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    rule.enabled ? "bg-emerald-500 animate-pulse" : "bg-neutral-400"
+                  }`}
+                />
+                {rule.enabled ? "Active" : "Paused"}
+              </button>
             </div>
 
-            {/* Keyword Input Box or Any Comment Banner */}
+            {/* Description Subtitle */}
+            <p className="mt-1 text-xs sm:text-sm text-[var(--viz-muted)] leading-relaxed">
+              When someone comments a keyword, reply with a link that opens a DM — then send the real message once they tap it.
+            </p>
+
+            {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
+            <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+              <button
+                onClick={save}
+                disabled={saving || !dirty}
+                className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
+                  dirty
+                    ? "bg-foreground text-background active:scale-98"
+                    : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
+                }`}
+              >
+                {saving ? "Saving…" : dirty ? "Save Changes" : "Saved"}
+              </button>
+
+              <button
+                onClick={removeAutomation}
+                disabled={deleting}
+                title="Delete this automation"
+                aria-label="Delete this automation"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 active:scale-95 transition-all"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
+
+            {savedNote && (
+              <div className="sm:hidden mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                <span>✓</span>
+                <span>{savedNote}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+        {/* Step 1: Trigger Condition */}
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all">
+          <div className="space-y-3">
+            {/* Header: Icon + Title + Info Tooltip */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                  <BoltIcon className="h-4 w-4" />
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">1. Trigger Condition</span>
+                  <Tooltip
+                    title={
+                      triggerMode === "any"
+                        ? "Replies automatically whenever any follower or user leaves a comment on your post."
+                        : "Only triggers an automated reply when a user's comment includes at least one of your specified keywords."
+                    }
+                  >
+                    <button
+                      type="button"
+                      aria-label="Trigger condition info"
+                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
+                    >
+                      <InfoIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+            </div>
+
+            {/* Segmented Mode Selector: Full-width 2-column grid to ensure perfect symmetry and zero clipping */}
+            <div className="grid grid-cols-2 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.03] p-1 dark:bg-white/[0.04] shadow-2xs">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTriggerMode("keywords");
+                  if (keywords.length === 0) {
+                    setKeywordDraft("NICE, PERFECT");
+                    setDirty(true);
+                  }
+                }}
+                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer ${
+                  triggerMode === "keywords"
+                    ? "bg-background text-[var(--viz-ink)] shadow-xs"
+                    : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
+                }`}
+              >
+                <span>Keywords</span>
+                {keywords.length > 0 && <span className="ml-1 opacity-70">({keywords.length})</span>}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTriggerMode("any");
+                  setKeywordDraft("");
+                  setDirty(true);
+                }}
+                className={`rounded-lg py-1.5 px-2 text-xs font-semibold text-center transition-all select-none cursor-pointer ${
+                  triggerMode === "any"
+                    ? "bg-background text-[var(--viz-ink)] shadow-xs"
+                    : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
+                }`}
+              >
+                Any Comment
+              </button>
+            </div>
+
+            {/* Keyword Input Box or Any Comment State */}
+            <div className="min-h-[110px] flex flex-col justify-center">
             {triggerMode === "keywords" ? (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-background p-2.5 transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 min-h-[3.25rem]">
                   {keywords.map((k) => (
                     <span
                       key={k}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500/10 to-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:text-violet-300 border border-violet-500/20 shadow-2xs animate-in fade-in zoom-in-95 duration-150"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-black/[0.04] dark:bg-white/[0.08] px-2.5 py-1 text-xs font-semibold text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs transition-all"
                     >
-                      <span>{k.toUpperCase()}</span>
+                      <span className="font-mono text-[11px] tracking-wide">{k.toUpperCase()}</span>
                       <button
                         type="button"
                         onClick={() => removeKeyword(k)}
                         aria-label={`Remove keyword ${k}`}
-                        className="flex h-3.5 w-3.5 items-center justify-center rounded-full text-violet-500 hover:bg-violet-500/20 hover:text-violet-800 dark:hover:text-violet-200 transition-colors"
+                        className="flex h-3.5 w-3.5 items-center justify-center rounded text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors"
                       >
                         ×
                       </button>
@@ -556,10 +666,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     }}
                     placeholder={
                       keywords.length === 0
-                        ? "Type a keyword and press Enter (e.g. NICE, PRICE, LINK)..."
-                        : "Add another keyword…"
+                        ? "Type keyword and press Enter..."
+                        : "Add keyword…"
                     }
-                    className="min-w-[140px] flex-1 bg-transparent text-xs text-[var(--viz-ink)] outline-none placeholder:text-[var(--viz-muted)]"
+                    className="min-w-[120px] flex-1 bg-transparent text-xs text-[var(--viz-ink)] outline-none placeholder:text-[var(--viz-muted)]"
                   />
                   {keywordInput.trim() && (
                     <button
@@ -568,17 +678,24 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         addKeyword(keywordInput);
                         setKeywordInput("");
                       }}
-                      className="rounded-md bg-foreground px-2 py-0.5 text-[11px] font-medium text-background"
+                      className="rounded-lg bg-foreground px-2.5 py-1 text-[11px] font-semibold text-background shadow-2xs hover:opacity-90 active:scale-95 transition-all"
                     >
                       + Add
                     </button>
                   )}
                 </div>
 
-                {/* Quick Presets */}
+                {/* Suggestions Pills */}
                 <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                  <span className="text-[10px] font-medium text-[var(--viz-muted)]">Suggestions:</span>
-                  {["NICE", "PERFECT", "PRICE", "LINK", "SHOP", "INFO", "GUIDE", "DETAILS"].map((preset) => {
+                  <div className="flex items-center gap-1 text-[10px] font-medium text-[var(--viz-muted)] mr-0.5">
+                    <span>Suggestions</span>
+                    <Tooltip title="Tap any suggested keyword to quickly add it to your automation triggers.">
+                      <span className="cursor-pointer hover:text-[var(--viz-ink)]">
+                        <InfoIcon className="h-3 w-3" />
+                      </span>
+                    </Tooltip>
+                  </div>
+                  {["PRICE", "LINK", "SHOP", "INFO", "GUIDE", "DETAILS"].map((preset) => {
                     const exists = keywords.some((k) => k.toUpperCase() === preset);
                     if (exists) return null;
                     return (
@@ -586,7 +703,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         key={preset}
                         type="button"
                         onClick={() => addKeyword(preset)}
-                        className="rounded-md border border-dashed border-[var(--viz-border)] px-2 py-0.5 text-[10px] font-medium text-[var(--viz-ink-2)] hover:border-[var(--viz-ink)] hover:text-[var(--viz-ink)] hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                        className="rounded-full border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-2.5 py-0.5 text-[10px] font-medium text-[var(--viz-ink-2)] hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all select-none focus:outline-none"
                       >
                         + {preset}
                       </button>
@@ -595,122 +712,184 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3 rounded-xl border border-dashed border-emerald-500/30 bg-emerald-500/[0.04] p-3.5 text-xs text-emerald-800 dark:text-emerald-300">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold">
-                  ✓
-                </span>
-                <div>
-                  <p className="font-semibold">All comments will trigger automated DMs</p>
-                  <p className="text-[11px] opacity-80">No keyword filter required. Anyone commenting on the post receives the DM.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Step 2: Check this post */}
-          <div className="flex flex-col justify-between space-y-4 border-t pt-4 lg:border-t-0 lg:border-l lg:pl-6 lg:pt-0 border-[var(--viz-border)]">
-            <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400">
-                    <InstagramIcon className="h-4 w-4" />
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-3.5 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-foreground text-background text-xs font-bold shadow-2xs">
+                    ✓
                   </span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-[var(--viz-ink)]">2. Target Post</span>
-                      <span className="rounded-md bg-pink-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-pink-600 dark:text-pink-400">
-                        {rule.mediaId ? "Specific Post" : "All Posts & Reels"}
-                      </span>
-                    </div>
+                    <p className="font-semibold text-[var(--viz-ink)]">All comments will trigger automated DMs</p>
+                    <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">No keyword filter required.</p>
                   </div>
                 </div>
-
-                {rule.mediaId ? (
-                  <button
-                    type="button"
-                    onClick={clearPost}
-                    className="text-[11px] font-medium text-[var(--viz-muted)] hover:text-red-500 transition-colors"
-                  >
-                    Switch to all posts
-                  </button>
-                ) : null}
+                <Tooltip title="Every follower or user who comments on the target post will automatically receive this DM response.">
+                  <span className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] cursor-pointer p-1">
+                    <InfoIcon className="h-3.5 w-3.5" />
+                  </span>
+                </Tooltip>
               </div>
-              <p className="mt-1.5 text-xs text-[var(--viz-muted)]">
-                {rule.mediaId
-                  ? "Replies only when someone comments on this specific post or reel."
-                  : "Runs across every post and reel published on your Instagram account."}
-              </p>
+            )}
+            </div>
+          </div>
+        </div>
+
+        {/* Step 2: Target Post */}
+        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all">
+          <div className="space-y-3">
+            {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                  <InstagramIcon className="h-4 w-4" />
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">2. Target Post</span>
+                  <Tooltip
+                    title={
+                      rule.mediaId
+                        ? "Replies only when someone comments on this specific post or reel."
+                        : "Runs across every post and reel published on your Instagram account."
+                    }
+                  >
+                    <button
+                      type="button"
+                      aria-label="Target post info"
+                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
+                    >
+                      <InfoIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+
             </div>
 
             {/* Target Display Card */}
             {rule.mediaId ? (
-              <div className="group relative flex items-center gap-3.5 rounded-xl border border-[var(--viz-border)] bg-black/[0.02] p-3 dark:bg-white/[0.02] transition-all hover:border-[var(--viz-ink-2)]">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-black/10 bg-black/5 dark:border-white/10 shadow-xs">
-                  {rule.mediaThumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={rule.mediaThumb}
-                      alt="Selected post thumbnail"
-                      referrerPolicy="no-referrer"
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-lg">📷</div>
-                  )}
-                </div>
+              (() => {
+                const linkedPost = posts?.find((p) => p.mediaId === rule.mediaId);
+                const isReel =
+                  rule.mediaPermalink?.includes("/reel/") ||
+                  linkedPost?.permalink?.includes("/reel/");
 
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
-                    <span className="text-xs font-semibold text-[var(--viz-ink)]">Specific Post Linked</span>
-                    {rule.mediaPermalink && (
-                      <a
-                        href={rule.mediaPermalink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[11px] text-[var(--viz-muted)] hover:text-[var(--viz-ink)] ml-1"
-                        title="View post on Instagram"
-                      >
-                        ↗
-                      </a>
-                    )}
+                return (
+                  <div className="group relative rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
+                    <div className="flex items-start gap-3.5">
+                      {/* Post / Reel Thumbnail */}
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
+                        {rule.mediaThumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rule.mediaThumb}
+                            alt="Selected post thumbnail"
+                            referrerPolicy="no-referrer"
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-[#f9ed32]/10 via-[#ee2a7b]/10 to-[#002aff]/10 text-[var(--viz-muted)]">
+                            <InstagramIcon className="h-6 w-6 opacity-60" />
+                          </div>
+                        )}
+                        {isReel && (
+                          <span className="absolute bottom-1 left-1 flex items-center gap-0.5 rounded-md bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-xs">
+                            <PlayIcon className="h-2 w-2 fill-white" />
+                            <span>Reel</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Post Info & Metadata (NO ID DISPLAYED) */}
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="text-xs font-bold text-[var(--viz-ink)]">
+                              {isReel ? "Specific Reel Linked" : "Specific Post Linked"}
+                            </span>
+                            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Active
+                            </span>
+                          </div>
+
+                          {rule.mediaPermalink && (
+                            <a
+                              href={rule.mediaPermalink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0095f6] hover:text-[#0077c5] hover:underline transition-colors"
+                              title="Open on Instagram"
+                            >
+                              <span>View on Instagram</span>
+                              <ExternalLinkIcon className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Caption / Contextual description instead of technical ID */}
+                        {linkedPost?.caption ? (
+                          <p className="line-clamp-2 text-xs text-[var(--viz-ink-2)] font-normal leading-relaxed pt-0.5">
+                            &ldquo;{linkedPost.caption}&rdquo;
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[var(--viz-muted)] font-normal leading-relaxed pt-0.5">
+                            Replies exclusively to comments placed on this selected {isReel ? "reel" : "post"}.
+                          </p>
+                        )}
+
+                        {linkedPost?.postedAt && (
+                          <p className="text-[10px] text-[var(--viz-muted)] font-medium">
+                            Published {new Date(linkedPost.postedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action buttons bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={openPicker}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
+                          <span>Change Post</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={clearPost}
+                          className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                          <span>Reset to All Posts</span>
+                        </button>
+                      </div>
+
+                      <span className="text-[10px] text-[var(--viz-muted)] font-medium">
+                        1 specific target
+                      </span>
+                    </div>
                   </div>
-                  <p className="truncate text-xs text-[var(--viz-ink-2)]">
-                    {rule.mediaPermalink ? rule.mediaPermalink.replace("https://www.instagram.com", "") : `Post ID: ${rule.mediaId}`}
-                  </p>
-                  <div className="flex items-center gap-2 pt-0.5">
-                    <button
-                      type="button"
-                      onClick={openPicker}
-                      className="rounded-lg border border-[var(--viz-border)] bg-background px-2.5 py-1 text-xs font-medium text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 transition-all"
-                    >
-                      Change Post
-                    </button>
-                    <button
-                      type="button"
-                      onClick={clearPost}
-                      className="text-xs text-[var(--viz-muted)] hover:text-red-500 transition-colors"
-                    >
-                      Reset to All
-                    </button>
-                  </div>
-                </div>
-              </div>
+                );
+              })()
             ) : (
-              <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[var(--viz-border)] bg-black/[0.01] p-3.5 dark:bg-white/[0.01]">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-indigo-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/20 shadow-2xs">
+              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
                     <InstagramIcon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold text-[var(--viz-ink)]">All Posts &amp; Reels</p>
-                    <p className="text-[11px] text-[var(--viz-muted)]">Active across your entire profile</p>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
+                    <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={openPicker}
-                  className="rounded-lg bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-xs hover:opacity-90 transition-all"
+                  className="shrink-0 rounded-xl bg-foreground px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer"
                 >
                   Choose Post
                 </button>
@@ -724,14 +903,20 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       <div className={card}>
         <div className="mb-4">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
               <SendIcon className="h-4 w-4" />
             </span>
-            <div>
-              <h2 className="text-sm font-semibold text-[var(--viz-ink)]">3. Send this message & custom template</h2>
-              <p className="text-xs text-[var(--viz-muted)] mt-0.5">
-                Sent as a DM to commenters. Customize with interactive buttons, product showcases, or downloadable files.
-              </p>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <h2 className="text-sm font-bold text-[var(--viz-ink)]">3. Response &amp; DM Template</h2>
+              <Tooltip title="Sent as a private Instagram DM to commenters. Customize with interactive buttons, product showcases, or downloadable lead magnets.">
+                <button
+                  type="button"
+                  aria-label="Template info"
+                  className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
+                >
+                  <InfoIcon className="h-3.5 w-3.5" />
+                </button>
+              </Tooltip>
             </div>
           </div>
 
@@ -740,73 +925,76 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             {[
               {
                 id: "text",
-                icon: "💬",
+                icon: MessageTextIcon,
                 label: "Simple Text",
                 desc: "Clean text message",
                 badge: "Direct DM",
-                accent: "from-blue-500/10 to-indigo-500/10 text-blue-600 dark:text-blue-400",
+                accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
               },
               {
                 id: "button",
-                icon: "🔘",
+                icon: MessageButtonsIcon,
                 label: "Text + Buttons",
                 desc: "Message with clickable links",
                 badge: "Up to 3 links",
-                accent: "from-purple-500/10 to-pink-500/10 text-purple-600 dark:text-purple-400",
+                accent: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
               },
               {
                 id: "product",
-                icon: "🛍️",
+                icon: ShoppingBagIcon,
                 label: "Product Card",
                 desc: "Photo, price & buy CTA",
                 badge: "eCommerce",
-                accent: "from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:text-emerald-400",
+                accent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
               },
               {
                 id: "file",
-                icon: "📥",
+                icon: FileDownloadIcon,
                 label: "Downloadable File",
                 desc: "PDF or lead magnet",
                 badge: "Lead Magnet",
-                accent: "from-amber-500/10 to-orange-500/10 text-amber-600 dark:text-amber-400",
+                accent: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
               },
               {
                 id: "card",
-                icon: "🎴",
+                icon: MediaCardIcon,
                 label: "Custom Media Card",
                 desc: "Header image & buttons",
                 badge: "Rich Media",
-                accent: "from-rose-500/10 to-pink-500/10 text-rose-600 dark:text-rose-400",
+                accent: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
               },
-            ].map((tab) => {
+            ].map((tab, idx) => {
               const active = templateType === tab.id;
+              const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   type="button"
                   onClick={() => selectTemplate(tab.id as any)}
-                  className={`group relative flex flex-col items-start justify-between rounded-2xl p-3.5 text-left transition-all duration-200 border ${
+                  className={`group relative flex flex-col justify-between rounded-2xl p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[118px] ${
+                    idx === 4 ? "col-span-2 sm:col-span-1" : ""
+                  } ${
                     active
-                      ? "border-neutral-900 bg-neutral-900 text-white shadow-lg shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-black dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
-                      : "border-[var(--viz-border)] bg-[var(--viz-surface)] text-[var(--viz-ink)] hover:-translate-y-0.5 hover:border-[var(--viz-ink)]/30 hover:shadow-md"
+                      ? "border-neutral-900 bg-neutral-900 text-white shadow-lg shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-neutral-900 dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
+                      : "border-[var(--viz-border)] bg-[var(--viz-surface)] text-[var(--viz-ink)] hover:-translate-y-0.5 hover:border-[var(--viz-ink)]/30 hover:shadow-xs"
                   }`}
                 >
-                  <div className="flex w-full items-center justify-between">
+                  <div className="flex w-full items-center justify-between gap-2">
                     <span
-                      className={`flex h-8 w-8 items-center justify-center rounded-xl text-base shadow-2xs ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors ${
                         active
-                          ? "bg-white/15 text-white dark:bg-black/15 dark:text-black"
-                          : `bg-gradient-to-br ${tab.accent}`
+                          ? "bg-white/20 text-white dark:bg-black/20 dark:text-neutral-900"
+                          : `border ${tab.accent} shadow-2xs`
                       }`}
                     >
-                      {tab.icon}
+                      <Icon className="h-4 w-4" />
                     </span>
                     {active ? (
                       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 dark:bg-black/20 text-[10px] font-bold">
                         ✓
                       </span>
                     ) : (
-                      <span className="rounded-full bg-black/[0.04] dark:bg-white/[0.06] px-1.5 py-0.5 text-[9px] font-medium text-[var(--viz-muted)]">
+                      <span className="rounded-full bg-black/[0.04] dark:bg-white/[0.06] px-2 py-0.5 text-[9px] font-medium text-[var(--viz-muted)]">
                         {tab.badge}
                       </span>
                     )}
@@ -814,7 +1002,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <div className="mt-3">
                     <span className="block text-xs font-bold leading-tight tracking-tight">{tab.label}</span>
                     <span
-                      className={`mt-0.5 block text-[10px] leading-tight ${
+                      className={`mt-1 block text-[10px] leading-tight ${
                         active ? "text-white/70 dark:text-black/70" : "text-[var(--viz-muted)]"
                       }`}
                     >
@@ -885,9 +1073,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
                     setDirty(true);
                   }}
-                  className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all"
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all cursor-pointer"
                 >
-                  <span>👋 Friendly Greeting</span>
+                  <span>+ Friendly Greeting</span>
                 </button>
                 <button
                   type="button"
@@ -895,9 +1083,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
                     setDirty(true);
                   }}
-                  className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/5 px-2.5 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all"
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/5 px-2.5 py-1 text-[10px] font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/40 transition-all cursor-pointer"
                 >
-                  <span>👇 Call to action</span>
+                  <span>+ Call to Action</span>
                 </button>
               </div>
             </div>
@@ -907,8 +1095,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs">
-                      🛍️
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <ShoppingBagIcon className="h-3.5 w-3.5" />
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">Product Showcase Settings</p>
                   </div>
@@ -938,45 +1126,17 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </div>
                 </div>
 
-                {/* Product Image URL with Live Thumbnail Preview */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Product Image URL</label>
-                    {cardImageUrl && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">✓ Thumbnail loaded</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {cardImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={cardImageUrl}
-                        alt="Product preview"
-                        className="h-10 w-10 shrink-0 rounded-lg object-cover border border-[var(--viz-border)] shadow-2xs"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-xs text-[var(--viz-muted)]">
-                        🖼️
-                      </div>
-                    )}
-                    <input
-                      value={cardImageUrl}
-                      onChange={(e) => { setCardImageUrl(e.target.value); setDirty(true); }}
-                      placeholder="https://yourstore.com/images/hoodie.jpg"
-                      className="flex-1 rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 font-mono text-[11px] transition-all"
-                    />
-                    {cardImageUrl && (
-                      <button
-                        type="button"
-                        onClick={() => { setCardImageUrl(""); setDirty(true); }}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--viz-border)] text-xs text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
-                        title="Clear image"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Product Image Upload with Cloudinary CDN */}
+                <CloudinaryImageUploader
+                  label="Product Image"
+                  value={cardImageUrl}
+                  onChange={(url) => {
+                    setCardImageUrl(url);
+                    setDirty(true);
+                  }}
+                  accentColor="emerald"
+                  helperText="Instagram Direct displays this photo prominently at the top of the product card."
+                />
 
                 <div>
                   <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Store Product Link</label>
@@ -1001,8 +1161,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs">
-                      📥
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      <FileDownloadIcon className="h-3.5 w-3.5" />
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">Lead Magnet / File Resource Settings</p>
                   </div>
@@ -1048,41 +1208,17 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   />
                 </div>
 
-                <div>
-                  <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">
-                    Cover Image URL <span className="text-[var(--viz-muted)] font-normal">(optional)</span>
-                  </label>
-                  <div className="mt-1 flex items-center gap-2">
-                    {cardImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={cardImageUrl}
-                        alt="Cover preview"
-                        className="h-10 w-10 shrink-0 rounded-lg object-cover border border-[var(--viz-border)] shadow-2xs"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-xs text-[var(--viz-muted)]">
-                        📄
-                      </div>
-                    )}
-                    <input
-                      value={cardImageUrl}
-                      onChange={(e) => { setCardImageUrl(e.target.value); setDirty(true); }}
-                      placeholder="https://yourdomain.com/pdf-cover-preview.jpg"
-                      className="flex-1 rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/15 font-mono text-[11px] transition-all"
-                    />
-                    {cardImageUrl && (
-                      <button
-                        type="button"
-                        onClick={() => { setCardImageUrl(""); setDirty(true); }}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--viz-border)] text-xs text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
-                        title="Clear image"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Cover Image Upload with Cloudinary CDN */}
+                <CloudinaryImageUploader
+                  label="Cover Artwork"
+                  value={cardImageUrl}
+                  onChange={(url) => {
+                    setCardImageUrl(url);
+                    setDirty(true);
+                  }}
+                  accentColor="amber"
+                  helperText="Optional cover artwork shown above the resource title in Instagram DM."
+                />
               </div>
             )}
 
@@ -1091,8 +1227,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs">
-                      🎴
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                      <MediaCardIcon className="h-3.5 w-3.5" />
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">Custom Media Card Settings</p>
                   </div>
@@ -1122,45 +1258,17 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </div>
                 </div>
 
-                {/* Header Image URL with Live Thumbnail Preview */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Header Image URL</label>
-                    {cardImageUrl && (
-                      <span className="text-[10px] text-rose-600 dark:text-rose-400 font-medium">✓ Thumbnail loaded</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {cardImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={cardImageUrl}
-                        alt="Header preview"
-                        className="h-10 w-10 shrink-0 rounded-lg object-cover border border-[var(--viz-border)] shadow-2xs"
-                      />
-                    ) : (
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-xs text-[var(--viz-muted)]">
-                        🖼️
-                      </div>
-                    )}
-                    <input
-                      value={cardImageUrl}
-                      onChange={(e) => { setCardImageUrl(e.target.value); setDirty(true); }}
-                      placeholder="https://yourdomain.com/banner.jpg"
-                      className="flex-1 rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/15 font-mono text-[11px] transition-all"
-                    />
-                    {cardImageUrl && (
-                      <button
-                        type="button"
-                        onClick={() => { setCardImageUrl(""); setDirty(true); }}
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--viz-border)] text-xs text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 transition-all"
-                        title="Clear image"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </div>
+                {/* Header Image Upload with Cloudinary CDN */}
+                <CloudinaryImageUploader
+                  label="Header Image"
+                  value={cardImageUrl}
+                  onChange={(url) => {
+                    setCardImageUrl(url);
+                    setDirty(true);
+                  }}
+                  accentColor="rose"
+                  helperText="High-impact 1.91:1 banner image displayed at the top of the media card."
+                />
               </div>
             )}
 
@@ -1207,31 +1315,31 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
                     <button
                       type="button"
-                      onClick={() => addButton({ title: "Shop Now 🛍️", url: cardFileUrl || "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all"
+                      onClick={() => addButton({ title: "Shop Now", url: cardFileUrl || "https://instagram.com" })}
+                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
                     >
-                      + Shop Now 🛍️
+                      + Shop Now
                     </button>
                     <button
                       type="button"
-                      onClick={() => addButton({ title: "Download PDF 📥", url: cardFileUrl || "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all"
+                      onClick={() => addButton({ title: "Download PDF", url: cardFileUrl || "https://instagram.com" })}
+                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
                     >
-                      + Download PDF 📥
+                      + Download PDF
                     </button>
                     <button
                       type="button"
-                      onClick={() => addButton({ title: "Visit Website 🌐", url: "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all"
+                      onClick={() => addButton({ title: "Visit Website", url: "https://instagram.com" })}
+                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
                     >
-                      + Visit Website 🌐
+                      + Visit Website
                     </button>
                     <button
                       type="button"
-                      onClick={() => addButton({ title: "Claim Offer 🏷️", url: "https://instagram.com" })}
-                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all"
+                      onClick={() => addButton({ title: "Claim Offer", url: "https://instagram.com" })}
+                      className="rounded-full border border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.04] px-2.5 py-1 text-[10px] font-medium text-[var(--viz-ink)] hover:border-blue-500 hover:text-blue-600 transition-all cursor-pointer"
                     >
-                      + Claim Offer 🏷️
+                      + Claim Offer
                     </button>
                   </div>
                 )}
@@ -1239,8 +1347,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 {/* Buttons List */}
                 {cardButtons.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-[var(--viz-border)] p-6 text-center">
-                    <span className="text-xl">🔘</span>
-                    <p className="text-xs font-semibold text-[var(--viz-ink)] mt-1.5">No buttons attached</p>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-muted)] mx-auto">
+                      <MessageButtonsIcon className="h-4.5 w-4.5" />
+                    </div>
+                    <p className="text-xs font-semibold text-[var(--viz-ink)] mt-2">No buttons attached</p>
                     <p className="text-[11px] text-[var(--viz-muted)] mt-0.5">
                       Click &quot;+ Add Button&quot; or choose a preset above to attach interactive links.
                     </p>
@@ -1255,7 +1365,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         {/* Button card header */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-[10px] shadow-xs">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-black font-bold text-[10px] shadow-xs">
                               {idx + 1}
                             </span>
                             <span className="font-bold text-xs text-[var(--viz-ink)]">
@@ -1269,31 +1379,37 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               <button
                                 type="button"
                                 onClick={() => updateButton(idx, { type: "web_url" })}
-                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all ${
+                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
                                   btn.type === "web_url"
                                     ? "bg-foreground text-background shadow-xs"
                                     : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
                                 }`}
                               >
-                                🔗 Web Link
+                                <span className="flex items-center gap-1">
+                                  <LinkIcon className="h-3 w-3" />
+                                  <span>Web Link</span>
+                                </span>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => updateButton(idx, { type: "postback" })}
-                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all ${
+                                className={`rounded-md px-2 py-0.5 text-[10px] font-semibold transition-all cursor-pointer ${
                                   btn.type === "postback"
                                     ? "bg-foreground text-background shadow-xs"
                                     : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
                                 }`}
                               >
-                                ⚡ Action Reply
+                                <span className="flex items-center gap-1">
+                                  <BoltIcon className="h-3 w-3" />
+                                  <span>Action Reply</span>
+                                </span>
                               </button>
                             </div>
 
                             <button
                               type="button"
                               onClick={() => removeButton(idx)}
-                              className="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--viz-muted)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                              className="flex h-6 w-6 items-center justify-center rounded-lg text-[var(--viz-muted)] hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
                               title="Remove button"
                             >
                               ✕
@@ -1312,7 +1428,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               value={btn.title}
                               maxLength={20}
                               onChange={(e) => updateButton(idx, { title: e.target.value })}
-                              placeholder="e.g. Shop Now 🛍️"
+                              placeholder="e.g. Shop Now"
                               className="w-full rounded-xl border border-[var(--viz-border)] bg-transparent px-3 py-1.5 text-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 font-medium transition-all"
                             />
                           </div>
@@ -1324,7 +1440,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                             </div>
                             {btn.type === "web_url" ? (
                               <div className="relative flex items-center">
-                                <span className="absolute left-2.5 text-[11px] text-[var(--viz-muted)] pointer-events-none">🔗</span>
+                                <LinkIcon className="absolute left-2.5 h-3.5 w-3.5 text-[var(--viz-muted)] pointer-events-none" />
                                 <input
                                   value={btn.url || ""}
                                   onChange={(e) => updateButton(idx, { url: e.target.value })}
@@ -1334,7 +1450,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               </div>
                             ) : (
                               <div className="relative flex items-center">
-                                <span className="absolute left-2.5 text-[11px] text-[var(--viz-muted)] pointer-events-none">⚡</span>
+                                <BoltIcon className="absolute left-2.5 h-3.5 w-3.5 text-amber-500 pointer-events-none" />
                                 <input
                                   value={btn.payload || ""}
                                   onChange={(e) => updateButton(idx, { payload: e.target.value })}
@@ -1414,9 +1530,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </div>
 
                   {/* Header icons: Phone, Video */}
-                  <div className="flex items-center gap-3 text-black/70 dark:text-white/70 text-xs">
-                    <span className="cursor-pointer">📞</span>
-                    <span className="cursor-pointer">📹</span>
+                  <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
+                      <PhoneIcon className="h-3.5 w-3.5" />
+                    </span>
+                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
+                      <VideoCameraIcon className="h-3.5 w-3.5" />
+                    </span>
                   </div>
                 </div>
 
@@ -1472,9 +1592,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
                         ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 p-2 text-center">
-                            <span className="text-2xl">🛍️</span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1">Product Showcase</span>
+                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
+                              <ShoppingBagIcon className="h-5 w-5" />
+                            </span>
+                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Product Showcase</span>
                             <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
                           </div>
                         )}
@@ -1502,7 +1624,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                 key={idx}
                                 className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                               >
-                                {btn.title || "Shop Now 🛍️"}
+                                {btn.title || "Shop Now"}
                               </div>
                             ))}
                           </div>
@@ -1552,7 +1674,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                 key={idx}
                                 className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                               >
-                                {btn.title || "Download PDF 📥"}
+                                {btn.title || "Download PDF"}
                               </div>
                             ))}
                           </div>
@@ -1565,9 +1687,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
                         ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 p-2 text-center">
-                            <span className="text-xl">🎴</span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1">Header Image</span>
+                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
+                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
+                              <MediaCardIcon className="h-5 w-5" />
+                            </span>
+                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Header Image</span>
                             <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
                           </div>
                         )}
@@ -1640,18 +1764,24 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 </div>
 
                 {/* Instagram Direct bottom chat bar */}
-                <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2.5 shrink-0">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white text-xs cursor-pointer shadow-xs">
-                    📷
+                <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
+                    <CameraIcon className="h-3.5 w-3.5" />
                   </div>
                   <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
                     <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                    <div className="flex items-center gap-2 text-xs text-black/60 dark:text-white/60">
-                      <span className="cursor-pointer">🎤</span>
-                      <span className="cursor-pointer">🖼️</span>
+                    <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
+                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
+                        <MicrophoneIcon className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
+                        <PhotoIcon className="h-3.5 w-3.5" />
+                      </span>
                     </div>
                   </div>
-                  <span className="text-xs text-red-500 cursor-pointer">❤️</span>
+                  <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
+                    <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
+                  </span>
                 </div>
               </div>
             </MobilePreview>
@@ -1721,8 +1851,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs">
-                        💬
+                      <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <MessageSquareIcon className="h-3.5 w-3.5" />
                       </span>
                       <p className="text-xs font-bold text-[var(--viz-ink)]">Follow-Gate Private Message</p>
                     </div>
@@ -1764,7 +1894,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     }}
                     className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all cursor-pointer"
                   >
-                    <span>👋 Friendly Greeting</span>
+                    <span>+ Friendly Greeting</span>
                   </button>
                   <button
                     type="button"
@@ -1774,7 +1904,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     }}
                     className="inline-flex items-center gap-1 rounded-full border border-blue-500/20 bg-blue-500/5 px-2.5 py-1 text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 hover:border-blue-500/40 transition-all cursor-pointer"
                   >
-                    <span>🎯 Hit Follow CTA</span>
+                    <span>+ Hit Follow CTA</span>
                   </button>
                 </div>
 
@@ -1818,8 +1948,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs">
-                      ⚡
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <BoltIcon className="h-3.5 w-3.5" />
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">How Follow-Gate Automation Works</p>
                   </div>
@@ -1845,7 +1975,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <span className="text-xs font-semibold text-[var(--viz-ink)]">Already Following?</span>
                     </div>
                     <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      If commenter already follows you, your full template DM is delivered immediately! ✅
+                      If commenter already follows you, your full template DM is delivered immediately!
                     </p>
                   </div>
 
@@ -1865,7 +1995,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <span className="text-xs font-semibold text-[var(--viz-ink)]">Instant Delivery</span>
                     </div>
                     <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      Once they follow and reply or tap confirmation, the reward is unlocked and sent! 🎉
+                      Once they follow and reply or tap confirmation, the reward is unlocked and sent!
                     </p>
                   </div>
                 </div>
@@ -1933,9 +2063,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </div>
 
                     {/* Header icons: Phone, Video */}
-                    <div className="flex items-center gap-3 text-black/70 dark:text-white/70 text-xs">
-                      <span className="cursor-pointer">📞</span>
-                      <span className="cursor-pointer">📹</span>
+                    <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
+                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
+                        <PhoneIcon className="h-3.5 w-3.5" />
+                      </span>
+                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
+                        <VideoCameraIcon className="h-3.5 w-3.5" />
+                      </span>
                     </div>
                   </div>
 
@@ -1954,11 +2088,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         <div className="max-w-[88%] rounded-2xl rounded-tr-xs bg-[#0095f6] p-3 text-white shadow-sm space-y-2.5">
                           <p className="text-xs leading-relaxed whitespace-pre-line font-normal">{gatePreviewText}</p>
                           <div className="space-y-1.5 pt-1 border-t border-white/20">
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors">
-                              Visit Profile 👤
+                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
+                              <UserIcon className="h-3.5 w-3.5" />
+                              <span>Visit Profile</span>
                             </div>
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors">
-                              I&apos;m following ✅
+                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
+                              <CheckCircleIcon className="h-3.5 w-3.5" />
+                              <span>I&apos;m following</span>
                             </div>
                           </div>
                         </div>
@@ -1998,7 +2134,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
                             ) : (
                               <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 p-2 text-center">
-                                <span className="text-2xl">🛍️</span>
+                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-emerald-600 dark:text-emerald-400 shadow-xs">
+                                  <ShoppingBagIcon className="h-5 w-5" />
+                                </span>
                                 <span className="text-xs font-bold text-black dark:text-white mt-1">Product Showcase</span>
                                 <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
                               </div>
@@ -2027,7 +2165,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                     key={idx}
                                     className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                                   >
-                                    {btn.title || "Shop Now 🛍️"}
+                                    {btn.title || "Shop Now"}
                                   </div>
                                 ))}
                               </div>
@@ -2077,7 +2215,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                     key={idx}
                                     className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
                                   >
-                                    {btn.title || "Download PDF 📥"}
+                                    {btn.title || "Download PDF"}
                                   </div>
                                 ))}
                               </div>
@@ -2091,7 +2229,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
                             ) : (
                               <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 p-2 text-center">
-                                <span className="text-xl">🎴</span>
+                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-indigo-600 dark:text-indigo-400 shadow-xs">
+                                  <MediaCardIcon className="h-5 w-5" />
+                                </span>
                                 <span className="text-xs font-bold text-black dark:text-white mt-1">Header Image</span>
                                 <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
                               </div>
@@ -2166,18 +2306,24 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </div>
 
                   {/* Instagram Direct bottom chat bar */}
-                  <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2.5 shrink-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white text-xs cursor-pointer shadow-xs">
-                      📷
+                  <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
+                      <CameraIcon className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
                       <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                      <div className="flex items-center gap-2 text-xs text-black/60 dark:text-white/60">
-                        <span className="cursor-pointer">🎤</span>
-                        <span className="cursor-pointer">🖼️</span>
+                      <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
+                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
+                          <MicrophoneIcon className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
+                          <PhotoIcon className="h-3.5 w-3.5" />
+                        </span>
                       </div>
                     </div>
-                    <span className="text-xs text-red-500 cursor-pointer">❤️</span>
+                    <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
+                      <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
+                    </span>
                   </div>
                 </div>
               </MobilePreview>
@@ -2445,7 +2591,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
                     {/* Comment bubble */}
                     <div className="space-y-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)]">💬 Their comment</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)] flex items-center gap-1.5">
+                        <CommentIcon className="h-3 w-3" />
+                        <span>Their comment</span>
+                      </p>
                       <div className="inline-flex max-w-full rounded-2xl rounded-tl-sm bg-slate-100 px-3.5 py-2 dark:bg-white/10">
                         <p className="break-words text-sm text-[var(--viz-ink)]">{highlightComment()}</p>
                       </div>
@@ -2453,7 +2602,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
                     {/* Why triggered */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)]">⚡ Triggered because</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)] flex items-center gap-1.5">
+                        <BoltIcon className="h-3 w-3 text-amber-500" />
+                        <span>Triggered because</span>
+                      </p>
                       {log.matchedKeyword ? (
                         <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-400/20 dark:text-amber-200">
                           keyword matched: &ldquo;{log.matchedKeyword}&rdquo;
@@ -2468,8 +2620,28 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     {/* DM content */}
                     {log.dmText && (
                       <div className="space-y-1">
-                        <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)]">
-                          {log.status === "sent" || log.status === "follow_verified" ? "✉️ DM sent" : log.status === "follow_gate" ? "🔒 Follow gate sent" : log.status === "invited" ? "🔗 Invite sent" : "❌ DM failed"}
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--viz-muted)] flex items-center gap-1.5">
+                          {log.status === "sent" || log.status === "follow_verified" ? (
+                            <>
+                              <SendIcon className="h-3 w-3 text-emerald-500" />
+                              <span>DM sent</span>
+                            </>
+                          ) : log.status === "follow_gate" ? (
+                            <>
+                              <BoltIcon className="h-3 w-3 text-amber-500" />
+                              <span>Follow gate sent</span>
+                            </>
+                          ) : log.status === "invited" ? (
+                            <>
+                              <LinkIcon className="h-3 w-3 text-blue-500" />
+                              <span>Invite sent</span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="text-red-500 font-bold">✕</span>
+                              <span>DM failed</span>
+                            </>
+                          )}
                         </p>
                         {log.status === "failed" ? (
                           <p className="text-xs text-red-600 dark:text-red-400">{log.note ?? "DM could not be delivered."}</p>
