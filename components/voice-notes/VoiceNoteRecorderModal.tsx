@@ -233,7 +233,7 @@ export function VoiceNoteRecorderModal({
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 my-auto w-full max-w-xl rounded-[28px] bg-white border border-[#e9e9ee] shadow-2xl p-6 sm:p-8 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative z-10 my-auto w-full max-w-xl rounded-[28px] bg-white border border-[#e9e9ee] shadow-2xl p-4 sm:p-8 overflow-hidden animate-in zoom-in-95 duration-200"
       >
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#e9e9ee]">
@@ -265,42 +265,51 @@ export function VoiceNoteRecorderModal({
 
         {/* Mode Switcher */}
         {stage === "idle" && (
-          <div className="flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full my-4 max-w-sm mx-auto border border-[#e9e9ee]">
+          <div className="flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full my-4 w-full max-w-sm mx-auto border border-[#e9e9ee]">
             <button
               type="button"
               onClick={() => setInputMode("record")}
-              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 sm:px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap ${
                 inputMode === "record"
                   ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
                   : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <Mic size={13} />
-              <span>Record Voice</span>
+              <Mic size={13} className="shrink-0" />
+              <span>
+                <span className="sm:hidden">Record</span>
+                <span className="hidden sm:inline">Record Voice</span>
+              </span>
             </button>
             <button
               type="button"
               onClick={() => setInputMode("upload")}
-              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 sm:px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap ${
                 inputMode === "upload"
                   ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
                   : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <Upload size={13} />
-              <span>Upload Audio</span>
+              <Upload size={13} className="shrink-0" />
+              <span>
+                <span className="sm:hidden">Upload</span>
+                <span className="hidden sm:inline">Upload Audio</span>
+              </span>
             </button>
             <button
               type="button"
               onClick={() => setInputMode("type")}
-              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 sm:px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap ${
                 inputMode === "type"
                   ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
                   : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <FileText size={13} />
-              <span>Type / Paste</span>
+              <FileText size={13} className="shrink-0" />
+              <span>
+                <span className="sm:hidden">Type</span>
+                <span className="hidden sm:inline">Type / Paste</span>
+              </span>
             </button>
           </div>
         )}
