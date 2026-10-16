@@ -629,27 +629,35 @@ export function VoiceNotesDashboard() {
         </div>
 
         {/* ── RIGHT COLUMN: INSIGHTS & ACTIVITY (ALIGNED PARALLEL FROM TOP) (4 cols) ── */}
-        <div className="hidden lg:block lg:col-span-4 space-y-4">
-          {/* Widget 1: Your Insights (Real Data!) */}
-          <div className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-2xs space-y-4">
-            <h3 className="text-sm font-bold text-slate-900 tracking-tight">Your Insights</h3>
+        <div className="lg:col-span-4 space-y-4">
+          {/* Widget 1: Your Insights (Real Data with Minimalist Pastels!) */}
+          <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 shadow-2xs space-y-4 transition-all">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-950 tracking-tight">Your Insights</h3>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
+                Live Insights
+              </span>
+            </div>
 
             <div className="space-y-3.5">
               {/* Row 1: Notes Created */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <FileText size={18} />
+                  <div
+                    style={{ backgroundColor: "#bfbff9" }}
+                    className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
+                  >
+                    <FileText size={17} />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400">Notes Created</div>
-                    <div className="text-base font-black text-slate-900 tabular-nums">
+                    <div className="text-[11px] font-semibold text-slate-500">Notes Created</div>
+                    <div className="text-base font-black text-slate-950 tabular-nums">
                       {realTotalNotes}
                     </div>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">
-                  <TrendingUp size={12} />
+                <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-950 bg-white border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <TrendingUp size={11} className="text-emerald-600" />
                   <span>+{realNotesToday} today</span>
                 </div>
               </div>
@@ -657,19 +665,22 @@ export function VoiceNotesDashboard() {
               {/* Row 2: Tasks Completed */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <CheckCircle2 size={18} />
+                  <div
+                    style={{ backgroundColor: "#ffefb2" }}
+                    className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
+                  >
+                    <CheckCircle2 size={17} />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400">Tasks Completed</div>
-                    <div className="text-base font-black text-slate-900 tabular-nums">
+                    <div className="text-[11px] font-semibold text-slate-500">Tasks Completed</div>
+                    <div className="text-base font-black text-slate-950 tabular-nums">
                       {realCompletedTasks}
                       <span className="text-xs font-semibold text-slate-400 ml-1">/ {realTotalTasks}</span>
                     </div>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">
-                  <TrendingUp size={12} />
+                <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-950 bg-white border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <TrendingUp size={11} className="text-emerald-600" />
                   <span>
                     {realTotalTasks > 0
                       ? `${Math.round((realCompletedTasks / realTotalTasks) * 100)}%`
@@ -681,18 +692,21 @@ export function VoiceNotesDashboard() {
               {/* Row 3: Time Saved */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-                    <Clock size={18} />
+                  <div
+                    style={{ backgroundColor: "#f8d7ca" }}
+                    className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
+                  >
+                    <Clock size={17} />
                   </div>
                   <div>
-                    <div className="text-[11px] font-semibold text-slate-400">Time Saved</div>
-                    <div className="text-base font-black text-slate-900 tabular-nums">
+                    <div className="text-[11px] font-semibold text-slate-500">Time Saved</div>
+                    <div className="text-base font-black text-slate-950 tabular-nums">
                       {timeSavedFormatted}
                     </div>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-0.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">
-                  <TrendingUp size={12} />
+                <div className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-950 bg-white border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                  <TrendingUp size={11} className="text-emerald-600" />
                   <span>{timeSavedPercent}</span>
                 </div>
               </div>
@@ -700,20 +714,20 @@ export function VoiceNotesDashboard() {
           </div>
 
           {/* Widget 2: Weekly Activity Spline Chart (Real Data!) */}
-          <div className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-2xs">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Weekly Activity</h3>
-              <span className="text-[11px] font-semibold text-slate-400">
+          <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 shadow-2xs space-y-3 transition-all">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-950 tracking-tight">Weekly Activity</h3>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
                 {notes.length} this week
               </span>
             </div>
 
-            <div className="w-full h-32 relative">
+            <div className="w-full h-32 relative pt-2">
               <svg viewBox="0 0 320 120" className="w-full h-full overflow-visible">
                 <defs>
                   <linearGradient id="waveGradientReal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor="#bfbff9" stopOpacity="0.6" />
+                    <stop offset="100%" stopColor="#bfbff9" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
                 {/* Horizontal reference grid lines */}
@@ -734,11 +748,11 @@ export function VoiceNotesDashboard() {
                 {/* Spline Area Fill */}
                 <path d={areaPathD} fill="url(#waveGradientReal)" />
 
-                {/* Spline Curve Stroke */}
+                {/* Spline Curve Stroke - Minimalist Black */}
                 <path
                   d={splinePathD}
                   fill="none"
-                  stroke="#7c3aed"
+                  stroke="#000000"
                   strokeWidth="2.5"
                   strokeLinecap="round"
                 />
@@ -755,14 +769,14 @@ export function VoiceNotesDashboard() {
                       cy={y}
                       r={4}
                       fill="#ffffff"
-                      stroke="#7c3aed"
+                      stroke="#000000"
                       strokeWidth="2.5"
                     />
                   );
                 })}
               </svg>
             </div>
-            <div className="flex items-center justify-between text-[10px] font-semibold text-slate-400 px-3 mt-1">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 px-3 pt-1">
               <span>Mon</span>
               <span>Tue</span>
               <span>Wed</span>
@@ -774,16 +788,19 @@ export function VoiceNotesDashboard() {
           </div>
 
           {/* Widget 3: AI Productivity Score (Real Formula!) */}
-          <div className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-2xs flex items-center justify-between">
+          <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 shadow-2xs flex items-center justify-between transition-all">
             <div>
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">
+              <h3 className="text-sm font-bold text-slate-950 tracking-tight">
                 AI Productivity Score
               </h3>
               <div className="text-3xl font-black text-slate-950 mt-1 tabular-nums">
                 {productivityScore}
               </div>
-              <div className="text-xs font-bold text-emerald-600 mt-0.5">
-                {productivityScore >= 90 ? "Excellent" : productivityScore >= 80 ? "Good" : "Active"}
+              <div className="mt-1.5">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#dcfce7] border border-emerald-300 text-emerald-800 text-[11px] font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  {productivityScore >= 90 ? "Excellent" : productivityScore >= 80 ? "Good" : "Active"}
+                </span>
               </div>
             </div>
 
@@ -797,7 +814,7 @@ export function VoiceNotesDashboard() {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className="text-violet-600"
+                  className="text-slate-950"
                   strokeDasharray={`${productivityScore}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
@@ -807,19 +824,19 @@ export function VoiceNotesDashboard() {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-bold text-slate-700">Score</span>
+                <span className="text-[10px] font-black text-slate-950">Score</span>
               </div>
             </div>
           </div>
 
           {/* Widget 4: Recent Activity Stream (Real Data Events!) */}
-          <div className="rounded-[22px] border border-slate-200/80 bg-white p-5 shadow-2xs space-y-3.5">
+          <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 shadow-2xs space-y-3.5 transition-all">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight">Recent Activity</h3>
+              <h3 className="text-sm font-bold text-slate-950 tracking-tight">Recent Activity</h3>
               <button
                 type="button"
                 onClick={() => setSelectedCategory("all")}
-                className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors cursor-pointer"
+                className="text-xs font-bold text-slate-900 hover:text-black transition-colors cursor-pointer"
               >
                 View all
               </button>
@@ -832,13 +849,15 @@ export function VoiceNotesDashboard() {
                 {recentActivities.map((act) => (
                   <div key={act.id} className="flex items-start gap-3">
                     <div
-                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                        act.icon === "note"
-                          ? "bg-purple-50 text-purple-600"
-                          : act.icon === "task"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-violet-50 text-violet-600"
-                      }`}
+                      style={{
+                        backgroundColor:
+                          act.icon === "note"
+                            ? "#bfbff9"
+                            : act.icon === "task"
+                              ? "#ffefb2"
+                              : "#f7cbdf",
+                      }}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border border-black/15 text-slate-950 shadow-2xs"
                     >
                       {act.icon === "note" ? (
                         <FileText size={15} />
@@ -849,11 +868,11 @@ export function VoiceNotesDashboard() {
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-slate-800 leading-snug">
+                      <div className="text-xs font-bold text-slate-950 leading-snug">
                         {act.title}
                       </div>
                       {act.subtitle && (
-                        <div className="text-[11px] text-violet-600 font-medium truncate mt-0.5">
+                        <div className="text-[11px] text-slate-600 font-medium truncate mt-0.5">
                           {act.subtitle}
                         </div>
                       )}
