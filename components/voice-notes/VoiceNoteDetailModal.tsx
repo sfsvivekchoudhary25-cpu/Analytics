@@ -84,7 +84,6 @@ export function VoiceNoteDetailModal({
   const [currentTime, setCurrentTime] = useState(0);
   const [showRaw, setShowRaw] = useState(false);
   const [copiedClean, setCopiedClean] = useState(false);
-  const [copiedCaption, setCopiedCaption] = useState(false);
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -188,14 +187,6 @@ export function VoiceNoteDetailModal({
     navigator.clipboard.writeText(note.cleanedText);
     setCopiedClean(true);
     setTimeout(() => setCopiedClean(false), 2000);
-  };
-
-  const handleCopyCaption = () => {
-    const hashtags = (note.tags || []).map((t) => `#${t.replace(/\s+/g, "")}`).join(" ");
-    const captionText = `${note.cleanedText}\n\n${hashtags}`.trim();
-    navigator.clipboard.writeText(captionText);
-    setCopiedCaption(true);
-    setTimeout(() => setCopiedCaption(false), 2500);
   };
 
   const formattedDate = new Date(note.createdAt).toLocaleDateString(undefined, {
@@ -416,20 +407,6 @@ export function VoiceNoteDetailModal({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleCopyCaption}
-              style={{ backgroundColor: "#fceef4" }}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-slate-950 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-            >
-              {copiedCaption ? (
-                <Check size={13} className="text-emerald-600" />
-              ) : (
-                <InstagramIcon className="w-3.5 h-3.5 inline text-slate-950" />
-              )}
-              <span>{copiedCaption ? "Copied!" : "Copy IG Caption"}</span>
-            </button>
-
             <button
               type="button"
               onClick={handleCopyClean}
