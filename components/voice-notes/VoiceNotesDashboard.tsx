@@ -319,11 +319,11 @@ export function VoiceNotesDashboard() {
           <div className="space-y-3">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight hidden sm:block">Quick Capture</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-              {/* Card 1: New Note (Signature Periwinkle Pastel) */}
+              {/* Card 1: New Note (Light Soft Periwinkle - Borderless) */}
               <div
                 onClick={() => openCapture("record", "idea")}
-                style={{ backgroundColor: "#bfbff9" }}
-                className="group relative rounded-[28px] border-2 border-[#9e9efa] hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
+                style={{ backgroundColor: "#e2e2fc" }}
+                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -349,11 +349,11 @@ export function VoiceNotesDashboard() {
                 </div>
               </div>
 
-              {/* Card 2: AI Quick Capture (Signature Rose Pink Pastel) */}
+              {/* Card 2: AI Quick Capture (Light Soft Rose Pink - Borderless) */}
               <div
                 onClick={() => openCapture("type", "idea")}
-                style={{ backgroundColor: "#f7cbdf" }}
-                className="group relative rounded-[28px] border-2 border-[#ed83b3] hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
+                style={{ backgroundColor: "#fceef4" }}
+                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -381,11 +381,11 @@ export function VoiceNotesDashboard() {
                 </div>
               </div>
 
-              {/* Card 3: Voice Note (Signature Peach Coral Pastel) */}
+              {/* Card 3: Voice Note (Light Soft Peach Coral - Borderless) */}
               <div
                 onClick={() => openCapture("record", "idea")}
-                style={{ backgroundColor: "#f8d7ca" }}
-                className="hidden md:flex flex-col justify-between group rounded-[28px] border-2 border-[#eea07f] hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
+                style={{ backgroundColor: "#feece4" }}
+                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -413,11 +413,11 @@ export function VoiceNotesDashboard() {
                 </div>
               </div>
 
-              {/* Card 4: To-do Task (Signature Butter Yellow Pastel) */}
+              {/* Card 4: To-do Task (Light Soft Butter Yellow - Borderless) */}
               <div
                 onClick={() => openCapture("type", "todo")}
-                style={{ backgroundColor: "#ffefb2" }}
-                className="hidden md:flex flex-col justify-between group rounded-[28px] border-2 border-[#ffe006] hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
+                style={{ backgroundColor: "#fff9db" }}
+                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -447,7 +447,7 @@ export function VoiceNotesDashboard() {
             </div>
           </div>
 
-          {/* 2. Today At A Glance (Real Data with Minimalist Pastels!) */}
+          {/* 2. Today At A Glance (Real Data with Light Soft Pastels, Borderless!) */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-slate-900 tracking-tight">Today At A Glance</h2>
@@ -461,64 +461,64 @@ export function VoiceNotesDashboard() {
             </div>
 
             <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-              {/* Pastel Card 1: Notes (Periwinkle) */}
+              {/* Pastel Card 1: Notes (Light Soft Periwinkle - Borderless) */}
               <div
-                style={{ backgroundColor: "#bfbff9" }}
-                className="rounded-[24px] border-2 border-[#9e9efa] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-2xs"
+                style={{ backgroundColor: "#e2e2fc" }}
+                className="rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs"
               >
                 <div className="flex items-start justify-between">
                   <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                     {realTotalNotes}
                   </span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                    <FileText size={15} />
+                  <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <FileText size={16} />
                   </div>
                 </div>
                 <div className="mt-3">
                   <div className="text-xs sm:text-sm font-bold text-slate-950">Notes</div>
-                  <div className="text-[10px] sm:text-xs font-semibold text-slate-800 mt-0.5">
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">
                     +{realNotesToday} today
                   </div>
                 </div>
               </div>
 
-              {/* Pastel Card 2: Tasks (Butter Yellow) */}
+              {/* Pastel Card 2: Tasks (Light Soft Butter Yellow - Borderless) */}
               <div
-                style={{ backgroundColor: "#ffefb2" }}
-                className="rounded-[24px] border-2 border-[#ffe006] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-2xs"
+                style={{ backgroundColor: "#fff9db" }}
+                className="rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs"
               >
                 <div className="flex items-start justify-between">
                   <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                     {realTotalTasks}
                   </span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                    <CheckSquare size={15} />
+                  <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <CheckSquare size={16} />
                   </div>
                 </div>
                 <div className="mt-3">
                   <div className="text-xs sm:text-sm font-bold text-slate-950">Tasks</div>
-                  <div className="text-[10px] sm:text-xs font-semibold text-slate-800 mt-0.5">
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">
                     +{realTasksToday} today
                   </div>
                 </div>
               </div>
 
-              {/* Pastel Card 3: Reminders (Peach Coral) */}
+              {/* Pastel Card 3: Reminders (Light Soft Peach Coral - Borderless) */}
               <div
-                style={{ backgroundColor: "#f8d7ca" }}
-                className="rounded-[24px] border-2 border-[#eea07f] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-2xs"
+                style={{ backgroundColor: "#feece4" }}
+                className="rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs"
               >
                 <div className="flex items-start justify-between">
                   <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                     {realRemindersCount}
                   </span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                    <Bell size={15} />
+                  <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <Bell size={16} />
                   </div>
                 </div>
                 <div className="mt-3">
                   <div className="text-xs sm:text-sm font-bold text-slate-950">Reminders</div>
-                  <div className="text-[10px] sm:text-xs font-semibold text-slate-800 mt-0.5">
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">
                     +{realRemindersToday} today
                   </div>
                 </div>
@@ -580,7 +580,7 @@ export function VoiceNotesDashboard() {
               </div>
             ) : notes.length === 0 ? (
               <div className="rounded-[22px] border border-dashed border-slate-200 bg-white p-8 sm:p-10 text-center space-y-4 shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-[#bfbff9]/40 border border-[#9e9efa]/50 text-slate-900 flex items-center justify-center mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-[#e2e2fc] text-slate-900 flex items-center justify-center mx-auto shadow-2xs">
                   <Mic size={22} />
                 </div>
                 <div>
@@ -644,7 +644,7 @@ export function VoiceNotesDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    style={{ backgroundColor: "#bfbff9" }}
+                    style={{ backgroundColor: "#e2e2fc" }}
                     className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
                   >
                     <FileText size={17} />
@@ -666,7 +666,7 @@ export function VoiceNotesDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    style={{ backgroundColor: "#ffefb2" }}
+                    style={{ backgroundColor: "#fff9db" }}
                     className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
                   >
                     <CheckCircle2 size={17} />
@@ -693,7 +693,7 @@ export function VoiceNotesDashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    style={{ backgroundColor: "#f8d7ca" }}
+                    style={{ backgroundColor: "#feece4" }}
                     className="w-9 h-9 rounded-xl border border-black/15 text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
                   >
                     <Clock size={17} />
@@ -726,8 +726,8 @@ export function VoiceNotesDashboard() {
               <svg viewBox="0 0 320 120" className="w-full h-full overflow-visible">
                 <defs>
                   <linearGradient id="waveGradientReal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#bfbff9" stopOpacity="0.6" />
-                    <stop offset="100%" stopColor="#bfbff9" stopOpacity="0.0" />
+                    <stop offset="0%" stopColor="#e2e2fc" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#e2e2fc" stopOpacity="0.0" />
                   </linearGradient>
                 </defs>
                 {/* Horizontal reference grid lines */}
@@ -852,10 +852,10 @@ export function VoiceNotesDashboard() {
                       style={{
                         backgroundColor:
                           act.icon === "note"
-                            ? "#bfbff9"
+                            ? "#e2e2fc"
                             : act.icon === "task"
-                              ? "#ffefb2"
-                              : "#f7cbdf",
+                              ? "#fff9db"
+                              : "#fceef4",
                       }}
                       className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 border border-black/15 text-slate-950 shadow-2xs"
                     >

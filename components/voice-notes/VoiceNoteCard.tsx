@@ -62,37 +62,37 @@ const CATEGORY_CONFIG: Record<
 > = {
   idea: {
     label: "Idea",
-    bgColor: "#bfbff9", // signature periwinkle pastel
-    borderColor: "border-[#9e9efa]",
+    bgColor: "#e2e2fc", // light soft periwinkle matching reference
+    borderColor: "border-[#bfbff9]",
     icon: <Lightbulb className="w-4 h-4 text-slate-950" />,
   },
   todo: {
     label: "To-Do",
-    bgColor: "#ffefb2", // signature butter yellow pastel
+    bgColor: "#fff9db", // light soft butter yellow
     borderColor: "border-[#ffe006]",
     icon: <CheckSquare className="w-4 h-4 text-slate-950" />,
   },
   instagram_caption: {
     label: "IG Caption",
-    bgColor: "#f7cbdf", // signature rose pink pastel
+    bgColor: "#fceef4", // light soft rose pink
     borderColor: "border-[#ed83b3]",
     icon: <InstagramIcon className="w-4 h-4 text-slate-950" />,
   },
   client_note: {
     label: "Client Note",
-    bgColor: "#f8d7ca", // signature peach coral pastel
+    bgColor: "#feece4", // light soft peach coral
     borderColor: "border-[#eea07f]",
     icon: <Briefcase className="w-4 h-4 text-slate-950" />,
   },
   reminder: {
     label: "Reminder",
-    bgColor: "#f8d7ca",
+    bgColor: "#feece4",
     borderColor: "border-[#eea07f]",
     icon: <Bell className="w-4 h-4 text-slate-950" />,
   },
   journal: {
     label: "Memo",
-    bgColor: "#e9e9ee",
+    bgColor: "#f1f3f7",
     borderColor: "border-[#d0d0d8]",
     icon: <FileText className="w-4 h-4 text-slate-950" />,
   },
@@ -135,13 +135,13 @@ export function VoiceNoteCard({
 
   const snippet = (note.cleanedText || note.rawTranscript || "").replace(/\n+/g, " ").trim();
 
-  // 1. Featured Top Note Card (Minimalist Signature Pastel with Black Accent Button)
+  // 1. Featured Top Note Card (Light Soft Pastel, NO Border)
   if (featured) {
     return (
       <div
         onClick={() => onSelect(note)}
         style={{ backgroundColor: cat.bgColor }}
-        className={`group relative rounded-[26px] border-2 ${cat.borderColor} hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 flex items-center justify-between gap-3.5 cursor-pointer active:scale-[0.99]`}
+        className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 flex items-center justify-between gap-3.5 cursor-pointer active:scale-[0.99]"
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           {/* White icon badge with crisp black border */}
