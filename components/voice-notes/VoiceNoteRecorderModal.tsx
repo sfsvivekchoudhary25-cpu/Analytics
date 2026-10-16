@@ -233,16 +233,19 @@ export function VoiceNoteRecorderModal({
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 my-auto w-full max-w-xl rounded-3xl bg-white border border-slate-200/90 shadow-2xl p-6 sm:p-7 overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative z-10 my-auto w-full max-w-xl rounded-[28px] bg-white border border-[#e9e9ee] shadow-2xl p-6 sm:p-8 overflow-hidden animate-in zoom-in-95 duration-200"
       >
         {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-indigo-50 border border-indigo-200/60 text-indigo-600 flex items-center justify-center shadow-xs">
+        <div className="flex items-center justify-between pb-4 border-b border-[#e9e9ee]">
+          <div className="flex items-center gap-3">
+            <div
+              style={{ backgroundColor: "#e2e2fc" }}
+              className="w-10 h-10 rounded-2xl text-slate-950 flex items-center justify-center shrink-0 shadow-2xs"
+            >
               <Mic size={18} />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-900 leading-tight">
+              <h2 className="text-base font-bold text-slate-950 leading-tight">
                 {stage === "preview" ? "Review Organized Note" : "Voice Note Studio"}
               </h2>
               <span className="text-[11px] font-medium text-slate-500">
@@ -254,7 +257,7 @@ export function VoiceNoteRecorderModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-full text-slate-400 hover:text-slate-950 hover:bg-slate-100 transition-colors"
           >
             <X size={18} />
           </button>
@@ -262,41 +265,41 @@ export function VoiceNoteRecorderModal({
 
         {/* Mode Switcher */}
         {stage === "idle" && (
-          <div className="flex items-center justify-center p-1 bg-slate-100 rounded-2xl my-4 max-w-sm mx-auto border border-slate-200/80">
+          <div className="flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full my-4 max-w-sm mx-auto border border-[#e9e9ee]">
             <button
               type="button"
               onClick={() => setInputMode("record")}
-              className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 inputMode === "record"
-                  ? "bg-white text-indigo-700 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <Mic size={14} />
+              <Mic size={13} />
               <span>Record Voice</span>
             </button>
             <button
               type="button"
               onClick={() => setInputMode("upload")}
-              className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 inputMode === "upload"
-                  ? "bg-white text-indigo-700 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <Upload size={14} />
+              <Upload size={13} />
               <span>Upload Audio</span>
             </button>
             <button
               type="button"
               onClick={() => setInputMode("type")}
-              className={`flex-1 py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 py-1.5 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 inputMode === "type"
-                  ? "bg-white text-indigo-700 shadow-xs"
-                  : "text-slate-500 hover:text-slate-900"
+                  ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
+                  : "text-slate-600 hover:text-slate-950"
               }`}
             >
-              <FileText size={14} />
+              <FileText size={13} />
               <span>Type / Paste</span>
             </button>
           </div>
@@ -327,7 +330,7 @@ export function VoiceNoteRecorderModal({
                   <button
                     type="button"
                     onClick={() => window.location.reload()}
-                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
                   >
                     <RefreshCw size={12} />
                     <span>Reload Page to Apply</span>
@@ -335,29 +338,29 @@ export function VoiceNoteRecorderModal({
                   <button
                     type="button"
                     onClick={() => handleStart({ simulated: true })}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-full bg-white text-slate-950 border border-black/80 font-bold text-xs shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5"
                   >
                     <Sparkles size={12} />
-                    <span>Try with Virtual Mic (Test Audio)</span>
+                    <span>Try with Virtual Mic</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleStart()}
-                    className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
                     Retry Hardware Mic
                   </button>
                   <button
                     type="button"
                     onClick={() => setInputMode("upload")}
-                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] font-bold text-xs transition-colors cursor-pointer"
                   >
                     Upload Audio File
                   </button>
                   <button
                     type="button"
                     onClick={() => setInputMode("type")}
-                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] font-bold text-xs transition-colors cursor-pointer"
                   >
                     Type Instead
                   </button>
@@ -369,28 +372,28 @@ export function VoiceNoteRecorderModal({
               <button
                 type="button"
                 onClick={() => handleStart()}
-                className="w-24 h-24 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white flex items-center justify-center shadow-lg shadow-indigo-500/25 transition-transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="w-24 h-24 rounded-full bg-black hover:bg-neutral-800 text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
-                <Mic size={36} className="text-white animate-pulse" />
+                <Mic size={34} className="text-white" />
               </button>
             </div>
 
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-950">
                 Tap to Start Speaking
               </h3>
-              <p className="text-xs text-slate-500 max-w-sm mt-1 mx-auto leading-relaxed">
+              <p className="text-xs text-slate-600 max-w-sm mt-1 mx-auto leading-relaxed">
                 Ramble your content ideas, customer notes, or to-dos. AI will automatically strip fillers, format structure, and extract tasks.
               </p>
             </div>
 
             {/* Language Selector */}
             <div className="flex items-center gap-2 pt-2">
-              <Globe size={14} className="text-slate-400" />
+              <Globe size={14} className="text-slate-500" />
               <select
                 value={selectedLang}
                 onChange={(e) => setSelectedLang(e.target.value)}
-                className="text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                className="text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 rounded-full px-3.5 py-1.5 focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>
@@ -405,9 +408,9 @@ export function VoiceNoteRecorderModal({
               <button
                 type="button"
                 onClick={() => handleStart({ simulated: true })}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-semibold inline-flex items-center gap-1.5 transition-colors cursor-pointer hover:underline"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs hover:bg-slate-50 transition-all cursor-pointer"
               >
-                <Sparkles size={12} className="text-indigo-500" />
+                <Sparkles size={12} className="text-slate-950" />
                 <span>Test sample voice recording (Instant demo)</span>
               </button>
             </div>
@@ -417,7 +420,7 @@ export function VoiceNoteRecorderModal({
         {/* ── STAGE 1: IDLE (UPLOAD AUDIO MODE) ────────────────────── */}
         {stage === "idle" && inputMode === "upload" && (
           <div className="py-4 space-y-4">
-            <div className="border-2 border-dashed border-indigo-200 hover:border-indigo-400 bg-indigo-50/30 hover:bg-indigo-50/50 rounded-2xl p-6 text-center transition-colors cursor-pointer relative">
+            <div className="border-2 border-dashed border-[#e9e9ee] hover:border-black/40 bg-[#fbfbfc] hover:bg-white rounded-[26px] p-6 text-center transition-all cursor-pointer relative shadow-2xs">
               <input
                 type="file"
                 accept="audio/*,.mp3,.m4a,.wav,.webm,.ogg,.aac"
@@ -430,23 +433,26 @@ export function VoiceNoteRecorderModal({
                 }}
                 className="absolute inset-0 opacity-0 cursor-pointer"
               />
-              <div className="flex flex-col items-center space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-xs">
+              <div className="flex flex-col items-center space-y-2.5">
+                <div
+                  style={{ backgroundColor: "#e2e2fc" }}
+                  className="w-12 h-12 rounded-2xl text-slate-950 flex items-center justify-center shadow-xs"
+                >
                   <Upload size={22} />
                 </div>
                 {uploadedAudioFile ? (
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-800">{uploadedAudioFile.name}</p>
+                    <p className="text-xs font-bold text-slate-950">{uploadedAudioFile.name}</p>
                     <p className="text-[11px] text-slate-500">
                       {(uploadedAudioFile.size / (1024 * 1024)).toFixed(2)} MB • Ready to analyze
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <p className="text-xs font-bold text-slate-800">
+                    <p className="text-xs font-bold text-slate-950">
                       Drop voice recording or click to browse
                     </p>
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-slate-500">
                       Supports .mp3, .m4a, .wav, .webm, iPhone Voice Memos, WhatsApp Audio
                     </p>
                   </div>
@@ -466,18 +472,18 @@ export function VoiceNoteRecorderModal({
                   onChange={(e) => setUploadNoteHint(e.target.value)}
                   placeholder="Note summary or rambled thoughts (optional hint for AI cleanup)..."
                   rows={2}
-                  className="w-full text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-xl p-3 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none"
+                  className="w-full text-xs text-slate-900 bg-[#fbfbfc] border border-[#e9e9ee] rounded-2xl p-3 focus:bg-white focus:outline-none focus:border-black resize-none transition-all shadow-2xs"
                 />
               </div>
             )}
 
             <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-2">
-                <Globe size={14} className="text-slate-400" />
+                <Globe size={14} className="text-slate-500" />
                 <select
                   value={selectedLang}
                   onChange={(e) => setSelectedLang(e.target.value)}
-                  className="text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                  className="text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 rounded-full px-3.5 py-1.5 focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
                 >
                   {LANGUAGES.map((l) => (
                     <option key={l.code} value={l.code}>
@@ -494,7 +500,7 @@ export function VoiceNoteRecorderModal({
                   const hint = uploadNoteHint.trim() || uploadedAudioFile?.name.replace(/\.[^/.]+$/, "") || "Voice Audio Note";
                   runAiStructuring(hint, uploadedAudioFile);
                 }}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
               >
                 <Sparkles size={14} />
                 <span>Clean & Organize Voice with AI</span>
@@ -506,27 +512,27 @@ export function VoiceNoteRecorderModal({
         {/* ── STAGE 1: IDLE (TYPE / PASTE MODE) ────────────────────── */}
         {stage === "idle" && inputMode === "type" && (
           <div className="py-4 space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-950 flex items-center gap-1.5">
                 <span>Rambled Thoughts or Transcript</span>
-                <span className="text-[10px] text-slate-400 font-normal">(AI cleans fillers & extracts tasks)</span>
+                <span className="text-[10px] text-slate-500 font-normal">(AI cleans fillers & extracts tasks)</span>
               </label>
               <textarea
                 value={manualText}
                 onChange={(e) => setManualText(e.target.value)}
                 placeholder="E.g.: umm so basically we need to record 3 reels for the spring sale by Friday and follow up with Sarah about giveaway prizes..."
                 rows={5}
-                className="w-full text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl p-3.5 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none leading-relaxed transition-all"
+                className="w-full text-xs sm:text-sm text-slate-900 bg-[#fbfbfc] focus:bg-white border border-[#e9e9ee] focus:border-black rounded-[22px] p-4 focus:outline-none resize-none leading-relaxed transition-all shadow-2xs"
               />
             </div>
 
             <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-2">
-                <Globe size={14} className="text-slate-400" />
+                <Globe size={14} className="text-slate-500" />
                 <select
                   value={selectedLang}
                   onChange={(e) => setSelectedLang(e.target.value)}
-                  className="text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                  className="text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 rounded-full px-3.5 py-1.5 focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
                 >
                   {LANGUAGES.map((l) => (
                     <option key={l.code} value={l.code}>
@@ -540,7 +546,7 @@ export function VoiceNoteRecorderModal({
                 type="button"
                 disabled={!manualText.trim()}
                 onClick={() => runAiStructuring(manualText, null)}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                className="px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
               >
                 <Sparkles size={14} />
                 <span>Clean & Organize with AI</span>
@@ -554,8 +560,8 @@ export function VoiceNoteRecorderModal({
           <div className="py-6 space-y-5">
             {audio.isSimulated && (
               <div className="flex items-center justify-center">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold shadow-2xs">
-                  <Sparkles size={12} className="text-emerald-600" />
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                  <Sparkles size={12} className="text-slate-950" />
                   Virtual Mic Active • Generating Audio Chunks & Live Dictation
                 </span>
               </div>
@@ -566,7 +572,7 @@ export function VoiceNoteRecorderModal({
               {[40, 70, 100, 60, 85, 45, 95, 65, 80, 50, 75, 90, 60].map((h, i) => (
                 <div
                   key={i}
-                  className="w-1.5 bg-gradient-to-t from-indigo-600 to-violet-500 rounded-full animate-pulse"
+                  className="w-1.5 bg-black rounded-full animate-pulse"
                   style={{
                     height: `${h}%`,
                     animationDelay: `${(i * 0.08).toFixed(2)}s`,
@@ -578,27 +584,30 @@ export function VoiceNoteRecorderModal({
 
             {/* Timer Clock */}
             <div className="text-center">
-              <span className="text-xl font-black text-rose-600 tabular-nums">
+              <span className="text-2xl font-black text-slate-950 tabular-nums">
                 {Math.floor(audio.durationSeconds / 60)}:
                 {String(audio.durationSeconds % 60).padStart(2, "0")}
               </span>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
                 ● Listening & Recording
               </span>
             </div>
 
             {/* Live Streaming Transcript Window */}
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 min-h-[110px] max-h-[160px] overflow-y-auto">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between">
+            <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto shadow-2xs">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
                 <span>Real-Time Transcript</span>
-                <span className="text-indigo-600 animate-pulse">Live</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                  Live
+                </span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
                 {speech.transcript && (
-                  <span className="text-slate-900">{speech.transcript} </span>
+                  <span className="text-slate-950 font-medium">{speech.transcript} </span>
                 )}
                 {speech.interimTranscript ? (
-                  <span className="text-indigo-600 italic font-medium">
+                  <span className="text-slate-600 italic">
                     {speech.interimTranscript}
                   </span>
                 ) : !fullSpokenLive ? (
@@ -608,8 +617,8 @@ export function VoiceNoteRecorderModal({
                 ) : null}
               </p>
               {speech.error && !speech.transcript && (
-                <div className="mt-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200/60 p-2 rounded-xl flex items-center gap-1.5">
-                  <AlertCircle size={13} className="shrink-0 text-amber-600" />
+                <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
+                  <AlertCircle size={13} className="shrink-0 text-amber-700" />
                   <span>Audio is recording! Your voice audio will be processed upon clicking Stop.</span>
                 </div>
               )}
@@ -620,9 +629,9 @@ export function VoiceNoteRecorderModal({
               <button
                 type="button"
                 onClick={handleStop}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 transition-transform active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
               >
-                <Square size={14} className="fill-white" />
+                <Square size={13} className="fill-white" />
                 <span>Stop & Clean with AI</span>
               </button>
             </div>
@@ -632,11 +641,14 @@ export function VoiceNoteRecorderModal({
         {/* ── STAGE 3: STRUCTURING SHIMMER ─────────────────────────── */}
         {stage === "structuring" && (
           <div className="py-12 flex flex-col items-center text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 animate-spin">
+            <div
+              style={{ backgroundColor: "#e2e2fc" }}
+              className="w-14 h-14 rounded-2xl text-slate-950 flex items-center justify-center shadow-xs animate-spin"
+            >
               <Sparkles size={26} />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-950">
                 AI Structuring & Cleanup
               </h3>
               <p className="text-xs text-slate-500 max-w-xs mt-1">
@@ -652,25 +664,25 @@ export function VoiceNoteRecorderModal({
             {/* Title & Category Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Title
                 </label>
                 <input
                   type="text"
                   value={previewTitle}
                   onChange={(e) => setPreviewTitle(e.target.value)}
-                  className="w-full text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                  className="w-full text-xs font-bold text-slate-950 bg-[#fbfbfc] border border-[#e9e9ee] rounded-xl px-3.5 py-2.5 focus:bg-white focus:outline-none focus:border-black shadow-2xs transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                   Category
                 </label>
                 <select
                   value={previewCategory}
                   onChange={(e) => setPreviewCategory(e.target.value as any)}
-                  className="w-full text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
+                  className="w-full text-xs font-bold text-slate-950 bg-[#fbfbfc] border border-[#e9e9ee] rounded-xl px-3 py-2.5 focus:bg-white focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
                 >
                   <option value="idea">💡 Idea</option>
                   <option value="todo">✅ To-Do</option>
@@ -684,34 +696,39 @@ export function VoiceNoteRecorderModal({
 
             {/* Cleaned Note Text */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center justify-between">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
                 <span>Cleaned Text</span>
-                <span className="text-emerald-600 text-[10px] font-bold flex items-center gap-1">
-                  <Check size={11} /> Fillers Stripped
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
+                  <Check size={11} className="text-emerald-600" /> Fillers Stripped
                 </span>
               </label>
               <textarea
                 rows={4}
                 value={previewCleanedText}
                 onChange={(e) => setPreviewCleanedText(e.target.value)}
-                className="w-full text-xs sm:text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl p-3 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full text-xs sm:text-sm text-slate-900 bg-[#fbfbfc] border border-[#e9e9ee] rounded-[22px] p-3.5 leading-relaxed focus:bg-white focus:outline-none focus:border-black shadow-2xs transition-all"
               />
             </div>
 
             {/* Action Items List */}
             {previewActionItems.length > 0 && (
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
-                  <ListTodo size={12} className="text-indigo-600" />
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
+                  <ListTodo size={12} className="text-slate-950" />
                   <span>Extracted Action Items</span>
                 </label>
                 <div className="space-y-1.5">
                   {previewActionItems.map((item, idx) => (
                     <div
                       key={item.id || idx}
-                      className="flex items-center gap-2 p-2 rounded-xl bg-indigo-50/60 border border-indigo-100 text-xs text-slate-800"
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#fbfbfc] border border-[#e9e9ee] text-xs text-slate-950 shadow-2xs"
                     >
-                      <CheckCircle2 size={13} className="text-indigo-600 shrink-0" />
+                      <div
+                        style={{ backgroundColor: "#fff9db" }}
+                        className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 shadow-2xs"
+                      >
+                        <Check size={12} className="text-slate-950" />
+                      </div>
                       <input
                         type="text"
                         value={item.text}
@@ -720,7 +737,7 @@ export function VoiceNoteRecorderModal({
                           updated[idx].text = e.target.value;
                           setPreviewActionItems(updated);
                         }}
-                        className="w-full bg-transparent border-none focus:outline-none text-xs font-medium"
+                        className="w-full bg-transparent border-none focus:outline-none text-xs font-semibold text-slate-950"
                       />
                     </div>
                   ))}
@@ -729,11 +746,11 @@ export function VoiceNoteRecorderModal({
             )}
 
             {/* Modal Bottom Actions */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+            <div className="pt-3 border-t border-[#e9e9ee] flex items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={() => setStage("idle")}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors"
               >
                 <RotateCcw size={13} />
                 <span>Record Again</span>
@@ -743,7 +760,7 @@ export function VoiceNoteRecorderModal({
                 type="button"
                 disabled={saving}
                 onClick={handleSave}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs hover:scale-[1.01] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
               >
                 {saving ? (
                   <span>Saving...</span>
