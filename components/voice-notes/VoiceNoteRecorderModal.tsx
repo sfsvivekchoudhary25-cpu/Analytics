@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   Mic,
@@ -71,6 +71,11 @@ export function VoiceNoteRecorderModal({
   const [recordType, setRecordType] = useState<"dictate" | "memo">("dictate");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
 
+  // Live Groq Whisper stream state
+  const [whisperTranscript, setWhisperTranscript] = useState("");
+  const [isTranscribingChunk, setIsTranscribingChunk] = useState(false);
+  const isTranscribingChunkRef = useRef(false);
+
   const speech = useSpeechRecognition();
   const audio = useAudioRecorder();
 
@@ -86,6 +91,8 @@ export function VoiceNoteRecorderModal({
     audio.resetRecording();
     setStage("idle");
     setRecordingSeconds(0);
+    setWhisperTranscript("");
+    isTranscribingChunkRef.current = false;
     onClose();
   };
 
@@ -97,6 +104,8 @@ export function VoiceNoteRecorderModal({
       audio.resetRecording();
       setStage("idle");
       setRecordingSeconds(0);
+      setWhisperTranscript("");
+      isTranscribingChunkRef.current = false;
       return;
     }
 
@@ -141,6 +150,8 @@ export function VoiceNoteRecorderModal({
       setUploadedAudioFile(null);
       setUploadNoteHint("");
       speech.resetTranscript();
+      setWhisperTranscript("");
+      isTranscribingChunkRef.current = false;
       audio.resetRecording();
       setRecordedAudioBlob(null);
       setRecordingSeconds(0);
@@ -163,6 +174,41 @@ export function VoiceNoteRecorderModal({
     };
   }, [stage]);
 
+  // Live periodic Groq Whisper transcription while speaking in Live AI Dictation mode
+  useEffect(() => {
+    if (stage !== "recording" || recordType !== "dictate") return;
+
+    const interval = setInterval(async () => {
+      if (isTranscribingChunkRef.current) return;
+      const snapshot = audio.getSnapshotBlob();
+      if (!snapshot || snapshot.size < 4000) return;
+
+      isTranscribingChunkRef.current = true;
+      setIsTranscribingChunk(true);
+      try {
+        const formData = new FormData();
+        formData.append("audio", snapshot, "live-slice.webm");
+        if (selectedLang) formData.append("languageCode", selectedLang);
+
+        const res = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (res?.text && res.text.trim()) {
+          setWhisperTranscript(res.text.trim());
+        }
+      } catch (err) {
+        // Non-blocking live stream retry
+      } finally {
+        isTranscribingChunkRef.current = false;
+        setIsTranscribingChunk(false);
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [stage, recordType, selectedLang, audio]);
+
   // Helper to detect mobile browsers (Android / iOS)
   const isMobileClient = (): boolean => {
     if (typeof window === "undefined" || typeof navigator === "undefined") return false;
@@ -175,13 +221,11 @@ export function VoiceNoteRecorderModal({
   // Auto-revert to idle if active recording mode experienced a fatal acquisition error
   useEffect(() => {
     if (stage === "recording") {
-      if (recordType === "memo" && audio.error) {
-        setStage("idle");
-      } else if (recordType === "dictate" && speech.error && !speech.transcript) {
+      if (audio.error) {
         setStage("idle");
       }
     }
-  }, [stage, audio.error, speech.error, speech.transcript, recordType]);
+  }, [stage, audio.error]);
 
   if (!isOpen || !mounted) return null;
 
@@ -259,6 +303,8 @@ export function VoiceNoteRecorderModal({
   // Start recording
   const handleStart = async (options?: { simulated?: boolean }) => {
     speech.resetTranscript();
+    setWhisperTranscript("");
+    isTranscribingChunkRef.current = false;
     audio.resetRecording();
     setIsAiOrganized(false);
     setStage("recording");
@@ -266,30 +312,17 @@ export function VoiceNoteRecorderModal({
 
     const isMobile = isMobileClient();
 
-    if (recordType === "dictate") {
-      // Live speech recognition for real-time dictation
-      speech.startListening(selectedLang, options);
+    // Universal audio capture for Groq Whisper (works on all devices without collision)
+    const audioStarted = await audio.startRecording(options);
+    if (!audioStarted && !options?.simulated) {
+      console.warn("Hardware audio acquisition did not start");
+    }
 
-      // CRITICAL ON MOBILE (Android / iOS):
-      // On mobile OSs (especially Android), the Audio HAL strictly enforces single-client capture.
-      // If Chrome opens getUserMedia while Google Speech Services runs webkitSpeechRecognition,
-      // Android HAL terminates Google Speech Services with the system notification:
-      // "Speech Recognition and Synthesis from Google cannot record now as Chrome is recording audio."
-      // By keeping Live Dictation dedicated to speech recognition on mobile, Google Speech Services
-      // receives exclusive, uninterrupted access, streaming speech smoothly in real time.
-      if (!isMobile && !options?.simulated) {
-        try {
-          await audio.startRecording(options);
-        } catch (err) {
-          console.warn("Dual desktop audio capture skipped, dictation remains primary:", err);
-        }
-      }
-    } else {
-      // Dedicated Voice Memo mode: capture hardware audio stream
-      const audioStarted = await audio.startRecording(options);
-      if (!audioStarted && !options?.simulated) {
-        console.warn("Hardware audio acquisition did not start");
-      }
+    // On desktop, we can also optionally listen with browser speech recognition for instant visual typing,
+    // while Groq Whisper continuously powers the authoritative transcription.
+    // On mobile, we avoid starting Web Speech to prevent Google Speech Services mic collisions on Android.
+    if (!isMobile && recordType === "dictate") {
+      speech.startListening(selectedLang, options);
     }
   };
 
@@ -302,8 +335,32 @@ export function VoiceNoteRecorderModal({
       setRecordedAudioBlob(blob);
     }
 
-    const fullSpokenText = (speech.transcript + " " + speech.interimTranscript).trim();
     const activeDuration = recordingSeconds || audio.durationSeconds;
+    let fullSpokenText = (
+      whisperTranscript.trim() ||
+      speech.transcript + " " + speech.interimTranscript
+    ).trim();
+
+    // Final authoritative transcription from Groq Whisper using complete audio file
+    if (blob) {
+      try {
+        const formData = new FormData();
+        formData.append("audio", blob, "final.webm");
+        if (selectedLang) formData.append("languageCode", selectedLang);
+
+        const whisperRes = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (whisperRes?.text?.trim()) {
+          fullSpokenText = whisperRes.text.trim();
+          setWhisperTranscript(fullSpokenText);
+        }
+      } catch (err) {
+        console.warn("Final Groq Whisper transcription fallback:", err);
+      }
+    }
 
     if (options?.useAi === false) {
       // Sole stop without AI: bypass AI latency and save raw spoken note
@@ -347,6 +404,8 @@ export function VoiceNoteRecorderModal({
   // Completely discard previous session data and return to idle clean for next take
   const handleRecordAgain = () => {
     speech.resetTranscript();
+    setWhisperTranscript("");
+    isTranscribingChunkRef.current = false;
     audio.resetRecording();
     setRecordedAudioBlob(null);
     setManualText("");
@@ -365,7 +424,11 @@ export function VoiceNoteRecorderModal({
   const handleSave = async () => {
     setSaving(true);
     try {
-      const fullSpokenText = (manualText.trim() || speech.transcript + " " + speech.interimTranscript).trim();
+      const fullSpokenText = (
+        manualText.trim() ||
+        whisperTranscript.trim() ||
+        speech.transcript + " " + speech.interimTranscript
+      ).trim();
       const finalDuration = recordingSeconds || audio.durationSeconds;
       const formData = new FormData();
       formData.append("rawTranscript", fullSpokenText || previewCleanedText);
@@ -396,7 +459,10 @@ export function VoiceNoteRecorderModal({
     }
   };
 
-  const fullSpokenLive = (speech.transcript + " " + speech.interimTranscript).trim();
+  const fullSpokenLive = (
+    whisperTranscript ||
+    speech.transcript + " " + speech.interimTranscript
+  ).trim();
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-in fade-in duration-200">
@@ -584,7 +650,7 @@ export function VoiceNoteRecorderModal({
               </h3>
               <p className="text-xs text-slate-600 max-w-sm mt-1 mx-auto leading-relaxed">
                 {recordType === "dictate"
-                  ? "Speak freely. Your words stream live in real-time, then AI strips filler words, structures notes, and extracts to-dos."
+                  ? "Speak freely. Your words stream live powered by Groq Whisper, then AI strips filler words, structures notes, and extracts to-dos."
                   : "Captures a high-fidelity playable voice audio file with interactive waveform player."}
               </p>
             </div>
@@ -834,30 +900,33 @@ export function VoiceNoteRecorderModal({
             {recordType === "dictate" ? (
               <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto shadow-2xs">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
-                  <span>Real-Time Transcript</span>
+                  <span className="flex items-center gap-1.5 font-bold">
+                    <Sparkles size={11} className="text-slate-950" />
+                    <span>Real-Time Transcript</span>
+                  </span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                    Live
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                    Groq Whisper Live
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
-                  {speech.transcript && (
-                    <span className="text-slate-950 font-medium">{speech.transcript} </span>
-                  )}
-                  {speech.interimTranscript ? (
-                    <span className="text-slate-600 italic">
-                      {speech.interimTranscript}
-                    </span>
-                  ) : !fullSpokenLive ? (
+                  {fullSpokenLive ? (
+                    <span className="text-slate-950 font-medium">{fullSpokenLive} </span>
+                  ) : (
                     <span className="text-slate-400 italic">
-                      Start speaking... your words will stream live here.
+                      Start speaking... your words stream live with Groq Whisper.
                     </span>
-                  ) : null}
+                  )}
+                  {isTranscribingChunk && (
+                    <span className="inline-block ml-1.5 text-[10px] font-bold text-slate-400 animate-pulse">
+                      ● transcribing...
+                    </span>
+                  )}
                 </p>
-                {speech.error && !speech.transcript && (
+                {audio.error && (
                   <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
                     <AlertCircle size={13} className="shrink-0 text-amber-700" />
-                    <span>{speech.error}</span>
+                    <span>{audio.error}</span>
                   </div>
                 )}
               </div>
