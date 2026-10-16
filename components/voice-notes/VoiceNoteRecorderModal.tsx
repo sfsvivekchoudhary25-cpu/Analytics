@@ -358,8 +358,8 @@ export function VoiceNoteRecorderModal({
     }
   };
 
-  // Start recording
-  const handleStart = async (options?: { simulated?: boolean }) => {
+  // Start recording (always acquires real microphone audio)
+  const handleStart = async () => {
     speech.resetTranscript();
     setWhisperTranscript("");
     isTranscribingChunkRef.current = false;
@@ -370,17 +370,15 @@ export function VoiceNoteRecorderModal({
 
     const isMobile = isMobileClient();
 
-    // Universal audio capture for Groq Whisper (works on all devices without collision)
-    const audioStarted = await audio.startRecording(options);
-    if (!audioStarted && !options?.simulated) {
+    // Universal real audio capture for Groq Whisper
+    const audioStarted = await audio.startRecording();
+    if (!audioStarted) {
       console.warn("Hardware audio acquisition did not start");
     }
 
-    // On desktop, we can also optionally listen with browser speech recognition for instant visual typing,
-    // while Groq Whisper continuously powers the authoritative transcription.
-    // On mobile, we avoid starting Web Speech to prevent Google Speech Services mic collisions on Android.
+    // On desktop, also listen with browser speech recognition for instant real-time typing of spoken words
     if (!isMobile && recordType === "dictate") {
-      speech.startListening(selectedLang, options);
+      speech.startListening(selectedLang);
     }
   };
 
@@ -725,9 +723,9 @@ export function VoiceNoteRecorderModal({
                   reactive="simulated"
                   isRecording={stage === "recording"}
                   ariaLabel={stage === "recording" ? "Tap to Stop Recording" : "Tap to Start Speaking"}
-                  onStart={({ source }) => {
+                  onStart={() => {
                     if (stage !== "recording") {
-                      handleStart({ simulated: source === "simulated" });
+                      handleStart();
                     }
                   }}
                   onStop={({ reason, duration }) => {

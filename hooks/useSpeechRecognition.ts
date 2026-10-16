@@ -19,11 +19,7 @@ interface SpeechRecognitionHook {
   resetTranscript: () => void;
 }
 
-const DEFAULT_SIMULATED_PHRASES = [
-  "Reviewing Instagram growth metrics and campaign schedule for next week.",
-  "Need to finalize three high-converting carousel posts and test new hooks.",
-  "Assign team member to check incoming DMs and export leads by Friday."
-];
+
 
 function isIOSorSafari(): boolean {
   if (typeof window === "undefined" || typeof navigator === "undefined") return false;
@@ -170,16 +166,9 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         shouldListenRef.current = false;
         setIsSimulated(true);
         setIsListening(true);
-        const phrases = options.sampleText ? [options.sampleText] : DEFAULT_SIMULATED_PHRASES;
-        let index = 0;
-
-        simulationTimerRef.current = setInterval(() => {
-          if (index < phrases.length) {
-            const phrase = phrases[index];
-            setTranscript((prev) => (prev ? `${prev} ${phrase}` : phrase));
-            index++;
-          }
-        }, 1200);
+        if (options.sampleText) {
+          setTranscript(options.sampleText);
+        }
         return;
       }
 
