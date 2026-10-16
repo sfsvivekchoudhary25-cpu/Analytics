@@ -48,6 +48,7 @@ export interface VoicePillProps {
   reactive?: VoicePillSource;
   disabled?: boolean;
   ariaLabel?: string;
+  isRecording?: boolean;
   onStart?: (info: { source: VoicePillSource }) => void;
   onStop?: (info: { reason: VoicePillStopReason; duration: number }) => void;
   className?: string;
@@ -242,6 +243,7 @@ const VoicePill: React.FC<VoicePillProps> = ({
   reactive = 'simulated',
   disabled = false,
   ariaLabel = 'Dictate',
+  isRecording,
   onStart,
   onStop,
   className = ''
@@ -308,7 +310,7 @@ const VoicePill: React.FC<VoicePillProps> = ({
     s.raf = s.listening ? requestAnimationFrame(frame) : 0;
   };
 
-  const begin = (kind: 'pointer' | 'key') => {
+  const begin = (kind: 'pointer' | 'key', suppressCallback = false) => {
     const s = st.current;
     const c = cfg.current;
     if (s.listening || disabled) return;
@@ -324,10 +326,10 @@ const VoicePill: React.FC<VoicePillProps> = ({
     setListening(true);
     setInput(kind);
     if (!s.raf) s.raf = requestAnimationFrame(frame);
-    c.onStart?.({ source: c.reactive });
+    if (!suppressCallback) c.onStart?.({ source: c.reactive });
     if (c.reactive === 'mic') openMic(s).catch(() => end('mic-denied'));
   };
-  const end = (reason: VoicePillStopReason) => {
+  const end = (reason: VoicePillStopReason, suppressCallback = false) => {
     const s = st.current;
     const c = cfg.current;
     if (!s.listening) return;
@@ -335,8 +337,18 @@ const VoicePill: React.FC<VoicePillProps> = ({
     closeMic(s);
     setListening(false);
     setInput(reason === 'key' || reason === 'escape' ? 'key' : 'pointer');
-    c.onStop?.({ reason, duration: Math.round(performance.now() - s.startedAt) });
+    if (!suppressCallback) c.onStop?.({ reason, duration: Math.round(performance.now() - s.startedAt) });
   };
+
+  useEffect(() => {
+    if (isRecording !== undefined) {
+      if (isRecording && !st.current.listening) {
+        begin('pointer', true);
+      } else if (!isRecording && st.current.listening) {
+        end('tap', true);
+      }
+    }
+  }, [isRecording]);
 
   const settleSlide = () => {
     const s = st.current;

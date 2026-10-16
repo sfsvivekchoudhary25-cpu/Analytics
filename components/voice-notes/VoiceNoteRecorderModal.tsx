@@ -613,11 +613,11 @@ export function VoiceNoteRecorderModal({
           </div>
         )}
 
-        {/* ── STAGE 1: IDLE ────────────────────────────────────────── */}
-        {stage === "idle" && inputMode === "record" && (
+        {/* ── STAGE 1 & 2: RECORDING STUDIO WITH VOICE PILL ───────── */}
+        {(stage === "idle" || stage === "recording") && inputMode === "record" && (
           <div className="py-4 flex flex-col items-center text-center space-y-4">
             {/* Record Sub-Mode Selector */}
-            <div className="flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full max-w-xs mx-auto border border-[#e9e9ee] shadow-2xs">
+            <div className={`flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full max-w-xs mx-auto border border-[#e9e9ee] shadow-2xs transition-opacity ${stage === "recording" ? "opacity-60 pointer-events-none" : "opacity-100"}`}>
               <button
                 type="button"
                 onClick={() => setRecordType("dictate")}
@@ -695,63 +695,172 @@ export function VoiceNoteRecorderModal({
               </div>
             )}
 
-            <div className="relative flex items-center justify-center py-2">
-              <VoicePill
-                accentColor="#f5f5f5"
-                iconColor="#a1a1aa"
-                background="#27272a"
-                size={76}
-                shape="pill"
-                reach={14}
-                showTime
-                waveform
-                slideToCancel
-                cancelDistance={76}
-                attack={40}
-                release={240}
-                sensitivity={1}
-                floor={0.1}
-                openDuration={200}
-                pressScale={0.95}
-                mode="auto"
-                holdAfter={300}
-                reactive="simulated"
-                ariaLabel="Tap to Record"
-                onStart={({ source }) => handleStart()}
-                onStop={({ reason, duration }) => {
-                  if (reason === "cancel") {
-                    handleCloseModal();
-                  }
+            {/* The Swelling VoicePill Centerpiece */}
+            <div className="relative flex items-center justify-center py-4 my-1">
+              <div
+                className="relative inline-flex items-center justify-center transition-transform duration-220 ease-out"
+                style={{
+                  transform: stage === "recording" ? "translateX(89px)" : "translateX(0px)",
                 }}
-              />
-            </div>
-
-            <div>
-              <h3 className="text-base font-bold text-slate-950">
-                {recordType === "dictate" ? "Tap to Start Speaking" : "Tap to Record Voice Memo"}
-              </h3>
-              <p className="text-xs text-slate-600 max-w-sm mt-1 mx-auto leading-relaxed">
-                {recordType === "dictate"
-                  ? "Speak freely. Your words stream live powered by Groq Whisper, then AI strips filler words, structures notes, and extracts to-dos."
-                  : "Captures a high-fidelity playable voice audio file with interactive waveform player."}
-              </p>
-            </div>
-
-            {/* Language Selector */}
-            <div className="flex items-center gap-2 pt-1">
-              <Globe size={14} className="text-slate-500" />
-              <select
-                value={selectedLang}
-                onChange={(e) => setSelectedLang(e.target.value)}
-                className="text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 rounded-full px-3.5 py-1.5 focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
               >
-                {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
+                <VoicePill
+                  accentColor="#f5f5f5"
+                  iconColor="#a1a1aa"
+                  background="#18181b"
+                  size={58}
+                  shape="pill"
+                  reach={12}
+                  showTime={true}
+                  waveform={true}
+                  slideToCancel={true}
+                  cancelDistance={64}
+                  attack={40}
+                  release={240}
+                  sensitivity={1}
+                  floor={0.1}
+                  openDuration={220}
+                  pressScale={0.95}
+                  mode="auto"
+                  holdAfter={300}
+                  reactive="simulated"
+                  isRecording={stage === "recording"}
+                  ariaLabel={stage === "recording" ? "Tap to Stop Recording" : "Tap to Start Speaking"}
+                  onStart={({ source }) => {
+                    if (stage !== "recording") {
+                      handleStart({ simulated: source === "simulated" });
+                    }
+                  }}
+                  onStop={({ reason, duration }) => {
+                    if (reason === "cancel") {
+                      handleRecordAgain();
+                    } else if (stage === "recording") {
+                      handleStop({ useAi: true });
+                    }
+                  }}
+                />
+              </div>
             </div>
+
+            {/* When Idle: Guidance text & Language selector */}
+            {stage === "idle" && (
+              <div className="space-y-4 animate-in fade-in duration-200">
+                <div>
+                  <h3 className="text-base font-bold text-slate-950">
+                    {recordType === "dictate" ? "Tap to Start Speaking" : "Tap to Record Voice Memo"}
+                  </h3>
+                  <p className="text-xs text-slate-600 max-w-sm mt-1 mx-auto leading-relaxed">
+                    {recordType === "dictate"
+                      ? "Speak freely. Your words stream live powered by Groq Whisper, then AI strips filler words, structures notes, and extracts to-dos."
+                      : "Captures a high-fidelity playable voice audio file with interactive waveform player."}
+                  </p>
+                </div>
+
+                {/* Language Selector */}
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <Globe size={14} className="text-slate-500" />
+                  <select
+                    value={selectedLang}
+                    onChange={(e) => setSelectedLang(e.target.value)}
+                    className="text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 rounded-full px-3.5 py-1.5 focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
+                  >
+                    {LANGUAGES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* When Recording: Live Transcript Window & Stop Controls */}
+            {stage === "recording" && (
+              <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                    {recordType === "dictate" ? "Listening & Transcribing with Groq" : "Recording Audio Memo"}
+                  </span>
+                </div>
+
+                {/* Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
+                {recordType === "dictate" ? (
+                  <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto text-left shadow-2xs">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 font-bold">
+                        <Sparkles size={11} className="text-slate-950" />
+                        <span>Real-Time Transcript</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                        Groq Whisper Live
+                      </span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
+                      {fullSpokenLive ? (
+                        <span className="text-slate-950 font-medium">{fullSpokenLive} </span>
+                      ) : (
+                        <span className="text-slate-400 italic">
+                          Start speaking... your words stream live with Groq Whisper.
+                        </span>
+                      )}
+                      {isTranscribingChunk && (
+                        <span className="inline-block ml-1.5 text-[10px] font-bold text-slate-400 animate-pulse">
+                          ● transcribing...
+                        </span>
+                      )}
+                    </p>
+                    {audio.error && (
+                      <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
+                        <AlertCircle size={13} className="shrink-0 text-amber-700" />
+                        <span>{audio.error}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-5 min-h-[100px] flex flex-col items-center justify-center text-center shadow-2xs">
+                    <div
+                      style={{ backgroundColor: "#feece4" }}
+                      className="w-10 h-10 rounded-2xl text-slate-950 flex items-center justify-center mb-2 shadow-2xs"
+                    >
+                      <Mic size={18} />
+                    </div>
+                    <p className="text-xs font-bold text-slate-950">Capturing High-Fidelity Audio Memo</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Microphone is capturing voice audio. Tap the capsule or Stop button when finished.</p>
+                  </div>
+                )}
+
+                {/* Stop Controls */}
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleStop({ useAi: false })}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 font-bold text-xs shadow-2xs transition-transform active:scale-95 cursor-pointer"
+                  >
+                    <Square size={12} className="fill-slate-950" />
+                    <span>Stop (Keep Raw)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleStop({ useAi: true })}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+                  >
+                    {recordType === "dictate" ? (
+                      <>
+                        <Sparkles size={13} className="text-white" />
+                        <span>Stop & Clean with AI</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={13} className="text-white" />
+                        <span>Stop & Review Memo</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -941,121 +1050,7 @@ export function VoiceNoteRecorderModal({
           </div>
         )}
 
-        {/* ── STAGE 2: RECORDING ───────────────────────────────────── */}
-        {stage === "recording" && (
-          <div className="py-6 space-y-5">
 
-            {/* Pulsing Waveform Visualizer */}
-            <div className="flex items-center justify-center gap-1.5 h-12">
-              {[40, 70, 100, 60, 85, 45, 95, 65, 80, 50, 75, 90, 60].map((h, i) => (
-                <div
-                  key={i}
-                  className="w-1.5 bg-black rounded-full animate-pulse"
-                  style={{
-                    height: `${h}%`,
-                    animationDelay: `${(i * 0.08).toFixed(2)}s`,
-                    animationDuration: "0.8s",
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Timer Clock */}
-            <div className="text-center">
-              {(() => {
-                const activeSeconds = recordingSeconds || audio.durationSeconds;
-                return (
-                  <>
-                    <span className="text-2xl font-black text-slate-950 tabular-nums">
-                      {Math.floor(activeSeconds / 60)}:
-                      {String(activeSeconds % 60).padStart(2, "0")}
-                    </span>
-                    <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
-                      {recordType === "dictate" ? "● Listening & Transcribing" : "● Recording Voice Audio"}
-                    </span>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
-            {recordType === "dictate" ? (
-              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto shadow-2xs">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 font-bold">
-                    <Sparkles size={11} className="text-slate-950" />
-                    <span>Real-Time Transcript</span>
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                    Groq Whisper Live
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
-                  {fullSpokenLive ? (
-                    <span className="text-slate-950 font-medium">{fullSpokenLive} </span>
-                  ) : (
-                    <span className="text-slate-400 italic">
-                      Start speaking... your words stream live with Groq Whisper.
-                    </span>
-                  )}
-                  {isTranscribingChunk && (
-                    <span className="inline-block ml-1.5 text-[10px] font-bold text-slate-400 animate-pulse">
-                      ● transcribing...
-                    </span>
-                  )}
-                </p>
-                {audio.error && (
-                  <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
-                    <AlertCircle size={13} className="shrink-0 text-amber-700" />
-                    <span>{audio.error}</span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-5 min-h-[110px] flex flex-col items-center justify-center text-center shadow-2xs">
-                <div
-                  style={{ backgroundColor: "#feece4" }}
-                  className="w-10 h-10 rounded-2xl text-slate-950 flex items-center justify-center mb-2 shadow-2xs"
-                >
-                  <Mic size={18} />
-                </div>
-                <p className="text-xs font-bold text-slate-950">Capturing High-Fidelity Audio Memo</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Microphone is recording crystal-clear voice audio. Tap Stop when finished.</p>
-              </div>
-            )}
-
-            {/* Stop Controls */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => handleStop({ useAi: false })}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 font-bold text-xs shadow-2xs transition-transform active:scale-95 cursor-pointer"
-              >
-                <Square size={12} className="fill-slate-950" />
-                <span>Stop (Keep Raw)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleStop({ useAi: true })}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
-              >
-                {recordType === "dictate" ? (
-                  <>
-                    <Sparkles size={13} className="text-white" />
-                    <span>Stop & Clean with AI</span>
-                  </>
-                ) : (
-                  <>
-                    <Check size={13} className="text-white" />
-                    <span>Stop & Review Memo</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* ── STAGE 3: STRUCTURING THOUGHTLINE ─────────────────────── */}
         {stage === "structuring" && (
