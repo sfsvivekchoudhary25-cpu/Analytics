@@ -14,6 +14,7 @@ import {
   CheckCircleFilled,
   NumberOutlined,
   CloseOutlined,
+  AudioOutlined,
 } from "@ant-design/icons";
 
 export type SectionId =
@@ -23,6 +24,7 @@ export type SectionId =
   | "comments"
   | "stories"
   | "hashtags"
+  | "voice-notes"
   | "account";
 
 export type Section = { id: SectionId; label: string; icon: ReactNode };
@@ -35,6 +37,7 @@ const ICON_MAP: Record<SectionId, ReactNode> = {
   photos: <PictureOutlined className="text-base" />,
   stories: <HistoryOutlined className="text-base" />,
   hashtags: <NumberOutlined className="text-base" />,
+  "voice-notes": <AudioOutlined className="text-base" />,
   account: <SettingOutlined className="text-base" />,
 };
 

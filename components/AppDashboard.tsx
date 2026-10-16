@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { activeAccount, api, ApiError, auth, ConnectionStatus, devBypassLogin, isLocalDev } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
@@ -12,6 +12,9 @@ import { AccountPanel } from "@/components/AccountPanel";
 import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
+import { VoiceNotesDashboard } from "@/components/voice-notes/VoiceNotesDashboard";
+import { VoiceNoteGlobalButton } from "@/components/voice-notes/VoiceNoteGlobalButton";
+import { AudioOutlined } from "@ant-design/icons";
 
 export const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
@@ -20,13 +23,21 @@ export const SECTIONS: Section[] = [
   { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
   { id: "stories", label: "Stories", icon: <StoriesIcon /> },
   { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
+  { id: "voice-notes", label: "Voice Notes", icon: <AudioOutlined /> },
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
 
 export type View = { status: ConnectionStatus; daysLeft: number | null };
 
 export async function fetchView(): Promise<View> {
-  const status = await api<ConnectionStatus>("/instagram/connection");
+  let status = await api<ConnectionStatus>("/instagram/connection");
+  // If not connected and an active account was cached in local storage, try clearing stale account and re-fetching once
+  if (!status.connected && activeAccount.get()) {
+    activeAccount.clear();
+    try {
+      status = await api<ConnectionStatus>("/instagram/connection");
+    } catch {}
+  }
   if (status.connected && status.username) {
     activeAccount.set(status.username);
   }
@@ -101,13 +112,8 @@ export default function AppDashboard({
   const handleLoadError = useCallback(
     (err: unknown) => {
       if (err instanceof ApiError && err.status === 401) {
-        if (!isLocalDev()) {
-          auth.clear();
-          router.replace("/login");
-        } else {
-          devBypassLogin();
-          setError("Dev session re-armed with dev-bypass-token.");
-        }
+        auth.clear();
+        router.replace("/login");
       } else {
         setError(err instanceof Error ? err.message : "Could not reach the server");
       }
@@ -170,10 +176,6 @@ export default function AppDashboard({
       auth.set(authToken);
     }
 
-    if (isLocalDev() && !auth.get()) {
-      console.log("[Dev Bypass] Auto-authenticating local session with dev-bypass-token");
-      devBypassLogin();
-    }
 
     if (!auth.get()) {
       router.replace("/login");
@@ -197,6 +199,12 @@ export default function AppDashboard({
       }
     }, handleLoadError);
   }, [router, handleLoadError, setTab]);
+
+  useEffect(() => {
+    if (view && !view.status.connected) {
+      router.replace("/onboarding");
+    }
+  }, [view, router]);
 
   useEffect(() => {
     if (!view?.status.connected) return;
@@ -293,22 +301,24 @@ export default function AppDashboard({
 
   if (!connected) {
     return (
-      <main className="flex min-h-screen flex-col bg-slate-50/50">
-        <header className="flex h-[68px] items-center justify-between border-b border-slate-200/80 bg-white px-6 shadow-2xs">
-          <div className="flex items-center gap-2.5">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Fabroniee" className="h-8 w-8 object-contain rounded-lg" />
-            <span className="text-lg font-bold tracking-tight text-slate-900">Fabroniee</span>
+            <img src="/logo.png" alt="Fabroniee" className="h-10 w-10 object-contain" />
+            <div className="absolute -inset-1 rounded-2xl border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
           </div>
-          <button
-            onClick={logout}
-            className="text-xs font-semibold text-slate-600 hover:text-slate-900 px-3.5 py-1.5 rounded-full border border-slate-200 bg-white hover:bg-slate-50 transition-colors cursor-pointer"
-          >
-            Sign out
-          </button>
-        </header>
-        <div className="flex flex-1 items-center justify-center p-6">{accountPanel}</div>
-      </main>
+          <div className="text-center space-y-1">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight font-sans">Fabroniee</h2>
+            <p className="text-xs text-slate-500 font-medium">Redirecting to creator setup...</p>
+          </div>
+          <div className="flex items-center gap-1.5 pt-1">
+            <div className="h-2 w-2 rounded-full bg-[#e13181] animate-bounce [animation-delay:-0.3s]" />
+            <div className="h-2 w-2 rounded-full bg-[#e13181] animate-bounce [animation-delay:-0.15s]" />
+            <div className="h-2 w-2 rounded-full bg-[#e13181] animate-bounce" />
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -439,8 +449,12 @@ export default function AppDashboard({
             <Stories username={status.username} ownAvatar={status.profilePictureUrl} />
           )}
           {active === "hashtags" && <HashtagSearch />}
+          {active === "voice-notes" && <VoiceNotesDashboard />}
           {active === "account" && accountPanel}
         </div>
+
+        {/* Global Quick Voice Note Launcher */}
+        <VoiceNoteGlobalButton />
       </main>
     </div>
   );

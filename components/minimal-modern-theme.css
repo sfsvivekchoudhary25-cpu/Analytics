@@ -54,11 +54,43 @@
   gap: 30px;
 }
 
+.topbar-row {
+  display: contents;
+}
+
+.topbar-mobile-context {
+  display: none;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
   min-width: 190px;
+}
+
+.brand-back {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.brand-back:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.brand-back-icon {
+  font-size: 11px;
 }
 
 .brand-mark {
@@ -153,6 +185,20 @@
 .primary-nav em.mint {
   background: #dcfce7;
   color: #16a34a;
+}
+
+.tab-label-full {
+  display: inline;
+}
+
+.tab-label-short {
+  display: none;
+}
+
+.tab-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .top-actions {
@@ -1250,44 +1296,207 @@
 
 @media (max-width: 650px) {
   .app-shell {
-    padding: 14px 14px 40px;
+    padding: 12px 14px 40px;
   }
+
+  /* ── Mobile Topbar Structure ── */
   .topbar {
-    gap: 10px;
-    min-width: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: auto;
+    min-height: unset;
+    gap: 12px;
+    padding: 2px 0 14px;
+    border-bottom: 1px solid var(--line);
+    overflow: visible;
   }
+
+  .topbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+  }
+
   .brand {
     min-width: auto;
     flex: 0 0 auto;
   }
+
   .brand small {
     display: none;
   }
+
+  .brand-back {
+    height: 36px;
+    padding: 0 13px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .brand-back:active {
+    background: #f1f5f9;
+    transform: scale(0.97);
+  }
+
+  .topbar-mobile-context {
+    display: flex;
+    align-items: center;
+  }
+
+  .context-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 9999px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .context-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+
+  /* ── Mobile Segmented Tab Navigation ── */
   .primary-nav {
-    flex: 1 1 auto;
-    min-width: 0;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: auto;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    gap: 4px;
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
-    gap: 1px;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
   }
+
   .primary-nav::-webkit-scrollbar {
     display: none;
   }
-  .primary-nav button, .primary-nav button.active {
-    flex: 0 0 auto;
-    display: flex;
-    padding: 0 5px;
-    font-size: 10px;
+
+  .tab-label-full {
+    display: none;
   }
+
+  .tab-label-short {
+    display: inline;
+  }
+
+  .primary-nav button,
+  .primary-nav button.active {
+    flex: 1 1 0;
+    min-width: max-content;
+    height: 38px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #64748b;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+    position: static;
+  }
+
+  .primary-nav button:active {
+    transform: scale(0.98);
+  }
+
+  .primary-nav button.active {
+    background: #ffffff;
+    color: #2563eb;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Disable the desktop bottom underline on mobile */
   .primary-nav button.active:after {
-    left: 4px;
-    right: 4px;
+    display: none !important;
   }
+
+  .tab-badges {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 2px;
+  }
+
+  /* Refined mobile badges */
+  .primary-nav em {
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 1.5px 6px;
+    border-radius: 9999px;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    transition: all 0.15s ease;
+  }
+
+  .primary-nav em.blue {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid rgba(37, 99, 235, 0.25);
+  }
+
+  .primary-nav button.active em.blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: rgba(29, 78, 216, 0.35);
+  }
+
+  .primary-nav em.mint {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid rgba(5, 150, 105, 0.25);
+  }
+
+  .primary-nav button.active em.mint {
+    background: #d1fae5;
+    color: #047857;
+    border-color: rgba(4, 120, 87, 0.35);
+  }
+
   .workspace-head {
-    display: block;
-    padding: 30px 0 22px;
+    display: none !important;
   }
   .workspace-head h1 {
     font-size: 27px;

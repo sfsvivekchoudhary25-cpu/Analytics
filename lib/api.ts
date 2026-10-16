@@ -10,11 +10,6 @@ export function isLocalDev(): boolean {
   );
 }
 
-export function devBypassLogin(targetAccount = "sfs.vivekchoudhary25"): void {
-  auth.set("dev-bypass-token");
-  activeAccount.set(targetAccount);
-}
-
 export function getApiBase(): string {
   if (typeof window !== "undefined") {
     const override = localStorage.getItem("ighub_api_base");

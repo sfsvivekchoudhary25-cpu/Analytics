@@ -16,7 +16,7 @@ import {
   UserOutlined,
   SafetyCertificateFilled,
 } from "@ant-design/icons";
-import { auth, getApiBase, isLocalDev } from "@/lib/api";
+import { activeAccount, auth, getApiBase } from "@/lib/api";
 
 interface SocialStatus {
   facebookConnected: boolean;
@@ -56,7 +56,7 @@ export default function OnboardingPage() {
     if (typeof window === "undefined") return;
 
     const token = auth.get();
-    if (!token && !isLocalDev()) {
+    if (!token) {
       router.replace("/login");
       return;
     }
@@ -106,6 +106,10 @@ export default function OnboardingPage() {
       // 2. Fetch Facebook Page Connection
       const fbRes = await fetch(`${apiBase}/facebook-page`, { headers });
       const fbData = fbRes.ok ? await fbRes.json() : null;
+
+      if (igData?.connected && igData?.username) {
+        activeAccount.set(igData.username);
+      }
 
       setStatus((prev) => ({
         ...prev,
@@ -192,6 +196,9 @@ export default function OnboardingPage() {
     } catch (err) {
       console.warn("Could not persist onboarding to db:", err);
     } finally {
+      if (status.instagramHandle) {
+        activeAccount.set(status.instagramHandle);
+      }
       setBusy(false);
       router.push("/dashboard");
     }
@@ -218,7 +225,18 @@ export default function OnboardingPage() {
           </Link>
 
           {/* Right Header Navigation */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {anyConnected && (
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard")}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-black px-3.5 py-1.5 rounded-full transition-all cursor-pointer shadow-xs"
+              >
+                <span>Go to Studio</span>
+                <ArrowRightOutlined className="text-[10px]" />
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setHelpModalOpen(true)}

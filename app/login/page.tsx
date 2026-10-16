@@ -18,7 +18,7 @@ import {
   ThunderboltFilled,
   UserOutlined,
 } from "@ant-design/icons";
-import { auth, devBypassLogin, getApiBase, isLocalDev } from "@/lib/api";
+import { activeAccount, auth, getApiBase } from "@/lib/api";
 
 // ── Carousel Showcase Slides ──────────────────────────────────────────────────
 const CAROUSEL_SLIDES = [
@@ -78,14 +78,7 @@ export default function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [isLocal, setIsLocal] = useState(false);
-
-  // Carousel
   const [activeSlide, setActiveSlide] = useState(0);
-
-  useEffect(() => {
-    setIsLocal(isLocalDev());
-  }, []);
 
   // Auto-advance carousel
   useEffect(() => {
@@ -152,10 +145,15 @@ export default function AuthPage() {
       if (data.token) {
         auth.set(data.token);
       }
-      setSuccessMsg("Signed in successfully! Loading your creator setup...");
+      if (data.user?.instagramHandle) {
+        activeAccount.set(data.user.instagramHandle);
+      } else {
+        activeAccount.set("fabroniee");
+      }
+      setSuccessMsg("Signed in successfully! Loading dashboard...");
       setTimeout(() => {
-        router.push("/onboarding");
-      }, 500);
+        router.push("/dashboard");
+      }, 400);
     } catch (err: any) {
       setError(err?.message || "Failed to sign in. Please verify your credentials.");
       setBusy(false);
@@ -679,18 +677,20 @@ export default function AuthPage() {
                   <label className="block text-xs font-semibold text-slate-700">
                     Password
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("forgot");
-                      setError(null);
-                      setSuccessMsg(null);
-                      setForgotStep(1);
-                    }}
-                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Forgot password?
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMode("forgot");
+                        setError(null);
+                        setSuccessMsg(null);
+                        setForgotStep(1);
+                      }}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -736,6 +736,7 @@ export default function AuthPage() {
                 {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                 <span>Sign In</span>
               </button>
+
 
               {/* Bottom Switch to Sign Up */}
               <div className="text-center pt-2">

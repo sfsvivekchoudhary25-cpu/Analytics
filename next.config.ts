@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
         // Proxy to whatever NEXT_PUBLIC_API_URL is set to (localhost:4000 for dev, production URL otherwise)
         destination: `${apiUrl}/:path*`,
       },
+      {
+        source: "/media/:path*",
+        destination: `${apiUrl}/media/:path*`,
+      },
     ];
   },
   async headers() {
@@ -45,7 +49,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(self), microphone=(self), geolocation=()",
           },
         ],
       },

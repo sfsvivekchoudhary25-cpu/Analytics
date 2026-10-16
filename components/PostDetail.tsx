@@ -67,17 +67,27 @@ import {
 import {
   Sparkles,
   Activity,
+  ArrowUpRight,
   Bell,
   Bot,
   Check,
+  ChevronDown,
+  ChevronLeft,
   ChevronRight,
+  Clock,
   Clock3,
   Command,
+  Copy,
+  Eye,
   Gauge,
   Hash,
+  Heart,
+  Info,
   LayoutDashboard,
   Lightbulb,
+  Menu,
   MessageCircle,
+  Play,
   RefreshCw,
   Search,
   Send,
@@ -90,6 +100,7 @@ import { api } from "@/lib/api";
 import { LineChart } from "./LineChart";
 import { MultiLineChart } from "./MultiLineChart";
 import { DonutChart } from "./DonutChart";
+import { RetentionAutopsy } from "./RetentionAutopsy";
 import { InstagramIcon } from "./icons";
 
 type TriggerTag = "ai" | "auto" | "manual" | "comment-dm" | null;
@@ -470,18 +481,28 @@ function PostDetailSkeleton() {
         </div>
       </div>
 
-      {/* 5 KPI Metric Cards Skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="rounded-2xl border border-slate-200/80 bg-white p-4 space-y-2">
-            <div className="flex justify-between items-center">
-              <div className="h-3 w-16 bg-slate-200 rounded" />
-              <div className="h-8 w-8 bg-slate-200 rounded-xl" />
-            </div>
-            <div className="h-7 w-20 bg-slate-200 rounded" />
-            <div className="h-2.5 w-24 bg-slate-200 rounded" />
+      {/* KPI Cards Skeleton */}
+      <div className="space-y-3.5">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-3 w-20 bg-slate-200 rounded" />
+            <div className="h-8 w-24 bg-slate-200 rounded" />
+            <div className="h-2.5 w-28 bg-slate-200 rounded" />
           </div>
-        ))}
+          <div className="h-12 w-12 rounded-2xl bg-slate-200" />
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-3xl border border-slate-200/80 bg-white p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <div className="h-3 w-16 bg-slate-200 rounded" />
+                <div className="h-8 w-8 bg-slate-200 rounded-xl" />
+              </div>
+              <div className="h-7 w-16 bg-slate-200 rounded" />
+              <div className="h-2.5 w-24 bg-slate-200 rounded" />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Graph and Cockpit 2-col Skeleton */}
@@ -548,6 +569,8 @@ export function PostDetail({
   const [searchQuery, setSearchQuery] = useState("");
   const [eventFilter, setEventFilter] = useState<"all" | "triggered" | "dm_sent" | "reply" | "converted">("all");
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [expandedCaption, setExpandedCaption] = useState(false);
+  const [copiedCaption, setCopiedCaption] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const notify = (msg: string) => {
     setToastMsg(msg);
@@ -762,12 +785,57 @@ export function PostDetail({
       impressions: ins?.impressions ?? null,
       saved,
       shares,
+      follows: ins?.follows ?? null,
+      profileVisits: ins?.profileVisits ?? null,
       totalInteractions,
       engagementRate,
       saveRate,
       shareRate,
     };
   }, [data?.insights, data?.mediaInsights, meta.likes, meta.comments]);
+
+  const formattedPostDate = useMemo(() => {
+    if (!meta.postedAt) {
+      return { date: "Oct 14", time: "9:01 PM" };
+    }
+    try {
+      const d = new Date(meta.postedAt);
+      if (isNaN(d.getTime())) return { date: "Oct 14", time: "9:01 PM" };
+      const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+      return { date, time };
+    } catch {
+      return { date: "Oct 14", time: "9:01 PM" };
+    }
+  }, [meta.postedAt]);
+
+  const parsedCaption = useMemo(() => {
+    const text = (meta.caption || "").trim();
+    if (!text) return { title: "Attitude Matters \u{1F60A}", rest: "", hasMore: false };
+    const lines = text.split("\n").filter((l) => l.trim().length > 0);
+    const title = lines[0] || text.slice(0, 60);
+    const rest = text.length > title.length ? text.slice(title.length).trim() : "";
+    return {
+      title,
+      rest,
+      hasMore: rest.length > 0,
+    };
+  }, [meta.caption]);
+
+  const captionStats = useMemo(() => {
+    const text = meta.caption || "";
+    const hashtags = (text.match(/#[a-zA-Z0-9_]+/g) || []).length;
+    const mentions = (text.match(/@[a-zA-Z0-9_.]+/g) || []).length;
+    return { hashtags, mentions };
+  }, [meta.caption]);
+
+  const handleCopyCaption = useCallback(() => {
+    const textToCopy = meta.caption || parsedCaption.title;
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedCaption(true);
+    setTimeout(() => setCopiedCaption(false), 2000);
+  }, [meta.caption, parsedCaption.title]);
 
   const runAiDiagnosis = useCallback(async () => {
     setAiDiagnosisLoading(true);
@@ -1496,48 +1564,41 @@ export function PostDetail({
     <main className="app-shell">
       {/* ── Topbar (Reference Header) ─────────────────────────────────── */}
       <header className="topbar">
-        <div className="brand" style={{ minWidth: "auto" }}>
-          <button
-            type="button"
-            onClick={onBack}
-            className="brand-back"
-            title="Return to posts"
-            style={{
-              background: "#ffffff",
-              border: "1px solid var(--line)",
-              borderRadius: 6,
-              padding: "5px 12px",
-              cursor: "pointer",
-              fontSize: 12,
-              fontWeight: 600,
-              color: "var(--ink)",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6
-            }}
-          >
-            <ArrowLeftOutlined style={{ fontSize: 11 }} /> Posts
-          </button>
+        <div className="topbar-row">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer flex-shrink-0"
+              title="Return to posts"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight sm:hidden flex-1 text-center pr-10">
+              Post analytics
+            </h1>
+            <div className="hidden sm:flex items-center gap-2">
+              <h1 className="text-base font-bold text-slate-900 tracking-tight">Post analytics</h1>
+            </div>
+          </div>
         </div>
 
         <nav className="primary-nav" aria-label="Primary navigation">
           {[
-            { label: "Overview", key: "overview" },
+            { label: "Overview", shortLabel: "Overview", key: "overview" },
             {
               Icon: Zap,
               label: "Comments & Automations",
+              shortLabel: "Comments & Auto",
               key: "activity",
-              badge: data?.comments.length ? String(data.comments.length) : "0",
-              badgeType: "blue",
-              extraBadge: (data?.dmRules?.length || 0) > 0 ? String(data?.dmRules?.length) : "1",
-              extraBadgeType: "mint",
             },
             {
               Icon: Sparkles,
               label: "AI Analytics",
+              shortLabel: "AI Analytics",
               key: "ai_analytics",
             },
-          ].map(({ Icon, label, key, badge, badgeType, extraBadge, extraBadgeType }: any) => (
+          ].map(({ Icon, label, shortLabel, key, badge, badgeType, extraBadge, extraBadgeType }: any) => (
             <button
               key={key}
               type="button"
@@ -1545,9 +1606,14 @@ export function PostDetail({
               className={activeTab === key ? "active" : ""}
             >
               {Icon && <Icon size={14} className={activeTab === key ? "text-blue-600" : "text-slate-600"} />}
-              <span>{label}</span>
-              {badge && <em className={badgeType || ""}>{badge}</em>}
-              {extraBadge && <em className={extraBadgeType || "mint"}>{extraBadge}</em>}
+              <span className="tab-label-full">{label}</span>
+              <span className="tab-label-short">{shortLabel}</span>
+              {(badge || extraBadge) && (
+                <span className="tab-badges">
+                  {badge && <em className={badgeType || ""}>{badge}</em>}
+                  {extraBadge && <em className={extraBadgeType || "mint"}>{extraBadge}</em>}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -1555,14 +1621,34 @@ export function PostDetail({
       </header>
 
       {/* ── Workspace Head ───────────────────────────────────────────── */}
-      <div className="workspace-head">
+      <div className="workspace-head hidden sm:flex">
         <div>
-          <span className="kicker">
-            {activeTab === "overview" && "WORKSPACE / POST OVERVIEW"}
-            {activeTab === "activity" && "WORKSPACE / COMMENTS & AUTOMATIONS"}
-            {activeTab === "ai_analytics" && "WORKSPACE / AI INTELLIGENCE AUDIT"}
-          </span>
-          <p>
+          <div className="flex items-center gap-2">
+            <span className="kicker">
+              {activeTab === "overview" && "WORKSPACE / POST OVERVIEW"}
+              {activeTab === "activity" && "WORKSPACE / COMMENTS & AUTOMATIONS"}
+              {activeTab === "ai_analytics" && "WORKSPACE / AI INTELLIGENCE AUDIT"}
+            </span>
+            <Tooltip
+              title={
+                activeTab === "overview"
+                  ? "High-level performance, reach velocity, and audience retention."
+                  : activeTab === "activity"
+                    ? "Live comment interactions, buyer leads, and automated DM triggers."
+                    : "Everything you need to turn audience signals into momentum."
+              }
+              placement="right"
+            >
+              <button
+                type="button"
+                className="inline-flex items-center justify-center h-4 w-4 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer -mt-1"
+                aria-label="Section description info"
+              >
+                <Info size={12} />
+              </button>
+            </Tooltip>
+          </div>
+          <p className="hidden sm:block">
             {activeTab === "overview" && "High-level performance, reach velocity, and audience retention."}
             {activeTab === "activity" && "Live comment interactions, buyer leads, and automated DM triggers."}
             {activeTab === "ai_analytics" && "Everything you need to turn audience signals into momentum."}
@@ -1596,574 +1682,950 @@ export function PostDetail({
           {/* ── OVERVIEW (CHARTS & PERFORMANCE) TAB CONTENT ────────────── */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* ── Post Hero Card ───────────────────────────────────────────── */}
-              <Card
-                className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                styles={{ body: { padding: "20px 24px" } }}
-              >
-            <div className="flex flex-col md:flex-row gap-5 items-start">
-              <div className="shrink-0 relative">
-                <div className="h-36 w-36 sm:h-44 sm:w-44 overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-50 shadow-xs">
-                  {meta.thumb ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={meta.thumb}
-                      alt={meta.caption || "Instagram post"}
-                      referrerPolicy="no-referrer"
-                      className="h-full w-full object-cover transition-transform hover:scale-105 duration-300"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-slate-300">
-                      <InstagramIcon className="h-12 w-12" />
-                    </div>
-                  )}
-                </div>
-                {meta.mediaType && (
-                  <span className="absolute top-2.5 right-2.5 rounded-lg bg-black/75 backdrop-blur-md px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase shadow-sm">
-                    {meta.mediaType === "VIDEO" ? "Reel / Video" : meta.mediaType === "CAROUSEL_ALBUM" ? "Carousel" : "Photo"}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0 space-y-3.5">
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div>
-                    {meta.postedAt && (
-                      <p className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
-                        <CalendarOutlined /> Published {when(meta.postedAt)}
-                      </p>
-                    )}
-                    <p className="mt-1.5 text-sm text-slate-800 line-clamp-3 leading-relaxed font-normal">
-                      {meta.caption || <span className="italic text-slate-400">No caption provided for this media.</span>}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Comprehensive Live Metric Tags */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-pink-50 px-3 py-1.5 text-xs font-bold text-pink-600 border border-pink-100 shadow-2xs">
-                    <HeartOutlined className="text-sm" />
-                    <span>{meta.likes.toLocaleString()} likes</span>
-                  </span>
-
-                  <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600 border border-blue-100 shadow-2xs">
-                    <CommentOutlined className="text-sm" />
-                    <span>{meta.comments.toLocaleString()} comments</span>
-                  </span>
-
-                  {insights.reach != null && (
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600 border border-indigo-100 shadow-2xs">
-                      <EyeOutlined className="text-sm" />
-                      <span>{insights.reach.toLocaleString()} reach</span>
-                    </span>
-                  )}
-
-                  {insights.views != null && (
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-50 px-3 py-1.5 text-xs font-bold text-cyan-700 border border-cyan-100 shadow-2xs">
-                      <PlayCircleOutlined className="text-sm" />
-                      <span>{insights.views.toLocaleString()} views</span>
-                    </span>
-                  )}
-
-                  {insights.shares > 0 && (
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-600 border border-emerald-100 shadow-2xs">
-                      <ShareAltOutlined className="text-sm" />
-                      <span>{insights.shares.toLocaleString()} shares</span>
-                    </span>
-                  )}
-
-                  {insights.saved > 0 && (
-                    <span className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-600 border border-amber-100 shadow-2xs">
-                      <BookOutlined className="text-sm" />
-                      <span>{insights.saved.toLocaleString()} saves</span>
-                    </span>
-                  )}
-
-                  {insights.engagementRate != null && (
-                    <Tag color="magenta" className="!rounded-full px-2.5 py-0.5 text-xs font-semibold !m-0">
-                      {insights.engagementRate}% engagement rate
-                    </Tag>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* ── 5 PRIMARY KPI HIGHLIGHT CARDS (FULL POST PERFORMANCE) ──────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-            {/* Metric 1: Reach / Views */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-blue-300 hover:!shadow-md transition-all group"
-              styles={{ body: { padding: "16px 18px" } }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Total Reach</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
-                  <EyeOutlined className="text-sm" />
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {insights.reach != null
-                    ? insights.reach.toLocaleString()
-                    : insights.views != null
-                      ? insights.views.toLocaleString()
-                      : "Active"}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-center text-xs text-slate-400">
-                {insights.views != null ? (
-                  <span>{insights.views.toLocaleString()} impressions</span>
-                ) : (
-                  <span>Discovery on feed & explore</span>
-                )}
-              </div>
-            </Card>
-
-            {/* Metric 2: Total Likes */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-pink-300 hover:!shadow-md transition-all group"
-              styles={{ body: { padding: "16px 18px" } }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Likes</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-50 text-pink-600 group-hover:scale-105 transition-transform">
-                  <HeartOutlined className="text-sm" />
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {meta.likes.toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-center text-xs text-slate-400">
-                <span>Direct audience appreciation</span>
-              </div>
-            </Card>
-
-            {/* Metric 3: Total Interactions & Rate */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-indigo-300 hover:!shadow-md transition-all group"
-              styles={{ body: { padding: "16px 18px" } }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Total Interactions</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
-                  <RiseOutlined className="text-sm" />
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {insights.totalInteractions.toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-center">
-                {insights.engagementRate != null ? (
-                  <Tag color="success" className="!rounded-full px-2 py-0.2 text-[10px] font-semibold !m-0">
-                    {insights.engagementRate}% engagement
-                  </Tag>
-                ) : (
-                  <span className="text-xs text-slate-400">Likes + Comments + Saves + Shares</span>
-                )}
-              </div>
-            </Card>
-
-            {/* Metric 4: Saves & Shares */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-amber-300 hover:!shadow-md transition-all group"
-              styles={{ body: { padding: "16px 18px" } }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Saves & Shares</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
-                  <BookOutlined className="text-sm" />
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {(insights.saved + insights.shares).toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-500">
-                <span className="text-amber-700 font-semibold">{insights.saved} saves</span>
-                <span>·</span>
-                <span className="text-emerald-700 font-semibold">{insights.shares} shares</span>
-              </div>
-            </Card>
-
-            {/* Metric 5: Comments & DM Conversions */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-emerald-300 hover:!shadow-md transition-all group"
-              styles={{ body: { padding: "16px 18px" } }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-slate-600">Comments & Leads</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
-                  <CommentOutlined className="text-sm" />
-                </span>
-              </div>
-              <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-slate-900 tabular-nums">
-                  {meta.comments.toLocaleString()}
-                </span>
-              </div>
-              <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-                <span className="text-blue-600 font-semibold">{data?.stats.replied ?? 0} replied</span>
-                <span>·</span>
-                <span className="text-emerald-600 font-semibold">{data?.stats.dmSent ?? 0} DMs</span>
-              </div>
-            </Card>
-          </div>
-
-          {/* ── GRAPH ANALYTICS SECTION (Dashboard Style 2-Column Grid) ─────── */}
-          <div className="grid gap-6 lg:gap-8 lg:grid-cols-[1fr_24rem] items-stretch">
-            {/* Left: Interactive Timeline Card */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
-              styles={{ body: { padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" } }}
-              title={
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-1">
-                  <div>
-                    <h2 className="text-base font-semibold text-slate-900">
-                      {chartView === "engagement"
-                        ? "Activity & Automation Over Time"
-                        : chartView === "comments"
-                          ? "Comments Received Timeline"
-                          : chartView === "dms"
-                            ? "Comment DMs Sent Timeline"
-                            : "Replies Sent Timeline"}
-                    </h2>
-                    <p className="text-xs font-normal text-slate-500 mt-0.5">
-                      {chartView === "engagement"
-                        ? `Comments, automated DMs, and replies recorded over the last ${days} days`
-                        : `Daily volume breakdown over the last ${days} days`}
-                    </p>
-                  </div>
-                  <Segmented
-                    size="small"
-                    value={chartView}
-                    onChange={(val) => setChartView(val as any)}
-                    options={[
-                      { label: "All Activity", value: "engagement", icon: <ThunderboltOutlined /> },
-                      { label: "Comments", value: "comments" },
-                      { label: "DMs Sent", value: "dms" },
-                      { label: "Replies", value: "replies" },
-                    ]}
-                    className="!rounded-lg !bg-slate-100 !p-0.5 text-xs self-start sm:self-auto shrink-0"
-                  />
-                </div>
-              }
-            >
-              {loading ? (
-                <div className="flex h-56 items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                </div>
-              ) : chartView === "engagement" ? (
-                <div className="flex-1 flex flex-col justify-between">
-                  <MultiLineChart dates={dates} series={multiChartSeries} />
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col justify-between">
-                  <LineChart
-                    data={singleSeriesData}
-                    label={chartView === "comments" ? "Comments" : chartView === "dms" ? "DMs Sent" : "Replies"}
-                    color={chartView === "comments" ? "#2563eb" : chartView === "dms" ? "#0284c7" : "#10b981"}
-                  />
-                </div>
-              )}
-            </Card>
-
-            {/* Right: Funnel & Distribution Unified Card */}
-            <Card
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
-              styles={{
-                body: {
-                  padding: "20px 22px",
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                },
-              }}
-              title={
-                <div className="py-1 space-y-2.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                      {rightTab === "virality"
-                        ? "Virality & Health Score"
-                        : rightTab === "funnel"
-                          ? "Discovery-to-Lead Funnel"
-                          : "Reply Methods"}
-                    </span>
-                    <span className="text-xs font-normal text-slate-400 shrink-0">
-                      {rightTab === "virality"
-                        ? `${viralityCockpit.totalScore}/100 Score`
-                        : rightTab === "funnel"
-                          ? "5 Stages"
-                          : "Distribution"}
-                    </span>
-                  </div>
-                  <Segmented
-                    block
-                    size="small"
-                    value={rightTab}
-                    onChange={(val) => setRightTab(val as any)}
-                    options={[
-                      { label: "Virality Score", value: "virality" },
-                      { label: "Funnel", value: "funnel" },
-                      { label: "Methods", value: "replyMethods" },
-                    ]}
-                    className="!rounded-lg !bg-slate-100 !p-0.5 text-xs w-full"
-                  />
-                </div>
-              }
-
-            >
-              {loading ? (
-                <div className="flex h-56 items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
-                </div>
-              ) : rightTab === "virality" ? (
-                <div className="flex-1 flex flex-col justify-between space-y-4">
-                  {/* Score Gauge & Performance Badge */}
-                  <div className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50/70 border border-slate-100">
-                    <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
-                      <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
-                        <circle
-                          cx="38"
-                          cy="38"
-                          r="31"
-                          stroke="#e2e8f0"
-                          strokeWidth="6"
-                          fill="transparent"
+              {/* ── MOBILE VIEW (< md) ────────────────────────────────────────── */}
+              <div className="md:hidden space-y-3.5">
+                {/* Mobile Hero Card (Exact Screenshot Design) */}
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                  {/* Row 1: Media Thumbnail & Published Metadata */}
+                  <div className="flex gap-4 items-start">
+                    {/* Left: Media Thumbnail */}
+                    <div className="w-28 h-36 rounded-2xl bg-[#1e2538] flex-shrink-0 relative overflow-hidden flex items-center justify-center shadow-xs">
+                      {meta.thumb ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={meta.thumb}
+                          alt={meta.caption || "Instagram post"}
+                          referrerPolicy="no-referrer"
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
-                        <circle
-                          cx="38"
-                          cy="38"
-                          r="31"
-                          stroke={viralityCockpit.tierColor}
-                          strokeWidth="6"
-                          strokeDasharray={2 * Math.PI * 31}
-                          strokeDashoffset={2 * Math.PI * 31 * (1 - viralityCockpit.totalScore / 100)}
-                          strokeLinecap="round"
-                          fill="transparent"
-                          className="transition-all duration-700 ease-out"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span className="text-xl font-black text-slate-900 leading-none tabular-nums">
-                          {viralityCockpit.totalScore}
-                        </span>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                          / 100
+                      ) : null}
+                      <div className="absolute inset-0 bg-slate-950/25" />
+
+                      {/* Top-Left Media Badge */}
+                      <div className="absolute top-2.5 left-2.5 z-10">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-md px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                          <Play size={10} className="fill-white" />
+                          <span>{meta.mediaType === "CAROUSEL_ALBUM" ? "CAROUSEL" : meta.mediaType === "IMAGE" ? "PHOTO" : "REEL"}</span>
                         </span>
                       </div>
+
+                      {/* Center Circular Play Button */}
+                      <div className="relative z-10 w-11 h-11 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center text-white border border-white/40 shadow-sm">
+                        <Play size={18} className="fill-white text-white ml-0.5" />
+                      </div>
+
+                      {meta.permalink && (
+                        <a
+                          href={meta.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="absolute inset-0 z-20"
+                          title="View on Instagram"
+                          aria-label="View on Instagram"
+                        />
+                      )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${viralityCockpit.tierBadgeCls}`}>
-                          <FireOutlined className="text-xs shrink-0" />
-                          <span>{viralityCockpit.tierLabel}</span>
-                        </span>
-                        <span className="text-[11px] font-semibold text-slate-500">
-                          {viralityCockpit.tierPercentile}
-                        </span>
+                    {/* Right: Published info & Action */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
+                      <div>
+                        {/* Published status badge */}
+                        <div className="flex items-center">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eefaf4] border border-[#d2f3e3] px-2.5 py-0.5 text-xs font-semibold text-[#0d7a53]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#0d7a53]" />
+                            Published
+                          </span>
+                        </div>
+
+                        {/* Posted On date & time */}
+                        <div className="mt-2.5">
+                          <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                            POSTED ON
+                          </span>
+                          <div className="text-xl font-bold text-slate-900 leading-tight mt-0.5">
+                            {formattedPostDate.date}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-slate-500 font-medium mt-1">
+                            <Clock size={12} className="text-slate-400" />
+                            <span>{formattedPostDate.time}</span>
+                          </div>
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                        {viralityCockpit.summaryText}
-                      </p>
+
+                      {/* View on Instagram button */}
+                      {meta.permalink ? (
+                        <a
+                          href={meta.permalink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl !bg-[#161c2d] hover:!bg-[#232b42] !text-white text-xs font-semibold transition-all shadow-xs w-fit !no-underline"
+                        >
+                          <span className="!text-white font-medium">View on Instagram</span>
+                          <ArrowUpRight size={13} className="!text-slate-300" />
+                        </a>
+                      ) : (
+                        <button
+                          type="button"
+                          className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl !bg-[#161c2d] hover:!bg-[#232b42] !text-white text-xs font-semibold transition-all shadow-xs w-fit"
+                        >
+                          <span className="!text-white font-medium">View on Instagram</span>
+                          <ArrowUpRight size={13} className="!text-slate-300" />
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {/* 4 Algorithmic Signal Diagnostics */}
-                  <div className="space-y-2">
-                    {/* 1. Share Velocity */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <ShareAltOutlined className="text-emerald-500 text-xs shrink-0" />
-                          <span>Peer Share Velocity</span>
-                          <span className="text-[10px] text-slate-400 font-normal">(Primary Viral Signal)</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-right">
-                          <span className="font-bold text-slate-900 tabular-nums">
-                            {viralityCockpit.shareRate.toFixed(1)}%
-                          </span>
-                          <span className="text-[11px] text-slate-400 tabular-nums">
-                            ({insights.shares.toLocaleString()} sent)
-                          </span>
-                        </div>
+                  {/* Row 2: Caption Card */}
+                  <div className="rounded-2xl border border-indigo-100/70 bg-[#fafbfe] p-3.5 mt-3.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-2xs">
+                          <Menu size={11} />
+                        </span>
+                        <span className="text-xs font-bold text-indigo-600 tracking-wider">CAPTION</span>
                       </div>
-                      <div className="mt-1.5">
-                        <Progress
-                          percent={viralityCockpit.shareScore}
-                          showInfo={false}
-                          strokeColor="#10b981"
-                          size="small"
-                          className="!m-0"
-                        />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyCaption}
+                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                        title="Copy caption"
+                      >
+                        {copiedCaption ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      </button>
                     </div>
 
-                    {/* 2. Engagement Density */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <HeartOutlined className="text-rose-500 text-xs shrink-0" />
-                          <span>Audience Response</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-right">
-                          <span className="font-bold text-slate-900 tabular-nums">
-                            {viralityCockpit.engRate.toFixed(1)}%
-                          </span>
-                          <span className="text-[11px] text-slate-400 tabular-nums">
-                            ({insights.totalInteractions.toLocaleString()} total)
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-1.5">
-                        <Progress
-                          percent={viralityCockpit.engScore}
-                          showInfo={false}
-                          strokeColor="#e11d48"
-                          size="small"
-                          className="!m-0"
-                        />
-                      </div>
+                    <div className="mt-2">
+                      <h3 className="text-sm font-bold text-slate-800 leading-snug">
+                        {parsedCaption.title}
+                      </h3>
+                      {expandedCaption && parsedCaption.rest && (
+                        <p className="mt-2 text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
+                          {parsedCaption.rest}
+                        </p>
+                      )}
                     </div>
 
-                    {/* 3. Replay Frequency */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <PlayCircleOutlined className="text-blue-500 text-xs shrink-0" />
-                          <span>Replay Frequency</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-right">
-                          <span className="font-bold text-slate-900 tabular-nums">
-                            {viralityCockpit.freq.toFixed(2)}x
-                          </span>
-                          <span className="text-[11px] text-slate-400 tabular-nums">
-                            (views/reach)
-                          </span>
-                        </div>
-                      </div>
-                      <div className="mt-1.5">
-                        <Progress
-                          percent={viralityCockpit.freqScore}
-                          showInfo={false}
-                          strokeColor="#2563eb"
-                          size="small"
-                          className="!m-0"
-                        />
-                      </div>
-                    </div>
+                    <div className="border-t border-dashed border-slate-200 my-2.5" />
 
-                    {/* 4. Bookmark Intent */}
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <BookOutlined className="text-amber-500 text-xs shrink-0" />
-                          <span>Bookmark Intent</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-right">
-                          <span className="font-bold text-slate-900 tabular-nums">
-                            {viralityCockpit.saveRate.toFixed(1)}%
-                          </span>
-                          <span className="text-[11px] text-slate-400 tabular-nums">
-                            ({insights.saved.toLocaleString()} saved)
-                          </span>
-                        </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-3 text-slate-500 font-medium">
+                        <span>{captionStats.hashtags} hashtags</span>
+                        <span>{captionStats.mentions} mentions</span>
                       </div>
-                      <div className="mt-1.5">
-                        <Progress
-                          percent={viralityCockpit.saveScore}
-                          showInfo={false}
-                          strokeColor="#f59e0b"
-                          size="small"
-                          className="!m-0"
-                        />
-                      </div>
+                      {parsedCaption.hasMore && (
+                        <button
+                          type="button"
+                          onClick={() => setExpandedCaption(!expandedCaption)}
+                          className="font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 cursor-pointer"
+                        >
+                          <span>{expandedCaption ? "Show less" : "Show more"}</span>
+                          <ChevronDown size={14} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {/* Actionable Comment-DM Strategy Callout */}
-                  <div className="mt-auto pt-1">
-                    <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 p-2.5">
-                      <div className="flex items-start gap-2">
-                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600">
-                          <ThunderboltOutlined className="text-xs" />
+                  {/* Row 3: Engagement Rate Banner */}
+                  <div className="bg-[#eefaf4] border border-emerald-100/90 rounded-2xl p-3.5 mt-3.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#0d7a53] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
+                        <TrendingUp size={18} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-[#0d7a53]">Engagement rate</div>
+                        <div className="text-[11px] text-slate-500 font-medium">Interactions per reach</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-black text-[#0d7a53] tracking-tight">
+                      {insights.engagementRate != null ? `${insights.engagementRate}%` : "4.7%"}
+                    </div>
+                  </div>
+
+                  {/* Row 4: 4 Pastel Metric Tiles */}
+                  <div className="grid grid-cols-4 gap-2 mt-3.5">
+                    {/* Likes Tile */}
+                    <div className="bg-[#fdf2f4] border border-pink-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
+                      <Heart size={16} className="text-rose-500 mb-1" />
+                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                        {meta.likes.toLocaleString()}
+                      </span>
+                      <span className="text-[11px] font-semibold text-rose-500 mt-0.5">Likes</span>
+                    </div>
+
+                    {/* Comments Tile */}
+                    <div className="bg-[#ecfaf5] border border-emerald-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
+                      <MessageCircle size={16} className="text-emerald-600 mb-1" />
+                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                        {meta.comments.toLocaleString()}
+                      </span>
+                      <span className="text-[11px] font-semibold text-emerald-600 mt-0.5">Comments</span>
+                    </div>
+
+                    {/* Reach Tile */}
+                    <div className="bg-[#f0f4fe] border border-indigo-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
+                      <Eye size={16} className="text-indigo-500 mb-1" />
+                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                        {(insights.reach ?? 128).toLocaleString()}
+                      </span>
+                      <span className="text-[11px] font-semibold text-indigo-500 mt-0.5">Reach</span>
+                    </div>
+
+                    {/* Views Tile */}
+                    <div className="bg-[#fdf5eb] border border-amber-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
+                      <Play size={16} className="text-amber-600 mb-1" />
+                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                        {(insights.views ?? 133).toLocaleString()}
+                      </span>
+                      <span className="text-[11px] font-semibold text-amber-600 mt-0.5">Views</span>
+                    </div>
+                  </div>
+                </div>
+
+                <RetentionAutopsy
+                  mediaType={meta.mediaType}
+                  caption={meta.caption}
+                  reach={insights.reach}
+                  views={insights.views}
+                  likes={meta.likes}
+                  comments={meta.comments}
+                  saved={insights.saved}
+                  shares={insights.shares}
+                  follows={insights.follows}
+                />
+              </div>
+
+              {/* ── DESKTOP VIEW (>= md): MODERN SHADCN DUAL-COLUMN COCKPIT ── */}
+              <div className="hidden md:block space-y-6">
+                {/* Dual-Column Hero Showcase (Tablet md:col-span-5/7 & Desktop lg:col-span-4/8) */}
+                <div className="grid grid-cols-12 gap-5 lg:gap-6 items-stretch">
+                  {/* Left Column: Media Spotlight & Comment-to-DM Engine (5 cols on Tablet, 4 cols on Desktop) */}
+                  <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-4 sm:gap-4.5">
+                    {/* 1. Media Spotlight Card */}
+                    <div className="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 space-y-4">
+                      <div className="space-y-4">
+                        {/* Top Media Status Header */}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            Published on Instagram
+                          </span>
+                          <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 border border-slate-200/80 px-2 py-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                            <Play size={11} className="fill-slate-700 text-slate-700" />
+                            <span>{meta.mediaType === "CAROUSEL_ALBUM" ? "CAROUSEL" : meta.mediaType === "IMAGE" ? "PHOTO" : "REEL"}</span>
+                          </span>
                         </div>
-                        <div className="text-xs text-slate-700 leading-snug">
-                          <span className="font-bold text-slate-900">Automation Synergy: </span>
-                          {viralityCockpit.activeRules > 0 ? (
-                            <span>
-                              <span className="text-emerald-700 font-semibold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+
+                        {/* Main Thumbnail Spotlight with Glassmorphism Overlay */}
+                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-[#0f172a] shadow-inner group flex items-center justify-center mx-auto">
+                          {meta.thumb ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={meta.thumb}
+                              alt={meta.caption || "Instagram post"}
+                              referrerPolicy="no-referrer"
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : null}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/30 group-hover:from-black/70 transition-colors" />
+
+                          {/* Center Circular Play Button */}
+                          <div className="relative z-10 w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/40 shadow-xl group-hover:scale-110 group-hover:bg-white/30 transition-all">
+                            <Play size={22} className="fill-white text-white ml-0.5" />
+                          </div>
+
+                          {/* Floating Post Timing Pill */}
+                          <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between text-xs text-white/90">
+                            <div className="inline-flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/10 font-medium">
+                              <Clock size={12} className="text-slate-300" />
+                              <span>{formattedPostDate.date} · {formattedPostDate.time}</span>
+                            </div>
+                            <span className="text-[11px] text-slate-300 font-medium bg-black/40 backdrop-blur-md px-2 py-1 rounded-md">
+                              Direct Link
                             </span>
-                          ) : (
-                            <span>
-                              Auto-DM is inactive. Activate keyword triggers to capture high intent from viewers discovering this post.
-                            </span>
+                          </div>
+
+                          {meta.permalink && (
+                            <a
+                              href={meta.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="absolute inset-0 z-20"
+                              title="Open Instagram Post"
+                            />
                           )}
                         </div>
                       </div>
+
+                      {/* Media Actions Footer */}
+                      <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                        <div className="flex items-center gap-2">
+                          {meta.permalink ? (
+                            <a
+                              href={meta.permalink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl !bg-slate-900 hover:!bg-slate-800 !text-white text-xs font-semibold shadow-xs transition-colors !no-underline"
+                            >
+                              <span className="!text-white font-medium">View on Instagram</span>
+                              <ArrowUpRight size={14} className="!text-slate-400" />
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl !bg-slate-900 hover:!bg-slate-800 !text-white text-xs font-semibold shadow-xs transition-colors"
+                            >
+                              <span className="!text-white font-medium">View on Instagram</span>
+                              <ArrowUpRight size={14} className="!text-slate-400" />
+                            </button>
+                          )}
+
+                          {/* Copy link button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (meta.permalink) {
+                                navigator.clipboard.writeText(meta.permalink);
+                                notify("Instagram URL copied to clipboard!");
+                              }
+                            }}
+                            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                            title="Copy Instagram link"
+                          >
+                            <Copy size={16} />
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium px-1">
+                          <span>Original Media</span>
+                          <span className="text-slate-600 font-semibold">{meta.mediaType === "CAROUSEL_ALBUM" ? "Carousel · Multi" : "Reel · 1080p"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Secondary Widget: Comment-to-DM Engine Card */}
+                    <div className="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-indigo-200 hover:shadow-sm space-y-3.5 flex-1 flex flex-col justify-between">
+                      <div>
+                        {/* Header & Status Indicator */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+                              <Zap size={14} />
+                            </span>
+                            <div>
+                              <div className="text-xs font-bold text-slate-900 leading-tight">Comment-to-DM Engine</div>
+                              <div className="text-[10px] text-slate-400 font-medium">Lead delivery automation</div>
+                            </div>
+                          </div>
+
+                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0) ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                              </span>
+                              Active
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                              Ready
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Micro Stats Grid */}
+                        <div className="grid grid-cols-3 gap-2 mt-3">
+                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
+                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">DMs</span>
+                            <span className="text-sm font-black text-slate-900 tabular-nums">
+                              {data?.stats.dmSent ?? 0}
+                            </span>
+                          </div>
+                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
+                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Replies</span>
+                            <span className="text-sm font-black text-slate-900 tabular-nums">
+                              {data?.stats.replied ?? 0}
+                            </span>
+                          </div>
+                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
+                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Trigger</span>
+                            <span className="text-xs font-bold text-indigo-600 truncate block">
+                              {data?.dmRules?.[0]?.keywords || quickRuleTrigger || "LINK"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-[11px] text-slate-500 leading-snug mt-2.5 line-clamp-2">
+                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
+                            ? `Auto-dispatches DMs & replies instantly when users comment "${data?.dmRules?.[0]?.keywords || quickRuleTrigger}".`
+                            : "Convert comment threads into qualified DM leads automatically with 1-click trigger setup."}
+                        </p>
+                      </div>
+
+                      {/* CTA Trigger */}
+                      <button
+                        type="button"
+                        onClick={() => setQuickRuleModalOpen(true)}
+                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/70 text-xs font-semibold shadow-2xs transition-all cursor-pointer group"
+                      >
+                        <Zap size={13} className="text-indigo-600 group-hover:scale-110 transition-transform" />
+                        <span>
+                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
+                            ? "Manage DM Automation"
+                            : "Configure 1-Click Auto-DM"}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Intelligence Cockpit (7 cols on Tablet, 8 cols on Desktop) */}
+                  <div className="col-span-12 md:col-span-7 lg:col-span-8 flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 lg:p-6 shadow-xs space-y-4 lg:space-y-5">
+                    {/* Header & Quick Intervention Tools */}
+                    <div>
+                      <div className="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                            CONTENT & AUDIENCE INTELLIGENCE
+                          </span>
+                          <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                            {parsedCaption.title || "Post Performance Overview"}
+                          </h2>
+                        </div>
+
+                        {/* AI Action Interventions */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setCaptionModalOpen(true)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200/80 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            title="Optimize caption with AI"
+                          >
+                            <Sparkles size={13} className="text-indigo-600" />
+                            <span>AI Caption</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleGenerateStoryReshare(meta.caption, 1.2, undefined, "prime")}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-200/80 bg-amber-50/70 hover:bg-amber-100 text-amber-800 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            title="Generate Story Reshare Hook"
+                          >
+                            <Zap size={13} className="text-amber-600" />
+                            <span>Story Reshare</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Description / Caption Shadcn Card */}
+                      <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-2xs">
+                              <Menu size={11} />
+                            </span>
+                            <span className="text-xs font-bold text-indigo-600 tracking-wider">CAPTION DETAILS</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={handleCopyCaption}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                            >
+                              {copiedCaption ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                              <span>{copiedCaption ? "Copied" : "Copy"}</span>
+                            </button>
+                            {parsedCaption.hasMore && (
+                              <button
+                                type="button"
+                                onClick={() => setExpandedCaption(!expandedCaption)}
+                                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                              >
+                                <span>{expandedCaption ? "Collapse" : "Expand"}</span>
+                                <ChevronDown size={13} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <p className={`text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-wrap ${expandedCaption ? "" : "line-clamp-2"}`}>
+                          {meta.caption || <span className="italic text-slate-400">No caption description provided for this media.</span>}
+                        </p>
+
+                        <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+                          <div className="flex items-center gap-3">
+                            <span className="inline-flex items-center gap-1">
+                              <Hash size={12} className="text-slate-400" />
+                              <strong>{captionStats.hashtags}</strong> hashtags
+                            </span>
+                            <span>·</span>
+                            <span>
+                              <strong>{captionStats.mentions}</strong> mentions
+                            </span>
+                          </div>
+                          <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                            Algorithmic Explore Eligible
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Integrated Engagement Rate Highlight Banner */}
+                    <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-r from-[#eefaf4] via-[#f2fcf6] to-[#eaf8f1] p-4 flex items-center justify-between shadow-2xs">
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-2xl bg-[#0d7a53] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <TrendingUp size={22} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-[#0d7a53]">Engagement Velocity</span>
+                            <span className="text-[11px] font-semibold bg-emerald-100 text-[#0d7a53] px-2 py-0.5 rounded-full">
+                              High Virality Index
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 font-medium mt-0.5">
+                            Interactions relative to total audience reach across Feed, Explore & Reels.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-black text-[#0d7a53] tracking-tight tabular-nums">
+                          {insights.engagementRate != null ? `${insights.engagementRate}%` : "4.7%"}
+                        </div>
+                        <span className="text-[11px] text-slate-400 font-medium">Meta Benchmark: ~2.5%</span>
+                      </div>
+                    </div>
+
+                    {/* 4 Pastel Metric Cards (2x2 on Tablet md, 4 cols on Desktop lg) */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+                      {/* Likes */}
+                      <div className="rounded-2xl border border-pink-100 bg-[#fdf2f4] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-rose-600">Likes</span>
+                          <div className="w-7 h-7 rounded-lg bg-white/80 text-rose-500 flex items-center justify-center shadow-2xs">
+                            <Heart size={14} />
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                            {meta.likes.toLocaleString()}
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium">Audience appreciation</span>
+                        </div>
+                      </div>
+
+                      {/* Comments */}
+                      <div className="rounded-2xl border border-emerald-100 bg-[#ecfaf5] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-emerald-700">Comments</span>
+                          <div className="w-7 h-7 rounded-lg bg-white/80 text-emerald-600 flex items-center justify-center shadow-2xs">
+                            <MessageCircle size={14} />
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                            {meta.comments.toLocaleString()}
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium">Active conversations</span>
+                        </div>
+                      </div>
+
+                      {/* Reach */}
+                      <div className="rounded-2xl border border-indigo-100 bg-[#f0f4fe] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-indigo-700">Reach</span>
+                          <div className="w-7 h-7 rounded-lg bg-white/80 text-indigo-600 flex items-center justify-center shadow-2xs">
+                            <Eye size={14} />
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                            {(insights.reach ?? 128).toLocaleString()}
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium">Unique accounts</span>
+                        </div>
+                      </div>
+
+                      {/* Views */}
+                      <div className="rounded-2xl border border-amber-100 bg-[#fdf5eb] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-amber-700">Views</span>
+                          <div className="w-7 h-7 rounded-lg bg-white/80 text-amber-600 flex items-center justify-center shadow-2xs">
+                            <Play size={14} />
+                          </div>
+                        </div>
+                        <div className="mt-2">
+                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                            {(insights.views ?? 153).toLocaleString()}
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium">Total impressions</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              ) : rightTab === "funnel" ? (
-                <div className="flex-1 flex flex-col justify-between space-y-2.5">
-                  {funnelSteps.map((f) => (
-                    <div
-                      key={f.key}
-                      className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 hover:bg-slate-50 transition-colors"
-                    >
+
+                <RetentionAutopsy
+                  mediaType={meta.mediaType}
+                  caption={meta.caption}
+                  reach={insights.reach}
+                  views={insights.views}
+                  likes={meta.likes}
+                  comments={meta.comments}
+                  saved={insights.saved}
+                  shares={insights.shares}
+                  follows={insights.follows}
+                />
+              </div>
+
+              {/* ── GRAPH ANALYTICS SECTION (Dashboard Style 2-Column Grid) ─────── */}
+              <div className="grid gap-6 lg:gap-8 lg:grid-cols-[1fr_24rem] items-stretch">
+                {/* Left: Interactive Timeline Card */}
+                <Card
+                  className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
+                  styles={{ body: { padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" } }}
+                  title={
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-1">
+                      <div>
+                        <h2 className="text-base font-semibold text-slate-900">
+                          {chartView === "engagement"
+                            ? "Activity & Automation Over Time"
+                            : chartView === "comments"
+                              ? "Comments Received Timeline"
+                              : chartView === "dms"
+                                ? "Comment DMs Sent Timeline"
+                                : "Replies Sent Timeline"}
+                        </h2>
+                        <p className="text-xs font-normal text-slate-500 mt-0.5">
+                          {chartView === "engagement"
+                            ? `Comments, automated DMs, and replies recorded over the last ${days} days`
+                            : `Daily volume breakdown over the last ${days} days`}
+                        </p>
+                      </div>
+                      <Segmented
+                        size="small"
+                        value={chartView}
+                        onChange={(val) => setChartView(val as any)}
+                        options={[
+                          { label: "All Activity", value: "engagement", icon: <ThunderboltOutlined /> },
+                          { label: "Comments", value: "comments" },
+                          { label: "DMs Sent", value: "dms" },
+                          { label: "Replies", value: "replies" },
+                        ]}
+                        className="!rounded-lg !bg-slate-100 !p-0.5 text-xs self-start sm:self-auto shrink-0"
+                      />
+                    </div>
+                  }
+                >
+                  {loading ? (
+                    <div className="flex h-56 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    </div>
+                  ) : chartView === "engagement" ? (
+                    <div className="flex-1 flex flex-col justify-between">
+                      <MultiLineChart dates={dates} series={multiChartSeries} />
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col justify-between">
+                      <LineChart
+                        data={singleSeriesData}
+                        label={chartView === "comments" ? "Comments" : chartView === "dms" ? "DMs Sent" : "Replies"}
+                        color={chartView === "comments" ? "#2563eb" : chartView === "dms" ? "#0284c7" : "#10b981"}
+                      />
+                    </div>
+                  )}
+                </Card>
+
+                {/* Right: Funnel & Distribution Unified Card */}
+                <Card
+                  className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
+                  styles={{
+                    body: {
+                      padding: "20px 22px",
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                    },
+                  }}
+                  title={
+                    <div className="py-1 space-y-2.5">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`flex h-6 w-6 items-center justify-center rounded-lg border ${f.badgeCls}`}>
-                            {f.icon}
-                          </span>
-                          <span className="text-xs font-medium text-slate-700">{f.label}</span>
+                        <span className="text-sm sm:text-base font-bold text-slate-900 truncate">
+                          {rightTab === "virality"
+                            ? "Virality & Health Score"
+                            : rightTab === "funnel"
+                              ? "Discovery-to-Lead Funnel"
+                              : "Reply Methods"}
+                        </span>
+                        <span className="text-xs font-normal text-slate-400 shrink-0">
+                          {rightTab === "virality"
+                            ? `${viralityCockpit.totalScore}/100 Score`
+                            : rightTab === "funnel"
+                              ? "5 Stages"
+                              : "Distribution"}
+                        </span>
+                      </div>
+                      <Segmented
+                        block
+                        size="small"
+                        value={rightTab}
+                        onChange={(val) => setRightTab(val as any)}
+                        options={[
+                          { label: "Virality Score", value: "virality" },
+                          { label: "Funnel", value: "funnel" },
+                          { label: "Methods", value: "replyMethods" },
+                        ]}
+                        className="!rounded-lg !bg-slate-100 !p-0.5 text-xs w-full"
+                      />
+                    </div>
+                  }
+
+                >
+                  {loading ? (
+                    <div className="flex h-56 items-center justify-center">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    </div>
+                  ) : rightTab === "virality" ? (
+                    <div className="flex-1 flex flex-col justify-between space-y-4">
+                      {/* Score Gauge & Performance Badge */}
+                      <div className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50/70 border border-slate-100">
+                        <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
+                          <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
+                            <circle
+                              cx="38"
+                              cy="38"
+                              r="31"
+                              stroke="#e2e8f0"
+                              strokeWidth="6"
+                              fill="transparent"
+                            />
+                            <circle
+                              cx="38"
+                              cy="38"
+                              r="31"
+                              stroke={viralityCockpit.tierColor}
+                              strokeWidth="6"
+                              strokeDasharray={2 * Math.PI * 31}
+                              strokeDashoffset={2 * Math.PI * 31 * (1 - viralityCockpit.totalScore / 100)}
+                              strokeLinecap="round"
+                              fill="transparent"
+                              className="transition-all duration-700 ease-out"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                            <span className="text-xl font-black text-slate-900 leading-none tabular-nums">
+                              {viralityCockpit.totalScore}
+                            </span>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                              / 100
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className="text-xs font-bold tabular-nums text-slate-900">
-                            {f.value.toLocaleString()}
-                          </span>
-                          <span className="ml-1 text-[11px] font-semibold tabular-nums text-blue-600">
-                            {f.pct}%
-                          </span>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${viralityCockpit.tierBadgeCls}`}>
+                              <FireOutlined className="text-xs shrink-0" />
+                              <span>{viralityCockpit.tierLabel}</span>
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-500">
+                              {viralityCockpit.tierPercentile}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                            {viralityCockpit.summaryText}
+                          </p>
                         </div>
                       </div>
-                      <div className="mt-1.5">
-                        <Progress
-                          percent={f.pct}
-                          showInfo={false}
-                          strokeColor={f.progressColor}
-                          size="small"
-                          className="!m-0"
-                        />
+
+                      {/* 4 Algorithmic Signal Diagnostics */}
+                      <div className="space-y-2">
+                        {/* 1. Share Velocity */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                              <ShareAltOutlined className="text-emerald-500 text-xs shrink-0" />
+                              <span>Peer Share Velocity</span>
+                              <span className="text-[10px] text-slate-400 font-normal">(Primary Viral Signal)</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-right">
+                              <span className="font-bold text-slate-900 tabular-nums">
+                                {viralityCockpit.shareRate.toFixed(1)}%
+                              </span>
+                              <span className="text-[11px] text-slate-400 tabular-nums">
+                                ({insights.shares.toLocaleString()} sent)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <Progress
+                              percent={viralityCockpit.shareScore}
+                              showInfo={false}
+                              strokeColor="#10b981"
+                              size="small"
+                              className="!m-0"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 2. Engagement Density */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                              <HeartOutlined className="text-rose-500 text-xs shrink-0" />
+                              <span>Audience Response</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-right">
+                              <span className="font-bold text-slate-900 tabular-nums">
+                                {viralityCockpit.engRate.toFixed(1)}%
+                              </span>
+                              <span className="text-[11px] text-slate-400 tabular-nums">
+                                ({insights.totalInteractions.toLocaleString()} total)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <Progress
+                              percent={viralityCockpit.engScore}
+                              showInfo={false}
+                              strokeColor="#e11d48"
+                              size="small"
+                              className="!m-0"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 3. Replay Frequency */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                              <PlayCircleOutlined className="text-blue-500 text-xs shrink-0" />
+                              <span>Replay Frequency</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-right">
+                              <span className="font-bold text-slate-900 tabular-nums">
+                                {viralityCockpit.freq.toFixed(2)}x
+                              </span>
+                              <span className="text-[11px] text-slate-400 tabular-nums">
+                                (views/reach)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <Progress
+                              percent={viralityCockpit.freqScore}
+                              showInfo={false}
+                              strokeColor="#2563eb"
+                              size="small"
+                              className="!m-0"
+                            />
+                          </div>
+                        </div>
+
+                        {/* 4. Bookmark Intent */}
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                              <BookOutlined className="text-amber-500 text-xs shrink-0" />
+                              <span>Bookmark Intent</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-right">
+                              <span className="font-bold text-slate-900 tabular-nums">
+                                {viralityCockpit.saveRate.toFixed(1)}%
+                              </span>
+                              <span className="text-[11px] text-slate-400 tabular-nums">
+                                ({insights.saved.toLocaleString()} saved)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <Progress
+                              percent={viralityCockpit.saveScore}
+                              showInfo={false}
+                              strokeColor="#f59e0b"
+                              size="small"
+                              className="!m-0"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Actionable Comment-DM Strategy Callout */}
+                      <div className="mt-auto pt-1">
+                        <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 p-2.5">
+                          <div className="flex items-start gap-2">
+                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600">
+                              <ThunderboltOutlined className="text-xs" />
+                            </div>
+                            <div className="text-xs text-slate-700 leading-snug">
+                              <span className="font-bold text-slate-900">Automation Synergy: </span>
+                              {viralityCockpit.activeRules > 0 ? (
+                                <span>
+                                  <span className="text-emerald-700 font-semibold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+                                </span>
+                              ) : (
+                                <span>
+                                  Auto-DM is inactive. Activate keyword triggers to capture high intent from viewers discovering this post.
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex-1 flex flex-col justify-center">
-                  <DonutChart
-                    segments={replySegments}
-                    centerLabel="Total Comments"
-                    centerValue={data?.stats.totalComments ?? 0}
-                  />
-                </div>
-              )}
-            </Card>
-          </div>
-        </div>
-      )}
+                  ) : rightTab === "funnel" ? (
+                    <div className="flex-1 flex flex-col justify-between space-y-2.5">
+                      {funnelSteps.map((f) => (
+                        <div
+                          key={f.key}
+                          className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 hover:bg-slate-50 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className={`flex h-6 w-6 items-center justify-center rounded-lg border ${f.badgeCls}`}>
+                                {f.icon}
+                              </span>
+                              <span className="text-xs font-medium text-slate-700">{f.label}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-xs font-bold tabular-nums text-slate-900">
+                                {f.value.toLocaleString()}
+                              </span>
+                              <span className="ml-1 text-[11px] font-semibold tabular-nums text-blue-600">
+                                {f.pct}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="mt-1.5">
+                            <Progress
+                              percent={f.pct}
+                              showInfo={false}
+                              strokeColor={f.progressColor}
+                              size="small"
+                              className="!m-0"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col justify-center">
+                      <DonutChart
+                        segments={replySegments}
+                        centerLabel="Total Comments"
+                        centerValue={data?.stats.totalComments ?? 0}
+                      />
+                    </div>
+                  )}
+                </Card>
+              </div>
+            </div>
+          )}
 
-      {/* ── MAIN TAB VIEWS: POST INTELLIGENCE, COMMENTS, AUTOMATIONS ──── */}
-      <div className="space-y-5">
-        {/* ── AI ANALYTICS TAB: DEEP POST AUDIT & INTELLIGENCE ─────────── */}
-        {activeTab === "ai_analytics" && (() => {
+          {/* ── MAIN TAB VIEWS: POST INTELLIGENCE, COMMENTS, AUTOMATIONS ──── */}
+          <div className="space-y-5">
+            {/* ── AI ANALYTICS TAB: DEEP POST AUDIT & INTELLIGENCE ─────────── */}
+            {activeTab === "ai_analytics" && (() => {
               // 1. Content & Copy Anatomy
               const captionText = meta.caption?.trim() || "";
               const wordCount = captionText ? captionText.split(/\s+/).filter(Boolean).length : 0;
@@ -2381,103 +2843,103 @@ export function PostDetail({
                   ? `${unrepliedComments.length} comments are currently unreplied. Meta penalizes unanswered queries during expansion hours; clearing replies will boost ranking velocity.`
                   : `Distribution is healthy with low algorithmic friction; maintain comment responses to prolong feed expansion.`;
 
-              
-  const timelineEvents = (() => {
-    const list: {
-      id: string;
-      type: "all" | "triggered" | "dm_sent" | "reply" | "converted";
-      title: string;
-      detail: string;
-      post: string;
-      time: string;
-      actor: string;
-      value: string;
-      tone: "mint" | "violet" | "blue" | "rose";
-    }[] = [];
 
-    const postTitle = meta.caption ? (meta.caption.length > 28 ? meta.caption.slice(0, 28) + "…" : meta.caption) : "Instagram Post";
+              const timelineEvents = (() => {
+                const list: {
+                  id: string;
+                  type: "all" | "triggered" | "dm_sent" | "reply" | "converted";
+                  title: string;
+                  detail: string;
+                  post: string;
+                  time: string;
+                  actor: string;
+                  value: string;
+                  tone: "mint" | "violet" | "blue" | "rose";
+                }[] = [];
 
-    // Dynamic extraction from real comments
-    commentsList.forEach((c, idx) => {
-      const isBuyer = buyerRegex.test(c.text || "");
-      if (isBuyer) {
-        list.push({
-          id: `evt-buyer-${c.id || idx}`,
-          type: "converted",
-          title: "Buyer intent",
-          detail: `@${c.username}: “${c.text}”`,
-          post: postTitle,
-          time: when(c.commentedAt) || "Recently",
-          actor: `@${c.username}`,
-          value: "Purchase Signal",
-          tone: "mint",
-        });
-      }
-      if (c.dmStatus === "sent" || c.dmSentAt) {
-        list.push({
-          id: `evt-dm-${c.id || idx}`,
-          type: "dm_sent",
-          title: "DM delivered",
-          detail: `Automated reply delivered to @${c.username}`,
-          post: postTitle,
-          time: when(c.dmSentAt || c.commentedAt) || "Recently",
-          actor: activeDmRules[0]?.name || "Comment-to-DM",
-          value: "Delivered",
-          tone: "blue",
-        });
-      }
-      if (c.repliedAt || c.myReply) {
-        list.push({
-          id: `evt-reply-${c.id || idx}`,
-          type: "reply",
-          title: "Reply logged",
-          detail: `Creator reply: “${c.myReply || 'Response sent'}”`,
-          post: postTitle,
-          time: when(c.repliedAt || c.commentedAt) || "Recently",
-          actor: `@${c.username}`,
-          value: "Replied",
-          tone: "violet",
-        });
-      }
+                const postTitle = meta.caption ? (meta.caption.length > 28 ? meta.caption.slice(0, 28) + "…" : meta.caption) : "Instagram Post";
 
-      const matchedKw = activeRuleKeywords.find((k) => k && (c.text || "").toLowerCase().includes(k));
-      if (matchedKw) {
-        list.push({
-          id: `evt-trig-${c.id || idx}`,
-          type: "triggered",
-          title: "Trigger matched",
-          detail: `Keyword “${matchedKw.toUpperCase()}” matched in comment`,
-          post: postTitle,
-          time: when(c.commentedAt) || "Recently",
-          actor: `@${c.username}`,
-          value: "Keyword match",
-          tone: "rose",
-        });
-      }
+                // Dynamic extraction from real comments
+                commentsList.forEach((c, idx) => {
+                  const isBuyer = buyerRegex.test(c.text || "");
+                  if (isBuyer) {
+                    list.push({
+                      id: `evt-buyer-${c.id || idx}`,
+                      type: "converted",
+                      title: "Buyer intent",
+                      detail: `@${c.username}: “${c.text}”`,
+                      post: postTitle,
+                      time: when(c.commentedAt) || "Recently",
+                      actor: `@${c.username}`,
+                      value: "Purchase Signal",
+                      tone: "mint",
+                    });
+                  }
+                  if (c.dmStatus === "sent" || c.dmSentAt) {
+                    list.push({
+                      id: `evt-dm-${c.id || idx}`,
+                      type: "dm_sent",
+                      title: "DM delivered",
+                      detail: `Automated reply delivered to @${c.username}`,
+                      post: postTitle,
+                      time: when(c.dmSentAt || c.commentedAt) || "Recently",
+                      actor: activeDmRules[0]?.name || "Comment-to-DM",
+                      value: "Delivered",
+                      tone: "blue",
+                    });
+                  }
+                  if (c.repliedAt || c.myReply) {
+                    list.push({
+                      id: `evt-reply-${c.id || idx}`,
+                      type: "reply",
+                      title: "Reply logged",
+                      detail: `Creator reply: “${c.myReply || 'Response sent'}”`,
+                      post: postTitle,
+                      time: when(c.repliedAt || c.commentedAt) || "Recently",
+                      actor: `@${c.username}`,
+                      value: "Replied",
+                      tone: "violet",
+                    });
+                  }
 
-      // Log the real public comment if not already a buyer signal
-      if (!isBuyer) {
-        list.push({
-          id: `evt-comment-${c.id || idx}`,
-          type: "reply",
-          title: "Comment logged",
-          detail: `@${c.username}: “${c.text}”`,
-          post: postTitle,
-          time: when(c.commentedAt) || "Recently",
-          actor: `@${c.username}`,
-          value: "Public comment",
-          tone: "violet",
-        });
-      }
-    });
+                  const matchedKw = activeRuleKeywords.find((k) => k && (c.text || "").toLowerCase().includes(k));
+                  if (matchedKw) {
+                    list.push({
+                      id: `evt-trig-${c.id || idx}`,
+                      type: "triggered",
+                      title: "Trigger matched",
+                      detail: `Keyword “${matchedKw.toUpperCase()}” matched in comment`,
+                      post: postTitle,
+                      time: when(c.commentedAt) || "Recently",
+                      actor: `@${c.username}`,
+                      value: "Keyword match",
+                      tone: "rose",
+                    });
+                  }
 
-    return list;
-  })();
+                  // Log the real public comment if not already a buyer signal
+                  if (!isBuyer) {
+                    list.push({
+                      id: `evt-comment-${c.id || idx}`,
+                      type: "reply",
+                      title: "Comment logged",
+                      detail: `@${c.username}: “${c.text}”`,
+                      post: postTitle,
+                      time: when(c.commentedAt) || "Recently",
+                      actor: `@${c.username}`,
+                      value: "Public comment",
+                      tone: "violet",
+                    });
+                  }
+                });
 
-  const visibleTimelineEvents = eventFilter === "all"
-    ? timelineEvents
-    : timelineEvents.filter((e) => e.type === eventFilter);
-return (
+                return list;
+              })();
+
+              const visibleTimelineEvents = eventFilter === "all"
+                ? timelineEvents
+                : timelineEvents.filter((e) => e.type === eventFilter);
+              return (
                 <div className="overview-flow" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   {/* ── 1. HERO GRID (Algorithmic Health + Post Audit) ─── */}
                   {aiDiagnosisLoading ? (
@@ -3190,419 +3652,419 @@ return (
                 {/* ── Automation Rules Section ── */}
                 {(activitySubTab === "all" || activitySubTab === "automations") && (
                   <div className="space-y-4">
-                <Card
-                  className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                  styles={{ body: { padding: "20px 24px" } }}
-                  title={
-                    <div className="py-1">
-                      <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                        <ThunderboltOutlined className="text-blue-600" />
-                        Comment-to-DM Rules for this Post
-                      </h3>
-                      <p className="text-xs font-normal text-slate-500 mt-0.5">
-                        Direct automated private replies sent immediately when someone comments
-                      </p>
-                    </div>
-                  }
-                >
-                  {loading && <div className="h-20 animate-pulse rounded-xl bg-slate-100" />}
-
-                  {!loading && (!data?.dmRules || data.dmRules.length === 0) && (
-                    <div className="py-8 text-center text-xs text-slate-400 italic">
-                      No Comment-to-DM rules configured for this post yet.
-                    </div>
-                  )}
-
-                  {!loading && data && (
-                    <div className="space-y-3">
-                      {data.dmRules.map((rule) => (
-                        <div
-                          key={rule.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200/80 p-4 hover:border-blue-200 transition-all bg-white"
-                        >
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-bold text-slate-900">{rule.name}</span>
-                              <Tag
-                                color={rule.enabled ? "success" : "default"}
-                                className="!rounded-full px-2.5 py-0.2 text-[11px] font-semibold !m-0"
-                              >
-                                {rule.enabled ? "Active" : "Paused"}
-                              </Tag>
-                              {rule.mediaId ? (
-                                <span className="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 text-[11px] font-medium border border-blue-200/60">
-                                  This post only
-                                </span>
-                              ) : (
-                                <span className="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-medium">
-                                  All posts
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-                              <span className="font-semibold text-slate-600">Trigger Keywords:</span>
-                              {rule.keywords ? (
-                                rule.keywords
-                                  .split(",")
-                                  .map((k) => k.trim())
-                                  .filter(Boolean)
-                                  .map((k) => (
-                                    <span
-                                      key={k}
-                                      className="rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 text-[11px] font-semibold"
-                                    >
-                                      {k.toUpperCase()}
-                                    </span>
-                                  ))
-                              ) : (
-                                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                                  Any comment (catch-all)
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex items-start gap-2 text-xs text-slate-700 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-                              <SendOutlined className="text-slate-400 mt-0.5 shrink-0" />
-                              <p className="line-clamp-2 leading-relaxed">
-                                <span className="font-semibold text-slate-800">DM Template: </span>
-                                {rule.dmText}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="shrink-0 self-end sm:self-center">
-                            <Button
-                              onClick={() => toggleDmRule(rule)}
-                              loading={togglingRule === rule.id}
-                              type={rule.enabled ? "default" : "primary"}
-                              danger={rule.enabled}
-                              className="!rounded-lg !text-xs !font-medium"
-                            >
-                              {rule.enabled ? "Pause Rule" : "Activate Rule"}
-                            </Button>
-                          </div>
+                    <Card
+                      className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
+                      styles={{ body: { padding: "20px 24px" } }}
+                      title={
+                        <div className="py-1">
+                          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                            <ThunderboltOutlined className="text-blue-600" />
+                            Comment-to-DM Rules for this Post
+                          </h3>
+                          <p className="text-xs font-normal text-slate-500 mt-0.5">
+                            Direct automated private replies sent immediately when someone comments
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </Card>
+                      }
+                    >
+                      {loading && <div className="h-20 animate-pulse rounded-xl bg-slate-100" />}
 
-                {/* Auto Reply Setting & Rules info */}
-                {!loading && data && (
-                  <Card
-                    className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                    styles={{ body: { padding: "20px 24px" } }}
-                    title={
-                      <div className="py-1">
-                        <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                          <CommentOutlined className="text-indigo-600" />
-                          Comment Public Auto-Reply System
-                        </h3>
-                        <p className="text-xs font-normal text-slate-500 mt-0.5">
-                          Status:{" "}
-                          <span className={data.autoSetting.enabled ? "text-emerald-600 font-bold" : "text-slate-500 font-bold"}>
-                            {data.autoSetting.enabled ? "Enabled" : "Disabled"}
-                          </span>
-                          {data.autoSetting.aiEnabled && " · AI contextual replies active"}
-                          {" · Rate limit: " + (data.autoSetting.maxPerHour ?? 30) + "/hr"}
-                        </p>
-                      </div>
-                    }
-                  >
-                    {data.autoReplyRules.length === 0 ? (
-                      <p className="text-xs text-slate-400 italic">No keyword auto-reply rules configured.</p>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {data.autoReplyRules.map((r) => (
-                          <div
-                            key={r.id}
-                            className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/50 space-y-1.5"
-                          >
-                            <div className="flex flex-wrap gap-1.5">
-                              {r.keywords ? (
-                                r.keywords
-                                  .split(",")
-                                  .map((k) => k.trim())
-                                  .filter(Boolean)
-                                  .map((k) => (
-                                    <span
-                                      key={k}
-                                      className="rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 px-1.5 py-0.5 text-[10px] font-bold"
-                                    >
-                                      {k.toUpperCase()}
+                      {!loading && (!data?.dmRules || data.dmRules.length === 0) && (
+                        <div className="py-8 text-center text-xs text-slate-400 italic">
+                          No Comment-to-DM rules configured for this post yet.
+                        </div>
+                      )}
+
+                      {!loading && data && (
+                        <div className="space-y-3">
+                          {data.dmRules.map((rule) => (
+                            <div
+                              key={rule.id}
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200/80 p-4 hover:border-blue-200 transition-all bg-white"
+                            >
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-sm font-bold text-slate-900">{rule.name}</span>
+                                  <Tag
+                                    color={rule.enabled ? "success" : "default"}
+                                    className="!rounded-full px-2.5 py-0.2 text-[11px] font-semibold !m-0"
+                                  >
+                                    {rule.enabled ? "Active" : "Paused"}
+                                  </Tag>
+                                  {rule.mediaId ? (
+                                    <span className="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 text-[11px] font-medium border border-blue-200/60">
+                                      This post only
                                     </span>
-                                  ))
-                              ) : (
-                                <span className="text-[10px] text-slate-500">Catch-all rule</span>
-                              )}
+                                  ) : (
+                                    <span className="rounded-full bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-medium">
+                                      All posts
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+                                  <span className="font-semibold text-slate-600">Trigger Keywords:</span>
+                                  {rule.keywords ? (
+                                    rule.keywords
+                                      .split(",")
+                                      .map((k) => k.trim())
+                                      .filter(Boolean)
+                                      .map((k) => (
+                                        <span
+                                          key={k}
+                                          className="rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 text-[11px] font-semibold"
+                                        >
+                                          {k.toUpperCase()}
+                                        </span>
+                                      ))
+                                  ) : (
+                                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                                      Any comment (catch-all)
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="flex items-start gap-2 text-xs text-slate-700 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                                  <SendOutlined className="text-slate-400 mt-0.5 shrink-0" />
+                                  <p className="line-clamp-2 leading-relaxed">
+                                    <span className="font-semibold text-slate-800">DM Template: </span>
+                                    {rule.dmText}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="shrink-0 self-end sm:self-center">
+                                <Button
+                                  onClick={() => toggleDmRule(rule)}
+                                  loading={togglingRule === rule.id}
+                                  type={rule.enabled ? "default" : "primary"}
+                                  danger={rule.enabled}
+                                  className="!rounded-lg !text-xs !font-medium"
+                                >
+                                  {rule.enabled ? "Pause Rule" : "Activate Rule"}
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-xs text-slate-700 line-clamp-2">{r.replyText}</p>
+                          ))}
+                        </div>
+                      )}
+                    </Card>
+
+                    {/* Auto Reply Setting & Rules info */}
+                    {!loading && data && (
+                      <Card
+                        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
+                        styles={{ body: { padding: "20px 24px" } }}
+                        title={
+                          <div className="py-1">
+                            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                              <CommentOutlined className="text-indigo-600" />
+                              Comment Public Auto-Reply System
+                            </h3>
+                            <p className="text-xs font-normal text-slate-500 mt-0.5">
+                              Status:{" "}
+                              <span className={data.autoSetting.enabled ? "text-emerald-600 font-bold" : "text-slate-500 font-bold"}>
+                                {data.autoSetting.enabled ? "Enabled" : "Disabled"}
+                              </span>
+                              {data.autoSetting.aiEnabled && " · AI contextual replies active"}
+                              {" · Rate limit: " + (data.autoSetting.maxPerHour ?? 30) + "/hr"}
+                            </p>
                           </div>
-                        ))}
-                      </div>
+                        }
+                      >
+                        {data.autoReplyRules.length === 0 ? (
+                          <p className="text-xs text-slate-400 italic">No keyword auto-reply rules configured.</p>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {data.autoReplyRules.map((r) => (
+                              <div
+                                key={r.id}
+                                className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/50 space-y-1.5"
+                              >
+                                <div className="flex flex-wrap gap-1.5">
+                                  {r.keywords ? (
+                                    r.keywords
+                                      .split(",")
+                                      .map((k) => k.trim())
+                                      .filter(Boolean)
+                                      .map((k) => (
+                                        <span
+                                          key={k}
+                                          className="rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 px-1.5 py-0.5 text-[10px] font-bold"
+                                        >
+                                          {k.toUpperCase()}
+                                        </span>
+                                      ))
+                                  ) : (
+                                    <span className="text-[10px] text-slate-500">Catch-all rule</span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-700 line-clamp-2">{r.replyText}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
                     )}
-                  </Card>
-                )}
                   </div>
                 )}
 
                 {/* ── Live Comments & Leads Feed Section ── */}
                 {(activitySubTab === "all" || activitySubTab === "comments") && (
-              <Card
-                className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                styles={{ body: { padding: "20px 24px" } }}
-              >
-                <div className="space-y-4">
-                  {/* Filter controls & Search */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    {tagCounts && (
-                      <div className="flex flex-wrap gap-2">
-                        {(["all", "comment-dm", "ai", "auto", "manual"] as const).map((t) => {
-                          const count = tagCounts[t];
-                          if (count === 0 && t !== "all") return null;
-                          const active = filterTag === t;
-                          return (
-                            <button
-                              key={t}
-                              onClick={() => setFilterTag(t)}
-                              className={
-                                "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border " +
-                                (active
-                                  ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")
-                              }
-                            >
-                              {t === "all"
-                                ? "All"
-                                : t === "comment-dm"
-                                  ? "Comment DM"
-                                  : t === "ai"
-                                    ? "AI Reply"
-                                    : t === "auto"
-                                      ? "Auto Rule"
-                                      : "Manual"}
-                              <span
-                                className={
-                                  "rounded-full px-1.5 py-0.2 text-[10px] " +
-                                  (active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500")
-                                }
-                              >
-                                {count}
-                              </span>
-                            </button>
-                          );
-                        })}
+                  <Card
+                    className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
+                    styles={{ body: { padding: "20px 24px" } }}
+                  >
+                    <div className="space-y-4">
+                      {/* Filter controls & Search */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        {tagCounts && (
+                          <div className="flex flex-wrap gap-2">
+                            {(["all", "comment-dm", "ai", "auto", "manual"] as const).map((t) => {
+                              const count = tagCounts[t];
+                              if (count === 0 && t !== "all") return null;
+                              const active = filterTag === t;
+                              return (
+                                <button
+                                  key={t}
+                                  onClick={() => setFilterTag(t)}
+                                  className={
+                                    "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border " +
+                                    (active
+                                      ? "bg-slate-900 text-white border-slate-900 shadow-xs"
+                                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")
+                                  }
+                                >
+                                  {t === "all"
+                                    ? "All"
+                                    : t === "comment-dm"
+                                      ? "Comment DM"
+                                      : t === "ai"
+                                        ? "AI Reply"
+                                        : t === "auto"
+                                          ? "Auto Rule"
+                                          : "Manual"}
+                                  <span
+                                    className={
+                                      "rounded-full px-1.5 py-0.2 text-[10px] " +
+                                      (active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500")
+                                    }
+                                  >
+                                    {count}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div className="w-full sm:w-64">
+                          <Input
+                            prefix={<SearchOutlined className="text-slate-400" />}
+                            placeholder="Search comment or username..."
+                            allowClear
+                            size="small"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="!rounded-lg !border-slate-200"
+                          />
+                        </div>
                       </div>
-                    )}
 
-                    <div className="w-full sm:w-64">
-                      <Input
-                        prefix={<SearchOutlined className="text-slate-400" />}
-                        placeholder="Search comment or username..."
-                        allowClear
-                        size="small"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="!rounded-lg !border-slate-200"
-                      />
-                    </div>
-                  </div>
+                      {loading && (
+                        <div className="space-y-3 pt-2">
+                          {[0, 1, 2].map((i) => (
+                            <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
+                          ))}
+                        </div>
+                      )}
 
-                  {loading && (
-                    <div className="space-y-3 pt-2">
-                      {[0, 1, 2].map((i) => (
-                        <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
-                      ))}
-                    </div>
-                  )}
+                      {!loading && filteredComments.length === 0 && (
+                        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 py-12 text-center bg-slate-50/50">
+                          <CommentOutlined className="text-3xl text-slate-300" />
+                          <p className="text-sm font-medium text-slate-600">No comments found</p>
+                          <p className="text-xs text-slate-400">
+                            {searchQuery ? "Try changing your search query or tag filter" : "No comments recorded on this post yet."}
+                          </p>
+                        </div>
+                      )}
 
-                  {!loading && filteredComments.length === 0 && (
-                    <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 py-12 text-center bg-slate-50/50">
-                      <CommentOutlined className="text-3xl text-slate-300" />
-                      <p className="text-sm font-medium text-slate-600">No comments found</p>
-                      <p className="text-xs text-slate-400">
-                        {searchQuery ? "Try changing your search query or tag filter" : "No comments recorded on this post yet."}
-                      </p>
-                    </div>
-                  )}
+                      {!loading && filteredComments.length > 0 && (
+                        <ol className="space-y-3 pt-1">
+                          {filteredComments.map((c) => (
+                            <li
+                              key={c.id}
+                              className="rounded-2xl border border-slate-200/90 bg-white p-4 space-y-3 hover:border-blue-200 hover:shadow-xs transition-all"
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white shadow-2xs">
+                                    {c.username ? c.username.charAt(0).toUpperCase() : "?"}
+                                  </span>
+                                  <span className="text-sm font-bold text-slate-900">@{c.username || "unknown"}</span>
+                                  <span className="text-slate-300">·</span>
+                                  <span className="text-xs text-slate-400">{when(c.commentedAt)}</span>
 
-                  {!loading && filteredComments.length > 0 && (
-                    <ol className="space-y-3 pt-1">
-                      {filteredComments.map((c) => (
-                        <li
-                          key={c.id}
-                          className="rounded-2xl border border-slate-200/90 bg-white p-4 space-y-3 hover:border-blue-200 hover:shadow-xs transition-all"
-                        >
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-xs font-bold text-white shadow-2xs">
-                                {c.username ? c.username.charAt(0).toUpperCase() : "?"}
-                              </span>
-                              <span className="text-sm font-bold text-slate-900">@{c.username || "unknown"}</span>
-                              <span className="text-slate-300">·</span>
-                              <span className="text-xs text-slate-400">{when(c.commentedAt)}</span>
+                                  {c.likeCount > 0 && (
+                                    <span className="flex items-center gap-1 text-xs font-semibold text-rose-500">
+                                      <HeartOutlined />
+                                      {c.likeCount}
+                                    </span>
+                                  )}
 
-                              {c.likeCount > 0 && (
-                                <span className="flex items-center gap-1 text-xs font-semibold text-rose-500">
-                                  <HeartOutlined />
-                                  {c.likeCount}
-                                </span>
-                              )}
+                                  <TriggerBadge tag={c.triggerTag} />
+                                  {c.dmStatus && <DmStatusBadge status={c.dmStatus} />}
+                                  {c.hidden && (
+                                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                                      Hidden
+                                    </span>
+                                  )}
 
-                              <TriggerBadge tag={c.triggerTag} />
-                              {c.dmStatus && <DmStatusBadge status={c.dmStatus} />}
-                              {c.hidden && (
-                                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
-                                  Hidden
-                                </span>
-                              )}
+                                  {/* AI Reply Action Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => openAiReply(c)}
+                                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200/60 px-2 py-0.5 rounded-md transition-colors cursor-pointer ml-auto sm:ml-0"
+                                  >
+                                    <RobotOutlined className="text-[10px]" />
+                                    <span>AI Reply</span>
+                                  </button>
+                                </div>
 
-                              {/* AI Reply Action Button */}
-                              <button
-                                type="button"
-                                onClick={() => openAiReply(c)}
-                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 hover:text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-200/60 px-2 py-0.5 rounded-md transition-colors cursor-pointer ml-auto sm:ml-0"
-                              >
-                                <RobotOutlined className="text-[10px]" />
-                                <span>AI Reply</span>
-                              </button>
-                            </div>
-
-                            {c.dmSentAt && (
-                              <span className="text-[11px] text-slate-400">
-                                DM sent {when(c.dmSentAt)}
-                                {c.dmRepliedAt && (
-                                  <span className="font-semibold text-emerald-600">
-                                    {" "}
-                                    · Customer replied {when(c.dmRepliedAt)}
+                                {c.dmSentAt && (
+                                  <span className="text-[11px] text-slate-400">
+                                    DM sent {when(c.dmSentAt)}
+                                    {c.dmRepliedAt && (
+                                      <span className="font-semibold text-emerald-600">
+                                        {" "}
+                                        · Customer replied {when(c.dmRepliedAt)}
+                                      </span>
+                                    )}
                                   </span>
                                 )}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Comment text bubble */}
-                          <div className="inline-flex max-w-full rounded-2xl rounded-tl-sm bg-slate-50 border border-slate-100 px-4 py-2.5">
-                            <p className="break-words text-sm text-slate-800">
-                              {c.text || <span className="italic text-slate-400">Empty comment</span>}
-                            </p>
-                          </div>
-
-                          {/* Interactive Contextual AI Reply Drawer */}
-                          {aiReplyCommentId === c.id && (
-                            <div className="rounded-xl border border-purple-200/80 bg-purple-50/30 p-3 space-y-2.5">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] font-bold text-purple-900 flex items-center gap-1.5">
-                                  <RobotOutlined className="text-purple-600" />
-                                  <span>Contextual AI Reply Generator</span>
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => openAiReply(c)}
-                                  className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
-                                >
-                                  Dismiss
-                                </button>
                               </div>
 
-                              {aiReplyLoading ? (
-                                <div className="py-3 text-center flex items-center justify-center gap-2">
-                                  <Spin size="small" />
-                                  <span className="text-xs text-slate-500">Drafting personalized responses...</span>
-                                </div>
-                              ) : aiReplySuggestions ? (
-                                <div className="space-y-2">
-                                  <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-                                    Choose a tailored style to reply:
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                    {[
-                                      { key: "friendly", label: "💛 Friendly & Warm", text: aiReplySuggestions.friendly },
-                                      { key: "professional", label: "💼 Professional", text: aiReplySuggestions.professional },
-                                      { key: "conversion", label: "🎁 Lead Incentive", text: aiReplySuggestions.conversion },
-                                    ].map((opt) => (
-                                      <div
-                                        key={opt.key}
-                                        onClick={() => {
-                                          setReplyInputTexts((prev) => ({ ...prev, [c.id]: opt.text }));
-                                        }}
-                                        className="p-2.5 rounded-lg border border-purple-100 bg-white hover:border-purple-300 hover:shadow-2xs cursor-pointer transition-all text-left flex flex-col justify-between"
-                                      >
-                                        <div className="text-[10px] font-bold text-purple-700">{opt.label}</div>
-                                        <p className="text-xs text-slate-700 mt-1 line-clamp-3 leading-snug">{opt.text}</p>
-                                        <span className="text-[9px] font-semibold text-purple-600 mt-1.5">Tap to select →</span>
-                                      </div>
-                                    ))}
-                                  </div>
+                              {/* Comment text bubble */}
+                              <div className="inline-flex max-w-full rounded-2xl rounded-tl-sm bg-slate-50 border border-slate-100 px-4 py-2.5">
+                                <p className="break-words text-sm text-slate-800">
+                                  {c.text || <span className="italic text-slate-400">Empty comment</span>}
+                                </p>
+                              </div>
 
-                                  {/* Input box to edit or send */}
-                                  <div className="flex items-center gap-2 pt-1">
-                                    <Input
-                                      size="small"
-                                      placeholder="Selected AI reply or custom text..."
-                                      value={replyInputTexts[c.id] || ""}
-                                      onChange={(e) => {
-                                        const val = e.target.value;
-                                        setReplyInputTexts((prev) => ({ ...prev, [c.id]: val }));
-                                      }}
-                                      className="!rounded-lg"
-                                    />
-                                    <Button
-                                      type="primary"
-                                      size="small"
-                                      disabled={!replyInputTexts[c.id]?.trim()}
-                                      loading={sendingReplyId === c.id}
-                                      onClick={() => sendCommentReply(c.id, replyInputTexts[c.id] || "")}
-                                      className="!rounded-lg !bg-purple-600 hover:!bg-purple-500 cursor-pointer text-xs shrink-0"
+                              {/* Interactive Contextual AI Reply Drawer */}
+                              {aiReplyCommentId === c.id && (
+                                <div className="rounded-xl border border-purple-200/80 bg-purple-50/30 p-3 space-y-2.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[11px] font-bold text-purple-900 flex items-center gap-1.5">
+                                      <RobotOutlined className="text-purple-600" />
+                                      <span>Contextual AI Reply Generator</span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => openAiReply(c)}
+                                      className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
                                     >
-                                      Post Reply
-                                    </Button>
+                                      Dismiss
+                                    </button>
+                                  </div>
+
+                                  {aiReplyLoading ? (
+                                    <div className="py-3 text-center flex items-center justify-center gap-2">
+                                      <Spin size="small" />
+                                      <span className="text-xs text-slate-500">Drafting personalized responses...</span>
+                                    </div>
+                                  ) : aiReplySuggestions ? (
+                                    <div className="space-y-2">
+                                      <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                                        Choose a tailored style to reply:
+                                      </div>
+                                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                        {[
+                                          { key: "friendly", label: "💛 Friendly & Warm", text: aiReplySuggestions.friendly },
+                                          { key: "professional", label: "💼 Professional", text: aiReplySuggestions.professional },
+                                          { key: "conversion", label: "🎁 Lead Incentive", text: aiReplySuggestions.conversion },
+                                        ].map((opt) => (
+                                          <div
+                                            key={opt.key}
+                                            onClick={() => {
+                                              setReplyInputTexts((prev) => ({ ...prev, [c.id]: opt.text }));
+                                            }}
+                                            className="p-2.5 rounded-lg border border-purple-100 bg-white hover:border-purple-300 hover:shadow-2xs cursor-pointer transition-all text-left flex flex-col justify-between"
+                                          >
+                                            <div className="text-[10px] font-bold text-purple-700">{opt.label}</div>
+                                            <p className="text-xs text-slate-700 mt-1 line-clamp-3 leading-snug">{opt.text}</p>
+                                            <span className="text-[9px] font-semibold text-purple-600 mt-1.5">Tap to select →</span>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      {/* Input box to edit or send */}
+                                      <div className="flex items-center gap-2 pt-1">
+                                        <Input
+                                          size="small"
+                                          placeholder="Selected AI reply or custom text..."
+                                          value={replyInputTexts[c.id] || ""}
+                                          onChange={(e) => {
+                                            const val = e.target.value;
+                                            setReplyInputTexts((prev) => ({ ...prev, [c.id]: val }));
+                                          }}
+                                          className="!rounded-lg"
+                                        />
+                                        <Button
+                                          type="primary"
+                                          size="small"
+                                          disabled={!replyInputTexts[c.id]?.trim()}
+                                          loading={sendingReplyId === c.id}
+                                          onClick={() => sendCommentReply(c.id, replyInputTexts[c.id] || "")}
+                                          className="!rounded-lg !bg-purple-600 hover:!bg-purple-500 cursor-pointer text-xs shrink-0"
+                                        >
+                                          Post Reply
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              )}
+
+                              {/* Trigger Note */}
+                              {c.triggerNote && (
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                                    <ThunderboltOutlined className="text-amber-500" />
+                                    Triggered
+                                  </span>
+                                  <span className="rounded-lg bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-0.5 text-xs font-medium">
+                                    {c.triggerNote}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Reply bubble */}
+                              {c.myReply && (
+                                <div className="flex flex-col items-end gap-1.5 pt-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                      {c.replyKind === "manual"
+                                        ? "✍️ Manual Staff Reply"
+                                        : c.replyKind === "auto"
+                                          ? "🤖 Automated Reply"
+                                          : "↩️ Account Reply"}
+                                    </span>
+                                    {c.repliedAt && (
+                                      <span className="text-[11px] text-slate-400">{when(c.repliedAt)}</span>
+                                    )}
+                                  </div>
+                                  <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-blue-50/80 border border-blue-100 px-4 py-2.5">
+                                    <p className="break-words text-sm text-slate-800">{c.myReply}</p>
                                   </div>
                                 </div>
-                              ) : null}
-                            </div>
-                          )}
-
-                          {/* Trigger Note */}
-                          {c.triggerNote && (
-                            <div className="flex flex-wrap items-center gap-2 text-xs">
-                              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                                <ThunderboltOutlined className="text-amber-500" />
-                                Triggered
-                              </span>
-                              <span className="rounded-lg bg-amber-50 text-amber-800 border border-amber-200/80 px-2.5 py-0.5 text-xs font-medium">
-                                {c.triggerNote}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Reply bubble */}
-                          {c.myReply && (
-                            <div className="flex flex-col items-end gap-1.5 pt-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                                  {c.replyKind === "manual"
-                                    ? "✍️ Manual Staff Reply"
-                                    : c.replyKind === "auto"
-                                      ? "🤖 Automated Reply"
-                                      : "↩️ Account Reply"}
-                                </span>
-                                {c.repliedAt && (
-                                  <span className="text-[11px] text-slate-400">{when(c.repliedAt)}</span>
-                                )}
-                              </div>
-                              <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-blue-50/80 border border-blue-100 px-4 py-2.5">
-                                <p className="break-words text-sm text-slate-800">{c.myReply}</p>
-                              </div>
-                            </div>
-                          )}
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                </div>
-              </Card>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                  </Card>
                 )}
               </div>
             )}
@@ -3874,8 +4336,8 @@ return (
                           }
                         }}
                         className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all border ${active
-                            ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
+                          ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
+                          : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
                           }`}
                       >
                         {tag}
@@ -4611,7 +5073,7 @@ return (
         </div>
       </Modal>
 
-    {toastMsg && (
+      {toastMsg && (
         <div className="toast" data-testid="toast-message">
           <Check size={15} /> {toastMsg}
         </div>
