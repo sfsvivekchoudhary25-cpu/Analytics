@@ -27,7 +27,7 @@ export function VoiceNoteGlobalButton() {
           <button
             type="button"
             onClick={() => setIsOpen(true)}
-            className="group relative flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold text-xs shadow-xl shadow-indigo-600/30 hover:shadow-indigo-600/40 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
+            className="group relative flex items-center gap-2 px-4 py-3 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
           >
             <div className="relative">
               <Mic size={18} className="animate-pulse" />

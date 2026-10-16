@@ -53,43 +53,48 @@ interface VoiceNoteCardProps {
 
 const CATEGORY_CONFIG: Record<
   string,
-  { label: string; iconBg: string; iconColor: string; icon: React.ReactNode }
+  {
+    label: string;
+    bgColor: string;
+    borderColor: string;
+    icon: React.ReactNode;
+  }
 > = {
   idea: {
     label: "Idea",
-    iconBg: "bg-purple-100/80 text-purple-600",
-    iconColor: "text-purple-600",
-    icon: <Lightbulb className="w-4 h-4" />,
+    bgColor: "#bfbff9", // signature periwinkle pastel
+    borderColor: "border-[#9e9efa]",
+    icon: <Lightbulb className="w-4 h-4 text-slate-950" />,
   },
   todo: {
     label: "To-Do",
-    iconBg: "bg-emerald-100/80 text-emerald-600",
-    iconColor: "text-emerald-600",
-    icon: <CheckSquare className="w-4 h-4" />,
+    bgColor: "#ffefb2", // signature butter yellow pastel
+    borderColor: "border-[#ffe006]",
+    icon: <CheckSquare className="w-4 h-4 text-slate-950" />,
   },
   instagram_caption: {
     label: "IG Caption",
-    iconBg: "bg-pink-100/80 text-rose-600",
-    iconColor: "text-rose-600",
-    icon: <InstagramIcon className="w-4 h-4" />,
+    bgColor: "#f7cbdf", // signature rose pink pastel
+    borderColor: "border-[#ed83b3]",
+    icon: <InstagramIcon className="w-4 h-4 text-slate-950" />,
   },
   client_note: {
     label: "Client Note",
-    iconBg: "bg-blue-100/80 text-blue-600",
-    iconColor: "text-blue-600",
-    icon: <Briefcase className="w-4 h-4" />,
+    bgColor: "#f8d7ca", // signature peach coral pastel
+    borderColor: "border-[#eea07f]",
+    icon: <Briefcase className="w-4 h-4 text-slate-950" />,
   },
   reminder: {
     label: "Reminder",
-    iconBg: "bg-amber-100/80 text-amber-600",
-    iconColor: "text-amber-600",
-    icon: <Bell className="w-4 h-4" />,
+    bgColor: "#f8d7ca",
+    borderColor: "border-[#eea07f]",
+    icon: <Bell className="w-4 h-4 text-slate-950" />,
   },
   journal: {
     label: "Memo",
-    iconBg: "bg-slate-100 text-slate-600",
-    iconColor: "text-slate-600",
-    icon: <FileText className="w-4 h-4" />,
+    bgColor: "#e9e9ee",
+    borderColor: "border-[#d0d0d8]",
+    icon: <FileText className="w-4 h-4 text-slate-950" />,
   },
 };
 
@@ -130,50 +135,60 @@ export function VoiceNoteCard({
 
   const snippet = (note.cleanedText || note.rawTranscript || "").replace(/\n+/g, " ").trim();
 
-  // 1. Featured Top Note Card (Vibrant Purple Gradient)
+  // 1. Featured Top Note Card (Minimalist Signature Pastel with Black Accent Button)
   if (featured) {
     return (
       <div
         onClick={() => onSelect(note)}
-        className="group relative rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 p-3.5 sm:p-4 text-white shadow-md shadow-indigo-500/20 flex items-center justify-between gap-3.5 cursor-pointer active:scale-98 transition-all hover:shadow-lg hover:shadow-indigo-500/30"
+        style={{ backgroundColor: cat.bgColor }}
+        className={`group relative rounded-[26px] border-2 ${cat.borderColor} hover:border-black p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-md transition-all duration-300 flex items-center justify-between gap-3.5 cursor-pointer active:scale-[0.99]`}
       >
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 shadow-inner backdrop-blur-xs">
-            <Calendar size={18} />
+          {/* White icon badge with crisp black border */}
+          <div className="w-10 h-10 rounded-2xl bg-white text-slate-950 border border-black/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+            <Calendar size={18} className="text-slate-950" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm sm:text-base font-bold text-white leading-snug truncate">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
+                {cat.icon}
+                <span>{cat.label}</span>
+              </span>
+            </div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-950 leading-snug truncate mt-1">
               {note.title}
             </h3>
-            <p className="text-xs text-white/80 font-medium truncate mt-0.5">
-              • {isToday ? "Today" : formattedDate} • {formattedTime}
+            <p className="text-xs text-slate-800/80 font-medium truncate mt-0.5">
+              &bull; {isToday ? "Today" : formattedDate} &bull; {formattedTime}
             </p>
           </div>
         </div>
-        <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:bg-white/30 transition-colors">
-          <ArrowRight size={15} />
+        {/* Minimalist black circular arrow button matching website SplitCard */}
+        <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+          <ArrowRight size={14} />
         </div>
       </div>
     );
   }
 
-  // 2. Standard Note Row Card (Clean White with Right Chevron)
+  // 2. Standard Note Row Card (Clean Minimalist White Card)
   return (
     <div
       onClick={() => onSelect(note)}
-      className="group relative rounded-2xl bg-white p-3.5 sm:p-4 border border-slate-100/90 shadow-2xs hover:shadow-xs hover:border-slate-200 flex items-center justify-between gap-3.5 cursor-pointer active:scale-98 transition-all"
+      className="group relative rounded-[22px] bg-white p-3.5 sm:p-4 border border-[#e9e9ee] hover:border-black/40 shadow-2xs hover:shadow-xs flex items-center justify-between gap-3.5 cursor-pointer active:scale-[0.99] transition-all"
     >
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${cat.iconBg}`}
+          style={{ backgroundColor: cat.bgColor }}
+          className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border border-black/15 text-slate-950 shadow-2xs group-hover:scale-105 transition-transform"
         >
           {cat.icon}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-bold text-slate-900 group-hover:text-violet-700 transition-colors leading-tight truncate">
+          <h3 className="text-sm font-bold text-slate-950 group-hover:text-black transition-colors leading-tight truncate">
             {note.title}
           </h3>
-          <p className="text-xs text-slate-400 font-normal truncate mt-0.5">
+          <p className="text-xs text-slate-500 font-normal truncate mt-0.5">
             {snippet || "No description provided..."}
           </p>
         </div>
@@ -182,7 +197,7 @@ export function VoiceNoteCard({
         <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">
           {formattedDate}
         </span>
-        <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors mt-0.5" />
+        <ChevronRight size={14} className="text-slate-400 group-hover:text-slate-800 transition-colors mt-0.5" />
       </div>
     </div>
   );
