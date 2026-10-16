@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Play,
@@ -89,6 +90,7 @@ export function VoiceNoteDetailModal({
   onDelete,
   onUpdate,
 }: VoiceNoteDetailModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -96,6 +98,32 @@ export function VoiceNoteDetailModal({
   const [copiedClean, setCopiedClean] = useState(false);
   const [copiedCaption, setCopiedCaption] = useState(false);
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock background scrolling and prevent scrollbar layout shift while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const origBodyOverflow = document.body.style.overflow;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origBodyPaddingRight = document.body.style.paddingRight;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.paddingRight = origBodyPaddingRight;
+    };
+  }, [isOpen]);
 
   // Stop audio when modal closes or note changes
   useEffect(() => {
@@ -106,7 +134,7 @@ export function VoiceNoteDetailModal({
     }
   }, [isOpen, audioElement]);
 
-  if (!isOpen || !note) return null;
+  if (!isOpen || !note || !mounted) return null;
 
   const cat = CATEGORY_CONFIG[note.category] || CATEGORY_CONFIG.idea;
 
@@ -193,15 +221,20 @@ export function VoiceNoteDetailModal({
   const durationSec = note.durationSeconds || 0;
   const progressPercent = durationSec > 0 ? (currentTime / durationSec) * 100 : 0;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-fade-in">
-      {/* Backdrop Click */}
-      <div className="fixed inset-0" onClick={onClose} />
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-md overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+      {/* Clickable Backdrop */}
+      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       {/* Modal Card */}
-      <div className="relative z-10 w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh] animate-scale-up">
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-10 my-auto w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[88vh] overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Header */}
-        <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-4">
+        <div className="shrink-0 p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-4 bg-white">
           <div className="flex items-center gap-3">
             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs ${cat.iconBg}`}>
               {cat.icon}
@@ -255,8 +288,8 @@ export function VoiceNoteDetailModal({
           </div>
         </div>
 
-        {/* Content Body (Scrollable) */}
-        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto">
+        {/* Content Body (Scrollable with overscroll-contain) */}
+        <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-5">
           {/* Title */}
           <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
             {note.title}
@@ -379,7 +412,7 @@ export function VoiceNoteDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
+        <div className="shrink-0 p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
           <div className="text-xs text-slate-400 font-medium">
             AI Cleaned & Structured
           </div>
@@ -411,4 +444,6 @@ export function VoiceNoteDetailModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

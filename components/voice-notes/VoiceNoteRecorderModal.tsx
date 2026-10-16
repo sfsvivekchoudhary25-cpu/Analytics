@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Mic,
   Square,
@@ -48,6 +49,7 @@ export function VoiceNoteRecorderModal({
   initialInputMode = "record",
   initialCategory = "idea",
 }: VoiceNoteRecorderModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [selectedLang, setSelectedLang] = useState("en-US");
   const [stage, setStage] = useState<"idle" | "recording" | "structuring" | "preview">("idle");
   const [saving, setSaving] = useState(false);
@@ -69,6 +71,32 @@ export function VoiceNoteRecorderModal({
   const audio = useAudioRecorder();
 
   const [inputMode, setInputMode] = useState<"record" | "upload" | "type">(initialInputMode);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Lock background scrolling and prevent layout shift while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const origBodyOverflow = document.body.style.overflow;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origBodyPaddingRight = document.body.style.paddingRight;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.paddingRight = origBodyPaddingRight;
+    };
+  }, [isOpen]);
 
   // Reset state when opening modal
   useEffect(() => {
@@ -92,7 +120,7 @@ export function VoiceNoteRecorderModal({
     }
   }, [stage, audio.error]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Run AI Structuring on raw text
   const runAiStructuring = async (rawText: string, audioBlob?: Blob | null) => {
@@ -198,10 +226,15 @@ export function VoiceNoteRecorderModal({
 
   const fullSpokenLive = (speech.transcript + " " + speech.interimTranscript).trim();
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl rounded-3xl bg-white border border-slate-200/90 shadow-2xl p-6 sm:p-7 overflow-hidden">
-        
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-in fade-in duration-200">
+      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        className="relative z-10 my-auto w-full max-w-xl rounded-3xl bg-white border border-slate-200/90 shadow-2xl p-6 sm:p-7 overflow-hidden animate-in zoom-in-95 duration-200"
+      >
         {/* Top Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
@@ -728,4 +761,6 @@ export function VoiceNoteRecorderModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
