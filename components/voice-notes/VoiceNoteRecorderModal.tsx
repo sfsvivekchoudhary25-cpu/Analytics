@@ -68,6 +68,9 @@ export function VoiceNoteRecorderModal({
   const [previewActionItems, setPreviewActionItems] = useState<ActionItem[]>([]);
   const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
 
+  const [recordType, setRecordType] = useState<"dictate" | "memo">("dictate");
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+
   const speech = useSpeechRecognition();
   const audio = useAudioRecorder();
 
@@ -82,6 +85,7 @@ export function VoiceNoteRecorderModal({
     speech.stopListening();
     audio.resetRecording();
     setStage("idle");
+    setRecordingSeconds(0);
     onClose();
   };
 
@@ -92,6 +96,7 @@ export function VoiceNoteRecorderModal({
       speech.stopListening();
       audio.resetRecording();
       setStage("idle");
+      setRecordingSeconds(0);
       return;
     }
 
@@ -138,15 +143,45 @@ export function VoiceNoteRecorderModal({
       speech.resetTranscript();
       audio.resetRecording();
       setRecordedAudioBlob(null);
+      setRecordingSeconds(0);
     }
   }, [isOpen, initialInputMode, initialCategory]);
 
-  // Auto-revert to idle if microphone hardware acquisition failed
+  // Dedicated recording duration counter that runs reliably across dictation and audio memo modes
   useEffect(() => {
-    if (stage === "recording" && audio.error) {
-      setStage("idle");
+    let interval: NodeJS.Timeout | null = null;
+    if (stage === "recording") {
+      setRecordingSeconds(0);
+      interval = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingSeconds(0);
     }
-  }, [stage, audio.error]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [stage]);
+
+  // Helper to detect mobile browsers (Android / iOS)
+  const isMobileClient = (): boolean => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
+    const ua = navigator.userAgent || "";
+    const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    const isMobileData = Boolean((navigator as any)?.userAgentData?.mobile);
+    return isMobileUa || isMobileData;
+  };
+
+  // Auto-revert to idle if active recording mode experienced a fatal acquisition error
+  useEffect(() => {
+    if (stage === "recording") {
+      if (recordType === "memo" && audio.error) {
+        setStage("idle");
+      } else if (recordType === "dictate" && speech.error && !speech.transcript) {
+        setStage("idle");
+      }
+    }
+  }, [stage, audio.error, speech.error, speech.transcript, recordType]);
 
   if (!isOpen || !mounted) return null;
 
@@ -200,24 +235,48 @@ export function VoiceNoteRecorderModal({
     audio.resetRecording();
     setIsAiOrganized(false);
     setStage("recording");
+    setRecordingSeconds(0);
 
-    // Synchronous execution within user tap/click gesture for iOS WebKit & Safari compatibility
-    speech.startListening(selectedLang, options);
+    const isMobile = isMobileClient();
 
-    // Acquire hardware audio stream
-    const audioStarted = await audio.startRecording(options);
-    if (!audioStarted && !options?.simulated) {
-      console.warn("Hardware audio acquisition did not start; speech recognition remains active");
+    if (recordType === "dictate") {
+      // Live speech recognition for real-time dictation
+      speech.startListening(selectedLang, options);
+
+      // CRITICAL ON MOBILE (Android / iOS):
+      // On mobile OSs (especially Android), the Audio HAL strictly enforces single-client capture.
+      // If Chrome opens getUserMedia while Google Speech Services runs webkitSpeechRecognition,
+      // Android HAL terminates Google Speech Services with the system notification:
+      // "Speech Recognition and Synthesis from Google cannot record now as Chrome is recording audio."
+      // By keeping Live Dictation dedicated to speech recognition on mobile, Google Speech Services
+      // receives exclusive, uninterrupted access, streaming speech smoothly in real time.
+      if (!isMobile && !options?.simulated) {
+        try {
+          await audio.startRecording(options);
+        } catch (err) {
+          console.warn("Dual desktop audio capture skipped, dictation remains primary:", err);
+        }
+      }
+    } else {
+      // Dedicated Voice Memo mode: capture hardware audio stream
+      const audioStarted = await audio.startRecording(options);
+      if (!audioStarted && !options?.simulated) {
+        console.warn("Hardware audio acquisition did not start");
+      }
     }
   };
 
   // Stop recording - user can choose sole stop without AI or Stop & Clean with AI
   const handleStop = async (options?: { useAi?: boolean }) => {
     speech.stopListening();
-    const blob = await audio.stopRecording();
-    setRecordedAudioBlob(blob);
+    let blob: Blob | null = null;
+    if (audio.isRecording) {
+      blob = await audio.stopRecording();
+      setRecordedAudioBlob(blob);
+    }
 
     const fullSpokenText = (speech.transcript + " " + speech.interimTranscript).trim();
+    const activeDuration = recordingSeconds || audio.durationSeconds;
 
     if (options?.useAi === false) {
       // Sole stop without AI: bypass AI latency and save raw spoken note
@@ -226,7 +285,12 @@ export function VoiceNoteRecorderModal({
         ? fullSpokenText.slice(0, 35) + (fullSpokenText.length > 35 ? "..." : "")
         : `Voice Note (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
       setPreviewTitle(fallbackTitle);
-      setPreviewCleanedText(fullSpokenText || "Voice audio recording");
+      setPreviewCleanedText(
+        fullSpokenText ||
+        (blob
+          ? `Voice audio memo (${Math.floor(activeDuration / 60)}:${String(activeDuration % 60).padStart(2, "0")})`
+          : "Voice Note")
+      );
       setPreviewCategory(initialCategory || "idea");
       setPreviewTags(["voice-note", "raw"]);
       setPreviewActionItems([]);
@@ -235,6 +299,19 @@ export function VoiceNoteRecorderModal({
     }
 
     setIsAiOrganized(true);
+
+    if (!fullSpokenText && blob) {
+      // Pure audio memo stopped with AI clean / review
+      const defaultTitle = `Voice Memo (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
+      setPreviewTitle(defaultTitle);
+      setPreviewCleanedText(`Voice audio memo (${Math.floor(activeDuration / 60)}:${String(activeDuration % 60).padStart(2, "0")})`);
+      setPreviewCategory(initialCategory || "idea");
+      setPreviewTags(["voice-memo"]);
+      setPreviewActionItems([]);
+      setStage("preview");
+      return;
+    }
+
     await runAiStructuring(fullSpokenText, blob);
   };
 
@@ -260,6 +337,7 @@ export function VoiceNoteRecorderModal({
     setPreviewActionItems([]);
     setIsAiOrganized(false);
     setStage("idle");
+    setRecordingSeconds(0);
   };
 
   // Final save to backend
@@ -267,6 +345,7 @@ export function VoiceNoteRecorderModal({
     setSaving(true);
     try {
       const fullSpokenText = (manualText.trim() || speech.transcript + " " + speech.interimTranscript).trim();
+      const finalDuration = recordingSeconds || audio.durationSeconds;
       const formData = new FormData();
       formData.append("rawTranscript", fullSpokenText || previewCleanedText);
       formData.append("cleanedText", previewCleanedText);
@@ -274,7 +353,7 @@ export function VoiceNoteRecorderModal({
       formData.append("category", previewCategory); 
       formData.append("tags", JSON.stringify(previewTags));
       formData.append("actionItems", JSON.stringify(previewActionItems));
-      formData.append("durationSeconds", String(audio.durationSeconds));
+      formData.append("durationSeconds", String(finalDuration));
       formData.append("languageCode", selectedLang);
 
       if (recordedAudioBlob) {
@@ -388,48 +467,75 @@ export function VoiceNoteRecorderModal({
 
         {/* ── STAGE 1: IDLE ────────────────────────────────────────── */}
         {stage === "idle" && inputMode === "record" && (
-          <div className="py-5 flex flex-col items-center text-center space-y-5">
+          <div className="py-4 flex flex-col items-center text-center space-y-4">
+            {/* Record Sub-Mode Selector */}
+            <div className="flex items-center justify-center p-1 bg-[#f1f3f7] rounded-full max-w-xs mx-auto border border-[#e9e9ee] shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setRecordType("dictate")}
+                className={`flex-1 py-1 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  recordType === "dictate"
+                    ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                <Sparkles size={12} className={recordType === "dictate" ? "text-slate-950" : "text-slate-500"} />
+                <span>Live AI Dictation</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRecordType("memo")}
+                className={`flex-1 py-1 px-3 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  recordType === "memo"
+                    ? "bg-white text-slate-950 border border-black/80 shadow-2xs"
+                    : "text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                <Mic size={12} className={recordType === "memo" ? "text-slate-950" : "text-slate-500"} />
+                <span>Voice Memo</span>
+              </button>
+            </div>
+
             {/* Permission Denied Alert Banner */}
-            {(audio.error || speech.error) && (
+            {((recordType === "dictate" && speech.error) || (recordType === "memo" && audio.error)) && (
               <div className="w-full text-left p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 space-y-3 animate-in fade-in duration-200">
                 <div className="flex items-center gap-2 font-bold text-xs text-rose-700">
                   <AlertCircle size={16} className="text-rose-600 shrink-0" />
-                  <span>Microphone Access Blocked ({audio.error || speech.error})</span>
+                  <span>Microphone Access Notice</span>
                 </div>
                 <p className="text-[11px] text-rose-700 leading-relaxed">
-                  Your browser or Windows has microphone access blocked. Choose how you want to proceed:
+                  {recordType === "dictate" ? speech.error : audio.error}
                 </p>
                 <div className="text-[11px] text-rose-900 bg-white/90 p-3 rounded-xl border border-rose-100 space-y-1.5">
                   <p>
-                    <strong>1. In Chrome:</strong> Click the settings/tune icon to the left of <code>localhost:3000</code> in your URL bar, toggle <strong>Microphone: Allow</strong>, then click <em>Reload Page to Apply</em> below.
-                  </p>
-                  <p>
-                    <strong>2. In Windows:</strong> Open <em>Settings → Privacy & Security → Microphone</em> and turn ON <em>Let desktop apps access your microphone</em>.
+                    <strong>Troubleshooting Tip:</strong> Make sure no other app (like Phone, Recorder, or another browser tab) is holding the microphone. You can switch modes or type your note.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   <button
                     type="button"
-                    onClick={() => window.location.reload()}
-                    className="px-3.5 py-1.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
-                  >
-                    <RefreshCw size={12} />
-                    <span>Reload Page to Apply</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => handleStart()}
-                    className="px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
-                    Retry Hardware Mic
+                    Retry
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setInputMode("upload")}
-                    className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] font-bold text-xs transition-colors cursor-pointer"
-                  >
-                    Upload Audio File
-                  </button>
+                  {recordType === "dictate" ? (
+                    <button
+                      type="button"
+                      onClick={() => setRecordType("memo")}
+                      className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Switch to Voice Memo
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setRecordType("dictate")}
+                      className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] font-bold text-xs transition-colors cursor-pointer"
+                    >
+                      Switch to Live Dictation
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => setInputMode("type")}
@@ -453,15 +559,17 @@ export function VoiceNoteRecorderModal({
 
             <div>
               <h3 className="text-base font-bold text-slate-950">
-                Tap to Start Speaking
+                {recordType === "dictate" ? "Tap to Start Speaking" : "Tap to Record Voice Memo"}
               </h3>
               <p className="text-xs text-slate-600 max-w-sm mt-1 mx-auto leading-relaxed">
-                Ramble your content ideas, customer notes, or to-dos. AI will automatically strip fillers, format structure, and extract tasks.
+                {recordType === "dictate"
+                  ? "Speak freely. Your words stream live in real-time, then AI strips filler words, structures notes, and extracts to-dos."
+                  : "Captures a high-fidelity playable voice audio file with interactive waveform player."}
               </p>
             </div>
 
             {/* Language Selector */}
-            <div className="flex items-center gap-2 pt-2">
+            <div className="flex items-center gap-2 pt-1">
               <Globe size={14} className="text-slate-500" />
               <select
                 value={selectedLang}
@@ -685,45 +793,65 @@ export function VoiceNoteRecorderModal({
 
             {/* Timer Clock */}
             <div className="text-center">
-              <span className="text-2xl font-black text-slate-950 tabular-nums">
-                {Math.floor(audio.durationSeconds / 60)}:
-                {String(audio.durationSeconds % 60).padStart(2, "0")}
-              </span>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
-                ● Listening & Recording
-              </span>
+              {(() => {
+                const activeSeconds = recordingSeconds || audio.durationSeconds;
+                return (
+                  <>
+                    <span className="text-2xl font-black text-slate-950 tabular-nums">
+                      {Math.floor(activeSeconds / 60)}:
+                      {String(activeSeconds % 60).padStart(2, "0")}
+                    </span>
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">
+                      {recordType === "dictate" ? "● Listening & Transcribing" : "● Recording Voice Audio"}
+                    </span>
+                  </>
+                );
+              })()}
             </div>
 
-            {/* Live Streaming Transcript Window */}
-            <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto shadow-2xs">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
-                <span>Real-Time Transcript</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                  Live
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
-                {speech.transcript && (
-                  <span className="text-slate-950 font-medium">{speech.transcript} </span>
-                )}
-                {speech.interimTranscript ? (
-                  <span className="text-slate-600 italic">
-                    {speech.interimTranscript}
+            {/* Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
+            {recordType === "dictate" ? (
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto shadow-2xs">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+                  <span>Real-Time Transcript</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                    Live
                   </span>
-                ) : !fullSpokenLive ? (
-                  <span className="text-slate-400 italic">
-                    Start speaking... your words will stream live here.
-                  </span>
-                ) : null}
-              </p>
-              {speech.error && !speech.transcript && (
-                <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
-                  <AlertCircle size={13} className="shrink-0 text-amber-700" />
-                  <span>Audio is recording! Your voice audio will be processed upon clicking Stop.</span>
                 </div>
-              )}
-            </div>
+                <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
+                  {speech.transcript && (
+                    <span className="text-slate-950 font-medium">{speech.transcript} </span>
+                  )}
+                  {speech.interimTranscript ? (
+                    <span className="text-slate-600 italic">
+                      {speech.interimTranscript}
+                    </span>
+                  ) : !fullSpokenLive ? (
+                    <span className="text-slate-400 italic">
+                      Start speaking... your words will stream live here.
+                    </span>
+                  ) : null}
+                </p>
+                {speech.error && !speech.transcript && (
+                  <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
+                    <AlertCircle size={13} className="shrink-0 text-amber-700" />
+                    <span>{speech.error}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-5 min-h-[110px] flex flex-col items-center justify-center text-center shadow-2xs">
+                <div
+                  style={{ backgroundColor: "#feece4" }}
+                  className="w-10 h-10 rounded-2xl text-slate-950 flex items-center justify-center mb-2 shadow-2xs"
+                >
+                  <Mic size={18} />
+                </div>
+                <p className="text-xs font-bold text-slate-950">Capturing High-Fidelity Audio Memo</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Microphone is recording crystal-clear voice audio. Tap Stop when finished.</p>
+              </div>
+            )}
 
             {/* Stop Controls */}
             <div className="flex flex-col-reverse sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-2">
@@ -741,8 +869,17 @@ export function VoiceNoteRecorderModal({
                 onClick={() => handleStop({ useAi: true })}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
               >
-                <Sparkles size={13} className="text-white" />
-                <span>Stop & Clean with AI</span>
+                {recordType === "dictate" ? (
+                  <>
+                    <Sparkles size={13} className="text-white" />
+                    <span>Stop & Clean with AI</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={13} className="text-white" />
+                    <span>Stop & Review Memo</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

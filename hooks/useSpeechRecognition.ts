@@ -114,6 +114,10 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         setError("Microphone permission was denied.");
         shouldListenRef.current = false;
         setIsListening(false);
+      } else if (event.error === "audio-capture") {
+        setError("Microphone is currently in use by another app or browser tab. Please close conflicting tabs or use Voice Memo.");
+        shouldListenRef.current = false;
+        setIsListening(false);
       } else if (event.error === "no-speech") {
         // Benign silence on mobile; continue listening if active
       } else if (event.error === "network") {
