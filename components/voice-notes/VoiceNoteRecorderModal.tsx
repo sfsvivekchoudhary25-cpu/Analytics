@@ -185,7 +185,7 @@ export function VoiceNoteRecorderModal({
 
   if (!isOpen || !mounted) return null;
 
-  // Run AI Structuring on raw text
+  // Run AI Structuring on raw text or audio file (using Groq Whisper for audio transcription)
   const runAiStructuring = async (rawText: string, audioBlob?: Blob | null) => {
     if (!rawText.trim() && !audioBlob) {
       setStage("idle");
@@ -195,7 +195,31 @@ export function VoiceNoteRecorderModal({
     setStage("structuring");
 
     try {
-      // Call backend AI cleanup preview
+      let textToClean = rawText.trim();
+
+      // If text is not yet transcribed, but we have an audio recording/file, transcribe with Groq Whisper
+      if (!textToClean && audioBlob) {
+        try {
+          const transcribeFormData = new FormData();
+          transcribeFormData.append("audio", audioBlob, "audio.webm");
+          if (selectedLang) {
+            transcribeFormData.append("languageCode", selectedLang);
+          }
+
+          const whisperResult = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+            method: "POST",
+            body: transcribeFormData,
+          });
+
+          if (whisperResult?.text) {
+            textToClean = whisperResult.text;
+          }
+        } catch (whisperErr) {
+          console.warn("Groq Whisper audio transcription error:", whisperErr);
+        }
+      }
+
+      // Call backend AI cleanup preview with the transcript
       const aiResult = await api<{
         title: string;
         cleanedText: string;
@@ -205,13 +229,13 @@ export function VoiceNoteRecorderModal({
       }>("/voice-notes/cleanup-preview", {
         method: "POST",
         body: JSON.stringify({
-          rawTranscript: rawText || "Spoken voice note",
+          rawTranscript: textToClean || "Spoken voice memo",
           languageCode: selectedLang,
         }),
       });
 
       setPreviewTitle(aiResult.title || "Voice Note");
-      setPreviewCleanedText(aiResult.cleanedText || rawText);
+      setPreviewCleanedText(aiResult.cleanedText || textToClean || "Voice memo audio");
       setPreviewCategory(aiResult.category || "idea");
       setPreviewTags(aiResult.tags || ["voice-note"]);
       setPreviewActionItems(aiResult.actionItems || []);
@@ -219,8 +243,11 @@ export function VoiceNoteRecorderModal({
       setStage("preview");
     } catch (err) {
       console.warn("AI preview failed, falling back to local text:", err);
-      setPreviewTitle("Voice Note");
-      setPreviewCleanedText(rawText);
+      const fallbackTitle = rawText.trim()
+        ? rawText.trim().slice(0, 35)
+        : `Voice Note (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
+      setPreviewTitle(fallbackTitle);
+      setPreviewCleanedText(rawText || "Voice audio recording");
       setPreviewCategory("idea");
       setPreviewTags(["voice-note"]);
       setPreviewActionItems([]);
@@ -301,14 +328,8 @@ export function VoiceNoteRecorderModal({
     setIsAiOrganized(true);
 
     if (!fullSpokenText && blob) {
-      // Pure audio memo stopped with AI clean / review
-      const defaultTitle = `Voice Memo (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
-      setPreviewTitle(defaultTitle);
-      setPreviewCleanedText(`Voice audio memo (${Math.floor(activeDuration / 60)}:${String(activeDuration % 60).padStart(2, "0")})`);
-      setPreviewCategory(initialCategory || "idea");
-      setPreviewTags(["voice-memo"]);
-      setPreviewActionItems([]);
-      setStage("preview");
+      // Audio memo with AI clean: transcribe via Groq Whisper and structure note!
+      await runAiStructuring("", blob);
       return;
     }
 
