@@ -13,6 +13,10 @@ import {
   Briefcase,
   Bell,
   Sparkles,
+  ArrowRight,
+  ChevronRight,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { InstagramIcon } from "@/components/icons";
 import { api } from "@/lib/api";
@@ -41,6 +45,7 @@ export interface VoiceNoteItem {
 
 interface VoiceNoteCardProps {
   note: VoiceNoteItem;
+  featured?: boolean;
   onSelect: (note: VoiceNoteItem) => void;
   onDelete: (id: string) => void;
   onUpdate: (updated: VoiceNoteItem) => void;
@@ -88,39 +93,14 @@ const CATEGORY_CONFIG: Record<
   },
 };
 
-export function VoiceNoteCard({ note, onSelect, onDelete, onUpdate }: VoiceNoteCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-
+export function VoiceNoteCard({
+  note,
+  featured = false,
+  onSelect,
+  onDelete,
+  onUpdate,
+}: VoiceNoteCardProps) {
   const cat = CATEGORY_CONFIG[note.category] || CATEGORY_CONFIG.idea;
-
-  const handleTogglePin = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const res = await api<VoiceNoteItem>(`/voice-notes/${note.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({ isPinned: !note.isPinned }),
-      });
-      onUpdate(res);
-    } catch (err) {
-      console.error("Failed to toggle pin:", err);
-    }
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(note.id);
-  };
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigator.clipboard.writeText(note.cleanedText || note.rawTranscript);
-    setCopied(true);
-    setTimeout(() => {
-      setCopied(false);
-      setMenuOpen(false);
-    }, 1500);
-  };
 
   // Date formatting matching reference: e.g. "9:30 AM", "Yesterday", "May 20"
   const noteDate = new Date(note.createdAt);
@@ -137,109 +117,72 @@ export function VoiceNoteCard({ note, onSelect, onDelete, onUpdate }: VoiceNoteC
     noteDate.getMonth() === yesterday.getMonth() &&
     noteDate.getFullYear() === yesterday.getFullYear();
 
+  const formattedTime = noteDate.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+
   const formattedDate = isToday
-    ? noteDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    ? formattedTime
     : isYesterday
       ? "Yesterday"
       : noteDate.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
   const snippet = (note.cleanedText || note.rawTranscript || "").replace(/\n+/g, " ").trim();
 
+  // 1. Featured Top Note Card (Vibrant Purple Gradient)
+  if (featured) {
+    return (
+      <div
+        onClick={() => onSelect(note)}
+        className="group relative rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 p-3.5 sm:p-4 text-white shadow-md shadow-indigo-500/20 flex items-center justify-between gap-3.5 cursor-pointer active:scale-98 transition-all hover:shadow-lg hover:shadow-indigo-500/30"
+      >
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+          <div className="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0 shadow-inner backdrop-blur-xs">
+            <Calendar size={18} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm sm:text-base font-bold text-white leading-snug truncate">
+              {note.title}
+            </h3>
+            <p className="text-xs text-white/80 font-medium truncate mt-0.5">
+              • {isToday ? "Today" : formattedDate} • {formattedTime}
+            </p>
+          </div>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center shrink-0 group-hover:bg-white/30 transition-colors">
+          <ArrowRight size={15} />
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Standard Note Row Card (Clean White with Right Chevron)
   return (
     <div
       onClick={() => onSelect(note)}
-      className="group relative px-4 sm:px-5 py-3.5 sm:py-4 flex items-center justify-between gap-4 hover:bg-slate-50/80 transition-colors cursor-pointer"
+      className="group relative rounded-2xl bg-white p-3.5 sm:p-4 border border-slate-100/90 shadow-2xs hover:shadow-xs hover:border-slate-200 flex items-center justify-between gap-3.5 cursor-pointer active:scale-98 transition-all"
     >
-      {/* Left: Category Icon + Title + Snippet */}
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
         <div
           className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${cat.iconBg}`}
         >
           {cat.icon}
         </div>
-
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold text-slate-900 group-hover:text-violet-700 transition-colors leading-tight truncate">
             {note.title}
           </h3>
-          <p className="text-xs text-slate-400 font-normal truncate mt-0.5 max-w-xl">
+          <p className="text-xs text-slate-400 font-normal truncate mt-0.5">
             {snippet || "No description provided..."}
           </p>
         </div>
       </div>
-
-      {/* Right: Timestamp + Pin Icon + More Actions Menu */}
-      <div className="flex items-center gap-2.5 shrink-0" onClick={(e) => e.stopPropagation()}>
-        <span className="text-xs text-slate-400 font-medium whitespace-nowrap">
+      <div className="flex flex-col items-end justify-center shrink-0 min-w-[48px]">
+        <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">
           {formattedDate}
         </span>
-
-        {/* Pin Icon (visible if pinned, or on hover) */}
-        <button
-          type="button"
-          onClick={handleTogglePin}
-          title={note.isPinned ? "Unpin note" : "Pin note"}
-          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-            note.isPinned
-              ? "text-blue-600 hover:text-blue-700"
-              : "text-slate-300 hover:text-slate-600 opacity-0 group-hover:opacity-100"
-          }`}
-        >
-          <Pin size={15} className={note.isPinned ? "fill-blue-600 -rotate-45" : "-rotate-45"} />
-        </button>
-
-        {/* Three Dots Menu */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen(!menuOpen);
-            }}
-            title="More actions"
-            className="p-1 rounded-lg text-slate-300 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
-          >
-            <MoreVertical size={16} />
-          </button>
-
-          {menuOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuOpen(false);
-                }}
-              />
-              <div className="absolute right-0 top-7 z-30 w-36 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 space-y-0.5 animate-scale-up">
-                <button
-                  type="button"
-                  onClick={handleTogglePin}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-xl transition-colors text-left cursor-pointer"
-                >
-                  <Pin size={13} className={note.isPinned ? "text-blue-600 fill-blue-600" : ""} />
-                  <span>{note.isPinned ? "Unpin note" : "Pin to top"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 rounded-xl transition-colors text-left cursor-pointer"
-                >
-                  {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
-                  <span>{copied ? "Copied!" : "Copy note"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-xl transition-colors text-left cursor-pointer"
-                >
-                  <Trash2 size={13} />
-                  <span>Delete</span>
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+        <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors mt-0.5" />
       </div>
     </div>
   );
