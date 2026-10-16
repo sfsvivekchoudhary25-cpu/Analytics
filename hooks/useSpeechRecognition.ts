@@ -106,6 +106,10 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
     recognition.onerror = (event: any) => {
       console.warn("[SpeechRecognition] Event error:", event.error);
+      if (event.error === "aborted") {
+        // Benign: programmatic abort when user stops, resets, or closes modal
+        return;
+      }
       if (event.error === "not-allowed") {
         setError("Microphone permission was denied.");
         shouldListenRef.current = false;
@@ -209,8 +213,9 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
 
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch {}
+      recognitionRef.current = null;
     }
     setIsListening(false);
     setIsSimulated(false);
@@ -224,8 +229,15 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
       clearInterval(simulationTimerRef.current);
       simulationTimerRef.current = null;
     }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {}
+      recognitionRef.current = null;
+    }
     setTranscript("");
     setInterimTranscript("");
+    setIsListening(false);
     setIsSimulated(false);
     setError(null);
   }, []);

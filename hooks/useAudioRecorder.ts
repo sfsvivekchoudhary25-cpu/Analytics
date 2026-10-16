@@ -157,9 +157,27 @@ export function useAudioRecorder(): AudioRecorderHook {
         timerRef.current = null;
       }
 
+      const cleanupTracksAndContext = () => {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((track) => {
+            try {
+              track.stop();
+            } catch {}
+          });
+          streamRef.current = null;
+        }
+        if (audioContextRef.current) {
+          try {
+            audioContextRef.current.close();
+          } catch {}
+          audioContextRef.current = null;
+        }
+      };
+
       const recorder = mediaRecorderRef.current;
       if (!recorder || recorder.state === "inactive") {
         setIsRecording(false);
+        cleanupTracksAndContext();
         resolve(null);
         return;
       }
@@ -172,20 +190,7 @@ export function useAudioRecorder(): AudioRecorderHook {
         setAudioUrl(url);
         setIsRecording(false);
 
-        // Stop all tracks
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((track) => track.stop());
-          streamRef.current = null;
-        }
-
-        // Close simulated audio context if open
-        if (audioContextRef.current) {
-          try {
-            audioContextRef.current.close();
-          } catch {}
-          audioContextRef.current = null;
-        }
-
+        cleanupTracksAndContext();
         resolve(blob);
       };
 
@@ -193,6 +198,7 @@ export function useAudioRecorder(): AudioRecorderHook {
         recorder.stop();
       } catch {
         setIsRecording(false);
+        cleanupTracksAndContext();
         resolve(null);
       }
     });
@@ -203,6 +209,23 @@ export function useAudioRecorder(): AudioRecorderHook {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
+      mediaRecorderRef.current = null;
+    }
+
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {}
+      });
+      streamRef.current = null;
+    }
+
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -225,12 +248,18 @@ export function useAudioRecorder(): AudioRecorderHook {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current.getTracks().forEach((t) => {
+          try {
+            t.stop();
+          } catch {}
+        });
+        streamRef.current = null;
       }
       if (audioContextRef.current) {
         try {
           audioContextRef.current.close();
         } catch {}
+        audioContextRef.current = null;
       }
     };
   }, []);

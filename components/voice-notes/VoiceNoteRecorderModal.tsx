@@ -56,8 +56,9 @@ export function VoiceNoteRecorderModal({
   const [manualText, setManualText] = useState("");
   const [uploadedAudioFile, setUploadedAudioFile] = useState<File | null>(null);
   const [uploadNoteHint, setUploadNoteHint] = useState("");
+  const [isAiOrganized, setIsAiOrganized] = useState(false);
 
-  // Preview form state after AI cleanup
+  // Preview form state after AI cleanup or raw stop
   const [previewTitle, setPreviewTitle] = useState("");
   const [previewCleanedText, setPreviewCleanedText] = useState("");
   const [previewCategory, setPreviewCategory] = useState<
@@ -76,9 +77,23 @@ export function VoiceNoteRecorderModal({
     setMounted(true);
   }, []);
 
+  // Safe close handler that immediately cuts off microphone tracks and speech recognition
+  const handleCloseModal = () => {
+    speech.stopListening();
+    audio.resetRecording();
+    setStage("idle");
+    onClose();
+  };
+
   // Lock background scrolling and prevent layout shift while modal is open
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Immediate microphone and recognition release when modal closes
+      speech.stopListening();
+      audio.resetRecording();
+      setStage("idle");
+      return;
+    }
 
     const origBodyOverflow = document.body.style.overflow;
     const origHtmlOverflow = document.documentElement.style.overflow;
@@ -98,10 +113,23 @@ export function VoiceNoteRecorderModal({
     };
   }, [isOpen]);
 
+  // Support ESC key to safely exit and kill microphone
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   // Reset state when opening modal
   useEffect(() => {
     if (isOpen) {
       setStage("idle");
+      setIsAiOrganized(false);
       setInputMode(initialInputMode);
       setPreviewCategory(initialCategory);
       setManualText("");
@@ -152,6 +180,7 @@ export function VoiceNoteRecorderModal({
       setPreviewCategory(aiResult.category || "idea");
       setPreviewTags(aiResult.tags || ["voice-note"]);
       setPreviewActionItems(aiResult.actionItems || []);
+      setIsAiOrganized(true);
       setStage("preview");
     } catch (err) {
       console.warn("AI preview failed, falling back to local text:", err);
@@ -160,6 +189,7 @@ export function VoiceNoteRecorderModal({
       setPreviewCategory("idea");
       setPreviewTags(["voice-note"]);
       setPreviewActionItems([]);
+      setIsAiOrganized(false);
       setStage("preview");
     }
   };
@@ -168,6 +198,7 @@ export function VoiceNoteRecorderModal({
   const handleStart = async (options?: { simulated?: boolean }) => {
     speech.resetTranscript();
     audio.resetRecording();
+    setIsAiOrganized(false);
     setStage("recording");
 
     // Synchronous execution within user tap/click gesture for iOS WebKit & Safari compatibility
@@ -180,14 +211,55 @@ export function VoiceNoteRecorderModal({
     }
   };
 
-  // Stop recording & run AI structuring
-  const handleStop = async () => {
+  // Stop recording - user can choose sole stop without AI or Stop & Clean with AI
+  const handleStop = async (options?: { useAi?: boolean }) => {
     speech.stopListening();
     const blob = await audio.stopRecording();
     setRecordedAudioBlob(blob);
 
     const fullSpokenText = (speech.transcript + " " + speech.interimTranscript).trim();
+
+    if (options?.useAi === false) {
+      // Sole stop without AI: bypass AI latency and save raw spoken note
+      setIsAiOrganized(false);
+      const fallbackTitle = fullSpokenText
+        ? fullSpokenText.slice(0, 35) + (fullSpokenText.length > 35 ? "..." : "")
+        : `Voice Note (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
+      setPreviewTitle(fallbackTitle);
+      setPreviewCleanedText(fullSpokenText || "Voice audio recording");
+      setPreviewCategory(initialCategory || "idea");
+      setPreviewTags(["voice-note", "raw"]);
+      setPreviewActionItems([]);
+      setStage("preview");
+      return;
+    }
+
+    setIsAiOrganized(true);
     await runAiStructuring(fullSpokenText, blob);
+  };
+
+  // Trigger AI cleanup from preview screen if user previously saved raw
+  const handleTriggerAiFromPreview = async () => {
+    const textToClean = previewCleanedText.trim() || fullSpokenLive;
+    if (!textToClean && !recordedAudioBlob) return;
+    setIsAiOrganized(true);
+    await runAiStructuring(textToClean, recordedAudioBlob);
+  };
+
+  // Completely discard previous session data and return to idle clean for next take
+  const handleRecordAgain = () => {
+    speech.resetTranscript();
+    audio.resetRecording();
+    setRecordedAudioBlob(null);
+    setManualText("");
+    setUploadedAudioFile(null);
+    setUploadNoteHint("");
+    setPreviewTitle("");
+    setPreviewCleanedText("");
+    setPreviewTags([]);
+    setPreviewActionItems([]);
+    setIsAiOrganized(false);
+    setStage("idle");
   };
 
   // Final save to backend
@@ -216,7 +288,7 @@ export function VoiceNoteRecorderModal({
       });
 
       onNoteCreated(savedNote);
-      onClose();
+      handleCloseModal();
     } catch (err) {
       console.error("Save voice note error:", err);
     } finally {
@@ -228,7 +300,7 @@ export function VoiceNoteRecorderModal({
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-in fade-in duration-200">
-      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+      <div className="fixed inset-0" onClick={handleCloseModal} aria-hidden="true" />
       <div
         role="dialog"
         aria-modal="true"
@@ -256,7 +328,7 @@ export function VoiceNoteRecorderModal({
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleCloseModal}
             className="p-1.5 rounded-full text-slate-400 hover:text-slate-950 hover:bg-slate-100 transition-colors"
           >
             <X size={18} />
@@ -346,14 +418,6 @@ export function VoiceNoteRecorderModal({
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleStart({ simulated: true })}
-                    className="px-3.5 py-1.5 rounded-full bg-white text-slate-950 border border-black/80 font-bold text-xs shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Sparkles size={12} />
-                    <span>Try with Virtual Mic</span>
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => handleStart()}
                     className="px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                   >
@@ -410,18 +474,6 @@ export function VoiceNoteRecorderModal({
                   </option>
                 ))}
               </select>
-            </div>
-
-            {/* Quick Test Option */}
-            <div className="pt-1 flex items-center justify-center">
-              <button
-                type="button"
-                onClick={() => handleStart({ simulated: true })}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs hover:bg-slate-50 transition-all cursor-pointer"
-              >
-                <Sparkles size={12} className="text-slate-950" />
-                <span>Test sample voice recording (Instant demo)</span>
-              </button>
             </div>
           </div>
         )}
@@ -486,9 +538,9 @@ export function VoiceNoteRecorderModal({
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[#e9e9ee]/60">
               <div className="flex items-center gap-2">
-                <Globe size={14} className="text-slate-500" />
+                <Globe size={14} className="text-slate-500 shrink-0" />
                 <select
                   value={selectedLang}
                   onChange={(e) => setSelectedLang(e.target.value)}
@@ -502,18 +554,44 @@ export function VoiceNoteRecorderModal({
                 </select>
               </div>
 
-              <button
-                type="button"
-                disabled={!uploadedAudioFile}
-                onClick={() => {
-                  const hint = uploadNoteHint.trim() || uploadedAudioFile?.name.replace(/\.[^/.]+$/, "") || "Voice Audio Note";
-                  runAiStructuring(hint, uploadedAudioFile);
-                }}
-                className="px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
-              >
-                <Sparkles size={14} />
-                <span>Clean & Organize Voice with AI</span>
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  disabled={!uploadedAudioFile}
+                  onClick={() => {
+                    const hint =
+                      uploadNoteHint.trim() ||
+                      uploadedAudioFile?.name.replace(/\.[^/.]+$/, "") ||
+                      "Audio Note";
+                    setIsAiOrganized(false);
+                    setPreviewTitle(hint);
+                    setPreviewCleanedText(hint);
+                    setPreviewCategory(initialCategory || "idea");
+                    setPreviewTags(["audio-upload", "raw"]);
+                    setPreviewActionItems([]);
+                    setStage("preview");
+                  }}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap text-center"
+                >
+                  <span>Save Raw</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={!uploadedAudioFile}
+                  onClick={() => {
+                    const hint =
+                      uploadNoteHint.trim() ||
+                      uploadedAudioFile?.name.replace(/\.[^/.]+$/, "") ||
+                      "Voice Audio Note";
+                    setIsAiOrganized(true);
+                    runAiStructuring(hint, uploadedAudioFile);
+                  }}
+                  className="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap text-center"
+                >
+                  <Sparkles size={13} className="shrink-0" />
+                  <span>Clean with AI</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -535,9 +613,9 @@ export function VoiceNoteRecorderModal({
               />
             </div>
 
-            <div className="flex items-center justify-between pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-[#e9e9ee]/60">
               <div className="flex items-center gap-2">
-                <Globe size={14} className="text-slate-500" />
+                <Globe size={14} className="text-slate-500 shrink-0" />
                 <select
                   value={selectedLang}
                   onChange={(e) => setSelectedLang(e.target.value)}
@@ -551,15 +629,37 @@ export function VoiceNoteRecorderModal({
                 </select>
               </div>
 
-              <button
-                type="button"
-                disabled={!manualText.trim()}
-                onClick={() => runAiStructuring(manualText, null)}
-                className="px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
-              >
-                <Sparkles size={14} />
-                <span>Clean & Organize with AI</span>
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  disabled={!manualText.trim()}
+                  onClick={() => {
+                    const text = manualText.trim();
+                    setIsAiOrganized(false);
+                    setPreviewTitle(text.slice(0, 35) + (text.length > 35 ? "..." : "") || "Typed Note");
+                    setPreviewCleanedText(text);
+                    setPreviewCategory(initialCategory || "idea");
+                    setPreviewTags(["note", "raw"]);
+                    setPreviewActionItems([]);
+                    setStage("preview");
+                  }}
+                  className="flex-1 sm:flex-initial px-4 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap text-center"
+                >
+                  <span>Save Raw</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={!manualText.trim()}
+                  onClick={() => {
+                    setIsAiOrganized(true);
+                    runAiStructuring(manualText, null);
+                  }}
+                  className="flex-1 sm:flex-initial px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap text-center"
+                >
+                  <Sparkles size={13} className="shrink-0" />
+                  <span>Clean with AI</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -567,14 +667,6 @@ export function VoiceNoteRecorderModal({
         {/* ── STAGE 2: RECORDING ───────────────────────────────────── */}
         {stage === "recording" && (
           <div className="py-6 space-y-5">
-            {audio.isSimulated && (
-              <div className="flex items-center justify-center">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
-                  <Sparkles size={12} className="text-slate-950" />
-                  Virtual Mic Active • Generating Audio Chunks & Live Dictation
-                </span>
-              </div>
-            )}
 
             {/* Pulsing Waveform Visualizer */}
             <div className="flex items-center justify-center gap-1.5 h-12">
@@ -634,13 +726,22 @@ export function VoiceNoteRecorderModal({
             </div>
 
             {/* Stop Controls */}
-            <div className="flex items-center justify-center gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-2">
               <button
                 type="button"
-                onClick={handleStop}
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+                onClick={() => handleStop({ useAi: false })}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 font-bold text-xs shadow-2xs transition-transform active:scale-95 cursor-pointer"
               >
-                <Square size={13} className="fill-white" />
+                <Square size={12} className="fill-slate-950" />
+                <span>Stop (Keep Raw)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleStop({ useAi: true })}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+              >
+                <Sparkles size={13} className="text-white" />
                 <span>Stop & Clean with AI</span>
               </button>
             </div>
@@ -703,14 +804,48 @@ export function VoiceNoteRecorderModal({
               </div>
             </div>
 
-            {/* Cleaned Note Text */}
+            {/* Audio Playback if recorded or uploaded */}
+            {(recordedAudioBlob || audio.audioUrl || uploadedAudioFile) && (
+              <div className="rounded-2xl bg-[#fbfbfc] border border-[#e9e9ee] p-3 shadow-2xs space-y-1.5">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <Mic size={11} className="text-slate-950" />
+                  <span>Audio Playback</span>
+                </div>
+                <audio
+                  controls
+                  src={
+                    audio.audioUrl ||
+                    (recordedAudioBlob ? URL.createObjectURL(recordedAudioBlob) : "") ||
+                    (uploadedAudioFile ? URL.createObjectURL(uploadedAudioFile) : "")
+                  }
+                  className="w-full h-9 rounded-xl"
+                />
+              </div>
+            )}
+
+            {/* Note Content */}
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
-                <span>Cleaned Text</span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
-                  <Check size={11} className="text-emerald-600" /> Fillers Stripped
-                </span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  {isAiOrganized ? "Cleaned Note Text" : "Note Content (Raw Spoken Text)"}
+                </label>
+                <div>
+                  {isAiOrganized ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
+                      <Check size={11} className="text-emerald-600" /> Fillers Stripped with AI
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleTriggerAiFromPreview}
+                      className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white hover:bg-slate-50 border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs transition-all cursor-pointer"
+                    >
+                      <Sparkles size={11} className="text-slate-950" />
+                      <span>Clean with AI</span>
+                    </button>
+                  )}
+                </div>
+              </div>
               <textarea
                 rows={4}
                 value={previewCleanedText}
@@ -758,11 +893,17 @@ export function VoiceNoteRecorderModal({
             <div className="pt-3 border-t border-[#e9e9ee] flex items-center justify-between gap-3">
               <button
                 type="button"
-                onClick={() => setStage("idle")}
-                className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors"
+                onClick={handleRecordAgain}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors cursor-pointer"
               >
                 <RotateCcw size={13} />
-                <span>Record Again</span>
+                <span>
+                  {inputMode === "upload"
+                    ? "Upload Another"
+                    : inputMode === "type"
+                    ? "Write Another"
+                    : "Record Again"}
+                </span>
               </button>
 
               <button
