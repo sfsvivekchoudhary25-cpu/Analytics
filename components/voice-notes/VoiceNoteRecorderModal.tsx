@@ -28,6 +28,8 @@ interface VoiceNoteRecorderModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNoteCreated: (note: VoiceNoteItem) => void;
+  initialInputMode?: "record" | "upload" | "type";
+  initialCategory?: "idea" | "todo" | "reminder" | "instagram_caption" | "client_note" | "journal";
 }
 
 const LANGUAGES = [
@@ -43,6 +45,8 @@ export function VoiceNoteRecorderModal({
   isOpen,
   onClose,
   onNoteCreated,
+  initialInputMode = "record",
+  initialCategory = "idea",
 }: VoiceNoteRecorderModalProps) {
   const [selectedLang, setSelectedLang] = useState("en-US");
   const [stage, setStage] = useState<"idle" | "recording" | "structuring" | "preview">("idle");
@@ -56,7 +60,7 @@ export function VoiceNoteRecorderModal({
   const [previewCleanedText, setPreviewCleanedText] = useState("");
   const [previewCategory, setPreviewCategory] = useState<
     "idea" | "todo" | "reminder" | "instagram_caption" | "client_note" | "journal"
-  >("idea");
+  >(initialCategory);
   const [previewTags, setPreviewTags] = useState<string[]>([]);
   const [previewActionItems, setPreviewActionItems] = useState<ActionItem[]>([]);
   const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
@@ -64,13 +68,14 @@ export function VoiceNoteRecorderModal({
   const speech = useSpeechRecognition();
   const audio = useAudioRecorder();
 
-  const [inputMode, setInputMode] = useState<"record" | "upload" | "type">("record");
+  const [inputMode, setInputMode] = useState<"record" | "upload" | "type">(initialInputMode);
 
   // Reset state when opening modal
   useEffect(() => {
     if (isOpen) {
       setStage("idle");
-      setInputMode("record");
+      setInputMode(initialInputMode);
+      setPreviewCategory(initialCategory);
       setManualText("");
       setUploadedAudioFile(null);
       setUploadNoteHint("");
@@ -78,7 +83,7 @@ export function VoiceNoteRecorderModal({
       audio.resetRecording();
       setRecordedAudioBlob(null);
     }
-  }, [isOpen]);
+  }, [isOpen, initialInputMode, initialCategory]);
 
   // Auto-revert to idle if microphone hardware acquisition failed
   useEffect(() => {
