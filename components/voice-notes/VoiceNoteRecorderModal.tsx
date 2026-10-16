@@ -72,7 +72,9 @@ export function VoiceNoteRecorderModal({
 
   const [recordType, setRecordType] = useState<"dictate" | "memo">("dictate");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
-  const [structuringStep, setStructuringStep] = useState(0);
+  const [structuringSteps, setStructuringSteps] = useState<string[]>([]);
+  const [isStructuringWorking, setIsStructuringWorking] = useState(true);
+  const [structuringTime, setStructuringTime] = useState(0);
 
   // Live Groq Whisper stream state
   const [whisperTranscript, setWhisperTranscript] = useState("");
@@ -177,21 +179,7 @@ export function VoiceNoteRecorderModal({
     };
   }, [stage]);
 
-  // Step progression animation while ThoughtLine is active during AI structuring
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (stage === "structuring") {
-      setStructuringStep(0);
-      interval = setInterval(() => {
-        setStructuringStep((prev) => (prev < 2 ? prev + 1 : prev));
-      }, 700);
-    } else {
-      setStructuringStep(0);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [stage]);
+
 
   // Live periodic Groq Whisper transcription while speaking in Live AI Dictation mode
   useEffect(() => {
@@ -256,6 +244,27 @@ export function VoiceNoteRecorderModal({
     }
 
     setStage("structuring");
+    setIsStructuringWorking(true);
+    setStructuringSteps(["Transcribing audio with Groq Whisper"]);
+
+    // Progressive step timers so steps append smoothly as in React Bits
+    const stepTimer1 = setTimeout(() => {
+      setStructuringSteps((prev) =>
+        prev.includes("Removing filler words & grammar cleanup")
+          ? prev
+          : [...prev, "Removing filler words & grammar cleanup"]
+      );
+    }, 850);
+
+    const stepTimer2 = setTimeout(() => {
+      setStructuringSteps((prev) =>
+        prev.includes("Extracting action items & organizing note")
+          ? prev
+          : [...prev, "Extracting action items & organizing note"]
+      );
+    }, 1700);
+
+    const startTime = Date.now();
 
     try {
       let textToClean = rawText.trim();
@@ -297,6 +306,27 @@ export function VoiceNoteRecorderModal({
         }),
       });
 
+      // Ensure the progressive animation has enough time to showcase each step
+      const elapsed = Date.now() - startTime;
+      if (elapsed < 2400) {
+        await new Promise((resolve) => setTimeout(resolve, 2400 - elapsed));
+      }
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
+
+      // Make sure all 3 steps are present
+      setStructuringSteps([
+        "Transcribing audio with Groq Whisper",
+        "Removing filler words & grammar cleanup",
+        "Extracting action items & organizing note",
+      ]);
+
+      // Trigger the React Bits settle chord (crossfade, blur, glide, fold into 1 line!)
+      setIsStructuringWorking(false);
+
+      // Wait 850ms for the settle fold animation to complete smoothly
+      await new Promise((resolve) => setTimeout(resolve, 850));
+
       setPreviewTitle(aiResult.title || "Voice Note");
       setPreviewCleanedText(aiResult.cleanedText || textToClean || "Voice memo audio");
       setPreviewCategory(aiResult.category || "idea");
@@ -306,6 +336,12 @@ export function VoiceNoteRecorderModal({
       setStage("preview");
     } catch (err) {
       console.warn("AI preview failed, falling back to local text:", err);
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
+
+      setIsStructuringWorking(false);
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
       const fallbackTitle = rawText.trim()
         ? rawText.trim().slice(0, 35)
         : `Voice Note (${new Date().toLocaleDateString(undefined, { month: "short", day: "numeric" })})`;
@@ -316,6 +352,9 @@ export function VoiceNoteRecorderModal({
       setPreviewActionItems([]);
       setIsAiOrganized(false);
       setStage("preview");
+    } finally {
+      clearTimeout(stepTimer1);
+      clearTimeout(stepTimer2);
     }
   };
 
@@ -434,6 +473,9 @@ export function VoiceNoteRecorderModal({
     setPreviewCleanedText("");
     setPreviewTags([]);
     setPreviewActionItems([]);
+    setStructuringSteps([]);
+    setIsStructuringWorking(true);
+    setStructuringTime(0);
     setIsAiOrganized(false);
     setStage("idle");
     setRecordingSeconds(0);
@@ -1017,16 +1059,11 @@ export function VoiceNoteRecorderModal({
 
         {/* ── STAGE 3: STRUCTURING THOUGHTLINE ─────────────────────── */}
         {stage === "structuring" && (
-          <div className="py-10 sm:py-14 flex flex-col items-center justify-center">
-            <div className="w-full max-w-lg rounded-[26px] border border-[#e9e9ee] bg-[#fbfbfc] p-6 sm:p-8 flex flex-col items-center shadow-2xs">
+          <div className="py-12 sm:py-16 flex flex-col items-center justify-center">
+            <div className="w-full max-w-lg rounded-[28px] border border-[#e9e9ee] bg-[#fbfbfc] p-7 sm:p-9 flex flex-col items-center shadow-2xs">
               <ThoughtLine
-                working={stage === "structuring"}
-                steps={[
-                  "Transcribing audio with Groq Whisper",
-                  "Removing filler words & grammar cleanup",
-                  "Extracting action items & organizing note",
-                ]}
-                activeStep={structuringStep}
+                working={isStructuringWorking}
+                steps={structuringSteps}
                 label="Thinking…"
                 doneLabel="Thought for"
                 glyph="sparkle"
@@ -1035,10 +1072,10 @@ export function VoiceNoteRecorderModal({
                 breathDepth={0.45}
                 settleDuration={350}
                 settleBlur={2}
-                collapsible
-                collapseOnSettle={false}
-                showTimer
-                onSettle={(seconds) => console.log(`thought for ${seconds}s`)}
+                collapsible={true}
+                collapseOnSettle={true}
+                showTimer={true}
+                onSettle={(seconds) => setStructuringTime(seconds)}
               />
             </div>
           </div>
@@ -1047,6 +1084,35 @@ export function VoiceNoteRecorderModal({
         {/* ── STAGE 4: PREVIEW & REVIEW ────────────────────────────── */}
         {stage === "preview" && (
           <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto pr-1">
+            {/* ThoughtLine settled summary trace when AI organized */}
+            {isAiOrganized && (
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-3.5 px-4 shadow-2xs flex items-center justify-between">
+                <ThoughtLine
+                  working={false}
+                  steps={
+                    structuringSteps.length
+                      ? structuringSteps
+                      : [
+                          "Transcribing audio with Groq Whisper",
+                          "Removing filler words & grammar cleanup",
+                          "Extracting action items & organizing note",
+                        ]
+                  }
+                  elapsed={structuringTime || 2.4}
+                  label="Thinking…"
+                  doneLabel="Thought for"
+                  glyph="sparkle"
+                  fontSize={14}
+                  collapsible={true}
+                  collapseOnSettle={true}
+                  showTimer={true}
+                />
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">
+                  Click to inspect steps
+                </span>
+              </div>
+            )}
+
             {/* Title & Category Row */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="sm:col-span-2">
