@@ -308,49 +308,6 @@ export function VoiceNotesDashboard() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* ── TOP ACTION BAR ─────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        {/* Search Input with ⌘K Badge */}
-        <div className="relative flex-1 max-w-xl">
-          <Search size={16} className="absolute left-3.5 top-3 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search notes, tasks, voice notes..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-12 py-2.5 text-xs sm:text-sm bg-white border border-slate-200/90 rounded-2xl shadow-2xs focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/40 text-slate-900 transition-all placeholder:text-slate-400"
-          />
-          <div className="absolute right-3 top-2.5 flex items-center">
-            <span className="text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200/80 px-1.5 py-0.5 rounded-md">
-              ⌘K
-            </span>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
-          <button
-            type="button"
-            onClick={() => openCapture("record", "idea")}
-            className="group relative inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer"
-          >
-            <Plus size={16} className="transition-transform group-hover:rotate-90 duration-200" />
-            <span>New Note</span>
-            <ChevronDown size={14} className="opacity-75 ml-0.5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => loadNotes()}
-            title="Refresh notes"
-            className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-2xs cursor-pointer active:scale-95"
-            aria-label="Refresh notes"
-          >
-            <RefreshCw size={15} className={loading ? "animate-spin text-violet-600" : ""} />
-          </button>
-        </div>
-      </div>
-
       {/* ── MAIN TWO-COLUMN SPLIT (PARALLEL FROM TOP TO BOTTOM) ─────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ── LEFT COLUMN: QUICK CAPTURE + TODAY AT A GLANCE + RECENT NOTES (8 cols) ── */}
