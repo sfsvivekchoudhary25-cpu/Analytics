@@ -25,6 +25,7 @@ import {
 import { api } from "@/lib/api";
 import { VoiceNoteCard, VoiceNoteItem } from "./VoiceNoteCard";
 import { VoiceNoteRecorderModal } from "./VoiceNoteRecorderModal";
+import { VoiceNoteDetailModal } from "./VoiceNoteDetailModal";
 
 function formatTimeAgo(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -49,6 +50,7 @@ export function VoiceNotesDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedNote, setSelectedNote] = useState<VoiceNoteItem | null>(null);
   const [isRecorderOpen, setIsRecorderOpen] = useState(false);
   const [recorderMode, setRecorderMode] = useState<"record" | "upload" | "type">("record");
   const [recorderCategory, setRecorderCategory] = useState<
@@ -526,14 +528,19 @@ export function VoiceNotesDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-3">
-                {notes.map((note, idx) => (
+              <div className="rounded-[22px] border border-slate-200/80 bg-white overflow-hidden shadow-2xs divide-y divide-slate-100">
+                {notes.map((note) => (
                   <VoiceNoteCard
                     key={note.id}
                     note={note}
-                    defaultExpanded={idx === 0}
+                    onSelect={(n) => setSelectedNote(n)}
                     onDelete={handleDelete}
-                    onUpdate={handleUpdate}
+                    onUpdate={(updated) => {
+                      handleUpdate(updated);
+                      if (selectedNote?.id === updated.id) {
+                        setSelectedNote(updated);
+                      }
+                    }}
                   />
                 ))}
               </div>
@@ -787,6 +794,18 @@ export function VoiceNotesDashboard() {
         onNoteCreated={handleNoteCreated}
         initialInputMode={recorderMode}
         initialCategory={recorderCategory}
+      />
+
+      {/* Full Detailed Note Modal */}
+      <VoiceNoteDetailModal
+        note={selectedNote}
+        isOpen={Boolean(selectedNote)}
+        onClose={() => setSelectedNote(null)}
+        onDelete={handleDelete}
+        onUpdate={(updated) => {
+          handleUpdate(updated);
+          setSelectedNote(updated);
+        }}
       />
     </div>
   );
