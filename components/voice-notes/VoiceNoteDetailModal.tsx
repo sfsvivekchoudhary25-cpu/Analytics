@@ -37,49 +37,37 @@ interface VoiceNoteDetailModalProps {
 
 const CATEGORY_CONFIG: Record<
   string,
-  { label: string; badge: string; iconBg: string; iconColor: string; icon: React.ReactNode }
+  { label: string; bgColor: string; icon: React.ReactNode }
 > = {
   idea: {
-    label: "💡 Idea",
-    badge: "bg-purple-50 text-purple-700 border-purple-200/80",
-    iconBg: "bg-purple-100/90 text-purple-600",
-    iconColor: "text-purple-600",
-    icon: <Lightbulb className="w-4 h-4" />,
+    label: "Idea",
+    bgColor: "#e2e2fc", // Soft Periwinkle
+    icon: <Lightbulb className="w-4 h-4 text-slate-950" />,
   },
   todo: {
-    label: "✅ To-Do",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-    iconBg: "bg-emerald-100/90 text-emerald-600",
-    iconColor: "text-emerald-600",
-    icon: <CheckSquare className="w-4 h-4" />,
+    label: "To-Do",
+    bgColor: "#fff9db", // Soft Butter Yellow
+    icon: <CheckSquare className="w-4 h-4 text-slate-950" />,
   },
   instagram_caption: {
-    label: "📸 IG Caption",
-    badge: "bg-pink-50 text-rose-700 border-pink-200/80",
-    iconBg: "bg-pink-100/90 text-rose-600",
-    iconColor: "text-rose-600",
-    icon: <InstagramIcon className="w-4 h-4" />,
+    label: "IG Caption",
+    bgColor: "#fceef4", // Soft Rose Pink
+    icon: <InstagramIcon className="w-4 h-4 text-slate-950" />,
   },
   client_note: {
-    label: "💼 Client / Lead",
-    badge: "bg-blue-50 text-blue-700 border-blue-200/80",
-    iconBg: "bg-blue-100/90 text-blue-600",
-    iconColor: "text-blue-600",
-    icon: <Briefcase className="w-4 h-4" />,
+    label: "Client / Lead",
+    bgColor: "#feece4", // Soft Peach Coral
+    icon: <Briefcase className="w-4 h-4 text-slate-950" />,
   },
   reminder: {
-    label: "⏰ Reminder",
-    badge: "bg-amber-50 text-amber-800 border-amber-200/80",
-    iconBg: "bg-amber-100/90 text-amber-600",
-    iconColor: "text-amber-600",
-    icon: <Bell className="w-4 h-4" />,
+    label: "Reminder",
+    bgColor: "#feece4", // Soft Peach Coral
+    icon: <Bell className="w-4 h-4 text-slate-950" />,
   },
   journal: {
-    label: "📓 Memo",
-    badge: "bg-slate-100 text-slate-700 border-slate-200/80",
-    iconBg: "bg-slate-100 text-slate-600",
-    iconColor: "text-slate-600",
-    icon: <FileText className="w-4 h-4" />,
+    label: "Memo",
+    bgColor: "#f1f3f7", // Soft Neutral Memo
+    icon: <FileText className="w-4 h-4 text-slate-950" />,
   },
 };
 
@@ -231,27 +219,31 @@ export function VoiceNoteDetailModal({
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className="relative z-10 my-auto w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col max-h-[88vh] overflow-hidden animate-in zoom-in-95 duration-200"
+        className="relative z-10 my-auto w-full max-w-2xl bg-white rounded-[28px] shadow-2xl border border-[#e9e9ee] flex flex-col max-h-[88vh] overflow-hidden animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
-        <div className="shrink-0 p-5 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-4 bg-white">
+        <div className="shrink-0 p-5 sm:p-6 pb-4 border-b border-[#e9e9ee] flex items-start justify-between gap-4 bg-white">
           <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-xs ${cat.iconBg}`}>
+            <div
+              style={{ backgroundColor: cat.bgColor }}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs text-slate-950"
+            >
               {cat.icon}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${cat.badge}`}>
-                  {cat.label}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                  {cat.icon}
+                  <span>{cat.label}</span>
                 </span>
                 {note.isPinned && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">
-                    <Pin size={10} className="fill-violet-600" /> Pinned
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-[#fff9db] border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                    <Pin size={10} className="fill-slate-950" /> Pinned
                   </span>
                 )}
               </div>
-              <div className="text-xs text-slate-400 font-medium mt-1 flex items-center gap-1.5">
-                <Clock size={12} />
+              <div className="text-xs text-slate-500 font-medium mt-1.5 flex items-center gap-1.5">
+                <Clock size={12} className="text-slate-400" />
                 <span>{formattedDate}</span>
               </div>
             </div>
@@ -263,17 +255,17 @@ export function VoiceNoteDetailModal({
               type="button"
               onClick={handleTogglePin}
               title={note.isPinned ? "Unpin note" : "Pin note"}
-              className={`p-2 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer ${
-                note.isPinned ? "text-violet-600 bg-violet-50" : "hover:text-slate-700"
+              className={`p-2 rounded-full hover:bg-slate-100 transition-colors cursor-pointer ${
+                note.isPinned ? "text-slate-950 bg-slate-100" : "hover:text-slate-950"
               }`}
             >
-              <Pin size={16} className={note.isPinned ? "fill-violet-600" : ""} />
+              <Pin size={16} className={note.isPinned ? "fill-slate-950" : ""} />
             </button>
             <button
               type="button"
               onClick={handleDelete}
               title="Delete note"
-              className="p-2 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
+              className="p-2 rounded-full hover:bg-rose-50 hover:text-rose-600 transition-colors cursor-pointer"
             >
               <Trash2 size={16} />
             </button>
@@ -281,7 +273,7 @@ export function VoiceNoteDetailModal({
               type="button"
               onClick={onClose}
               title="Close modal"
-              className="p-2 rounded-xl hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer ml-1"
+              className="p-2 rounded-full hover:bg-slate-100 hover:text-slate-950 transition-colors cursor-pointer ml-1"
             >
               <X size={18} />
             </button>
@@ -291,28 +283,28 @@ export function VoiceNoteDetailModal({
         {/* Content Body (Scrollable with overscroll-contain) */}
         <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-5">
           {/* Title */}
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-black text-slate-950 leading-snug tracking-tight">
             {note.title}
           </h2>
 
           {/* Audio Player Bar */}
           {note.audioUrl && (
-            <div className="bg-slate-50/90 border border-slate-200/70 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-2xs">
+            <div className="bg-[#fbfbfc] border border-[#e9e9ee] rounded-[22px] p-3.5 sm:p-4 flex items-center gap-3.5 shadow-2xs">
               <button
                 type="button"
                 onClick={handleToggleAudio}
-                className="w-10 h-10 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-sm transition-transform active:scale-95 cursor-pointer"
+                className="w-10 h-10 rounded-full bg-black hover:bg-neutral-800 text-white flex items-center justify-center shrink-0 shadow-xs transition-transform hover:scale-105 active:scale-95 cursor-pointer"
               >
-                {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+                {isPlaying ? <Pause size={15} /> : <Play size={15} className="ml-0.5" />}
               </button>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between text-xs text-slate-600 font-semibold mb-1.5">
-                  <span className="flex items-center gap-1.5 text-slate-800">
-                    <span className="w-2 h-2 rounded-full bg-violet-600 animate-pulse" />
+                  <span className="flex items-center gap-1.5 text-slate-950 font-bold">
+                    <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
                     Original Audio Recording
                   </span>
-                  <span className="tabular-nums font-mono text-slate-500">
+                  <span className="tabular-nums font-mono text-slate-500 font-semibold">
                     {Math.floor(currentTime / 60)}:
                     {String(Math.floor(currentTime % 60)).padStart(2, "0")} /{" "}
                     {Math.floor(durationSec / 60)}:
@@ -320,10 +312,10 @@ export function VoiceNoteDetailModal({
                   </span>
                 </div>
 
-                <div className="w-full bg-slate-200/80 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-[#e9e9ee] h-2 rounded-full overflow-hidden">
                   <div
                     style={{ width: `${Math.min(100, progressPercent)}%` }}
-                    className="bg-gradient-to-r from-violet-600 to-indigo-600 h-full rounded-full transition-all duration-150"
+                    className="bg-black h-full rounded-full transition-all duration-150"
                   />
                 </div>
               </div>
@@ -332,20 +324,20 @@ export function VoiceNoteDetailModal({
 
           {/* Cleaned Note Text */}
           <div className="space-y-1.5">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               Cleaned AI Note
             </div>
-            <div className="text-sm sm:text-base text-slate-800 leading-relaxed font-normal whitespace-pre-wrap bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+            <div className="text-sm sm:text-base text-slate-900 leading-relaxed font-normal whitespace-pre-wrap bg-[#fbfbfc] p-4.5 rounded-[22px] border border-[#e9e9ee] shadow-2xs">
               {note.cleanedText}
             </div>
           </div>
 
           {/* Action Items & Tasks */}
           {note.actionItems && note.actionItems.length > 0 && (
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <div className="space-y-2 pt-2 border-t border-[#e9e9ee]">
+              <div className="flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
                 <span>ACTION ITEMS & TASKS</span>
-                <span className="text-violet-600 font-semibold">
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-950 bg-white border border-black/80 px-2.5 py-0.5 rounded-full shadow-2xs">
                   {note.actionItems.filter((t) => t.completed).length} / {note.actionItems.length} completed
                 </span>
               </div>
@@ -354,17 +346,22 @@ export function VoiceNoteDetailModal({
                   <div
                     key={task.id}
                     onClick={() => handleToggleTask(task.id, task.completed)}
-                    className={`flex items-start gap-3 p-3 rounded-xl text-xs sm:text-sm cursor-pointer transition-all ${
+                    className={`flex items-start gap-3 p-3 rounded-2xl text-xs sm:text-sm cursor-pointer transition-all border ${
                       task.completed
-                        ? "bg-slate-50 text-slate-400 line-through"
-                        : "bg-violet-50/50 hover:bg-violet-50 text-slate-800 font-medium border border-violet-100/60"
+                        ? "bg-slate-50 border-[#e9e9ee] text-slate-400 line-through"
+                        : "bg-white hover:bg-slate-50 border-[#e9e9ee] hover:border-black/30 text-slate-950 font-medium shadow-2xs"
                     }`}
                   >
-                    <div className="mt-0.5 shrink-0 text-violet-600">
+                    <div className="mt-0.5 shrink-0">
                       {task.completed ? (
-                        <CheckCircle2 size={16} className="text-emerald-500 fill-emerald-100" />
+                        <div className="w-5 h-5 rounded-lg bg-black text-white flex items-center justify-center shadow-2xs">
+                          <Check size={12} />
+                        </div>
                       ) : (
-                        <Circle size={16} className="text-slate-400 hover:text-violet-600" />
+                        <div
+                          style={{ backgroundColor: "#fff9db" }}
+                          className="w-5 h-5 rounded-lg border border-black/30 flex items-center justify-center shadow-2xs"
+                        />
                       )}
                     </div>
                     <span className="leading-snug">{task.text}</span>
@@ -375,17 +372,17 @@ export function VoiceNoteDetailModal({
           )}
 
           {/* Spoken Raw Transcript Toggle */}
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-[#e9e9ee]">
             <button
               type="button"
               onClick={() => setShowRaw(!showRaw)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-950 transition-colors cursor-pointer"
             >
               <span>{showRaw ? "Hide spoken raw transcript" : "View spoken raw transcript"}</span>
               {showRaw ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
             {showRaw && (
-              <div className="mt-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 italic leading-relaxed whitespace-pre-wrap">
+              <div className="mt-2 p-4 rounded-[20px] bg-[#f8f9fa] border border-[#e9e9ee] text-xs text-slate-600 italic leading-relaxed whitespace-pre-wrap">
                 {note.rawTranscript}
               </div>
             )}
@@ -393,15 +390,15 @@ export function VoiceNoteDetailModal({
 
           {/* Tags */}
           {note.tags && note.tags.length > 0 && (
-            <div className="pt-2 border-t border-slate-100">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            <div className="pt-2 border-t border-[#e9e9ee]">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
                 TAGS
               </div>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {note.tags.map((t, idx) => (
                   <span
                     key={idx}
-                    className="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-slate-950 bg-white border border-[#e9e9ee] hover:border-black/40 px-3 py-1 rounded-full transition-colors shadow-2xs"
                   >
                     #{t}
                   </span>
@@ -412,21 +409,23 @@ export function VoiceNoteDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="shrink-0 p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 flex-wrap">
-          <div className="text-xs text-slate-400 font-medium">
-            AI Cleaned & Structured
+        <div className="shrink-0 p-4 sm:p-5 bg-white border-t border-[#e9e9ee] flex items-center justify-between gap-3 flex-wrap">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f1f3f7] text-slate-600 text-xs font-semibold">
+            <Sparkles size={12} className="text-slate-900" />
+            <span>AI Cleaned & Structured</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleCopyCaption}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-pink-50 hover:bg-pink-100 text-rose-700 border border-pink-200/80 text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-2xs"
+              style={{ backgroundColor: "#fceef4" }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-slate-950 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
             >
               {copiedCaption ? (
                 <Check size={13} className="text-emerald-600" />
               ) : (
-                <InstagramIcon className="w-3.5 h-3.5 inline text-rose-600" />
+                <InstagramIcon className="w-3.5 h-3.5 inline text-slate-950" />
               )}
               <span>{copiedCaption ? "Copied!" : "Copy IG Caption"}</span>
             </button>
@@ -434,7 +433,7 @@ export function VoiceNoteDetailModal({
             <button
               type="button"
               onClick={handleCopyClean}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200/80 text-xs font-semibold transition-all active:scale-95 cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
             >
               {copiedClean ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
               <span>{copiedClean ? "Copied" : "Copy Note"}</span>
