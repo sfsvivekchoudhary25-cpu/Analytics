@@ -25,6 +25,7 @@ import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { api } from "@/lib/api";
 import { ActionItem, VoiceNoteItem } from "./VoiceNoteCard";
 import ThoughtLine from "./ThoughtLine";
+import VoicePill from "./VoicePill";
 
 interface VoiceNoteRecorderModalProps {
   isOpen: boolean;
@@ -652,14 +653,35 @@ export function VoiceNoteRecorderModal({
               </div>
             )}
 
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => handleStart()}
-                className="w-24 h-24 rounded-full bg-black hover:bg-neutral-800 text-white flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
-              >
-                <Mic size={34} className="text-white" />
-              </button>
+            <div className="relative flex items-center justify-center py-2">
+              <VoicePill
+                accentColor="#f5f5f5"
+                iconColor="#a1a1aa"
+                background="#27272a"
+                size={76}
+                shape="pill"
+                reach={14}
+                showTime
+                waveform
+                slideToCancel
+                cancelDistance={76}
+                attack={40}
+                release={240}
+                sensitivity={1}
+                floor={0.1}
+                openDuration={200}
+                pressScale={0.95}
+                mode="auto"
+                holdAfter={300}
+                reactive="simulated"
+                ariaLabel="Tap to Record"
+                onStart={({ source }) => handleStart()}
+                onStop={({ reason, duration }) => {
+                  if (reason === "cancel") {
+                    handleCloseModal();
+                  }
+                }}
+              />
             </div>
 
             <div>

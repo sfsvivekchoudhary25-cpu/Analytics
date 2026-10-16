@@ -27,6 +27,7 @@ import { api } from "@/lib/api";
 import { VoiceNoteCard, VoiceNoteItem } from "./VoiceNoteCard";
 import { VoiceNoteRecorderModal } from "./VoiceNoteRecorderModal";
 import { VoiceNoteDetailModal } from "./VoiceNoteDetailModal";
+import VoicePill from "./VoicePill";
 
 function formatTimeAgo(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -393,8 +394,35 @@ export function VoiceNotesDashboard() {
                       <Mic size={13} className="text-[#e3622b]" />
                       <span>Voice Note</span>
                     </span>
-                    <div className="w-7 h-7 rounded-full bg-black/5 border border-black/10 flex items-center justify-center text-slate-900 group-hover:bg-white group-hover:scale-105 transition-all">
-                      <Mic size={13} />
+                    <div onClick={(e) => e.stopPropagation()} className="shrink-0">
+                      <VoicePill
+                        accentColor="#f5f5f5"
+                        iconColor="#a1a1aa"
+                        background="#27272a"
+                        size={28}
+                        shape="pill"
+                        reach={8}
+                        showTime
+                        waveform
+                        slideToCancel
+                        cancelDistance={64}
+                        attack={40}
+                        release={240}
+                        sensitivity={1}
+                        floor={0.1}
+                        openDuration={200}
+                        pressScale={0.95}
+                        mode="auto"
+                        holdAfter={300}
+                        reactive="simulated"
+                        onStart={({ source }) => console.log("VoicePill card start:", source)}
+                        onStop={({ reason, duration }) => {
+                          console.log(`VoicePill card stop: ${reason}, duration: ${duration}ms`);
+                          if (reason !== "cancel" && reason !== "unmount") {
+                            openCapture("record", "idea");
+                          }
+                        }}
+                      />
                     </div>
                   </div>
                   <div className="mt-3.5 sm:mt-4">
