@@ -135,16 +135,16 @@ export function VoiceNoteRecorderModal({
   const handleStart = async (options?: { simulated?: boolean }) => {
     speech.resetTranscript();
     audio.resetRecording();
-
-    // 1. Verify / acquire microphone stream
-    const audioStarted = await audio.startRecording(options);
-    if (!audioStarted) {
-      setStage("idle");
-      return;
-    }
-
     setStage("recording");
+
+    // Synchronous execution within user tap/click gesture for iOS WebKit & Safari compatibility
     speech.startListening(selectedLang, options);
+
+    // Acquire hardware audio stream
+    const audioStarted = await audio.startRecording(options);
+    if (!audioStarted && !options?.simulated) {
+      console.warn("Hardware audio acquisition did not start; speech recognition remains active");
+    }
   };
 
   // Stop recording & run AI structuring
