@@ -47,6 +47,13 @@
   --purple--300: #c6b6ff;
   --purple--400: #9579ff;
   --purple--text: #2e1065;
+
+  /* Soft Pastel Minimal Theme Tokens */
+  --pastel-periwinkle: #e2e2fc;
+  --pastel-yellow: #fff9db;
+  --pastel-pink: #fceef4;
+  --pastel-coral: #feece4;
+  --pastel-neutral: #f1f3f7;
 }
 
 @theme inline {
