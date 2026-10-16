@@ -24,6 +24,7 @@ import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { api } from "@/lib/api";
 import { ActionItem, VoiceNoteItem } from "./VoiceNoteCard";
+import ThoughtLine from "./ThoughtLine";
 
 interface VoiceNoteRecorderModalProps {
   isOpen: boolean;
@@ -70,6 +71,7 @@ export function VoiceNoteRecorderModal({
 
   const [recordType, setRecordType] = useState<"dictate" | "memo">("dictate");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [structuringStep, setStructuringStep] = useState(0);
 
   // Live Groq Whisper stream state
   const [whisperTranscript, setWhisperTranscript] = useState("");
@@ -168,6 +170,22 @@ export function VoiceNoteRecorderModal({
       }, 1000);
     } else {
       setRecordingSeconds(0);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [stage]);
+
+  // Step progression animation while ThoughtLine is active during AI structuring
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (stage === "structuring") {
+      setStructuringStep(0);
+      interval = setInterval(() => {
+        setStructuringStep((prev) => (prev < 2 ? prev + 1 : prev));
+      }, 700);
+    } else {
+      setStructuringStep(0);
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -975,22 +993,31 @@ export function VoiceNoteRecorderModal({
           </div>
         )}
 
-        {/* ── STAGE 3: STRUCTURING SHIMMER ─────────────────────────── */}
+        {/* ── STAGE 3: STRUCTURING THOUGHTLINE ─────────────────────── */}
         {stage === "structuring" && (
-          <div className="py-12 flex flex-col items-center text-center space-y-4">
-            <div
-              style={{ backgroundColor: "#e2e2fc" }}
-              className="w-14 h-14 rounded-2xl text-slate-950 flex items-center justify-center shadow-xs animate-spin"
-            >
-              <Sparkles size={26} />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-950">
-                AI Structuring & Cleanup
-              </h3>
-              <p className="text-xs text-slate-500 max-w-xs mt-1">
-                Removing filler words, categorizing content, and extracting action items...
-              </p>
+          <div className="py-10 sm:py-14 flex flex-col items-center justify-center">
+            <div className="w-full max-w-lg rounded-[26px] border border-[#e9e9ee] bg-[#fbfbfc] p-6 sm:p-8 flex flex-col items-center shadow-2xs">
+              <ThoughtLine
+                working={stage === "structuring"}
+                steps={[
+                  "Transcribing audio with Groq Whisper",
+                  "Removing filler words & grammar cleanup",
+                  "Extracting action items & organizing note",
+                ]}
+                activeStep={structuringStep}
+                label="Thinking…"
+                doneLabel="Thought for"
+                glyph="sparkle"
+                fontSize={16}
+                breathPeriod={1.6}
+                breathDepth={0.45}
+                settleDuration={350}
+                settleBlur={2}
+                collapsible
+                collapseOnSettle={false}
+                showTimer
+                onSettle={(seconds) => console.log(`thought for ${seconds}s`)}
+              />
             </div>
           </div>
         )}
