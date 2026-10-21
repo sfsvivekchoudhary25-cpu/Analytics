@@ -1,23 +1,28 @@
 :root {
-  --ink: #202229;
-  --muted: #79808a;
-  --line: #e6e8eb;
+  --ink: #000000;
+  --muted: #64748b;
+  --line: #e9e9ee;
   --surface: #ffffff;
-  --canvas: #f7f8f9;
-  --violet: #6555d9;
-  --violet-soft: #f0efff;
+  --canvas: #fcfcfd;
+  --violet: #e2e2fc;
+  --violet-soft: #f1f3f7;
   --rose: #dd7a74;
-  --rose-soft: #fff0ee;
-  --mint: #1da882;
-  --mint-soft: #e9f9f3;
-  --charcoal: #292b31;
+  --rose-soft: #fceef4;
+  --mint: #10b981;
+  --mint-soft: #f1f3f7;
+  --charcoal: #000000;
+  --pastel-periwinkle: #e2e2fc;
+  --pastel-yellow: #fff9db;
+  --pastel-pink: #fceef4;
+  --pastel-peach: #feece4;
+  --pastel-neutral: #f1f3f7;
 }
 
 .app-shell {
   max-width: 1540px;
   margin: auto;
-  padding: 20px 42px 70px;
-  font-family: 'DM Sans', sans-serif;
+  padding: 16px 20px 60px;
+  font-family: inherit;
   color: var(--ink);
   background: var(--canvas);
   box-sizing: border-box;
@@ -337,21 +342,26 @@
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(30, 33, 40, .025);
+  border-radius: 26px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease;
+}
+
+.panel:hover {
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .hero-grid {
   display: grid;
-  grid-template-columns: 270px 1fr;
-  gap: 14px;
+  grid-template-columns: 290px 1fr;
+  gap: 16px;
   align-items: stretch;
 }
 
 .score-panel {
-  padding: 23px;
+  padding: 24px;
   text-align: center;
-  background: linear-gradient(145deg, #ffffff 60%, #f2f1ff);
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -478,46 +488,52 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #f4f5f6;
-  color: #626973;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
+  background: var(--pastel-neutral);
+  color: #0f172a;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .badge.violet {
-  background: var(--violet-soft);
-  color: var(--violet);
+  background: var(--pastel-periwinkle);
+  color: #1e1b4b;
 }
 
 .badge.rose {
-  background: var(--rose-soft);
-  color: #c66460;
+  background: var(--pastel-pink);
+  color: #881337;
 }
 
 .badge.mint {
-  background: var(--mint-soft);
-  color: var(--mint);
+  background: #dcfce7;
+  color: #14532d;
 }
 
 /* ── RECOMMENDATIONS ──────────────────────────────────────────────────── */
 .recommendations {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 14px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .recommendation-card {
   background: #ffffff;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 21px 22px;
+  border-radius: 26px;
+  padding: 24px 26px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease;
+}
+
+.recommendation-card:hover {
+  border-color: rgba(0, 0, 0, 0.3);
 }
 
 .step {
@@ -530,8 +546,8 @@
 }
 
 .recommendation-card h3 {
-  font: 600 14px 'Space Grotesk', sans-serif;
-  margin: 17px 0 7px;
+  font: 700 15px 'Space Grotesk', sans-serif;
+  margin: 16px 0 8px;
   color: var(--ink);
 }
 
@@ -543,20 +559,26 @@
   color: var(--muted);
   font-size: 12px;
   margin: 0 0 20px;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .action-button {
   justify-content: center;
   width: 100%;
-  transition: background .2s, transform .2s, border-color .2s;
-  color: var(--ink);
+  border-radius: 9999px !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+  font-weight: 700 !important;
+  padding: 8px 18px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transition: background 0.15s, transform 0.15s !important;
 }
 
 .action-button:hover {
-  background: #f5f4ff;
-  border-color: #c8c2ff;
-  transform: translateY(-1px);
+  background: #262626 !important;
+  border-color: #262626 !important;
+  transform: scale(1.02) !important;
 }
 
 /* ── SIGNAL STRIP ─────────────────────────────────────────────────────── */

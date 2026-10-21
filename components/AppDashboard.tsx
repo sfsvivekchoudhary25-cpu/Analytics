@@ -416,7 +416,7 @@ export default function AppDashboard({
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
               : active === "hashtags"
                 ? "animate-page-entrance w-full space-y-6 p-3 sm:p-6"
-                : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6"
+                : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6 pb-24 sm:pb-8"
           }
         >
           {active === "dashboard" && (

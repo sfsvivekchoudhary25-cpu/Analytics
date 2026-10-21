@@ -67,8 +67,10 @@ import {
 import {
   Sparkles,
   Activity,
+  ArrowRight,
   ArrowUpRight,
   Bell,
+  Bookmark,
   Bot,
   Check,
   ChevronDown,
@@ -91,6 +93,7 @@ import {
   RefreshCw,
   Search,
   Send,
+  Share2,
   Target,
   TrendingUp,
   Users,
@@ -100,7 +103,6 @@ import { api } from "@/lib/api";
 import { LineChart } from "./LineChart";
 import { MultiLineChart } from "./MultiLineChart";
 import { DonutChart } from "./DonutChart";
-import { RetentionAutopsy } from "./RetentionAutopsy";
 import { InstagramIcon } from "./icons";
 
 type TriggerTag = "ai" | "auto" | "manual" | "comment-dm" | null;
@@ -1562,111 +1564,88 @@ export function PostDetail({
 
   return (
     <main className="app-shell">
-      {/* ── Topbar (Reference Header) ─────────────────────────────────── */}
-      <header className="topbar">
-        <div className="topbar-row">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <button
-              type="button"
-              onClick={onBack}
-              className="w-10 h-10 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-all cursor-pointer flex-shrink-0"
-              title="Return to posts"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight sm:hidden flex-1 text-center pr-10">
-              Post analytics
-            </h1>
-            <div className="hidden sm:flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-900 tracking-tight">Post analytics</h1>
-            </div>
-          </div>
-        </div>
+      {/* ── Top Hero Header (Soft Pastel Minimal) ────────────────────── */}
+      <div className="relative overflow-hidden rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-4 sm:p-6 shadow-2xs transition-all mb-6">
+        {/* Soft pastel ambient background glow */}
+        <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl" />
+        <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl" />
 
-        <nav className="primary-nav" aria-label="Primary navigation">
-          {[
-            { label: "Overview", shortLabel: "Overview", key: "overview" },
-            {
-              Icon: Zap,
-              label: "Comments & Automations",
-              shortLabel: "Comments & Auto",
-              key: "activity",
-            },
-            {
-              Icon: Sparkles,
-              label: "AI Analytics",
-              shortLabel: "AI Analytics",
-              key: "ai_analytics",
-            },
-          ].map(({ Icon, label, shortLabel, key, badge, badgeType, extraBadge, extraBadgeType }: any) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setActiveTab(key as any)}
-              className={activeTab === key ? "active" : ""}
-            >
-              {Icon && <Icon size={14} className={activeTab === key ? "text-blue-600" : "text-slate-600"} />}
-              <span className="tab-label-full">{label}</span>
-              <span className="tab-label-short">{shortLabel}</span>
-              {(badge || extraBadge) && (
-                <span className="tab-badges">
-                  {badge && <em className={badgeType || ""}>{badge}</em>}
-                  {extraBadge && <em className={extraBadgeType || "mint"}>{extraBadge}</em>}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-      </header>
-
-      {/* ── Workspace Head ───────────────────────────────────────────── */}
-      <div className="workspace-head hidden sm:flex">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="kicker">
-              {activeTab === "overview" && "WORKSPACE / POST OVERVIEW"}
-              {activeTab === "activity" && "WORKSPACE / COMMENTS & AUTOMATIONS"}
-              {activeTab === "ai_analytics" && "WORKSPACE / AI INTELLIGENCE AUDIT"}
-            </span>
-            <Tooltip
-              title={
-                activeTab === "overview"
-                  ? "High-level performance, reach velocity, and audience retention."
-                  : activeTab === "activity"
-                    ? "Live comment interactions, buyer leads, and automated DM triggers."
-                    : "Everything you need to turn audience signals into momentum."
-              }
-              placement="right"
-            >
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5 lg:gap-6">
+          {/* Title, Back Button & Category Pill */}
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="inline-flex items-center justify-center h-4 w-4 rounded-full text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors cursor-pointer -mt-1"
-                aria-label="Section description info"
+                onClick={onBack}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#e9e9ee] hover:border-black/40 text-slate-950 shadow-2xs flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                title="Return to posts"
               >
-                <Info size={12} />
+                <ChevronLeft size={18} />
               </button>
-            </Tooltip>
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+                  Post Analytics
+                </h1>
+                {/* Header Category Pill */}
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span>Live Hub</span>
+                </span>
+              </div>
+            </div>
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed pl-12 sm:pl-13 truncate lg:max-w-xl">
+              {activeTab === "overview" && "High-level performance, reach velocity, and algorithmic audience retention."}
+              {activeTab === "activity" && "Live comment interactions, buyer leads, and automated DM triggers."}
+              {activeTab === "ai_analytics" && "Deep post intelligence audit and conversion momentum recommendations."}
+            </p>
           </div>
-          <p className="hidden sm:block">
-            {activeTab === "overview" && "High-level performance, reach velocity, and audience retention."}
-            {activeTab === "activity" && "Live comment interactions, buyer leads, and automated DM triggers."}
-            {activeTab === "ai_analytics" && "Everything you need to turn audience signals into momentum."}
-          </p>
+
+          {/* Navigation Tab Pills & Actions */}
+          <div className="flex items-center gap-2.5 self-start lg:self-auto shrink-0 flex-wrap">
+            <nav className="inline-flex items-center gap-1 rounded-full bg-[#f1f3f7] p-1.5 border border-[#e9e9ee] shadow-2xs">
+              {[
+                { label: "Overview", fullLabel: "Overview", key: "overview", icon: null },
+                { label: "Comments & Auto", fullLabel: "Comments & Automations", key: "activity", icon: Zap },
+                { label: "AI Analytics", fullLabel: "AI Analytics", key: "ai_analytics", icon: Sparkles },
+              ].map(({ label, fullLabel, key, icon: TabIcon }) => {
+                const isActive = activeTab === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveTab(key as any)}
+                    style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
+                    className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      isActive
+                        ? "!bg-black !text-white shadow-xs"
+                        : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
+                    }`}
+                  >
+                    {TabIcon && <TabIcon size={14} className={isActive ? "text-white" : "text-slate-500"} />}
+                    <span className="hidden sm:inline">{fullLabel || label}</span>
+                    <span className="sm:hidden">{label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {activeTab === "ai_analytics" && (
+              <button
+                type="button"
+                onClick={runAiDiagnosis}
+                disabled={aiDiagnosisLoading}
+                style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white !border-0 text-xs sm:text-sm font-bold shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <RefreshCw size={13} className={aiDiagnosisLoading ? "animate-spin text-white" : "text-white"} />
+                <span>Re-run Audit</span>
+              </button>
+            )}
+          </div>
         </div>
-        {activeTab === "ai_analytics" && (
-          <div className="head-controls">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={runAiDiagnosis}
-              disabled={aiDiagnosisLoading}
-            >
-              <RefreshCw size={14} className={aiDiagnosisLoading ? "animate-spin" : ""} />
-              Re-run audit
-            </button>
-          </div>
-        )}
       </div>
 
       {error && (
@@ -1880,18 +1859,6 @@ export function PostDetail({
                     </div>
                   </div>
                 </div>
-
-                <RetentionAutopsy
-                  mediaType={meta.mediaType}
-                  caption={meta.caption}
-                  reach={insights.reach}
-                  views={insights.views}
-                  likes={meta.likes}
-                  comments={meta.comments}
-                  saved={insights.saved}
-                  shares={insights.shares}
-                  follows={insights.follows}
-                />
               </div>
 
               {/* ── DESKTOP VIEW (>= md): MODERN SHADCN DUAL-COLUMN COCKPIT ── */}
@@ -1899,24 +1866,24 @@ export function PostDetail({
                 {/* Dual-Column Hero Showcase (Tablet md:col-span-5/7 & Desktop lg:col-span-4/8) */}
                 <div className="grid grid-cols-12 gap-5 lg:gap-6 items-stretch">
                   {/* Left Column: Media Spotlight & Comment-to-DM Engine (5 cols on Tablet, 4 cols on Desktop) */}
-                  <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-4 sm:gap-4.5">
+                  <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-4 sm:gap-5">
                     {/* 1. Media Spotlight Card */}
-                    <div className="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300 space-y-4">
+                    <div className="rounded-[28px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs transition-all hover:border-black/30 space-y-4">
                       <div className="space-y-4">
                         {/* Top Media Status Header */}
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                             Published on Instagram
                           </span>
-                          <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 border border-slate-200/80 px-2 py-1 text-[11px] font-bold text-slate-700 uppercase tracking-wider">
-                            <Play size={11} className="fill-slate-700 text-slate-700" />
+                          <span className="inline-flex items-center gap-1 rounded-xl bg-white border border-black/80 px-2.5 py-1 text-[11px] font-bold text-slate-950 uppercase tracking-wider shadow-2xs">
+                            <Play size={10} className="fill-slate-950 text-slate-950" />
                             <span>{meta.mediaType === "CAROUSEL_ALBUM" ? "CAROUSEL" : meta.mediaType === "IMAGE" ? "PHOTO" : "REEL"}</span>
                           </span>
                         </div>
 
                         {/* Main Thumbnail Spotlight with Glassmorphism Overlay */}
-                        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-[#0f172a] shadow-inner group flex items-center justify-center mx-auto">
+                        <div className="relative aspect-[4/5] max-h-[380px] w-full overflow-hidden rounded-[22px] bg-[#0f172a] shadow-inner group flex items-center justify-center mx-auto">
                           {meta.thumb ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
                             <img
@@ -1957,25 +1924,27 @@ export function PostDetail({
                       </div>
 
                       {/* Media Actions Footer */}
-                      <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                      <div className="pt-3 border-t border-[#e9e9ee] space-y-2.5">
                         <div className="flex items-center gap-2">
                           {meta.permalink ? (
                             <a
                               href={meta.permalink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl !bg-slate-900 hover:!bg-slate-800 !text-white text-xs font-semibold shadow-xs transition-colors !no-underline"
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all !no-underline"
                             >
-                              <span className="!text-white font-medium">View on Instagram</span>
-                              <ArrowUpRight size={14} className="!text-slate-400" />
+                              <span className="!text-white font-bold">View on Instagram</span>
+                              <ArrowUpRight size={14} className="!text-white" />
                             </a>
                           ) : (
                             <button
                               type="button"
-                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl !bg-slate-900 hover:!bg-slate-800 !text-white text-xs font-semibold shadow-xs transition-colors"
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all"
                             >
-                              <span className="!text-white font-medium">View on Instagram</span>
-                              <ArrowUpRight size={14} className="!text-slate-400" />
+                              <span className="!text-white font-bold">View on Instagram</span>
+                              <ArrowUpRight size={14} className="!text-white" />
                             </button>
                           )}
 
@@ -1988,37 +1957,37 @@ export function PostDetail({
                                 notify("Instagram URL copied to clipboard!");
                               }
                             }}
-                            className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                            className="p-2.5 rounded-full border border-[#e9e9ee] bg-white hover:border-black/50 text-slate-700 shadow-2xs transition-colors cursor-pointer"
                             title="Copy Instagram link"
                           >
                             <Copy size={16} />
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium px-1">
+                        <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium px-1">
                           <span>Original Media</span>
-                          <span className="text-slate-600 font-semibold">{meta.mediaType === "CAROUSEL_ALBUM" ? "Carousel · Multi" : "Reel · 1080p"}</span>
+                          <span className="text-slate-950 font-bold">{meta.mediaType === "CAROUSEL_ALBUM" ? "Carousel · Multi" : "Reel · 1080p"}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* 2. Secondary Widget: Comment-to-DM Engine Card */}
-                    <div className="rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-xs transition-all hover:border-indigo-200 hover:shadow-sm space-y-3.5 flex-1 flex flex-col justify-between">
+                    <div className="rounded-[28px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs transition-all hover:border-black/30 space-y-3.5 flex-1 flex flex-col justify-between">
                       <div>
                         {/* Header & Status Indicator */}
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                               <Zap size={14} />
-                            </span>
+                            </div>
                             <div>
-                              <div className="text-xs font-bold text-slate-900 leading-tight">Comment-to-DM Engine</div>
-                              <div className="text-[10px] text-slate-400 font-medium">Lead delivery automation</div>
+                              <div className="text-xs font-bold text-slate-950 leading-tight">Comment-to-DM Engine</div>
+                              <div className="text-[10px] text-slate-500 font-medium">Lead delivery automation</div>
                             </div>
                           </div>
 
                           {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0) ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
                               <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -2026,36 +1995,36 @@ export function PostDetail({
                               Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 border border-slate-200/80 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
                               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                               Ready
                             </span>
                           )}
                         </div>
 
-                        {/* Micro Stats Grid */}
-                        <div className="grid grid-cols-3 gap-2 mt-3">
-                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
-                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">DMs</span>
-                            <span className="text-sm font-black text-slate-900 tabular-nums">
+                        {/* Micro Stats Grid (Theme Pastels - BORDERLESS) */}
+                        <div className="grid grid-cols-3 gap-2 mt-3.5">
+                          <div style={{ backgroundColor: "#f1f3f7" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
+                            <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">DMs</span>
+                            <span className="text-sm font-black text-slate-950 tabular-nums">
                               {data?.stats.dmSent ?? 0}
                             </span>
                           </div>
-                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
-                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Replies</span>
-                            <span className="text-sm font-black text-slate-900 tabular-nums">
+                          <div style={{ backgroundColor: "#fff9db" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
+                            <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Replies</span>
+                            <span className="text-sm font-black text-slate-950 tabular-nums">
                               {data?.stats.replied ?? 0}
                             </span>
                           </div>
-                          <div className="rounded-xl bg-slate-50 border border-slate-100 p-2 text-center">
-                            <span className="text-[10px] font-semibold text-slate-400 block uppercase tracking-wider">Trigger</span>
-                            <span className="text-xs font-bold text-indigo-600 truncate block">
+                          <div style={{ backgroundColor: "#e2e2fc" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
+                            <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Trigger</span>
+                            <span className="text-xs font-black text-slate-950 truncate block">
                               {data?.dmRules?.[0]?.keywords || quickRuleTrigger || "LINK"}
                             </span>
                           </div>
                         </div>
 
-                        <p className="text-[11px] text-slate-500 leading-snug mt-2.5 line-clamp-2">
+                        <p className="text-[11px] text-slate-600 leading-snug mt-3 line-clamp-2">
                           {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
                             ? `Auto-dispatches DMs & replies instantly when users comment "${data?.dmRules?.[0]?.keywords || quickRuleTrigger}".`
                             : "Convert comment threads into qualified DM leads automatically with 1-click trigger setup."}
@@ -2066,10 +2035,11 @@ export function PostDetail({
                       <button
                         type="button"
                         onClick={() => setQuickRuleModalOpen(true)}
-                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/70 text-xs font-semibold shadow-2xs transition-all cursor-pointer group"
+                        style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                        className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer group"
                       >
-                        <Zap size={13} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                        <span>
+                        <Zap size={13} className="text-amber-300 group-hover:scale-110 transition-transform" />
+                        <span className="!text-white font-bold">
                           {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
                             ? "Manage DM Automation"
                             : "Configure 1-Click Auto-DM"}
@@ -2079,69 +2049,80 @@ export function PostDetail({
                   </div>
 
                   {/* Right Column: Intelligence Cockpit (7 cols on Tablet, 8 cols on Desktop) */}
-                  <div className="col-span-12 md:col-span-7 lg:col-span-8 flex flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-5 lg:p-6 shadow-xs space-y-4 lg:space-y-5">
-                    {/* Header & Quick Intervention Tools */}
+                  <div className="col-span-12 md:col-span-7 lg:col-span-8 flex flex-col justify-between gap-5 rounded-[28px] border border-[#e9e9ee] bg-white p-5 lg:p-6 shadow-2xs hover:border-black/30 transition-all">
+                    {/* Section 1: Header & Quick Intervention Tools */}
                     <div>
                       <div className="flex items-start justify-between gap-4 flex-wrap">
                         <div>
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                            CONTENT & AUDIENCE INTELLIGENCE
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                            <Sparkles size={12} />
+                            <span>CONTENT & AUDIENCE INTELLIGENCE</span>
                           </span>
-                          <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                          <h2 className="text-xl lg:text-2xl font-black text-slate-950 tracking-tight mt-1.5">
                             {parsedCaption.title || "Post Performance Overview"}
                           </h2>
                         </div>
 
-                        {/* AI Action Interventions */}
-                        <div className="flex items-center gap-2">
+                        {/* AI Action Interventions (Soft Pastel Minimal pills) */}
+                        <div className="flex items-center gap-2 flex-wrap">
                           <button
                             type="button"
                             onClick={() => setCaptionModalOpen(true)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-indigo-200/80 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all cursor-pointer hover:scale-[1.02]"
                             title="Optimize caption with AI"
                           >
-                            <Sparkles size={13} className="text-indigo-600" />
+                            <Sparkles size={13} className="text-slate-950" />
                             <span>AI Caption</span>
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleGenerateStoryReshare(meta.caption, 1.2, undefined, "prime")}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-200/80 bg-amber-50/70 hover:bg-amber-100 text-amber-800 text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all cursor-pointer hover:scale-[1.02]"
                             title="Generate Story Reshare Hook"
                           >
-                            <Zap size={13} className="text-amber-600" />
+                            <Zap size={13} className="text-slate-950" />
                             <span>Story Reshare</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={openHashtagModal}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all cursor-pointer hover:scale-[1.02]"
+                            title="Boost Hashtags"
+                          >
+                            <Hash size={13} className="text-slate-950" />
+                            <span>Hashtags</span>
                           </button>
                         </div>
                       </div>
 
-                      {/* Description / Caption Shadcn Card */}
-                      <div className="mt-4 rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 space-y-2">
+                      {/* Description / Caption Card */}
+                      <div className="mt-3.5 rounded-[22px] border border-[#e9e9ee] bg-[#fafbff] p-4 space-y-2.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-2xs">
-                              <Menu size={11} />
-                            </span>
-                            <span className="text-xs font-bold text-indigo-600 tracking-wider">CAPTION DETAILS</span>
+                            <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                              <Menu size={12} />
+                            </div>
+                            <span className="text-xs font-bold text-slate-950 tracking-wider">CAPTION DETAILS</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={handleCopyCaption}
-                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white border border-[#e9e9ee] hover:border-black/50 text-xs font-bold text-slate-700 hover:text-black transition-colors cursor-pointer shadow-2xs"
                             >
-                              {copiedCaption ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                              {copiedCaption ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
                               <span>{copiedCaption ? "Copied" : "Copy"}</span>
                             </button>
                             {parsedCaption.hasMore && (
                               <button
                                 type="button"
                                 onClick={() => setExpandedCaption(!expandedCaption)}
-                                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                                className="inline-flex items-center gap-0.5 px-3 py-1 rounded-full bg-white border border-[#e9e9ee] hover:border-black/50 text-xs font-bold text-slate-950 transition-colors cursor-pointer shadow-2xs"
                               >
                                 <span>{expandedCaption ? "Collapse" : "Expand"}</span>
-                                <ChevronDown size={13} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
+                                <ChevronDown size={12} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
                               </button>
                             )}
                           </div>
@@ -2151,142 +2132,307 @@ export function PostDetail({
                           {meta.caption || <span className="italic text-slate-400">No caption description provided for this media.</span>}
                         </p>
 
-                        <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+                        <div className="pt-2 border-t border-[#e9e9ee] flex items-center justify-between text-xs text-slate-500">
                           <div className="flex items-center gap-3">
-                            <span className="inline-flex items-center gap-1">
+                            <span className="inline-flex items-center gap-1 font-semibold text-slate-700">
                               <Hash size={12} className="text-slate-400" />
-                              <strong>{captionStats.hashtags}</strong> hashtags
+                              <strong className="text-slate-950">{captionStats.hashtags}</strong> hashtags
                             </span>
                             <span>·</span>
-                            <span>
-                              <strong>{captionStats.mentions}</strong> mentions
+                            <span className="font-semibold text-slate-700">
+                              <strong className="text-slate-950">{captionStats.mentions}</strong> mentions
                             </span>
                           </div>
-                          <span className="text-[11px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                             Algorithmic Explore Eligible
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Integrated Engagement Rate Highlight Banner */}
-                    <div className="rounded-2xl border border-emerald-100/90 bg-gradient-to-r from-[#eefaf4] via-[#f2fcf6] to-[#eaf8f1] p-4 flex items-center justify-between shadow-2xs">
+                    {/* Section 2: Middle Algorithmic Signal Pulse & Lead Matrix (Fills the giant empty space) */}
+                    <div className="space-y-3.5 my-auto">
+                      {/* Row A: 3 Core Algorithmic Diagnostic Cards (Borderless Theme Pastels) */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        {/* 1. Peer Share Velocity */}
+                        <div
+                          style={{ backgroundColor: "#e2e2fc" }}
+                          className="rounded-[22px] p-4 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-800">
+                              Peer Share Velocity
+                            </span>
+                            <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <Share2 size={13} />
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-2xl lg:text-3xl font-black text-slate-950 tabular-nums">
+                                {viralityCockpit.shareRate.toFixed(1)}%
+                              </span>
+                              <span className="text-xs font-bold text-slate-700 tabular-nums">
+                                ({insights.shares.toLocaleString()} sent)
+                              </span>
+                            </div>
+                            <div className="text-[11px] font-semibold text-slate-700 mt-1">
+                              Instagram #1 Explore Virality Signal
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Conversation & Discussion Depth */}
+                        <div
+                          style={{ backgroundColor: "#fff9db" }}
+                          className="rounded-[22px] p-4 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-800">
+                              Discussion Depth
+                            </span>
+                            <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <MessageCircle size={13} />
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-2xl lg:text-3xl font-black text-slate-950 tabular-nums">
+                                {(meta.comments / Math.max(1, meta.likes)).toFixed(1)}x
+                              </span>
+                              <span className="text-xs font-bold text-slate-700 tabular-nums">
+                                ({meta.comments} comments)
+                              </span>
+                            </div>
+                            <div className="text-[11px] font-semibold text-slate-700 mt-1">
+                              High Community Engagement Multiplier
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3. Bookmark Shelf-Life */}
+                        <div
+                          style={{ backgroundColor: "#feece4" }}
+                          className="rounded-[22px] p-4 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                        >
+                          <div className="flex items-start justify-between">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-slate-800">
+                              Bookmark Shelf-Life
+                            </span>
+                            <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <Bookmark size={13} />
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-2xl lg:text-3xl font-black text-slate-950 tabular-nums">
+                                {viralityCockpit.saveRate.toFixed(1)}%
+                              </span>
+                              <span className="text-xs font-bold text-slate-700 tabular-nums">
+                                ({insights.saved.toLocaleString()} saved)
+                              </span>
+                            </div>
+                            <div className="text-[11px] font-semibold text-slate-700 mt-1">
+                              Evergreen Long-Tail Search Intent
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row B: Algorithmic Health & Lead Conversion Status Strip */}
+                      <div className="rounded-[22px] border border-[#e9e9ee] bg-[#ffffff] p-3.5 sm:p-4 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                          {/* Virality score badge */}
+                          <div className="w-12 h-12 rounded-2xl bg-black text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
+                            <span className="text-base font-black leading-none tabular-nums">{viralityCockpit.totalScore}</span>
+                            <span className="text-[9px] font-bold text-slate-300 uppercase leading-none mt-0.5">/ 100</span>
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-black text-slate-950">{viralityCockpit.tierLabel}</span>
+                              <span className="text-[11px] font-semibold text-slate-500">· {viralityCockpit.tierPercentile}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 truncate mt-0.5 max-w-[420px]">
+                              {viralityCockpit.summaryText}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Lead status & Quick Link */}
+                        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#e9e9ee]">
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-slate-950">
+                              {buyerLeads.length} Buyer Lead{buyerLeads.length === 1 ? "" : "s"}
+                            </div>
+                            <div className="text-[11px] font-semibold text-emerald-700">
+                              {buyerLeads.filter((l) => l.needsReply).length > 0
+                                ? `${buyerLeads.filter((l) => l.needsReply).length} awaiting reply`
+                                : "All leads engaged"}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("activity")}
+                            style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                          >
+                            <span className="!text-white font-bold">View Leads</span>
+                            <ArrowRight size={12} className="!text-white" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 3: Engagement Velocity Banner */}
+                    <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fafbff] p-4 flex items-center justify-between shadow-2xs">
                       <div className="flex items-center gap-3.5">
-                        <div className="w-11 h-11 rounded-2xl bg-[#0d7a53] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <TrendingUp size={22} />
+                        <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                          <TrendingUp size={20} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-[#0d7a53]">Engagement Velocity</span>
-                            <span className="text-[11px] font-semibold bg-emerald-100 text-[#0d7a53] px-2 py-0.5 rounded-full">
+                            <span className="text-sm font-bold text-slate-950">Engagement Velocity</span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               High Virality Index
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500 font-medium mt-0.5">
+                          <p className="text-xs text-slate-600 font-medium mt-0.5">
                             Interactions relative to total audience reach across Feed, Explore & Reels.
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-3xl font-black text-[#0d7a53] tracking-tight tabular-nums">
+                      <div className="text-right shrink-0">
+                        <div className="text-3xl font-black text-slate-950 tracking-tight tabular-nums">
                           {insights.engagementRate != null ? `${insights.engagementRate}%` : "4.7%"}
                         </div>
-                        <span className="text-[11px] text-slate-400 font-medium">Meta Benchmark: ~2.5%</span>
+                        <span className="text-[11px] text-slate-500 font-semibold">Meta Benchmark: ~2.5%</span>
                       </div>
                     </div>
 
-                    {/* 4 Pastel Metric Cards (2x2 on Tablet md, 4 cols on Desktop lg) */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-                      {/* Likes */}
-                      <div className="rounded-2xl border border-pink-100 bg-[#fdf2f4] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                    {/* Section 4: 6 Metric Cards (Soft Pastel Minimal tokens) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                      {/* 1. Likes - Soft Rose Pink (BORDERLESS) */}
+                      <div
+                        style={{ backgroundColor: "#fceef4" }}
+                        className="rounded-[20px] p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-rose-600">Likes</span>
-                          <div className="w-7 h-7 rounded-lg bg-white/80 text-rose-500 flex items-center justify-center shadow-2xs">
-                            <Heart size={14} />
+                          <span className="text-xs font-bold text-slate-900">Likes</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <Heart size={12} />
                           </div>
                         </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
                             {meta.likes.toLocaleString()}
                           </div>
-                          <span className="text-[11px] text-slate-400 font-medium">Audience appreciation</span>
+                          <span className="text-[10px] font-semibold text-slate-600">Audience appreciation</span>
                         </div>
                       </div>
 
-                      {/* Comments */}
-                      <div className="rounded-2xl border border-emerald-100 bg-[#ecfaf5] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                      {/* 2. Comments - Soft Butter Yellow (BORDERLESS) */}
+                      <div
+                        style={{ backgroundColor: "#fff9db" }}
+                        className="rounded-[20px] p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-emerald-700">Comments</span>
-                          <div className="w-7 h-7 rounded-lg bg-white/80 text-emerald-600 flex items-center justify-center shadow-2xs">
-                            <MessageCircle size={14} />
+                          <span className="text-xs font-bold text-slate-900">Comments</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <MessageCircle size={12} />
                           </div>
                         </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-black text-slate-900 tabular-nums">
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
                             {meta.comments.toLocaleString()}
                           </div>
-                          <span className="text-[11px] text-slate-400 font-medium">Active conversations</span>
+                          <span className="text-[10px] font-semibold text-slate-600">Active conversations</span>
                         </div>
                       </div>
 
-                      {/* Reach */}
-                      <div className="rounded-2xl border border-indigo-100 bg-[#f0f4fe] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                      {/* 3. Shares - Soft Periwinkle (BORDERLESS) */}
+                      <div
+                        style={{ backgroundColor: "#e2e2fc" }}
+                        className="rounded-[20px] p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-indigo-700">Reach</span>
-                          <div className="w-7 h-7 rounded-lg bg-white/80 text-indigo-600 flex items-center justify-center shadow-2xs">
-                            <Eye size={14} />
+                          <span className="text-xs font-bold text-slate-900">Shares</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <Share2 size={12} />
                           </div>
                         </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-black text-slate-900 tabular-nums">
-                            {(insights.reach ?? 128).toLocaleString()}
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
+                            {insights.shares.toLocaleString()}
                           </div>
-                          <span className="text-[11px] text-slate-400 font-medium">Unique accounts</span>
+                          <span className="text-[10px] font-semibold text-slate-600">Peer recommendations</span>
                         </div>
                       </div>
 
-                      {/* Views */}
-                      <div className="rounded-2xl border border-amber-100 bg-[#fdf5eb] p-3.5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                      {/* 4. Saves - Soft Peach Coral (BORDERLESS) */}
+                      <div
+                        style={{ backgroundColor: "#feece4" }}
+                        className="rounded-[20px] p-3.5 flex flex-col justify-between shadow-2xs hover:shadow-xs transition-shadow"
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-semibold text-amber-700">Views</span>
-                          <div className="w-7 h-7 rounded-lg bg-white/80 text-amber-600 flex items-center justify-center shadow-2xs">
-                            <Play size={14} />
+                          <span className="text-xs font-bold text-slate-900">Saves</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <Bookmark size={12} />
                           </div>
                         </div>
-                        <div className="mt-2">
-                          <div className="text-2xl font-black text-slate-900 tabular-nums">
-                            {(insights.views ?? 153).toLocaleString()}
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
+                            {insights.saved.toLocaleString()}
                           </div>
-                          <span className="text-[11px] text-slate-400 font-medium">Total impressions</span>
+                          <span className="text-[10px] font-semibold text-slate-600">Bookmarked reference</span>
+                        </div>
+                      </div>
+
+                      {/* 5. Reach - White Card (SUBTLE BORDER) */}
+                      <div className="rounded-[20px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 flex flex-col justify-between shadow-2xs transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900">Reach</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <Eye size={12} />
+                          </div>
+                        </div>
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
+                            {(insights.reach ?? 141).toLocaleString()}
+                          </div>
+                          <span className="text-[10px] font-semibold text-slate-500">Unique accounts</span>
+                        </div>
+                      </div>
+
+                      {/* 6. Views - White Card (SUBTLE BORDER) */}
+                      <div className="rounded-[20px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 flex flex-col justify-between shadow-2xs transition-all">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900">Views</span>
+                          <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
+                            <Play size={12} />
+                          </div>
+                        </div>
+                        <div className="mt-2.5">
+                          <div className="text-2xl font-black text-slate-950 tabular-nums">
+                            {(insights.views ?? 186).toLocaleString()}
+                          </div>
+                          <span className="text-[10px] font-semibold text-slate-500">Total impressions</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <RetentionAutopsy
-                  mediaType={meta.mediaType}
-                  caption={meta.caption}
-                  reach={insights.reach}
-                  views={insights.views}
-                  likes={meta.likes}
-                  comments={meta.comments}
-                  saved={insights.saved}
-                  shares={insights.shares}
-                  follows={insights.follows}
-                />
               </div>
 
               {/* ── GRAPH ANALYTICS SECTION (Dashboard Style 2-Column Grid) ─────── */}
               <div className="grid gap-6 lg:gap-8 lg:grid-cols-[1fr_24rem] items-stretch">
                 {/* Left: Interactive Timeline Card */}
-                <Card
-                  className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
-                  styles={{ body: { padding: "20px 22px", flex: 1, display: "flex", flexDirection: "column" } }}
-                  title={
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-1">
-                      <div>
-                        <h2 className="text-base font-semibold text-slate-900">
+                <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all flex flex-col h-full">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-4 border-b border-[#e9e9ee]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-950">
                           {chartView === "engagement"
                             ? "Activity & Automation Over Time"
                             : chartView === "comments"
@@ -2295,30 +2441,33 @@ export function PostDetail({
                                 ? "Comment DMs Sent Timeline"
                                 : "Replies Sent Timeline"}
                         </h2>
-                        <p className="text-xs font-normal text-slate-500 mt-0.5">
-                          {chartView === "engagement"
-                            ? `Comments, automated DMs, and replies recorded over the last ${days} days`
-                            : `Daily volume breakdown over the last ${days} days`}
-                        </p>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f1f3f7] text-slate-700 text-[11px] font-bold">
+                          Timeline
+                        </span>
                       </div>
-                      <Segmented
-                        size="small"
-                        value={chartView}
-                        onChange={(val) => setChartView(val as any)}
-                        options={[
-                          { label: "All Activity", value: "engagement", icon: <ThunderboltOutlined /> },
-                          { label: "Comments", value: "comments" },
-                          { label: "DMs Sent", value: "dms" },
-                          { label: "Replies", value: "replies" },
-                        ]}
-                        className="!rounded-lg !bg-slate-100 !p-0.5 text-xs self-start sm:self-auto shrink-0"
-                      />
+                      <p className="text-xs font-normal text-slate-500 mt-0.5">
+                        {chartView === "engagement"
+                          ? `Comments, automated DMs, and replies recorded over the last ${days} days`
+                          : `Daily volume breakdown over the last ${days} days`}
+                      </p>
                     </div>
-                  }
-                >
+                    <Segmented
+                      size="small"
+                      value={chartView}
+                      onChange={(val) => setChartView(val as any)}
+                      options={[
+                        { label: "All Activity", value: "engagement", icon: <ThunderboltOutlined /> },
+                        { label: "Comments", value: "comments" },
+                        { label: "DMs Sent", value: "dms" },
+                        { label: "Replies", value: "replies" },
+                      ]}
+                      className="!rounded-full !bg-[#f1f3f7] !p-1 text-xs font-bold self-start sm:self-auto shrink-0"
+                    />
+                  </div>
+
                   {loading ? (
                     <div className="flex h-56 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                     </div>
                   ) : chartView === "engagement" ? (
                     <div className="flex-1 flex flex-col justify-between">
@@ -2333,62 +2482,49 @@ export function PostDetail({
                       />
                     </div>
                   )}
-                </Card>
+                </div>
 
                 {/* Right: Funnel & Distribution Unified Card */}
-                <Card
-                  className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md transition-shadow flex flex-col h-full"
-                  styles={{
-                    body: {
-                      padding: "20px 22px",
-                      flex: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                    },
-                  }}
-                  title={
-                    <div className="py-1 space-y-2.5">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm sm:text-base font-bold text-slate-900 truncate">
-                          {rightTab === "virality"
-                            ? "Virality & Health Score"
-                            : rightTab === "funnel"
-                              ? "Discovery-to-Lead Funnel"
-                              : "Reply Methods"}
-                        </span>
-                        <span className="text-xs font-normal text-slate-400 shrink-0">
-                          {rightTab === "virality"
-                            ? `${viralityCockpit.totalScore}/100 Score`
-                            : rightTab === "funnel"
-                              ? "5 Stages"
-                              : "Distribution"}
-                        </span>
-                      </div>
-                      <Segmented
-                        block
-                        size="small"
-                        value={rightTab}
-                        onChange={(val) => setRightTab(val as any)}
-                        options={[
-                          { label: "Virality Score", value: "virality" },
-                          { label: "Funnel", value: "funnel" },
-                          { label: "Methods", value: "replyMethods" },
-                        ]}
-                        className="!rounded-lg !bg-slate-100 !p-0.5 text-xs w-full"
-                      />
+                <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all flex flex-col h-full">
+                  <div className="flex flex-col gap-2.5 pb-4 mb-4 border-b border-[#e9e9ee]">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-base sm:text-lg font-bold text-slate-950 truncate">
+                        {rightTab === "virality"
+                          ? "Virality & Health Score"
+                          : rightTab === "funnel"
+                            ? "Discovery-to-Lead Funnel"
+                            : "Reply Methods"}
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f1f3f7] text-slate-700 text-[11px] font-bold shrink-0">
+                        {rightTab === "virality"
+                          ? `${viralityCockpit.totalScore}/100 Score`
+                          : rightTab === "funnel"
+                            ? "5 Stages"
+                            : "Distribution"}
+                      </span>
                     </div>
-                  }
+                    <Segmented
+                      block
+                      size="small"
+                      value={rightTab}
+                      onChange={(val) => setRightTab(val as any)}
+                      options={[
+                        { label: "Virality Score", value: "virality" },
+                        { label: "Funnel", value: "funnel" },
+                        { label: "Methods", value: "replyMethods" },
+                      ]}
+                      className="!rounded-full !bg-[#f1f3f7] !p-1 text-xs font-bold w-full"
+                    />
+                  </div>
 
-                >
                   {loading ? (
                     <div className="flex h-56 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                     </div>
                   ) : rightTab === "virality" ? (
                     <div className="flex-1 flex flex-col justify-between space-y-4">
-                      {/* Score Gauge & Performance Badge */}
-                      <div className="flex items-center gap-3.5 p-3 rounded-xl bg-slate-50/70 border border-slate-100">
+                      {/* Score Gauge & Performance Badge (Soft Pastel borderless) */}
+                      <div style={{ backgroundColor: "#f1f3f7" }} className="flex items-center gap-3.5 p-3.5 rounded-[22px] shadow-2xs border-0">
                         <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
                           <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
                             <circle
@@ -2424,8 +2560,8 @@ export function PostDetail({
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold border ${viralityCockpit.tierBadgeCls}`}>
-                              <FireOutlined className="text-xs shrink-0" />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border border-black/80 text-slate-950 shadow-2xs">
+                              <FireOutlined className="text-xs shrink-0 text-amber-500" />
                               <span>{viralityCockpit.tierLabel}</span>
                             </span>
                             <span className="text-[11px] font-semibold text-slate-500">
@@ -2438,12 +2574,12 @@ export function PostDetail({
                         </div>
                       </div>
 
-                      {/* 4 Algorithmic Signal Diagnostics */}
+                      {/* 4 Algorithmic Signal Diagnostics (White Cards with subtle border) */}
                       <div className="space-y-2">
                         {/* 1. Share Velocity */}
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
                               <ShareAltOutlined className="text-emerald-500 text-xs shrink-0" />
                               <span>Peer Share Velocity</span>
                               <span className="text-[10px] text-slate-400 font-normal">(Primary Viral Signal)</span>
@@ -2469,9 +2605,9 @@ export function PostDetail({
                         </div>
 
                         {/* 2. Engagement Density */}
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
                               <HeartOutlined className="text-rose-500 text-xs shrink-0" />
                               <span>Audience Response</span>
                             </div>
@@ -2496,9 +2632,9 @@ export function PostDetail({
                         </div>
 
                         {/* 3. Replay Frequency */}
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
                               <PlayCircleOutlined className="text-blue-500 text-xs shrink-0" />
                               <span>Replay Frequency</span>
                             </div>
@@ -2523,9 +2659,9 @@ export function PostDetail({
                         </div>
 
                         {/* 4. Bookmark Intent */}
-                        <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 hover:bg-slate-50 transition-colors">
+                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                           <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
                               <BookOutlined className="text-amber-500 text-xs shrink-0" />
                               <span>Bookmark Intent</span>
                             </div>
@@ -2550,18 +2686,21 @@ export function PostDetail({
                         </div>
                       </div>
 
-                      {/* Actionable Comment-DM Strategy Callout */}
+                      {/* Actionable Comment-DM Strategy Callout (Soft Pastel Periwinkle borderless) */}
                       <div className="mt-auto pt-1">
-                        <div className="rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/70 to-indigo-50/50 p-2.5">
-                          <div className="flex items-start gap-2">
-                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-100 text-blue-600">
+                        <div
+                          style={{ backgroundColor: "#e2e2fc" }}
+                          className="rounded-[20px] p-3.5 shadow-2xs border-0"
+                        >
+                          <div className="flex items-start gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0 mt-0.5">
                               <ThunderboltOutlined className="text-xs" />
                             </div>
-                            <div className="text-xs text-slate-700 leading-snug">
-                              <span className="font-bold text-slate-900">Automation Synergy: </span>
+                            <div className="text-xs text-slate-900 leading-snug">
+                              <span className="font-bold">Automation Synergy: </span>
                               {viralityCockpit.activeRules > 0 ? (
                                 <span>
-                                  <span className="text-emerald-700 font-semibold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+                                  <span className="text-emerald-800 font-bold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
                                 </span>
                               ) : (
                                 <span>
@@ -2578,20 +2717,20 @@ export function PostDetail({
                       {funnelSteps.map((f) => (
                         <div
                           key={f.key}
-                          className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 hover:bg-slate-50 transition-colors"
+                          className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all"
                         >
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
-                              <span className={`flex h-6 w-6 items-center justify-center rounded-lg border ${f.badgeCls}`}>
+                              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs text-xs">
                                 {f.icon}
                               </span>
-                              <span className="text-xs font-medium text-slate-700">{f.label}</span>
+                              <span className="text-xs font-bold text-slate-900">{f.label}</span>
                             </div>
                             <div className="text-right">
                               <span className="text-xs font-bold tabular-nums text-slate-900">
                                 {f.value.toLocaleString()}
                               </span>
-                              <span className="ml-1 text-[11px] font-semibold tabular-nums text-blue-600">
+                              <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-500">
                                 {f.pct}%
                               </span>
                             </div>
@@ -2600,7 +2739,7 @@ export function PostDetail({
                             <Progress
                               percent={f.pct}
                               showInfo={false}
-                              strokeColor={f.progressColor}
+                              strokeColor="#000000"
                               size="small"
                               className="!m-0"
                             />
@@ -2617,7 +2756,7 @@ export function PostDetail({
                       />
                     </div>
                   )}
-                </Card>
+                </div>
               </div>
             </div>
           )}
@@ -3606,43 +3745,45 @@ export function PostDetail({
             {activeTab === "activity" && (
               <div className="space-y-6">
                 {/* ── View Sub-Filter Switcher Bar ── */}
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 px-4 rounded-2xl border border-slate-200/80 shadow-2xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filter View:</span>
-                    <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl">
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 px-5 rounded-[22px] border border-[#e9e9ee] shadow-2xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Filter:</span>
+                    <div className="inline-flex items-center gap-1 p-1 bg-[#f1f3f7] rounded-full border border-[#e9e9ee]">
                       {[
                         { key: "all", label: "All Activity", count: (data?.comments?.length ?? 0) + (data?.dmRules?.length ?? 0) },
                         { key: "comments", label: "Comments & Leads", count: data?.comments?.length ?? 0 },
                         { key: "automations", label: "Automations", count: data?.dmRules?.length ?? 0 },
-                      ].map((item) => (
-                        <button
-                          key={item.key}
-                          type="button"
-                          onClick={() => setActivitySubTab(item.key as any)}
-                          className={
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all " +
-                            (activitySubTab === item.key
-                              ? "bg-white text-blue-600 shadow-xs"
-                              : "text-slate-600 hover:text-slate-900")
-                          }
-                        >
-                          <span>{item.label}</span>
-                          <span
-                            className={
-                              "text-[10px] px-1.5 py-0.2 rounded-full font-bold " +
-                              (activitySubTab === item.key
-                                ? "bg-blue-50 text-blue-600"
-                                : "bg-slate-200 text-slate-600")
-                            }
+                      ].map((item) => {
+                        const isActive = activitySubTab === item.key;
+                        return (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => setActivitySubTab(item.key as any)}
+                            style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
+                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                              isActive
+                                ? "!bg-black !text-white shadow-xs"
+                                : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
+                            }`}
                           >
-                            {item.count}
-                          </span>
-                        </button>
-                      ))}
+                            <span>{item.label}</span>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                                isActive
+                                  ? "bg-white/20 text-white"
+                                  : "bg-slate-200/80 text-slate-700"
+                              }`}
+                            >
+                              {item.count}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-slate-400 font-medium">
                     {activitySubTab === "all" && "Showing active automations and real-time follower comments"}
                     {activitySubTab === "comments" && "Showing live comments feed and DM trigger tags"}
                     {activitySubTab === "automations" && "Showing active keyword routing and direct message rules"}
@@ -3652,22 +3793,18 @@ export function PostDetail({
                 {/* ── Automation Rules Section ── */}
                 {(activitySubTab === "all" || activitySubTab === "automations") && (
                   <div className="space-y-4">
-                    <Card
-                      className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                      styles={{ body: { padding: "20px 24px" } }}
-                      title={
-                        <div className="py-1">
-                          <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                            <ThunderboltOutlined className="text-blue-600" />
-                            Comment-to-DM Rules for this Post
-                          </h3>
-                          <p className="text-xs font-normal text-slate-500 mt-0.5">
-                            Direct automated private replies sent immediately when someone comments
-                          </p>
-                        </div>
-                      }
-                    >
-                      {loading && <div className="h-20 animate-pulse rounded-xl bg-slate-100" />}
+                    <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all">
+                      <div className="pb-4 mb-4 border-b border-[#e9e9ee]">
+                        <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                          <ThunderboltOutlined className="text-slate-950" />
+                          Comment-to-DM Rules for this Post
+                        </h3>
+                        <p className="text-xs font-normal text-slate-500 mt-0.5">
+                          Direct automated private replies sent immediately when someone comments
+                        </p>
+                      </div>
+
+                      {loading && <div className="h-20 animate-pulse rounded-2xl bg-slate-100" />}
 
                       {!loading && (!data?.dmRules || data.dmRules.length === 0) && (
                         <div className="py-8 text-center text-xs text-slate-400 italic">
@@ -3680,7 +3817,7 @@ export function PostDetail({
                           {data.dmRules.map((rule) => (
                             <div
                               key={rule.id}
-                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-slate-200/80 p-4 hover:border-blue-200 transition-all bg-white"
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-[20px] border border-[#e9e9ee] p-4.5 hover:border-black/30 transition-all bg-white shadow-2xs"
                             >
                               <div className="flex-1 min-w-0 space-y-2">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -3712,22 +3849,22 @@ export function PostDetail({
                                       .map((k) => (
                                         <span
                                           key={k}
-                                          className="rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 px-2 py-0.5 text-[11px] font-semibold"
+                                          className="rounded-full bg-[#fff9db] text-amber-900 border-0 px-2.5 py-0.5 text-[11px] font-bold"
                                         >
                                           {k.toUpperCase()}
                                         </span>
                                       ))
                                   ) : (
-                                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                                    <span className="rounded-full bg-[#f1f3f7] px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
                                       Any comment (catch-all)
                                     </span>
                                   )}
                                 </div>
 
-                                <div className="flex items-start gap-2 text-xs text-slate-700 bg-slate-50 rounded-xl p-2.5 border border-slate-100">
+                                <div className="flex items-start gap-2 text-xs text-slate-800 bg-[#f1f3f7] rounded-[16px] p-3 border-0">
                                   <SendOutlined className="text-slate-400 mt-0.5 shrink-0" />
                                   <p className="line-clamp-2 leading-relaxed">
-                                    <span className="font-semibold text-slate-800">DM Template: </span>
+                                    <span className="font-bold text-slate-900">DM Template: </span>
                                     {rule.dmText}
                                   </p>
                                 </div>
@@ -3737,9 +3874,12 @@ export function PostDetail({
                                 <Button
                                   onClick={() => toggleDmRule(rule)}
                                   loading={togglingRule === rule.id}
-                                  type={rule.enabled ? "default" : "primary"}
-                                  danger={rule.enabled}
-                                  className="!rounded-lg !text-xs !font-medium"
+                                  style={!rule.enabled ? { backgroundColor: "#000000", color: "#ffffff", borderColor: "#000000" } : undefined}
+                                  className={`!rounded-full !text-xs !font-bold !px-4 !py-1 transition-all cursor-pointer ${
+                                    rule.enabled
+                                      ? "!bg-white !text-slate-950 !border !border-[#e9e9ee] hover:!border-black/40 !shadow-2xs"
+                                      : "!bg-black hover:!bg-neutral-800 !text-white !border-0 !shadow-xs"
+                                  }`}
                                 >
                                   {rule.enabled ? "Pause Rule" : "Activate Rule"}
                                 </Button>
@@ -3748,30 +3888,26 @@ export function PostDetail({
                           ))}
                         </div>
                       )}
-                    </Card>
+                    </div>
 
                     {/* Auto Reply Setting & Rules info */}
                     {!loading && data && (
-                      <Card
-                        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                        styles={{ body: { padding: "20px 24px" } }}
-                        title={
-                          <div className="py-1">
-                            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-                              <CommentOutlined className="text-indigo-600" />
-                              Comment Public Auto-Reply System
-                            </h3>
-                            <p className="text-xs font-normal text-slate-500 mt-0.5">
-                              Status:{" "}
-                              <span className={data.autoSetting.enabled ? "text-emerald-600 font-bold" : "text-slate-500 font-bold"}>
-                                {data.autoSetting.enabled ? "Enabled" : "Disabled"}
-                              </span>
-                              {data.autoSetting.aiEnabled && " · AI contextual replies active"}
-                              {" · Rate limit: " + (data.autoSetting.maxPerHour ?? 30) + "/hr"}
-                            </p>
-                          </div>
-                        }
-                      >
+                      <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all">
+                        <div className="pb-4 mb-4 border-b border-[#e9e9ee]">
+                          <h3 className="text-base sm:text-lg font-bold text-slate-950 flex items-center gap-2">
+                            <CommentOutlined className="text-slate-950" />
+                            Comment Public Auto-Reply System
+                          </h3>
+                          <p className="text-xs font-normal text-slate-500 mt-0.5">
+                            Status:{" "}
+                            <span className={data.autoSetting.enabled ? "text-emerald-700 font-bold" : "text-slate-500 font-bold"}>
+                              {data.autoSetting.enabled ? "Enabled" : "Disabled"}
+                            </span>
+                            {data.autoSetting.aiEnabled && " · AI contextual replies active"}
+                            {" · Rate limit: " + (data.autoSetting.maxPerHour ?? 30) + "/hr"}
+                          </p>
+                        </div>
+
                         {data.autoReplyRules.length === 0 ? (
                           <p className="text-xs text-slate-400 italic">No keyword auto-reply rules configured.</p>
                         ) : (
@@ -3779,7 +3915,7 @@ export function PostDetail({
                             {data.autoReplyRules.map((r) => (
                               <div
                                 key={r.id}
-                                className="rounded-xl border border-slate-200/80 p-3 bg-slate-50/50 space-y-1.5"
+                                className="rounded-[18px] border border-[#e9e9ee] p-3.5 bg-white hover:border-black/30 shadow-2xs transition-all space-y-1.5"
                               >
                                 <div className="flex flex-wrap gap-1.5">
                                   {r.keywords ? (
@@ -3790,13 +3926,13 @@ export function PostDetail({
                                       .map((k) => (
                                         <span
                                           key={k}
-                                          className="rounded-md bg-blue-50 text-blue-700 border border-blue-200/60 px-1.5 py-0.5 text-[10px] font-bold"
+                                          className="rounded-full bg-[#e2e2fc] text-slate-900 border-0 px-2 py-0.5 text-[10px] font-bold"
                                         >
                                           {k.toUpperCase()}
                                         </span>
                                       ))
                                   ) : (
-                                    <span className="text-[10px] text-slate-500">Catch-all rule</span>
+                                    <span className="text-[10px] text-slate-500 font-medium">Catch-all rule</span>
                                   )}
                                 </div>
                                 <p className="text-xs text-slate-700 line-clamp-2">{r.replyText}</p>
@@ -3804,20 +3940,17 @@ export function PostDetail({
                             ))}
                           </div>
                         )}
-                      </Card>
+                      </div>
                     )}
                   </div>
                 )}
 
                 {/* ── Live Comments & Leads Feed Section ── */}
                 {(activitySubTab === "all" || activitySubTab === "comments") && (
-                  <Card
-                    className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs"
-                    styles={{ body: { padding: "20px 24px" } }}
-                  >
+                  <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all">
                     <div className="space-y-4">
                       {/* Filter controls & Search */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e9e9ee]">
                         {tagCounts && (
                           <div className="flex flex-wrap gap-2">
                             {(["all", "comment-dm", "ai", "auto", "manual"] as const).map((t) => {
@@ -3828,11 +3961,12 @@ export function PostDetail({
                                 <button
                                   key={t}
                                   onClick={() => setFilterTag(t)}
+                                  style={active ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
                                   className={
-                                    "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all border " +
+                                    "flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold transition-all border cursor-pointer " +
                                     (active
-                                      ? "bg-slate-900 text-white border-slate-900 shadow-xs"
-                                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50")
+                                      ? "!bg-black !text-white !border-black shadow-xs"
+                                      : "border-[#e9e9ee] bg-white text-slate-700 hover:border-black/30 hover:bg-slate-50")
                                   }
                                 >
                                   {t === "all"
@@ -3847,7 +3981,7 @@ export function PostDetail({
                                   <span
                                     className={
                                       "rounded-full px-1.5 py-0.2 text-[10px] " +
-                                      (active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500")
+                                      (active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600 font-semibold")
                                     }
                                   >
                                     {count}
@@ -3866,7 +4000,7 @@ export function PostDetail({
                             size="small"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="!rounded-lg !border-slate-200"
+                            className="!rounded-full !border-[#e9e9ee] hover:!border-black/30"
                           />
                         </div>
                       </div>
@@ -3874,15 +4008,15 @@ export function PostDetail({
                       {loading && (
                         <div className="space-y-3 pt-2">
                           {[0, 1, 2].map((i) => (
-                            <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
+                            <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
                           ))}
                         </div>
                       )}
 
                       {!loading && filteredComments.length === 0 && (
-                        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 py-12 text-center bg-slate-50/50">
-                          <CommentOutlined className="text-3xl text-slate-300" />
-                          <p className="text-sm font-medium text-slate-600">No comments found</p>
+                        <div className="flex flex-col items-center gap-2 rounded-[22px] border border-dashed border-[#e9e9ee] py-12 text-center bg-[#f1f3f7]/50">
+                          <CommentOutlined className="text-3xl text-slate-400" />
+                          <p className="text-sm font-bold text-slate-800">No comments found</p>
                           <p className="text-xs text-slate-400">
                             {searchQuery ? "Try changing your search query or tag filter" : "No comments recorded on this post yet."}
                           </p>
@@ -3894,7 +4028,7 @@ export function PostDetail({
                           {filteredComments.map((c) => (
                             <li
                               key={c.id}
-                              className="rounded-2xl border border-slate-200/90 bg-white p-4 space-y-3 hover:border-blue-200 hover:shadow-xs transition-all"
+                              className="rounded-[22px] border border-[#e9e9ee] bg-white p-4.5 space-y-3 hover:border-black/30 shadow-2xs transition-all"
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex flex-wrap items-center gap-2">
@@ -4064,7 +4198,7 @@ export function PostDetail({
                         </ol>
                       )}
                     </div>
-                  </Card>
+                  </div>
                 )}
               </div>
             )}

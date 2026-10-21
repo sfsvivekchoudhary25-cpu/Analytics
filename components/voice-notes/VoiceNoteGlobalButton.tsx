@@ -29,13 +29,7 @@ export function VoiceNoteGlobalButton() {
             onClick={() => setIsOpen(true)}
             className="group relative flex items-center gap-2 px-4 py-3 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer border border-white/20"
           >
-            <div className="relative">
-              <Mic size={18} className="animate-pulse" />
-              <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
-              </span>
-            </div>
+            <Mic size={18} />
             <span className="hidden sm:inline font-bold">Quick Voice Note</span>
           </button>
         </div>
