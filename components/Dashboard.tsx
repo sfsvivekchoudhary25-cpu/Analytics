@@ -1137,7 +1137,7 @@ export function Dashboard({
               </Dropdown>
             </div>
 
-            <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+            <div className="p-[5px] sm:p-6 flex-1 flex flex-col justify-between">
               {activeChart === "reach" ? (
                 insightsLoading ? (
                   <AnalyticsChartSkeleton />
@@ -1147,7 +1147,7 @@ export function Dashboard({
                       data={reachSeries}
                       label="Reach"
                       color="#4f46e5"
-                      ribbonClassName="-mx-5 sm:-mx-6 -mt-5 sm:-mt-6 px-5 sm:px-6 py-2.5 sm:py-3 border-b border-[#e9e9ee] mb-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                      ribbonClassName="-mx-[5px] sm:-mx-6 -mt-[5px] sm:-mt-6 px-2.5 sm:px-6 py-2 sm:py-3 border-b border-[#e9e9ee] mb-3 sm:mb-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
                     />
                     {reachSeries.length === 0 && (
                       <p className="mt-3 text-xs text-slate-400 text-center">

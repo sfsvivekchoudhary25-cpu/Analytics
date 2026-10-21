@@ -445,7 +445,7 @@ export function LineChart({
           </ChartContainer>
 
           {/* Card Footer matching the user's mobile screenshot */}
-          <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 text-xs">
+          <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 px-1.5 sm:px-0 text-xs">
             <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
               <span>Trending up by 5.2% this period</span>
               <TrendingUp className="h-4 w-4 text-emerald-600" />
