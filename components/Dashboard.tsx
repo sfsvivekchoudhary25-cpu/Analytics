@@ -21,8 +21,6 @@ import type { ColumnsType } from "antd/es/table";
 import {
   CommentOutlined,
   SendOutlined,
-  MessageOutlined,
-  CameraOutlined,
   ReloadOutlined,
   PlusOutlined,
   CalendarOutlined,
@@ -50,6 +48,7 @@ import {
 import { api } from "@/lib/api";
 import { LineChart, Point } from "./LineChart";
 import { MultiLineChart } from "./MultiLineChart";
+import { EngagementBarChart } from "./EngagementBarChart";
 import { NotificationBell, AccountAvatar } from "./HeaderControls";
 import { PostDetail } from "./PostDetail";
 
@@ -266,65 +265,6 @@ function AnalyticsChartSkeleton() {
   );
 }
 
-function FunnelCardSkeleton() {
-  return (
-    <div className="flex-1 flex flex-col justify-between space-y-2.5">
-      {[0, 1, 2, 3].map((i) => (
-        <div
-          key={i}
-          className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 space-y-2"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <Skeleton.Avatar active size={28} shape="square" className="!rounded-lg" />
-              <Skeleton.Input active size="small" style={{ width: 110, height: 14 }} />
-            </div>
-            <div className="flex items-center gap-1.5">
-              <Skeleton.Input active size="small" style={{ width: 36, height: 14 }} />
-              <Skeleton.Input active size="small" style={{ width: 32, height: 12 }} />
-            </div>
-          </div>
-          <Skeleton.Button active block size="small" style={{ height: 6 }} className="!rounded-full" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function EngagementCardSkeleton() {
-  return (
-    <div className="flex-1 flex flex-col justify-between space-y-2.5">
-      <div className="space-y-2.5">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3 space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <Skeleton.Avatar active size={28} shape="square" className="!rounded-lg" />
-                <Skeleton.Input active size="small" style={{ width: 80, height: 14 }} />
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Skeleton.Input active size="small" style={{ width: 36, height: 14 }} />
-                <Skeleton.Input active size="small" style={{ width: 32, height: 12 }} />
-              </div>
-            </div>
-            <Skeleton.Button active block size="small" style={{ height: 6 }} className="!rounded-full" />
-          </div>
-        ))}
-      </div>
-      <div className="flex gap-2.5 border-t border-slate-100 pt-3">
-        <div className="flex-1 rounded-xl bg-slate-50 p-2.5 text-center border border-slate-100 space-y-1">
-          <Skeleton.Input active size="small" style={{ width: 45, height: 18 }} />
-          <Skeleton.Input active size="small" style={{ width: 75, height: 12 }} />
-        </div>
-        <div className="flex-1 rounded-xl bg-slate-50 p-2.5 text-center border border-slate-100 space-y-1">
-          <Skeleton.Input active size="small" style={{ width: 45, height: 18 }} />
-          <Skeleton.Input active size="small" style={{ width: 65, height: 12 }} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function PostsShowcaseSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
@@ -428,7 +368,6 @@ export function Dashboard({
   const [tick, setTick] = useState(0);
   const [activeChart, setActiveChart] = useState<"reach" | "automations">("reach");
   const [postSort, setPostSort] = useState<"recent" | "top">("recent");
-  const [rightWidgetTab, setRightWidgetTab] = useState<"funnel" | "engagement">("funnel");
 
   const [showAllPostsModal, setShowAllPostsModal] = useState(false);
   const [modalSearch, setModalSearch] = useState("");
@@ -484,84 +423,9 @@ export function Dashboard({
 
   const isAnyLoading = dashLoading || insightsLoading;
 
-  // Engagement calculation
-  const engagement = [
-    {
-      label: "Likes",
-      value: totals.likes,
-      dot: "bg-rose-500",
-      icon: <HeartOutlined className="text-sm text-rose-500" />,
-      badgeBg: "bg-rose-50 border-rose-200/60",
-      progressColor: "#f43f5e",
-    },
-    {
-      label: "Comments",
-      value: totals.comments,
-      dot: "bg-blue-500",
-      icon: <CommentOutlined className="text-sm text-blue-500" />,
-      badgeBg: "bg-blue-50 border-blue-200/60",
-      progressColor: "#3b82f6",
-    },
-    {
-      label: "Shares",
-      value: totals.shares,
-      dot: "bg-amber-500",
-      icon: <ShareAltOutlined className="text-sm text-amber-500" />,
-      badgeBg: "bg-amber-50 border-amber-200/60",
-      progressColor: "#f59e0b",
-    },
-    {
-      label: "Saves",
-      value: totals.saves,
-      dot: "bg-emerald-500",
-      icon: <BookOutlined className="text-sm text-emerald-500" />,
-      badgeBg: "bg-emerald-50 border-emerald-200/60",
-      progressColor: "#10b981",
-    },
-  ];
-  const engTotal = engagement.reduce((n, e) => n + (e.value ?? 0), 0);
+  // Rates calculation for KPI cards
   const engagementRate = totals.reach ? Math.round(((totals.total_interactions ?? 0) / totals.reach) * 1000) / 10 : null;
   const saveRate = totals.reach ? Math.round(((totals.saves ?? 0) / totals.reach) * 1000) / 10 : null;
-
-  // Funnel setup
-  const funnel = data
-    ? [
-      {
-        key: "comments",
-        icon: <CommentOutlined className="text-base text-blue-600" />,
-        badgeBg: "bg-blue-50 border-blue-200/60",
-        progressColor: "#2563eb",
-        label: "Comments received",
-        value: data.commentsReceived,
-      },
-      {
-        key: "dms",
-        icon: <SendOutlined className="text-base text-indigo-600" />,
-        badgeBg: "bg-indigo-50 border-indigo-200/60",
-        progressColor: "#6366f1",
-        label: "Comment DMs sent",
-        value: data.dmsSent,
-      },
-      {
-        key: "replies",
-        icon: <MessageOutlined className="text-base text-emerald-600" />,
-        badgeBg: "bg-emerald-50 border-emerald-200/60",
-        progressColor: "#10b981",
-        label: "Replies to those DMs",
-        value: data.replies,
-      },
-      {
-        key: "conversions",
-        icon: <CameraOutlined className="text-base text-purple-600" />,
-        badgeBg: "bg-purple-50 border-purple-200/60",
-        progressColor: "#9333ea",
-        label: "Converted to a photo",
-        value: data.conversions,
-      },
-    ]
-    : [];
-
-  const funnelTop = Math.max(1, funnel[0]?.value || 1);
 
   // Posts sorting
   const score = (m: Media) => (m.like_count ?? 0) + (m.comments_count ?? 0);
@@ -1194,172 +1058,12 @@ export function Dashboard({
             </div>
           </Card>
 
-          {/* Right: Funnel & Engagement Unified Card (Soft Pastel Minimal White Widget) */}
-          <Card
-            className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all flex flex-col h-full overflow-hidden"
-            styles={{ body: { padding: "0px", flex: 1, display: "flex", flexDirection: "column" } }}
-          >
-            <div className="px-5 py-4 border-b border-[#e9e9ee] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm sm:text-[15px] font-bold text-slate-950 truncate">
-                  {rightWidgetTab === "funnel" ? "Conversion Funnel" : "Engagement Breakdown"}
-                </h2>
-                <p className="text-xs font-normal text-slate-500 mt-0.5 truncate">
-                  {rightWidgetTab === "funnel"
-                    ? "Comments reaching each lead stage"
-                    : `Total ${compact(engTotal)} actions over ${days} days`}
-                </p>
-              </div>
-              <Segmented
-                size="small"
-                value={rightWidgetTab}
-                onChange={(val) => setRightWidgetTab(val as "funnel" | "engagement")}
-                options={[
-                  { label: "Funnel", value: "funnel" },
-                  { label: "Engagement", value: "engagement" },
-                ]}
-                className="!rounded-xl !bg-slate-100 !p-1 text-xs self-start sm:self-auto shrink-0 font-semibold"
-              />
-            </div>
-
-            <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
-              {rightWidgetTab === "funnel" ? (
-                dashLoading ? (
-                  <FunnelCardSkeleton />
-                ) : (
-                  <div className="flex-1 flex flex-col justify-between space-y-3">
-                    <div className="space-y-2.5">
-                      {funnel.map((f) => {
-                        const percentOfTop = Math.round((f.value / funnelTop) * 1000) / 10;
-                        return (
-                          <div
-                            key={f.key}
-                            className="rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2.5">
-                                <span className={`flex h-7 w-7 items-center justify-center rounded-lg border ${f.badgeBg}`}>
-                                  {f.icon}
-                                </span>
-                                <span className="text-xs font-bold text-slate-800">{f.label}</span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-xs font-bold tabular-nums text-slate-950">
-                                  {f.value.toLocaleString()}
-                                </span>
-                                <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-600">
-                                  {percentOfTop}%
-                                </span>
-                              </div>
-                            </div>
-                            <div className="mt-2">
-                              <Progress
-                                percent={percentOfTop}
-                                showInfo={false}
-                                strokeColor={f.progressColor}
-                                size="small"
-                                className="!m-0"
-                              />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Funnel Bottom Summary (Soft Pastel Minimal - Borderless) */}
-                    {data && (
-                      <div className="flex gap-2.5 border-t border-[#e9e9ee] pt-3">
-                        <div
-                          style={{ backgroundColor: "#e2e2fc" }}
-                          className="flex-1 rounded-2xl p-3 text-center border-0 shadow-xs"
-                        >
-                          <div className="text-base font-black text-slate-950 tabular-nums">
-                            {data.commentsReceived > 0 ? Math.round((data.conversions / data.commentsReceived) * 1000) / 10 : 0}%
-                          </div>
-                          <div className="text-[11px] text-slate-700 font-bold mt-0.5">Conversion Rate</div>
-                        </div>
-                        <div
-                          style={{ backgroundColor: "#fff9db" }}
-                          className="flex-1 rounded-2xl p-3 text-center border-0 shadow-xs"
-                        >
-                          <div className="text-base font-black text-slate-950 tabular-nums">
-                            {data.dmsSent > 0 ? Math.round((data.replies / data.dmsSent) * 1000) / 10 : 0}%
-                          </div>
-                          <div className="text-[11px] text-slate-700 font-bold mt-0.5">DM Reply Rate</div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              ) : insightsLoading ? (
-                <EngagementCardSkeleton />
-              ) : (
-                <div className="flex-1 flex flex-col justify-between space-y-3">
-                  <div className="space-y-2.5">
-                    {engagement.map((e) => {
-                      const pct = engTotal > 0 && e.value != null ? Math.round((e.value / engTotal) * 100) : 0;
-                      return (
-                        <div
-                          key={e.label}
-                          className="rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2.5">
-                              <span className={`flex h-7 w-7 items-center justify-center rounded-lg border ${e.badgeBg}`}>
-                                {e.icon}
-                              </span>
-                              <span className="text-xs font-bold text-slate-800">{e.label}</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-xs font-bold tabular-nums text-slate-950">
-                                {e.value != null ? e.value.toLocaleString() : "0"}
-                              </span>
-                              <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-600">
-                                {pct}%
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-2">
-                            <Progress
-                              percent={pct}
-                              showInfo={false}
-                              strokeColor={e.progressColor}
-                              size="small"
-                              className="!m-0"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Engagement & Save Rate Accent Boxes (Soft Pastel Minimal - Borderless) */}
-                  {(engagementRate != null || saveRate != null) && (
-                    <div className="flex gap-2.5 border-t border-[#e9e9ee] pt-3">
-                      {engagementRate != null && (
-                        <div
-                          style={{ backgroundColor: "#e2e2fc" }}
-                          className="flex-1 rounded-2xl p-3 text-center border-0 shadow-xs"
-                        >
-                          <div className="text-base font-black text-slate-950 tabular-nums">{engagementRate}%</div>
-                          <div className="text-[11px] text-slate-700 font-bold mt-0.5">Engagement Rate</div>
-                        </div>
-                      )}
-                      {saveRate != null && (
-                        <div
-                          style={{ backgroundColor: "#fff9db" }}
-                          className="flex-1 rounded-2xl p-3 text-center border-0 shadow-xs"
-                        >
-                          <div className="text-base font-black text-slate-950 tabular-nums">{saveRate}%</div>
-                          <div className="text-[11px] text-slate-700 font-bold mt-0.5">Save Rate</div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
+          {/* Right: Engagement Breakdown Card (Soft Pastel Minimal White Widget) */}
+          <EngagementBarChart
+            totals={totals}
+            days={days}
+            loading={insightsLoading}
+          />
         </div>
 
         {/* ── 4. Recent & Top Instagram Posts Showcase (Soft Pastel Minimal) ────────────────── */}

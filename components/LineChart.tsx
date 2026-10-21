@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/chart";
 
 export const description = "A bar chart with a label";
+export { ChartBarStacked } from "./ui/chart-bar-stacked";
 
 export type Point = { date: string; value: number };
 

@@ -1,19 +1,109 @@
 "use client";
 
 import React, { useState } from "react";
+import { TrendingUp } from "lucide-react";
 import {
-  Area,
-  AreaChart,
+  Bar,
+  BarChart,
   CartesianGrid,
   XAxis,
   YAxis,
 } from "recharts";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "./ui/chart";
+} from "@/components/ui/chart";
+
+export const description = "A stacked bar chart with a legend";
+
+const sampleChartData = [
+  { month: "January", desktop: 186, mobile: 80 },
+  { month: "February", desktop: 305, mobile: 200 },
+  { month: "March", desktop: 237, mobile: 120 },
+  { month: "April", desktop: 73, mobile: 190 },
+  { month: "May", desktop: 209, mobile: 130 },
+  { month: "June", desktop: 214, mobile: 140 },
+];
+
+const sampleChartConfig = {
+  desktop: {
+    label: "Desktop",
+    color: "#5c67f5",
+  },
+  mobile: {
+    label: "Mobile",
+    color: "#a5b4fc",
+  },
+} satisfies ChartConfig;
+
+export function ChartBarStacked({
+  data,
+  config,
+}: {
+  data?: typeof sampleChartData;
+  config?: ChartConfig;
+}) {
+  const activeData = data || sampleChartData;
+  const activeConfig = config || sampleChartConfig;
+
+  return (
+    <Card className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs">
+      <CardHeader>
+        <CardTitle>Bar Chart - Stacked + Legend</CardTitle>
+        <CardDescription>January - June 2024</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={activeConfig} className="aspect-auto h-[250px] w-full">
+          <BarChart accessibilityLayer data={activeData}>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
+              tickFormatter={(value) => String(value).slice(0, 3)}
+            />
+            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Bar
+              dataKey="desktop"
+              stackId="a"
+              fill={activeConfig.desktop?.color || "#5c67f5"}
+              radius={[0, 0, 4, 4]}
+            />
+            <Bar
+              dataKey="mobile"
+              stackId="a"
+              fill={activeConfig.mobile?.color || "#a5b4fc"}
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm border-t border-[#e9e9ee] pt-4">
+        <div className="flex gap-2 leading-none font-medium text-slate-900">
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-emerald-600" />
+        </div>
+        <div className="leading-none text-slate-500 text-xs">
+          Showing total visitors for the last 6 months
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
 export type Series = {
   key: string;
@@ -62,7 +152,7 @@ export function MultiLineChart({
     setHiddenSeries((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Recharts formatted data
+  // Recharts formatted data for stacked bar chart
   const chartData = dates.map((date, idx) => {
     const row: Record<string, any> = {
       date,
@@ -85,10 +175,14 @@ export function MultiLineChart({
 
   const activeSeries = series.filter((s) => !hiddenSeries[s.key]);
 
+  // Responsive tick interval for X-Axis to prevent overlap
+  const tickInterval = chartData.length > 20 ? 4 : chartData.length > 10 ? 2 : 0;
+  const maxBarWidth = chartData.length > 20 ? 12 : chartData.length > 10 ? 20 : 36;
+
   return (
     <div className="w-full flex flex-col justify-between h-full">
-      {/* ── Apple-Themed Interactive Series Toggles ────────────────────────── */}
-      <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+      {/* ── Metric Series Toggle Pills ────────────────────────── */}
+      <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
         {series.map((s) => {
           const isHidden = hiddenSeries[s.key];
           const total = s.data.reduce((a, b) => a + b, 0);
@@ -98,7 +192,7 @@ export function MultiLineChart({
               key={s.key}
               type="button"
               onClick={() => toggleSeries(s.key)}
-              className={`group flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer shadow-2xs ${
+              className={`group flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer shadow-2xs ${
                 isHidden
                   ? "bg-slate-100/70 text-slate-400 line-through border border-transparent opacity-60"
                   : "bg-white text-slate-800 border border-[#e9e9ee] hover:border-black/30 hover:bg-slate-50/80"
@@ -106,12 +200,12 @@ export function MultiLineChart({
             >
               <span
                 aria-hidden
-                className="h-2.5 w-2.5 rounded-full transition-transform group-hover:scale-110"
+                className="h-2 w-2 rounded-full transition-transform group-hover:scale-110"
                 style={{ backgroundColor: s.color }}
               />
               <span>{s.label}</span>
               <span
-                className={`ml-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
+                className={`ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
                   isHidden ? "bg-slate-200 text-slate-400" : "bg-slate-100 text-slate-700"
                 }`}
               >
@@ -122,69 +216,30 @@ export function MultiLineChart({
         })}
       </div>
 
-      {/* ── Shadcn Recharts Multi-Area Chart ───────────────────────────────── */}
+      {/* ── Shadcn Stacked Bar Chart with Legend ──────────────── */}
       <div className="w-full relative select-none">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[240px] sm:h-[270px] w-full"
+          className="aspect-auto h-[230px] sm:h-[260px] w-full"
         >
-          <AreaChart
+          <BarChart
             accessibilityLayer
             data={chartData}
-            margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
+            margin={{ top: 16, right: 6, left: 6, bottom: 0 }}
+            barCategoryGap="16%"
           >
-            <defs>
-              {series.map((s) => (
-                <linearGradient
-                  key={`apple-grad-${s.key}`}
-                  id={`apple-grad-${s.key}`}
-                  x1="0"
-                  y1="0"
-                  x2="0"
-                  y2="1"
-                >
-                  <stop offset="0%" stopColor={s.color} stopOpacity={0.28} />
-                  <stop offset="65%" stopColor={s.color} stopOpacity={0.06} />
-                  <stop offset="100%" stopColor={s.color} stopOpacity={0.0} />
-                </linearGradient>
-              ))}
-            </defs>
-
-            {/* Subtle Horizontal Grid */}
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="3 3"
-              stroke="#f1f5f9"
-            />
-
-            {/* X-Axis Dates */}
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
               dataKey="formattedDate"
               tickLine={false}
-              axisLine={false}
               tickMargin={10}
+              axisLine={false}
+              interval={chartData.length > 10 ? tickInterval : 0}
               tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
             />
-
-            {/* Y-Axis Counts */}
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              allowDecimals={false}
-              tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 500 }}
-              tickFormatter={(val) =>
-                Intl.NumberFormat(undefined, { notation: "compact" }).format(val)
-              }
-            />
-
-            {/* Frosted Glass Tooltip */}
+            <YAxis hide domain={[0, "auto"]} />
             <ChartTooltip
-              cursor={{
-                stroke: "#cbd5e1",
-                strokeWidth: 1.25,
-                strokeDasharray: "4 4",
-              }}
+              cursor={{ fill: "rgba(92, 103, 245, 0.05)", radius: 6 }}
               content={
                 <ChartTooltipContent
                   indicator="dot"
@@ -197,47 +252,53 @@ export function MultiLineChart({
                       </div>
                     );
                   }}
-                  formatter={(value, name) => (
-                    <span className="font-bold text-slate-950 tabular-nums text-xs">
-                      {fmtNum(Number(value))}
-                    </span>
-                  )}
+                  formatter={(value, name) => {
+                    return (
+                      <span className="font-bold text-slate-950 tabular-nums text-xs">
+                        {fmtNum(Number(value))}
+                      </span>
+                    );
+                  }}
                 />
               }
             />
+            <ChartLegend content={<ChartLegendContent />} />
+            {activeSeries.map((s, idx) => {
+              const isBottom = idx === 0;
+              const isTop = idx === activeSeries.length - 1;
+              const isOnly = activeSeries.length === 1;
+              const radius: [number, number, number, number] = isOnly
+                ? [6, 6, 6, 6]
+                : isTop
+                ? [6, 6, 0, 0]
+                : isBottom
+                ? [0, 0, 4, 4]
+                : [0, 0, 0, 0];
 
-            {/* Active Multi-Series Areas */}
-            {activeSeries.map((s) => (
-              <Area
-                key={s.key}
-                dataKey={s.key}
-                name={s.key}
-                type="natural"
-                fill={`url(#apple-grad-${s.key})`}
-                stroke={s.color}
-                strokeWidth={2.25}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                activeDot={{
-                  r: 5,
-                  fill: s.color,
-                  stroke: "#ffffff",
-                  strokeWidth: 2,
-                  className: "filter drop-shadow-sm",
-                }}
-              />
-            ))}
-          </AreaChart>
+              return (
+                <Bar
+                  key={s.key}
+                  dataKey={s.key}
+                  name={s.key}
+                  stackId="a"
+                  fill={s.color}
+                  radius={radius}
+                  maxBarSize={maxBarWidth}
+                />
+              );
+            })}
+          </BarChart>
         </ChartContainer>
 
-        {/* Micro Subtext */}
-        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 px-1">
-          <span className="font-medium text-slate-400">
-            Click any metric pill above to isolate or compare trends
-          </span>
-          <span className="font-semibold text-slate-500">
-            {activeSeries.length} active {activeSeries.length === 1 ? "metric" : "metrics"}
-          </span>
+        {/* Card Footer matching shadcn/ui exact pattern */}
+        <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 text-xs px-1.5 sm:px-0">
+          <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
+            <span>Trending up by 5.2% this period</span>
+            <TrendingUp className="h-4 w-4 text-emerald-600" />
+          </div>
+          <div className="text-slate-500 text-xs font-normal">
+            Showing total automated actions for the last {dates.length} days
+          </div>
         </div>
       </div>
     </div>
