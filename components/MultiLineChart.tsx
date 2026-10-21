@@ -1,7 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { computeIntegerTicks, buildMonotoneSpline } from "./LineChart";
+import React, { useState } from "react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "./ui/chart";
 
 export type Series = {
   key: string;
@@ -10,18 +22,24 @@ export type Series = {
   data: number[];
 };
 
-const W = 760;
-const H = 260;
-const M = { l: 44, r: 16, t: 16, b: 28 };
-
 const fmtDay = (iso: string) => {
   if (!iso) return "";
   const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 };
 
-const fmtNum = (n: number) => n.toLocaleString();
+const fmtFullDate = (iso: string) => {
+  if (!iso) return "";
+  const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+  return d.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
+const fmtNum = (n: number) => n.toLocaleString();
 
 export function MultiLineChart({
   dates,
@@ -30,232 +48,197 @@ export function MultiLineChart({
   dates: string[];
   series: Series[];
 }) {
-  const [hover, setHover] = useState<number | null>(null);
   const [hiddenSeries, setHiddenSeries] = useState<Record<string, boolean>>({});
 
   if (dates.length === 0) {
     return (
-      <div className="flex h-56 items-center justify-center text-sm text-slate-400">
-        No data available for this period.
+      <div className="flex h-56 items-center justify-center text-sm font-medium text-slate-400">
+        No automation activity recorded for this period.
       </div>
     );
-  }
-
-  const activeSeries = series.filter((s) => !hiddenSeries[s.key]);
-  const maxValue = Math.max(0, ...activeSeries.flatMap((s) => s.data));
-  const { yMax, ticks } = computeIntegerTicks(maxValue);
-
-  const x = (i: number) =>
-    M.l + (dates.length === 1 ? 0 : (i / (dates.length - 1)) * (W - M.l - M.r));
-  const y = (v: number) => M.t + (1 - v / yMax) * (H - M.t - M.b);
-
-  const xLabels = [
-    0,
-    Math.floor((dates.length - 1) / 2),
-    dates.length - 1,
-  ];
-
-  function nearest(e: React.PointerEvent<SVGSVGElement>) {
-    const box = e.currentTarget.getBoundingClientRect();
-    const px = ((e.clientX - box.left) / box.width) * W;
-    const i = Math.round(
-      ((px - M.l) / (W - M.l - M.r)) * (dates.length - 1)
-    );
-    setHover(Math.min(dates.length - 1, Math.max(0, i)));
   }
 
   const toggleSeries = (key: string) => {
     setHiddenSeries((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Recharts formatted data
+  const chartData = dates.map((date, idx) => {
+    const row: Record<string, any> = {
+      date,
+      formattedDate: fmtDay(date),
+      fullDate: fmtFullDate(date),
+    };
+    series.forEach((s) => {
+      row[s.key] = s.data[idx] ?? 0;
+    });
+    return row;
+  });
+
+  const chartConfig: ChartConfig = {};
+  series.forEach((s) => {
+    chartConfig[s.key] = {
+      label: s.label,
+      color: s.color,
+    };
+  });
+
+  const activeSeries = series.filter((s) => !hiddenSeries[s.key]);
+
   return (
-    <div>
-      {/* Legend with interactive toggles */}
+    <div className="w-full flex flex-col justify-between h-full">
+      {/* ── Apple-Themed Interactive Series Toggles ────────────────────────── */}
       <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
         {series.map((s) => {
           const isHidden = hiddenSeries[s.key];
+          const total = s.data.reduce((a, b) => a + b, 0);
+
           return (
             <button
               key={s.key}
               type="button"
               onClick={() => toggleSeries(s.key)}
-              className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-all ${
+              className={`group flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer shadow-2xs ${
                 isHidden
-                  ? "bg-slate-100 text-slate-400 line-through opacity-60"
-                  : "bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/60"
+                  ? "bg-slate-100/70 text-slate-400 line-through border border-transparent opacity-60"
+                  : "bg-white text-slate-800 border border-[#e9e9ee] hover:border-black/30 hover:bg-slate-50/80"
               }`}
             >
               <span
                 aria-hidden
-                className="h-2 w-2 rounded-full transition-transform"
-                style={{ background: s.color }}
+                className="h-2.5 w-2.5 rounded-full transition-transform group-hover:scale-110"
+                style={{ backgroundColor: s.color }}
               />
-              {s.label}
+              <span>{s.label}</span>
+              <span
+                className={`ml-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
+                  isHidden ? "bg-slate-200 text-slate-400" : "bg-slate-100 text-slate-700"
+                }`}
+              >
+                {fmtNum(total)}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <div className="relative">
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full touch-none overflow-visible outline-none select-none"
-          role="img"
-          aria-label="Messages Over Time Chart"
-          onPointerMove={nearest}
-          onPointerLeave={() => setHover(null)}
+      {/* ── Shadcn Recharts Multi-Area Chart ───────────────────────────────── */}
+      <div className="w-full relative select-none">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[240px] sm:h-[270px] w-full"
         >
-          <defs>
-            {series.map((s) => (
-              <linearGradient
-                key={`grad-${s.key}`}
-                id={`grad-${s.key}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop offset="0%" stopColor={s.color} stopOpacity="0.16" />
-                <stop offset="100%" stopColor={s.color} stopOpacity="0.0" />
-              </linearGradient>
-            ))}
-          </defs>
-
-          {/* Grid lines and Y axis ticks */}
-          {ticks.map((t) => (
-            <g key={t}>
-              <line
-                x1={M.l}
-                x2={W - M.r}
-                y1={y(t)}
-                y2={y(t)}
-                stroke="#e2e8f0"
-                strokeWidth={1}
-                strokeDasharray={t === 0 ? "none" : "3 3"}
-              />
-              <text
-                x={M.l - 10}
-                y={y(t) + 4}
-                textAnchor="end"
-                fontSize={11}
-                fill="#94a3b8"
-                className="tabular-nums font-medium"
-              >
-                {Intl.NumberFormat(undefined, { notation: "compact" }).format(t)}
-              </text>
-            </g>
-          ))}
-
-          {/* X axis labels */}
-          {xLabels.map((i, k) => (
-            <text
-              key={i}
-              x={x(i)}
-              y={H - 6}
-              textAnchor={k === 0 ? "start" : k === 2 ? "end" : "middle"}
-              fontSize={11}
-              fill="#94a3b8"
-              className="font-medium"
-            >
-              {fmtDay(dates[i])}
-            </text>
-          ))}
-
-          {/* Lines & Gradients */}
-          {activeSeries.map((s) => {
-            const points = s.data.map((v, i) => ({ x: x(i), y: y(v), val: v }));
-            const zeroY = y(0);
-            const { line: linePath, area: areaPath } = buildMonotoneSpline(points, zeroY);
-
-            return (
-              <g key={s.key}>
-                <path d={areaPath} fill={`url(#grad-${s.key})`} />
-                <path
-                  d={linePath}
-                  fill="none"
-                  stroke={s.color}
-                  strokeWidth={2.5}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              </g>
-            );
-          })}
-
-
-          {/* Hover crosshair line */}
-          {hover !== null && (
-            <line
-              x1={x(hover)}
-              x2={x(hover)}
-              y1={M.t}
-              y2={H - M.b}
-              stroke="#64748b"
-              strokeWidth={1.2}
-              strokeDasharray="4 4"
-            />
-          )}
-
-          {/* Hover points on curves */}
-          {hover !== null &&
-            activeSeries.map((s) => (
-              <g key={s.key}>
-                <circle
-                  cx={x(hover)}
-                  cy={y(s.data[hover])}
-                  r={5}
-                  fill={s.color}
-                  stroke="#ffffff"
-                  strokeWidth={2}
-                  className="transition-all"
-                />
-                <circle
-                  cx={x(hover)}
-                  cy={y(s.data[hover])}
-                  r={8}
-                  fill={s.color}
-                  opacity={0.2}
-                />
-              </g>
-            ))}
-        </svg>
-
-        {/* Ant Design styled floating glassmorphism tooltip */}
-        {hover !== null && (
-          <div
-            className="pointer-events-none absolute top-1 z-20 min-w-44 rounded-xl border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-md transition-all duration-75"
-            style={{
-              left: `${(x(hover) / W) * 100}%`,
-              transform: `translateX(${
-                hover > dates.length * 0.6 ? "calc(-100% - 12px)" : "12px"
-              })`,
-            }}
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ top: 12, right: 10, left: -20, bottom: 0 }}
           >
-            <div className="mb-2 border-b border-slate-100 pb-1.5 text-xs font-semibold text-slate-800">
-              {fmtDay(dates[hover])}
-            </div>
-            <div className="space-y-1.5">
-              {activeSeries.map((s) => (
-                <div
-                  key={s.key}
-                  className="flex items-center justify-between gap-3 text-xs"
+            <defs>
+              {series.map((s) => (
+                <linearGradient
+                  key={`apple-grad-${s.key}`}
+                  id={`apple-grad-${s.key}`}
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
                 >
-                  <div className="flex items-center gap-1.5 text-slate-600">
-                    <span
-                      aria-hidden
-                      className="h-2 w-2 rounded-full"
-                      style={{ background: s.color }}
-                    />
-                    <span className="truncate">{s.label}</span>
-                  </div>
-                  <span className="font-semibold tabular-nums text-slate-900">
-                    {fmtNum(s.data[hover])}
-                  </span>
-                </div>
+                  <stop offset="0%" stopColor={s.color} stopOpacity={0.28} />
+                  <stop offset="65%" stopColor={s.color} stopOpacity={0.06} />
+                  <stop offset="100%" stopColor={s.color} stopOpacity={0.0} />
+                </linearGradient>
               ))}
-            </div>
-          </div>
-        )}
+            </defs>
+
+            {/* Subtle Horizontal Grid */}
+            <CartesianGrid
+              vertical={false}
+              strokeDasharray="3 3"
+              stroke="#f1f5f9"
+            />
+
+            {/* X-Axis Dates */}
+            <XAxis
+              dataKey="formattedDate"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
+            />
+
+            {/* Y-Axis Counts */}
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              allowDecimals={false}
+              tick={{ fill: "#94a3b8", fontSize: 11, fontWeight: 500 }}
+              tickFormatter={(val) =>
+                Intl.NumberFormat(undefined, { notation: "compact" }).format(val)
+              }
+            />
+
+            {/* Frosted Glass Tooltip */}
+            <ChartTooltip
+              cursor={{
+                stroke: "#cbd5e1",
+                strokeWidth: 1.25,
+                strokeDasharray: "4 4",
+              }}
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  className="rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xl px-3.5 py-2.5 min-w-[12rem]"
+                  labelFormatter={(_, payload) => {
+                    const item = payload?.[0]?.payload;
+                    return (
+                      <div className="text-[11px] font-semibold text-slate-500 mb-1 border-b border-slate-100 pb-1">
+                        {item?.fullDate || ""}
+                      </div>
+                    );
+                  }}
+                  formatter={(value, name) => (
+                    <span className="font-bold text-slate-950 tabular-nums text-xs">
+                      {fmtNum(Number(value))}
+                    </span>
+                  )}
+                />
+              }
+            />
+
+            {/* Active Multi-Series Areas */}
+            {activeSeries.map((s) => (
+              <Area
+                key={s.key}
+                dataKey={s.key}
+                name={s.key}
+                type="natural"
+                fill={`url(#apple-grad-${s.key})`}
+                stroke={s.color}
+                strokeWidth={2.25}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                activeDot={{
+                  r: 5,
+                  fill: s.color,
+                  stroke: "#ffffff",
+                  strokeWidth: 2,
+                  className: "filter drop-shadow-sm",
+                }}
+              />
+            ))}
+          </AreaChart>
+        </ChartContainer>
+
+        {/* Micro Subtext */}
+        <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 px-1">
+          <span className="font-medium text-slate-400">
+            Click any metric pill above to isolate or compare trends
+          </span>
+          <span className="font-semibold text-slate-500">
+            {activeSeries.length} active {activeSeries.length === 1 ? "metric" : "metrics"}
+          </span>
+        </div>
       </div>
     </div>
   );

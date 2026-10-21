@@ -1057,27 +1057,84 @@ export function Dashboard({
             className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all flex flex-col h-full overflow-hidden"
             styles={{ body: { padding: "0px", flex: 1, display: "flex", flexDirection: "column" } }}
           >
-            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white">
-              <div>
-                <h2 className="text-base font-bold text-slate-950">
-                  {activeChart === "reach" ? "Daily Reach Performance" : "Automated Messages Over Time"}
-                </h2>
-                <p className="text-xs font-normal text-slate-500 mt-0.5">
+            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex items-center justify-between gap-3 bg-white">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base sm:text-[17px] font-bold text-slate-950 tracking-tight">
+                    {activeChart === "reach" ? "Daily Reach Performance" : "Automated Messages Over Time"}
+                  </h2>
+                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-[#e2e2fc]/60 text-[#3730a3] text-[10px] font-bold uppercase tracking-wider">
+                    {activeChart === "reach" ? "Reach" : "Automation"}
+                  </span>
+                </div>
+                <p className="hidden sm:block text-xs font-normal text-slate-500 mt-1 max-w-md truncate">
                   {activeChart === "reach"
                     ? `Organic account reach trend over the last ${days} days`
                     : `Comment-to-DM triggers, dispatches, and replies over ${days} days`}
                 </p>
               </div>
-              <Segmented
-                size="small"
-                value={activeChart}
-                onChange={(val) => setActiveChart(val as "reach" | "automations")}
-                options={[
-                  { label: "Daily Reach", value: "reach", icon: <LineChartOutlined /> },
-                  { label: "Automations", value: "automations", icon: <ThunderboltOutlined /> },
-                ]}
-                className="!rounded-xl !bg-slate-100 !p-1 text-xs self-start sm:self-auto shrink-0 font-semibold"
-              />
+
+              {/* Desktop/Tablet Segmented Switcher (Strictly hidden on mobile) */}
+              <div className="hidden sm:block">
+                <Segmented
+                  size="small"
+                  value={activeChart}
+                  onChange={(val) => setActiveChart(val as "reach" | "automations")}
+                  options={[
+                    {
+                      label: (
+                        <span className="flex items-center justify-center gap-1.5 font-bold text-xs px-2.5 py-0.5">
+                          <LineChartOutlined />
+                          <span>Daily Reach</span>
+                        </span>
+                      ),
+                      value: "reach",
+                    },
+                    {
+                      label: (
+                        <span className="flex items-center justify-center gap-1.5 font-semibold text-xs px-2.5 py-0.5 text-slate-500">
+                          <ThunderboltOutlined />
+                          <span>Automations</span>
+                        </span>
+                      ),
+                      value: "automations",
+                    },
+                  ]}
+                  className="!rounded-xl !bg-[#f1f3f7] !p-1 text-xs shrink-0 shadow-2xs border border-[#e9e9ee]/60"
+                />
+              </div>
+
+              {/* Three dots dropdown placed right side of title at corner (on mobile) */}
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: "reach",
+                      icon: <LineChartOutlined />,
+                      label: <span className="font-medium text-xs">Daily Reach</span>,
+                      className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                    },
+                    {
+                      key: "automations",
+                      icon: <ThunderboltOutlined />,
+                      label: <span className="font-medium text-xs">Automations</span>,
+                      className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                    },
+                  ],
+                  onClick: ({ key }) => setActiveChart(key as "reach" | "automations"),
+                  selectedKeys: [activeChart],
+                }}
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <button
+                  type="button"
+                  aria-label="Chart view options"
+                  className="sm:hidden w-8 h-8 rounded-xl border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                >
+                  <EllipsisOutlined className="text-lg text-slate-800" />
+                </button>
+              </Dropdown>
             </div>
 
             <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
@@ -1086,7 +1143,12 @@ export function Dashboard({
                   <AnalyticsChartSkeleton />
                 ) : (
                   <div className="flex-1 flex flex-col justify-between">
-                    <LineChart data={reachSeries} label="Reach" />
+                    <LineChart
+                      data={reachSeries}
+                      label="Reach"
+                      color="#4f46e5"
+                      ribbonClassName="-mx-5 sm:-mx-6 -mt-5 sm:-mt-6 px-5 sm:px-6 py-2.5 sm:py-3 border-b border-[#e9e9ee] mb-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                    />
                     {reachSeries.length === 0 && (
                       <p className="mt-3 text-xs text-slate-400 text-center">
                         Instagram reach insights are populated as soon as post impressions occur.
@@ -1104,13 +1166,13 @@ export function Dashboard({
                       {
                         key: "comments",
                         label: "Comments",
-                        color: "#2563eb",
+                        color: "#0071e3",
                         data: data.series.map((s) => s.comments),
                       },
                       {
                         key: "dmsSent",
-                        label: "Comment DMs Sent",
-                        color: "#60a5fa",
+                        label: "Comment DMs",
+                        color: "#06b6d4",
                         data: data.series.map((s) => s.dmsSent),
                       },
                       {
@@ -1122,7 +1184,7 @@ export function Dashboard({
                       {
                         key: "conversions",
                         label: "Converted",
-                        color: "#9333ea",
+                        color: "#8b5cf6",
                         data: data.series.map((s) => s.conversions),
                       },
                     ]}
