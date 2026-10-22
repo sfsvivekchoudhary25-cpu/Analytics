@@ -89,8 +89,9 @@ export default function AppDashboard({
       if (newTab === "comments") {
         targetPath = commentsTab === "automation" ? "/automations" : "/comments";
       }
-      if (window.location.pathname !== targetPath) {
+      if (window.location.pathname !== targetPath || (newTab === "dashboard" && window.location.search)) {
         window.history.pushState(null, "", targetPath);
+        window.dispatchEvent(new PopStateEvent("popstate"));
       }
     }
   }, [commentsTab]);

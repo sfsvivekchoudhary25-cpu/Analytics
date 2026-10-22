@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Card,
   Button,
@@ -362,7 +362,111 @@ export function Dashboard({
   const [insights, setInsights] = useState<InsightsOverview | null>(null);
   const [insightsError, setInsightsError] = useState<string | null>(null);
   const [dashError, setDashError] = useState<string | null>(null);
-  const [selectedPost, setSelectedPost] = useState<Media | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Media | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const postId = q.get("post") || q.get("postId");
+      if (!postId) return null;
+      const cached = sessionStorage.getItem("active_post_detail");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.id === postId || !postId)) {
+          return parsed;
+        }
+      }
+      return {
+        id: postId,
+        caption: "",
+        media_type: "IMAGE",
+        media_url: "",
+        thumbnail_url: "",
+        permalink: "",
+        timestamp: new Date().toISOString(),
+        like_count: 0,
+        comments_count: 0,
+      } as Media;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleSelectPost = useCallback((post: Media) => {
+    setSelectedPost(post);
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.setItem("active_post_detail", JSON.stringify(post));
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.set("post", post.id);
+      window.history.pushState({ postId: post.id }, "", url.toString());
+    }
+  }, []);
+
+  const handleClosePost = useCallback(() => {
+    setSelectedPost(null);
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem("active_post_detail");
+      } catch {}
+      const url = new URL(window.location.href);
+      url.searchParams.delete("post");
+      url.searchParams.delete("postId");
+      url.searchParams.delete("subtab");
+      window.history.pushState({}, "", url.pathname + (url.search ? url.search : ""));
+    }
+  }, []);
+
+  // Listen to browser Back / Forward buttons (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const q = new URLSearchParams(window.location.search);
+      const postId = q.get("post") || q.get("postId");
+      if (!postId) {
+        setSelectedPost(null);
+        try {
+          sessionStorage.removeItem("active_post_detail");
+        } catch {}
+      } else {
+        try {
+          const cached = sessionStorage.getItem("active_post_detail");
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.id === postId) {
+              setSelectedPost(parsed);
+              return;
+            }
+          }
+        } catch {}
+        setSelectedPost({
+          id: postId,
+          caption: "",
+          media_type: "IMAGE",
+          media_url: "",
+          thumbnail_url: "",
+          permalink: "",
+          timestamp: new Date().toISOString(),
+          like_count: 0,
+          comments_count: 0,
+        } as Media);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  // Enrich selectedPost when live insights media finishes loading
+  useEffect(() => {
+    if (!selectedPost || !insights?.media) return;
+    const found = insights.media.find((p) => p.id === selectedPost.id);
+    if (found && (!selectedPost.thumbnail_url || !selectedPost.permalink || !selectedPost.caption)) {
+      setSelectedPost((prev) => (prev ? { ...prev, ...found } : found));
+      try {
+        sessionStorage.setItem("active_post_detail", JSON.stringify(found));
+      } catch {}
+    }
+  }, [insights?.media, selectedPost?.id]);
 
   const [dashLoading, setDashLoading] = useState(true);
   const [insightsLoading, setInsightsLoading] = useState(true);
@@ -474,7 +578,7 @@ export function Dashboard({
         likeCount={selectedPost.like_count}
         commentsCount={selectedPost.comments_count}
         mediaType={selectedPost.media_type}
-        onBack={() => setSelectedPost(null)}
+        onBack={handleClosePost}
         onOpenMessages={onOpenMessages}
       />
     );
@@ -1244,7 +1348,7 @@ export function Dashboard({
                 {posts.slice(0, 4).map((p) => (
                   <div
                     key={p.id}
-                    onClick={() => setSelectedPost(p)}
+                    onClick={() => handleSelectPost(p)}
                     className="group flex flex-col overflow-hidden rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
                   >
                     <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
@@ -1444,7 +1548,7 @@ export function Dashboard({
                       key={p.id}
                       onClick={() => {
                         setShowAllPostsModal(false);
-                        setSelectedPost(p);
+                        handleSelectPost(p);
                       }}
                       className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-sm cursor-pointer hover:-translate-y-0.5 transition-all"
                     >

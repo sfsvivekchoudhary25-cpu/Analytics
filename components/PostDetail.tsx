@@ -562,7 +562,28 @@ export function PostDetail({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState<number>(30);
-  const [activeTab, setActiveTab] = useState<"overview" | "activity" | "ai_analytics">("overview");
+  const [activeTab, setActiveTabState] = useState<"overview" | "activity" | "ai_analytics">(() => {
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search);
+      const sub = q.get("subtab");
+      if (sub === "activity" || sub === "automations" || sub === "comments") return "activity";
+      if (sub === "ai_analytics" || sub === "ai") return "ai_analytics";
+    }
+    return "overview";
+  });
+
+  const setActiveTab = useCallback((nextTab: "overview" | "activity" | "ai_analytics") => {
+    setActiveTabState(nextTab);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (nextTab === "overview") {
+        url.searchParams.delete("subtab");
+      } else {
+        url.searchParams.set("subtab", nextTab);
+      }
+      window.history.replaceState(null, "", url.toString());
+    }
+  }, []);
   const [activitySubTab, setActivitySubTab] = useState<"all" | "comments" | "automations">("all");
   const [chartView, setChartView] = useState<"engagement" | "comments" | "dms" | "replies">("engagement");
   const [rightTab, setRightTab] = useState<"virality" | "funnel" | "replyMethods">("virality");
@@ -1593,8 +1614,11 @@ export function PostDetail({
                     key={key}
                     type="button"
                     onClick={() => setActiveTab(key as any)}
-                    style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
-                    className={`inline-flex items-center justify-center px-4 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
+                    style={{
+                      padding: "5px 10px",
+                      ...(isActive ? { backgroundColor: "#000000", color: "#ffffff" } : {}),
+                    }}
+                    className={`inline-flex items-center justify-center rounded-full text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
                       isActive
                         ? "!bg-black !text-white font-bold shadow-xs"
                         : "text-slate-600 hover:text-slate-950 font-medium hover:bg-white/70"
