@@ -1514,25 +1514,27 @@ export function Dashboard({
           className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all overflow-hidden"
           styles={{ body: { padding: "0px" } }}
         >
-          {/* Responsive Header: neatly stacks on mobile without colliding with the button */}
-          <div className="p-4 sm:p-6 border-b border-[#e9e9ee] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          {/* Responsive Header: clean and uncluttered on mobile, detailed on desktop */}
+          <div className="p-4 sm:p-6 sm:border-b sm:border-[#e9e9ee] flex items-center justify-between gap-3 pb-2 sm:pb-6">
             <div>
-              <h2 className="text-base font-bold text-slate-950">Recent Instagram DMs</h2>
-              <p className="text-xs font-normal text-slate-500 mt-0.5">
+              <h2 className="text-base sm:text-lg font-bold text-slate-950">Recent Instagram DMs</h2>
+              <p className="hidden sm:block text-xs font-normal text-slate-500 mt-0.5">
                 Every DM sent from any source (Comment-to-DM, AI replies, keywords)
               </p>
             </div>
             {onOpenAutomations && (
-              <Button
-                onClick={onOpenAutomations}
-                className="self-start sm:self-auto !rounded-full !bg-black hover:!bg-neutral-800 !px-4 !py-1.5 !text-xs !font-bold !text-white !border-0 shadow-xs hover:scale-105 active:scale-95 transition-all"
-              >
-                View All Automations
-              </Button>
+              <div className="hidden sm:block">
+                <Button
+                  onClick={onOpenAutomations}
+                  className="!rounded-full !bg-black hover:!bg-neutral-800 !px-4 !py-1.5 !text-xs !font-bold !text-white !border-0 shadow-xs hover:scale-105 active:scale-95 transition-all"
+                >
+                  View All Automations
+                </Button>
+              </div>
             )}
           </div>
 
-          <div className="p-3.5 sm:p-6">
+          <div className="p-0 sm:p-6 sm:pt-6">
             {dashLoading ? (
               <RecentDmsTableSkeleton />
             ) : !data || data.recentDms.length === 0 ? (
@@ -1546,17 +1548,17 @@ export function Dashboard({
               />
             ) : (
               <>
-                {/* Mobile View: Dedicated cards in a smooth scrollable container */}
-                <div className="block md:hidden max-h-[440px] overflow-y-auto space-y-3 pr-1.5 custom-scrollbar overscroll-contain">
+                {/* Mobile View: Dedicated cards matching screenshot */}
+                <div className="block md:hidden max-h-[460px] overflow-y-auto space-y-3 p-0 custom-scrollbar overscroll-contain">
                   {data.recentDms.map((item, index) => (
                     <div
                       key={`${item.username}-${item.time}-${index}`}
-                      className="rounded-2xl border border-[#e9e9ee] bg-white p-3.5 shadow-2xs hover:border-black/20 transition-all space-y-2.5"
+                      className="rounded-[20px] border border-[#e9e9ee] bg-white p-3.5 sm:p-4 shadow-2xs hover:border-black/20 transition-all space-y-3"
                     >
                       {/* Top: Avatar, Username, Time, and Actions */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white shadow-xs">
+                          <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white shadow-xs">
                             {item.username ? item.username.charAt(0).toUpperCase() : "?"}
                           </span>
                           <div className="min-w-0">
@@ -1564,7 +1566,7 @@ export function Dashboard({
                               href={`https://instagram.com/${item.username}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="font-bold text-xs text-blue-600 hover:text-blue-700 hover:underline truncate block"
+                              className="font-bold text-xs sm:text-[13px] text-[#2563eb] hover:text-[#1d4ed8] hover:underline truncate block"
                             >
                               @{item.username || "unknown"}
                             </a>
@@ -1572,7 +1574,7 @@ export function Dashboard({
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-[11px] font-medium text-slate-400 whitespace-nowrap">
+                          <span className="text-xs font-normal text-slate-400 whitespace-nowrap">
                             {when(item.time)}
                           </span>
                           <Dropdown
@@ -1606,52 +1608,61 @@ export function Dashboard({
                             trigger={["click"]}
                             placement="bottomRight"
                           >
-                            <Button
-                              type="text"
-                              shape="circle"
-                              icon={<EllipsisOutlined className="text-slate-400 hover:text-slate-700" />}
-                              size="small"
-                            />
+                            <button
+                              type="button"
+                              className="text-slate-400 hover:text-slate-600 transition-colors p-1 leading-none rounded-full cursor-pointer"
+                              aria-label="Actions"
+                            >
+                              <EllipsisOutlined className="text-sm" />
+                            </button>
                           </Dropdown>
                         </div>
                       </div>
 
-                      {/* Message excerpt */}
+                      {/* Message excerpt bubble */}
                       {item.message ? (
-                        <div className="text-xs text-slate-700 bg-slate-50/90 rounded-xl p-2.5 border border-slate-100/90 leading-relaxed break-words line-clamp-3">
+                        <div className="text-xs sm:text-[13px] text-slate-700 bg-slate-50 rounded-xl px-3.5 py-2.5 border border-slate-100/70 leading-relaxed break-words line-clamp-3">
                           {item.message}
                         </div>
                       ) : null}
 
-                      {/* Bottom pills: Type + Status */}
-                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                        <div className="flex items-center gap-1.5">
-                          <Tag
-                            color={DM_TYPE_COLORS[item.type] || "default"}
-                            className="!rounded-full !m-0 px-2.5 py-0.5 text-[11px] font-semibold"
+                      {/* Bottom row: Type Pill + Dot Status (borderless) */}
+                      <div className="flex items-center justify-between gap-2 pt-0.5">
+                        <div className="flex items-center">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              item.type === "AI DM"
+                                ? "bg-[#FCEEF4] text-[#db2777]"
+                                : item.type === "Comment DM"
+                                ? "bg-[#f3e8ff] text-[#7e22ce]"
+                                : item.type === "Auto DM"
+                                ? "bg-[#eff6ff] text-[#2563eb]"
+                                : item.type === "System DM"
+                                ? "bg-[#fef9c3] text-[#a16207]"
+                                : "bg-slate-100 text-slate-700"
+                            }`}
                           >
                             {item.type}
-                          </Tag>
+                          </span>
                         </div>
                         <div className="flex items-center">
-                          {item.status === "replied" && (
-                            <Badge
-                              status="success"
-                              text={<span className="text-xs font-semibold text-emerald-700">Replied</span>}
-                            />
-                          )}
                           {item.status === "sent" && (
-                            <Badge
-                              status="processing"
-                              color="#2563eb"
-                              text={<span className="text-xs font-semibold text-blue-700">Sent</span>}
-                            />
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                              <span>Sent</span>
+                            </div>
+                          )}
+                          {item.status === "replied" && (
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                              <span>Replied</span>
+                            </div>
                           )}
                           {item.status === "failed" && (
-                            <Badge
-                              status="error"
-                              text={<span className="text-xs font-semibold text-rose-700">Failed</span>}
-                            />
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
+                              <span>Failed</span>
+                            </div>
                           )}
                         </div>
                       </div>
