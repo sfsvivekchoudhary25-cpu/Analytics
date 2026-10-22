@@ -80,38 +80,40 @@ export function EngagementBarChart({
   days = 7,
   loading = false,
 }: EngagementBarChartProps) {
+  const THEME_COLOR = "#5c67f5";
+
   const engagementItems = [
     {
       key: "likes",
       label: "Likes",
       value: totals.likes ?? 0,
-      fill: "#f43f5e",
-      badgeBg: "bg-rose-50 border-rose-200/60",
-      icon: <HeartOutlined className="text-sm text-rose-500" />,
+      fill: THEME_COLOR,
+      badgeBg: "bg-[#e2e2fc]/60 border-[#e2e2fc]",
+      icon: <HeartOutlined className="text-sm text-[#4f46e5]" />,
     },
     {
       key: "comments",
       label: "Comments",
       value: totals.comments ?? 0,
-      fill: "#3b82f6",
-      badgeBg: "bg-blue-50 border-blue-200/60",
-      icon: <CommentOutlined className="text-sm text-blue-500" />,
+      fill: THEME_COLOR,
+      badgeBg: "bg-[#e2e2fc]/60 border-[#e2e2fc]",
+      icon: <CommentOutlined className="text-sm text-[#4f46e5]" />,
     },
     {
       key: "shares",
       label: "Shares",
       value: totals.shares ?? 0,
-      fill: "#f59e0b",
-      badgeBg: "bg-amber-50 border-amber-200/60",
-      icon: <ShareAltOutlined className="text-sm text-amber-500" />,
+      fill: THEME_COLOR,
+      badgeBg: "bg-[#e2e2fc]/60 border-[#e2e2fc]",
+      icon: <ShareAltOutlined className="text-sm text-[#4f46e5]" />,
     },
     {
       key: "saves",
       label: "Saves",
       value: totals.saves ?? 0,
-      fill: "#10b981",
-      badgeBg: "bg-emerald-50 border-emerald-200/60",
-      icon: <BookOutlined className="text-sm text-emerald-500" />,
+      fill: THEME_COLOR,
+      badgeBg: "bg-[#e2e2fc]/60 border-[#e2e2fc]",
+      icon: <BookOutlined className="text-sm text-[#4f46e5]" />,
     },
   ];
 
@@ -139,22 +141,23 @@ export function EngagementBarChart({
   const chartConfig = {
     value: {
       label: "Interactions",
+      color: THEME_COLOR,
     },
     likes: {
       label: "Likes",
-      color: "#f43f5e",
+      color: THEME_COLOR,
     },
     comments: {
       label: "Comments",
-      color: "#3b82f6",
+      color: THEME_COLOR,
     },
     shares: {
       label: "Shares",
-      color: "#f59e0b",
+      color: THEME_COLOR,
     },
     saves: {
       label: "Saves",
-      color: "#10b981",
+      color: THEME_COLOR,
     },
   } satisfies ChartConfig;
 

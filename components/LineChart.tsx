@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useId } from "react";
+import React, { useId } from "react";
 import { TrendingUp } from "lucide-react";
 import {
   Bar,
@@ -12,7 +12,6 @@ import {
   Area,
   AreaChart,
 } from "recharts";
-import { Segmented } from "antd";
 
 import {
   Card,
@@ -215,7 +214,6 @@ export function LineChart({
   showStats?: boolean;
   ribbonClassName?: string;
 }) {
-  const [mode, setMode] = useState<"bar" | "table">("bar");
   const chartId = useId().replace(/:/g, "");
 
   const chartData =
@@ -268,13 +266,13 @@ export function LineChart({
   return (
     <div className="w-full flex flex-col justify-between h-full">
       {/* ── Soft Pastel Minimal Stats Ribbon ─────────────────── */}
-      <div
-        className={
-          ribbonClassName ||
-          "mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#e9e9ee]/80 pb-3"
-        }
-      >
-        {showStats ? (
+      {showStats && (
+        <div
+          className={
+            ribbonClassName ||
+            "mb-3 sm:mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-[#e9e9ee]/80 pb-3"
+          }
+        >
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden py-0.5">
             {/* Total Metric Pill (Soft Neutral Memo) */}
             <div className="flex items-center gap-1.5 shrink-0 rounded-full bg-[#f1f3f7] px-3 py-1 border border-[#e9e9ee]/70 shadow-2xs">
@@ -299,81 +297,11 @@ export function LineChart({
               </div>
             )}
           </div>
-        ) : (
-          <div />
-        )}
-
-        {/* Desktop-only view mode toggle (Table / Bar) */}
-        <div className="hidden sm:block">
-          <Segmented
-            size="small"
-            value={mode}
-            onChange={(val) => setMode(val as "bar" | "table")}
-            options={[
-              {
-                label: <span className="font-semibold text-xs px-1">Chart</span>,
-                value: "bar",
-              },
-              {
-                label: <span className="font-semibold text-xs px-1">Table</span>,
-                value: "table",
-              },
-            ]}
-            className="!rounded-xl !bg-slate-100/90 !p-1 text-xs shadow-2xs font-semibold"
-          />
         </div>
-      </div>
+      )}
 
-      {/* ── Main View: Shadcn Bar Chart with LabelList or Table ────────────────── */}
-      {mode === "table" ? (
-        <div className="max-h-64 overflow-y-auto rounded-2xl border border-[#e9e9ee] shadow-2xs bg-white">
-          <table className="w-full text-xs">
-            <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm text-left font-semibold text-slate-600 border-b border-[#e9e9ee]">
-              <tr>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3 text-right">{label}</th>
-                <th className="px-4 py-3 text-right">% of Total</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 tabular-nums">
-              {chartData.map((d: any) => {
-                const pct = totalValue > 0 ? ((d.desktop / totalValue) * 100).toFixed(0) : "0";
-                const isNonZero = d.desktop > 0;
-                return (
-                  <tr
-                    key={d.date}
-                    className={`transition-colors hover:bg-slate-50/80 ${
-                      isNonZero ? "bg-[#e2e2fc]/20 font-medium" : ""
-                    }`}
-                  >
-                    <td className="px-4 py-2.5 text-slate-800">{d.fullDate || d.month}</td>
-                    <td className="px-4 py-2.5 text-right">
-                      {isNonZero ? (
-                        <span className="inline-flex items-center gap-1.5 font-bold text-[#5c67f5]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#5c67f5]" />
-                          {fmtNum(d.desktop)}
-                        </span>
-                      ) : (
-                        <span className="text-slate-400">0</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-right text-slate-500 font-semibold">{pct}%</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-            <tfoot className="sticky bottom-0 bg-slate-50 font-bold text-slate-900 border-t border-[#e9e9ee]">
-              <tr>
-                <td className="px-4 py-3">Total</td>
-                <td className="px-4 py-3 text-right text-[#5c67f5] font-black">{fmtNum(totalValue)}</td>
-                <td className="px-4 py-3 text-right">100%</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      ) : (
-        /* ── Bar Chart with LabelList matching the user's mobile screenshot ─────── */
-        <div className="w-full relative select-none">
+      {/* ── Main View: Shadcn Bar Chart with LabelList ────────────────── */}
+      <div className="w-full relative select-none">
           <ChartContainer
             config={chartConfig}
             className="aspect-auto h-[230px] sm:h-[260px] w-full"
@@ -456,7 +384,6 @@ export function LineChart({
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
+      </div>
+    );
+  }

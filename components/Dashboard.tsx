@@ -44,6 +44,8 @@ import {
   RightOutlined,
   SearchOutlined,
   CloseOutlined,
+  TeamOutlined,
+  CompassOutlined,
 } from "@ant-design/icons";
 import { api } from "@/lib/api";
 import { LineChart, Point } from "./LineChart";
@@ -273,7 +275,7 @@ function PostsShowcaseSkeleton() {
           key={i}
           className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs"
         >
-          <div className="relative aspect-square w-full bg-slate-100 skeleton-pulse" />
+          <div className="relative aspect-video sm:aspect-square w-full bg-slate-100 skeleton-pulse" />
           <div className="flex flex-1 flex-col p-4 space-y-3">
             <div className="flex items-center justify-between">
               <Skeleton.Input active size="small" style={{ width: 60, height: 12 }} />
@@ -426,6 +428,12 @@ export function Dashboard({
   // Rates calculation for KPI cards
   const engagementRate = totals.reach ? Math.round(((totals.total_interactions ?? 0) / totals.reach) * 1000) / 10 : null;
   const saveRate = totals.reach ? Math.round(((totals.saves ?? 0) / totals.reach) * 1000) / 10 : null;
+
+  // Followers calculation (Current vs Past)
+  const followerSeries = insights?.series?.followers ?? [];
+  const netFollowers = followerSeries.reduce((acc, p) => acc + (p.value ?? 0), 0);
+  const currentFollowers = profile?.followers_count ?? 0;
+  const pastFollowers = Math.max(0, currentFollowers - netFollowers);
 
   // Posts sorting
   const score = (m: Media) => (m.like_count ?? 0) + (m.comments_count ?? 0);
@@ -801,7 +809,7 @@ export function Dashboard({
             <span className="text-xs font-semibold text-slate-500">Past {days} days</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
             {/* KPI 1: Total Reach (Soft Periwinkle #e2e2fc - Borderless) */}
             {insightsLoading ? (
               <KpiCardSkeleton />
@@ -911,6 +919,66 @@ export function Dashboard({
                 </div>
               </div>
             ) : null}
+
+            {/* KPI 5: Followers - Current vs Past (Soft Sky #e0f2fe - Borderless) */}
+            {insightsLoading ? (
+              <KpiCardSkeleton />
+            ) : (
+              <div
+                style={{ backgroundColor: "#e0f2fe" }}
+                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+              >
+                <div className="flex items-start justify-between gap-1.5">
+                  <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
+                    {compact(currentFollowers)}
+                  </span>
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <TeamOutlined className="text-xs sm:text-sm font-bold" />
+                  </div>
+                </div>
+                <div className="mt-3 sm:mt-4">
+                  <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Followers</div>
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+                    <span className="inline-flex items-center font-bold text-slate-950">
+                      {netFollowers >= 0 ? `+${netFollowers}` : netFollowers}
+                    </span>
+                    <span className="truncate">vs {compact(pastFollowers)} past</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* KPI 6: Profile Visits (Soft Mint #e8f5e9 - Borderless) */}
+            {insightsLoading ? (
+              <KpiCardSkeleton />
+            ) : (
+              <div
+                style={{ backgroundColor: "#e8f5e9" }}
+                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+              >
+                <div className="flex items-start justify-between gap-1.5">
+                  <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
+                    {compact(totals.profile_views ?? 0)}
+                  </span>
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <CompassOutlined className="text-xs sm:text-sm font-bold" />
+                  </div>
+                </div>
+                <div className="mt-3 sm:mt-4">
+                  <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Profile Visits</div>
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+                    {totals.reach && totals.profile_views ? (
+                      <span className="inline-flex items-center font-bold text-slate-950">
+                        {Math.round(((totals.profile_views ?? 0) / totals.reach) * 1000) / 10}%
+                      </span>
+                    ) : null}
+                    <span className="truncate">
+                      {totals.reach && totals.profile_views ? "of reach" : `Past ${days} days`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -994,7 +1062,7 @@ export function Dashboard({
                 <button
                   type="button"
                   aria-label="Chart view options"
-                  className="sm:hidden w-8 h-8 rounded-xl border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="sm:hidden w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                 >
                   <EllipsisOutlined className="text-lg text-slate-800" />
                 </button>
@@ -1069,121 +1137,190 @@ export function Dashboard({
         {/* ── 4. Recent & Top Instagram Posts Showcase (Soft Pastel Minimal) ────────────────── */}
         {insightsLoading ? (
           <Card
-            className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs"
-            styles={{ body: { padding: "24px" } }}
+            className="!rounded-[26px] !border-none sm:!border sm:!border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs"
+            styles={{ header: { paddingLeft: "5px" }, body: { padding: "0px" } }}
             title={
               <div>
-                <h2 className="text-base font-bold text-slate-950">Instagram Posts & Media</h2>
+                <h2 style={{ fontSize: "100%" }} className="text-base font-bold text-slate-950">Instagram Posts & Media</h2>
                 <p className="text-xs font-normal text-slate-500 mt-0.5">
                   Recent posts and engagement metrics on your connected account
                 </p>
               </div>
             }
           >
-            <PostsShowcaseSkeleton />
+            <div className="p-0 sm:p-6">
+              <PostsShowcaseSkeleton />
+            </div>
           </Card>
         ) : posts.length > 0 ? (
           <Card
-            className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all"
-            styles={{ body: { padding: "24px" } }}
+            className="!rounded-[26px] !border-none sm:!border sm:!border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all"
+            styles={{ header: { paddingLeft: "5px" }, body: { padding: "0px" } }}
             title={
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-1">
-                <div>
-                  <h2 className="text-base font-bold text-slate-950">Instagram Posts & Media</h2>
-                  <p className="text-xs font-normal text-slate-500 mt-0.5">
+              <div className="flex items-center justify-between gap-3 py-1">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2
+                      style={{ fontSize: "100%" }}
+                      className="text-sm sm:text-base font-bold text-slate-950 truncate"
+                    >
+                      Instagram Posts & Media
+                    </h2>
+                    <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-[#e2e2fc]/60 text-[#3730a3] text-[10px] font-bold uppercase tracking-wider">
+                      {postSort === "recent" ? "Recent" : "Top"}
+                    </span>
+                  </div>
+                  <p className="hidden sm:block text-xs font-normal text-slate-500 mt-0.5 truncate">
                     Recent posts and engagement metrics on your connected account
                   </p>
                 </div>
-                <Segmented
-                  size="small"
-                  value={postSort}
-                  onChange={(val) => setPostSort(val as "recent" | "top")}
-                  options={[
-                    { label: "Most Recent", value: "recent" },
-                    { label: "Top Engaged", value: "top" },
-                  ]}
-                  className="!rounded-xl !bg-slate-100 !p-1 text-xs self-start sm:self-auto font-semibold"
-                />
+
+                {/* Desktop/Tablet Segmented Switcher (Strictly hidden on mobile) */}
+                <div className="hidden sm:block">
+                  <Segmented
+                    size="small"
+                    value={postSort}
+                    onChange={(val) => setPostSort(val as "recent" | "top")}
+                    options={[
+                      {
+                        label: (
+                          <span className="flex items-center justify-center gap-1.5 font-bold text-xs px-2.5 py-0.5">
+                            <CalendarOutlined />
+                            <span>Most Recent</span>
+                          </span>
+                        ),
+                        value: "recent",
+                      },
+                      {
+                        label: (
+                          <span className="flex items-center justify-center gap-1.5 font-semibold text-xs px-2.5 py-0.5 text-slate-600">
+                            <HeartOutlined />
+                            <span>Top Engaged</span>
+                          </span>
+                        ),
+                        value: "top",
+                      },
+                    ]}
+                    className="!rounded-xl !bg-[#f1f3f7] !p-1 text-xs shrink-0 shadow-2xs border border-[#e9e9ee]/60"
+                  />
+                </div>
+
+                {/* Three dots dropdown placed right side of title at corner (on mobile) */}
+                <Dropdown
+                  menu={{
+                    items: [
+                      {
+                        key: "recent",
+                        icon: <CalendarOutlined />,
+                        label: <span className="font-medium text-xs">Most Recent</span>,
+                        className: postSort === "recent" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                      },
+                      {
+                        key: "top",
+                        icon: <HeartOutlined />,
+                        label: <span className="font-medium text-xs">Top Engaged</span>,
+                        className: postSort === "top" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                      },
+                    ],
+                    onClick: ({ key }) => setPostSort(key as "recent" | "top"),
+                    selectedKeys: [postSort],
+                  }}
+                  trigger={["click"]}
+                  placement="bottomRight"
+                >
+                  <button
+                    type="button"
+                    aria-label="Sort posts options"
+                    className="sm:hidden w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  >
+                    <EllipsisOutlined className="text-lg text-slate-800" />
+                  </button>
+                </Dropdown>
               </div>
             }
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-              {posts.slice(0, 4).map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => setSelectedPost(p)}
-                  className="group flex flex-col overflow-hidden rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
-                >
-                  <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
-                    <PostMediaThumbnail post={p} />
-                    <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
-                      {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
-                      {p.media_type === "VIDEO" ? "Reel" : p.media_type === "CAROUSEL_ALBUM" ? "Carousel" : "Photo"}
-                    </span>
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                      <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-sm">
-                        <EyeOutlined />
-                        View Analytics
+            <div className="p-0 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+                {posts.slice(0, 4).map((p) => (
+                  <div
+                    key={p.id}
+                    onClick={() => setSelectedPost(p)}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
+                  >
+                    <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
+                      <PostMediaThumbnail post={p} />
+                      <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
+                        {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
+                        {p.media_type === "VIDEO" ? "Reel" : p.media_type === "CAROUSEL_ALBUM" ? "Carousel" : "Photo"}
                       </span>
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                        <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-sm">
+                          <EyeOutlined />
+                          View Analytics
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-1 flex-col justify-between p-4 gap-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs text-slate-500">
-                        <span className="font-semibold text-slate-600">{fmtPostDate(p.timestamp)}</span>
-                        <a
-                          href={p.permalink}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 font-bold text-slate-950 hover:underline"
-                        >
-                          <span>Instagram</span>
-                          <LinkOutlined className="text-[10px]" />
-                        </a>
+                    <div className="flex flex-1 flex-col justify-between p-4 gap-3">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-slate-500">
+                          <span className="font-semibold text-slate-600">{fmtPostDate(p.timestamp)}</span>
+                          <a
+                            href={p.permalink}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                          >
+                            <span>Instagram</span>
+                            <LinkOutlined className="text-[10px]" />
+                          </a>
+                        </div>
+
+                        {p.caption ? (
+                          <p className="line-clamp-2 text-xs text-slate-700 leading-relaxed font-normal">
+                            {p.caption}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-400 italic">No caption</p>
+                        )}
                       </div>
 
-                      {p.caption ? (
-                        <p className="line-clamp-2 text-xs text-slate-700 leading-relaxed font-normal">
-                          {p.caption}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-slate-400 italic">No caption</p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-between border-t border-[#e9e9ee] pt-3 text-xs font-bold">
-                      <span className="flex items-center gap-1.5 rounded-full bg-[#fceef4] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
-                        <HeartOutlined className="text-rose-600" />
-                        <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
-                      </span>
-                      <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
-                        <CommentOutlined className="text-blue-600" />
-                        <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
-                      </span>
+                      <div className="flex items-center justify-between border-t border-[#e9e9ee] pt-3 text-xs font-bold">
+                        <span className="flex items-center gap-1.5 rounded-full bg-[#fceef4] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
+                          <HeartOutlined className="text-rose-600" />
+                          <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
+                        </span>
+                        <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
+                          <CommentOutlined className="text-blue-600" />
+                          <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Bottom Centered "View All" Button Action (Black pill button) */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-[#e9e9ee]">
-              <Button
-                type="primary"
-                size="middle"
-                onClick={() => setShowAllPostsModal(true)}
-                className="!h-10 !rounded-full !bg-black hover:!bg-neutral-800 !px-6 !text-xs !font-bold !text-white !border-0 shadow-xs hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer transition-all"
-                icon={<AppstoreOutlined className="text-sm" />}
+              {/* Bottom Centered "View All" Button Action (Black pill button) */}
+              <div
+                style={{ border: "none", margin: 0 }}
+                className="flex flex-wrap items-center justify-center gap-3 py-4 border-none m-0"
               >
-                <span>View All Posts</span>
-                <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold text-white">
-                  {posts.length}
-                </span>
-                <RightOutlined className="text-[10px]" />
-              </Button>
+                <Button
+                  type="primary"
+                  size="middle"
+                  onClick={() => setShowAllPostsModal(true)}
+                  className="!h-10 !rounded-full !bg-black hover:!bg-neutral-800 !px-6 !text-xs !font-bold !text-white !border-0 shadow-xs hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer transition-all"
+                  icon={<AppstoreOutlined className="text-sm" />}
+                >
+                  <span>View All Posts</span>
+                  <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-bold text-white">
+                    {posts.length}
+                  </span>
+                  <RightOutlined className="text-[10px]" />
+                </Button>
+              </div>
             </div>
 
             {/* ── Modal: All Instagram Posts & Media (Soft Pastel Minimal) ───────────────────── */}
@@ -1311,7 +1448,7 @@ export function Dashboard({
                       }}
                       className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-sm cursor-pointer hover:-translate-y-0.5 transition-all"
                     >
-                      <div className="relative aspect-square w-full overflow-hidden bg-slate-900">
+                      <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
                         <PostMediaThumbnail post={p} />
                         <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/80 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
                           {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
@@ -1336,7 +1473,7 @@ export function Dashboard({
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 font-bold text-slate-950 hover:underline"
+                              className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
                             >
                               <span>Instagram</span>
                               <LinkOutlined className="text-[10px]" />
