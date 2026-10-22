@@ -1563,54 +1563,30 @@ export function PostDetail({
   }, [aiDiagnosis, data?.topCommenters, data?.comments, data?.dmRules, meta.likes, meta.comments, meta.caption]);
 
   return (
-    <main className="app-shell">
+    <main className="app-shell !p-0 sm:!p-0 lg:!p-[16px_20px_60px]">
       {/* ── Top Hero Header (Soft Pastel Minimal) ────────────────────── */}
-      <div className="relative overflow-hidden rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-4 sm:p-6 shadow-2xs transition-all mb-6">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-[26px] border-0 lg:border lg:border-[#e9e9ee] hover:border-black/30 bg-transparent lg:bg-white p-0 lg:p-6 shadow-none lg:shadow-2xs transition-all mb-4 sm:mb-6">
         {/* Soft pastel ambient background glow */}
-        <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl" />
-        <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl" />
+        <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl hidden lg:block" />
+        <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl hidden lg:block" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5 lg:gap-6">
-          {/* Title, Back Button & Category Pill */}
-          <div className="min-w-0">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={onBack}
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#e9e9ee] hover:border-black/40 text-slate-950 shadow-2xs flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
-                title="Return to posts"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-                  Post Analytics
-                </h1>
-                {/* Header Category Pill */}
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                  </span>
-                  <span>Live Hub</span>
-                </span>
-              </div>
-            </div>
-            <p className="mt-1.5 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed pl-12 sm:pl-13 truncate lg:max-w-xl">
-              {activeTab === "overview" && "High-level performance, reach velocity, and algorithmic audience retention."}
-              {activeTab === "activity" && "Live comment interactions, buyer leads, and automated DM triggers."}
-              {activeTab === "ai_analytics" && "Deep post intelligence audit and conversion momentum recommendations."}
-            </p>
-          </div>
-
-          {/* Navigation Tab Pills & Actions */}
-          <div className="flex items-center gap-2.5 self-start lg:self-auto shrink-0 flex-wrap">
-            <nav className="inline-flex items-center gap-1 rounded-full bg-[#f1f3f7] p-1.5 border border-[#e9e9ee] shadow-2xs">
+        <div className="relative z-10">
+          {/* ── Mobile & Tablet Screen View (< lg) ONLY ── */}
+          <div className="flex lg:hidden items-center gap-2.5 sm:gap-3 w-full">
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-[#e9e9ee] hover:border-black/40 text-slate-950 shadow-2xs flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+              title="Return to posts"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <nav className="inline-flex items-center gap-1 rounded-full bg-[#f1f3f7] p-1 border border-[#e9e9ee] shadow-2xs overflow-x-auto no-scrollbar">
               {[
-                { label: "Overview", fullLabel: "Overview", key: "overview", icon: null },
-                { label: "Comments & Auto", fullLabel: "Comments & Automations", key: "activity", icon: Zap },
-                { label: "AI Analytics", fullLabel: "AI Analytics", key: "ai_analytics", icon: Sparkles },
-              ].map(({ label, fullLabel, key, icon: TabIcon }) => {
+                { label: "Overview", key: "overview" },
+                { label: "Automations", key: "activity" },
+                { label: "AI Analytics", key: "ai_analytics" },
+              ].map(({ label, key }) => {
                 const isActive = activeTab === key;
                 return (
                   <button
@@ -1618,32 +1594,105 @@ export function PostDetail({
                     type="button"
                     onClick={() => setActiveTab(key as any)}
                     style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
-                    className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    className={`inline-flex items-center justify-center px-4 sm:px-5 py-1.5 rounded-full text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
                       isActive
-                        ? "!bg-black !text-white shadow-xs"
-                        : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
+                        ? "!bg-black !text-white font-bold shadow-xs"
+                        : "text-slate-600 hover:text-slate-950 font-medium hover:bg-white/70"
                     }`}
                   >
-                    {TabIcon && <TabIcon size={14} className={isActive ? "text-white" : "text-slate-500"} />}
-                    <span className="hidden sm:inline">{fullLabel || label}</span>
-                    <span className="sm:hidden">{label}</span>
+                    <span>{label}</span>
                   </button>
                 );
               })}
             </nav>
-
             {activeTab === "ai_analytics" && (
               <button
                 type="button"
                 onClick={runAiDiagnosis}
                 disabled={aiDiagnosisLoading}
-                style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white !border-0 text-xs sm:text-sm font-bold shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                className="w-9 h-9 rounded-full bg-black text-white shadow-2xs flex items-center justify-center ml-auto shrink-0 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                title="Re-run AI Audit"
               >
-                <RefreshCw size={13} className={aiDiagnosisLoading ? "animate-spin text-white" : "text-white"} />
-                <span>Re-run Audit</span>
+                <RefreshCw size={14} className={aiDiagnosisLoading ? "animate-spin text-white" : "text-white"} />
               </button>
             )}
+          </div>
+
+          {/* ── Desktop Screen View (lg:) ONLY ── */}
+          <div className="hidden lg:flex lg:items-center lg:justify-between gap-6">
+            {/* Title, Back Button & Category Pill */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="w-10 h-10 rounded-full bg-white border border-[#e9e9ee] hover:border-black/40 text-slate-950 shadow-2xs flex items-center justify-center transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                  title="Return to posts"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
+                    Post Analytics
+                  </h1>
+                  {/* Header Category Pill */}
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                    <span>Live Hub</span>
+                  </span>
+                </div>
+              </div>
+              <p className="mt-1.5 text-xs sm:text-sm text-slate-600 font-medium leading-relaxed pl-13 truncate lg:max-w-xl">
+                {activeTab === "overview" && "High-level performance, reach velocity, and algorithmic audience retention."}
+                {activeTab === "activity" && "Live comment interactions, buyer leads, and automated DM triggers."}
+                {activeTab === "ai_analytics" && "Deep post intelligence audit and conversion momentum recommendations."}
+              </p>
+            </div>
+
+            {/* Navigation Tab Pills & Actions */}
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+              <nav className="inline-flex items-center gap-1 rounded-full bg-[#f1f3f7] p-1.5 border border-[#e9e9ee] shadow-2xs">
+                {[
+                  { label: "Overview", fullLabel: "Overview", key: "overview", icon: null },
+                  { label: "Comments & Auto", fullLabel: "Comments & Automations", key: "activity", icon: Zap },
+                  { label: "AI Analytics", fullLabel: "AI Analytics", key: "ai_analytics", icon: Sparkles },
+                ].map(({ label, fullLabel, key, icon: TabIcon }) => {
+                  const isActive = activeTab === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setActiveTab(key as any)}
+                      style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        isActive
+                          ? "!bg-black !text-white shadow-xs"
+                          : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
+                      }`}
+                    >
+                      {TabIcon && <TabIcon size={14} className={isActive ? "text-white" : "text-slate-500"} />}
+                      <span>{fullLabel || label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {activeTab === "ai_analytics" && (
+                <button
+                  type="button"
+                  onClick={runAiDiagnosis}
+                  disabled={aiDiagnosisLoading}
+                  style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white !border-0 text-sm font-bold shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                >
+                  <RefreshCw size={13} className={aiDiagnosisLoading ? "animate-spin text-white" : "text-white"} />
+                  <span>Re-run Audit</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -1663,12 +1712,12 @@ export function PostDetail({
             <div className="space-y-6">
               {/* ── MOBILE VIEW (< md) ────────────────────────────────────────── */}
               <div className="md:hidden space-y-3.5">
-                {/* Mobile Hero Card (Exact Screenshot Design) */}
-                <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                  {/* Row 1: Media Thumbnail & Published Metadata */}
-                  <div className="flex gap-4 items-start">
+                {/* Mobile Hero Card (Official Soft Pastel Minimal Design System) */}
+                <div className="border-0 shadow-none bg-transparent p-0 space-y-3 sm:space-y-3.5">
+                  {/* Top Row: Thumbnail (left) + Posted On & Caption Box (right) */}
+                  <div className="flex gap-3 sm:gap-3.5 items-stretch">
                     {/* Left: Media Thumbnail */}
-                    <div className="w-28 h-36 rounded-2xl bg-[#1e2538] flex-shrink-0 relative overflow-hidden flex items-center justify-center shadow-xs">
+                    <div className="w-[115px] xs:w-[125px] sm:w-[135px] shrink-0 rounded-2xl bg-[#1e2538] relative overflow-hidden flex items-center justify-center shadow-2xs self-stretch min-h-[125px]">
                       {meta.thumb ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
@@ -1678,19 +1727,19 @@ export function PostDetail({
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                       ) : null}
-                      <div className="absolute inset-0 bg-slate-950/25" />
+                      <div className="absolute inset-0 bg-slate-950/20" />
 
-                      {/* Top-Left Media Badge */}
-                      <div className="absolute top-2.5 left-2.5 z-10">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-md px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                          <Play size={10} className="fill-white" />
+                      {/* Top-Left Media Badge (Soft Pastel Minimal White Pill) */}
+                      <div className="absolute top-2 left-2 z-10">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white text-slate-950 border border-black/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider shadow-2xs">
+                          <Play size={8} className="fill-slate-950 text-slate-950" />
                           <span>{meta.mediaType === "CAROUSEL_ALBUM" ? "CAROUSEL" : meta.mediaType === "IMAGE" ? "PHOTO" : "REEL"}</span>
                         </span>
                       </div>
 
                       {/* Center Circular Play Button */}
-                      <div className="relative z-10 w-11 h-11 rounded-full bg-white/25 backdrop-blur-md flex items-center justify-center text-white border border-white/40 shadow-sm">
-                        <Play size={18} className="fill-white text-white ml-0.5" />
+                      <div className="relative z-10 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-md">
+                        <Play size={16} className="fill-white text-white ml-0.5" />
                       </div>
 
                       {meta.permalink && (
@@ -1705,157 +1754,151 @@ export function PostDetail({
                       )}
                     </div>
 
-                    {/* Right: Published info & Action */}
-                    <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5">
-                      <div>
-                        {/* Published status badge */}
-                        <div className="flex items-center">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eefaf4] border border-[#d2f3e3] px-2.5 py-0.5 text-xs font-semibold text-[#0d7a53]">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#0d7a53]" />
-                            Published
-                          </span>
-                        </div>
-
-                        {/* Posted On date & time */}
-                        <div className="mt-2.5">
-                          <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
-                            POSTED ON
-                          </span>
-                          <div className="text-xl font-bold text-slate-900 leading-tight mt-0.5">
-                            {formattedPostDate.date}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-slate-500 font-medium mt-1">
-                            <Clock size={12} className="text-slate-400" />
-                            <span>{formattedPostDate.time}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* View on Instagram button */}
-                      {meta.permalink ? (
-                        <a
-                          href={meta.permalink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl !bg-[#161c2d] hover:!bg-[#232b42] !text-white text-xs font-semibold transition-all shadow-xs w-fit !no-underline"
-                        >
-                          <span className="!text-white font-medium">View on Instagram</span>
-                          <ArrowUpRight size={13} className="!text-slate-300" />
-                        </a>
-                      ) : (
-                        <button
-                          type="button"
-                          className="mt-3 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl !bg-[#161c2d] hover:!bg-[#232b42] !text-white text-xs font-semibold transition-all shadow-xs w-fit"
-                        >
-                          <span className="!text-white font-medium">View on Instagram</span>
-                          <ArrowUpRight size={13} className="!text-slate-300" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Row 2: Caption Card */}
-                  <div className="rounded-2xl border border-indigo-100/70 bg-[#fafbfe] p-3.5 mt-3.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] shadow-2xs">
-                          <Menu size={11} />
+                    {/* Right: Posted On & Caption Box */}
+                    <div className="flex-1 min-w-0 flex flex-col justify-between">
+                      {/* Posted On date & time header */}
+                      <div className="flex items-center gap-1.5 flex-wrap pb-1.5">
+                        <span className="text-[11px] font-black tracking-wider text-slate-500 uppercase">
+                          POSTED ON:
                         </span>
-                        <span className="text-xs font-bold text-indigo-600 tracking-wider">CAPTION</span>
+                        <span className="text-xs sm:text-sm font-black text-slate-950">
+                          {formattedPostDate.date}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-slate-500 text-[11px] font-semibold ml-0.5">
+                          <Clock size={11} className="text-slate-500" />
+                          <span>{formattedPostDate.time}</span>
+                        </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyCaption}
-                        className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
-                        title="Copy caption"
+
+                      {/* Caption Card (Soft Neutral Memo #f1f3f7, BORDERLESS) */}
+                      <div
+                        style={{ backgroundColor: "#f1f3f7" }}
+                        className="rounded-[20px] p-2.5 sm:p-3 flex flex-col justify-between flex-1 border-0 shadow-2xs"
                       >
-                        {copiedCaption ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                      </button>
-                    </div>
+                        <div className="flex items-center justify-between">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                            <Menu size={11} className="text-slate-950" />
+                            <span>CAPTION</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleCopyCaption}
+                            className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            title="Copy caption"
+                            aria-label="Copy caption"
+                          >
+                            {copiedCaption ? <Check size={12} className="text-slate-950" /> : <Copy size={12} className="text-slate-950" />}
+                          </button>
+                        </div>
 
-                    <div className="mt-2">
-                      <h3 className="text-sm font-bold text-slate-800 leading-snug">
-                        {parsedCaption.title}
-                      </h3>
-                      {expandedCaption && parsedCaption.rest && (
-                        <p className="mt-2 text-xs text-slate-600 whitespace-pre-wrap leading-relaxed">
-                          {parsedCaption.rest}
-                        </p>
-                      )}
-                    </div>
+                        <div className="mt-1.5">
+                          <h3 className="text-xs font-bold text-slate-950 leading-snug line-clamp-2">
+                            {parsedCaption.title}
+                          </h3>
+                          {expandedCaption && parsedCaption.rest && (
+                            <p className="mt-1.5 text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed">
+                              {parsedCaption.rest}
+                            </p>
+                          )}
+                        </div>
 
-                    <div className="border-t border-dashed border-slate-200 my-2.5" />
+                        <div className="border-t border-[#e9e9ee] my-2" />
 
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-3 text-slate-500 font-medium">
-                        <span>{captionStats.hashtags} hashtags</span>
-                        <span>{captionStats.mentions} mentions</span>
+                        <div className="flex items-center justify-between text-[11px]">
+                          <div className="flex items-center gap-2 text-slate-600 font-semibold">
+                            <span><strong className="text-slate-950">{captionStats.hashtags}</strong> hashtags</span>
+                            <span><strong className="text-slate-950">{captionStats.mentions}</strong> mentions</span>
+                          </div>
+                          {parsedCaption.hasMore && (
+                            <button
+                              type="button"
+                              onClick={() => setExpandedCaption(!expandedCaption)}
+                              className="font-bold text-slate-950 hover:underline flex items-center gap-0.5 cursor-pointer ml-auto"
+                            >
+                              <span>{expandedCaption ? "Show less" : "Show more"}</span>
+                              <ChevronDown size={12} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      {parsedCaption.hasMore && (
-                        <button
-                          type="button"
-                          onClick={() => setExpandedCaption(!expandedCaption)}
-                          className="font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5 cursor-pointer"
-                        >
-                          <span>{expandedCaption ? "Show less" : "Show more"}</span>
-                          <ChevronDown size={14} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
-                        </button>
-                      )}
                     </div>
                   </div>
 
-                  {/* Row 3: Engagement Rate Banner */}
-                  <div className="bg-[#eefaf4] border border-emerald-100/90 rounded-2xl p-3.5 mt-3.5 flex items-center justify-between">
+                  {/* Middle Row: Engagement Rate Banner (Soft Periwinkle #e2e2fc, BORDERLESS) */}
+                  <div
+                    style={{ backgroundColor: "#e2e2fc" }}
+                    className="rounded-[22px] p-3.5 sm:p-4 flex items-center justify-between border-0 shadow-2xs"
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-[#0d7a53] text-white flex items-center justify-center flex-shrink-0 shadow-2xs">
-                        <TrendingUp size={18} />
+                      <div className="w-10 h-10 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                        <TrendingUp size={20} className="text-slate-950" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-[#0d7a53]">Engagement rate</div>
-                        <div className="text-[11px] text-slate-500 font-medium">Interactions per reach</div>
+                        <div className="text-xs sm:text-sm font-bold text-slate-950">Engagement rate</div>
+                        <div className="text-[11px] sm:text-xs font-semibold text-slate-600">Interactions per reach</div>
                       </div>
                     </div>
-                    <div className="text-2xl font-black text-[#0d7a53] tracking-tight">
-                      {insights.engagementRate != null ? `${insights.engagementRate}%` : "4.7%"}
+                    <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight tabular-nums">
+                      {insights.engagementRate != null ? `${insights.engagementRate}%` : "8.5%"}
                     </div>
                   </div>
 
-                  {/* Row 4: 4 Pastel Metric Tiles */}
-                  <div className="grid grid-cols-4 gap-2 mt-3.5">
-                    {/* Likes Tile */}
-                    <div className="bg-[#fdf2f4] border border-pink-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
-                      <Heart size={16} className="text-rose-500 mb-1" />
-                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                  {/* Bottom Row: 4 Metric Cards (Soft Pastel Minimal tokens, BORDERLESS) */}
+                  <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
+                    {/* 1. Likes - Soft Rose Pink #fceef4 */}
+                    <div
+                      style={{ backgroundColor: "#fceef4" }}
+                      className="rounded-[20px] p-2 sm:p-2.5 flex flex-col justify-between items-center text-center shadow-2xs border-0"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center mb-1">
+                        <Heart size={13} className="text-slate-950" />
+                      </div>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 leading-tight tabular-nums">
                         {meta.likes.toLocaleString()}
                       </span>
-                      <span className="text-[11px] font-semibold text-rose-500 mt-0.5">Likes</span>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-950 mt-0.5">Likes</span>
                     </div>
 
-                    {/* Comments Tile */}
-                    <div className="bg-[#ecfaf5] border border-emerald-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
-                      <MessageCircle size={16} className="text-emerald-600 mb-1" />
-                      <span className="text-lg font-bold text-slate-800 leading-tight">
+                    {/* 2. Comments - Soft Butter Yellow #fff9db */}
+                    <div
+                      style={{ backgroundColor: "#fff9db" }}
+                      className="rounded-[20px] p-2 sm:p-2.5 flex flex-col justify-between items-center text-center shadow-2xs border-0"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center mb-1">
+                        <MessageCircle size={13} className="text-slate-950" />
+                      </div>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 leading-tight tabular-nums">
                         {meta.comments.toLocaleString()}
                       </span>
-                      <span className="text-[11px] font-semibold text-emerald-600 mt-0.5">Comments</span>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-950 mt-0.5">Comments</span>
                     </div>
 
-                    {/* Reach Tile */}
-                    <div className="bg-[#f0f4fe] border border-indigo-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
-                      <Eye size={16} className="text-indigo-500 mb-1" />
-                      <span className="text-lg font-bold text-slate-800 leading-tight">
-                        {(insights.reach ?? 128).toLocaleString()}
+                    {/* 3. Reach - Soft Periwinkle #e2e2fc */}
+                    <div
+                      style={{ backgroundColor: "#e2e2fc" }}
+                      className="rounded-[20px] p-2 sm:p-2.5 flex flex-col justify-between items-center text-center shadow-2xs border-0"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center mb-1">
+                        <Eye size={13} className="text-slate-950" />
+                      </div>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 leading-tight tabular-nums">
+                        {(insights.reach ?? 141).toLocaleString()}
                       </span>
-                      <span className="text-[11px] font-semibold text-indigo-500 mt-0.5">Reach</span>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-950 mt-0.5">Reach</span>
                     </div>
 
-                    {/* Views Tile */}
-                    <div className="bg-[#fdf5eb] border border-amber-100/70 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center">
-                      <Play size={16} className="text-amber-600 mb-1" />
-                      <span className="text-lg font-bold text-slate-800 leading-tight">
-                        {(insights.views ?? 133).toLocaleString()}
+                    {/* 4. Views - Soft Peach Coral #feece4 */}
+                    <div
+                      style={{ backgroundColor: "#feece4" }}
+                      className="rounded-[20px] p-2 sm:p-2.5 flex flex-col justify-between items-center text-center shadow-2xs border-0"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center mb-1">
+                        <Play size={13} className="text-slate-950" />
+                      </div>
+                      <span className="text-lg sm:text-xl font-black text-slate-950 leading-tight tabular-nums">
+                        {(insights.views ?? 180).toLocaleString()}
                       </span>
-                      <span className="text-[11px] font-semibold text-amber-600 mt-0.5">Views</span>
+                      <span className="text-[11px] sm:text-xs font-bold text-slate-950 mt-0.5">Views</span>
                     </div>
                   </div>
                 </div>
