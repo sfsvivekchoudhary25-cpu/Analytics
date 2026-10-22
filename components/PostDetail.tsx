@@ -2732,7 +2732,7 @@ export function PostDetail({
                                 percent={viralityCockpit.shareScore}
                                 showInfo={false}
                                 strokeColor="#4f46e5"
-                                trailColor="#e5e5ea"
+                                railColor="#e5e5ea"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2763,7 +2763,7 @@ export function PostDetail({
                                 percent={viralityCockpit.engScore}
                                 showInfo={false}
                                 strokeColor="#FF2D55"
-                                trailColor="#e5e5ea"
+                                railColor="#e5e5ea"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2794,7 +2794,7 @@ export function PostDetail({
                                 percent={viralityCockpit.freqScore}
                                 showInfo={false}
                                 strokeColor="#5856D6"
-                                trailColor="#e5e5ea"
+                                railColor="#e5e5ea"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2825,7 +2825,7 @@ export function PostDetail({
                                 percent={viralityCockpit.saveScore}
                                 showInfo={false}
                                 strokeColor="#FF9500"
-                                trailColor="#e5e5ea"
+                                railColor="#e5e5ea"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2885,7 +2885,7 @@ export function PostDetail({
                                 percent={f.pct}
                                 showInfo={false}
                                 strokeColor={f.progressColor}
-                                trailColor="#e5e5ea"
+                                railColor="#e5e5ea"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
