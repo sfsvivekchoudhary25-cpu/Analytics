@@ -1,15 +1,5 @@
 "use client";
 
-import React from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  LabelList,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Card, Skeleton } from "antd";
 import {
   HeartOutlined,
@@ -17,12 +7,7 @@ import {
   ShareAltOutlined,
   BookOutlined,
 } from "@ant-design/icons";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "./ui/chart";
+import { UnifiedChart } from "./UnifiedChart";
 
 export type EngagementTotals = {
   likes?: number;
@@ -126,43 +111,6 @@ export function EngagementBarChart({
     : null;
 
   // Chart data formatting with calculated percentages
-  const chartData = engagementItems.map((item) => {
-    const pctNumber = engTotal > 0 ? Math.round((item.value / engTotal) * 100) : 0;
-    return {
-      key: item.key,
-      name: item.label,
-      value: item.value,
-      pctNumber,
-      pct: `${pctNumber}%`,
-      fill: item.fill,
-    };
-  });
-
-  const chartConfig = {
-    value: {
-      label: "Interactions",
-      color: THEME_COLOR,
-    },
-    likes: {
-      label: "Likes",
-      color: THEME_COLOR,
-    },
-    comments: {
-      label: "Comments",
-      color: THEME_COLOR,
-    },
-    shares: {
-      label: "Shares",
-      color: THEME_COLOR,
-    },
-    saves: {
-      label: "Saves",
-      color: THEME_COLOR,
-    },
-  } satisfies ChartConfig;
-
-  const maxVal = Math.max(1, ...chartData.map((d) => d.value));
-
   return (
     <Card
       className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all flex flex-col h-full overflow-hidden"
@@ -191,70 +139,19 @@ export function EngagementBarChart({
           <EngagementCardSkeleton />
         ) : (
           <div className="flex-1 flex flex-col justify-between space-y-3">
-            {/* ── Chart Bars View ────────────────────────────── */}
+            {/* ── Chart Bars View (Centralized UnifiedChart) ────────────────── */}
             <div className="flex-1 flex flex-col justify-between">
-              <ChartContainer
-                config={chartConfig}
-                className="aspect-auto h-[220px] sm:h-[240px] w-full"
-              >
-                <BarChart
-                  accessibilityLayer
-                  data={chartData}
-                  margin={{ top: 22, right: 10, left: 10, bottom: 4 }}
-                >
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis
-                    dataKey="name"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={false}
-                    tick={{ fill: "#334155", fontSize: 12, fontWeight: 700 }}
-                  />
-                  <YAxis hide domain={[0, Math.ceil(maxVal * 1.25)]} />
-                  <ChartTooltip
-                    cursor={{ fill: "rgba(0,0,0,0.03)" }}
-                    content={
-                      <ChartTooltipContent
-                        indicator="dot"
-                        className="rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xl px-3.5 py-2.5 min-w-[9rem]"
-                        labelFormatter={(_, payload) => {
-                          const item = payload?.[0]?.payload;
-                          return (
-                            <div className="text-xs font-bold text-slate-800">
-                              {item?.name}
-                            </div>
-                          );
-                        }}
-                        formatter={(val, _, item) => (
-                          <div className="flex items-center justify-between gap-3 w-full">
-                            <span className="font-black text-slate-950 tabular-nums text-xs">
-                              {Number(val).toLocaleString()}
-                            </span>
-                            <span className="text-[11px] font-bold text-slate-500">
-                              {item?.payload?.pct}
-                            </span>
-                          </div>
-                        )}
-                      />
-                    }
-                  />
-                  <Bar dataKey="value" radius={[8, 8, 4, 4]} maxBarSize={48}>
-                    <LabelList
-                      position="top"
-                      offset={8}
-                      className="fill-slate-950 font-black text-xs"
-                      fontSize={12}
-                      formatter={(val: any) => {
-                        const num = Number(val);
-                        return num > 0 ? num.toLocaleString() : "0";
-                      }}
-                    />
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
+              <UnifiedChart
+                type="bar"
+                data={[
+                  { date: "Likes", value: totals.likes ?? 0 },
+                  { date: "Comments", value: totals.comments ?? 0 },
+                  { date: "Shares", value: totals.shares ?? 0 },
+                  { date: "Saves", value: totals.saves ?? 0 },
+                ]}
+                label="Interactions"
+                color={THEME_COLOR}
+              />
             </div>
 
             {/* ── Bottom Rate Accent Boxes (Soft Pastel Minimal - Borderless) ── */}

@@ -48,8 +48,7 @@ import {
   CompassOutlined,
 } from "@ant-design/icons";
 import { api } from "@/lib/api";
-import { LineChart, Point } from "./LineChart";
-import { MultiLineChart } from "./MultiLineChart";
+import { UnifiedChart, Point } from "./UnifiedChart";
 import { EngagementBarChart } from "./EngagementBarChart";
 import { NotificationBell, AccountAvatar } from "./HeaderControls";
 import { PostDetail } from "./PostDetail";
@@ -396,7 +395,7 @@ export function Dashboard({
     if (typeof window !== "undefined") {
       try {
         sessionStorage.setItem("active_post_detail", JSON.stringify(post));
-      } catch {}
+      } catch { }
       const url = new URL(window.location.href);
       url.searchParams.set("post", post.id);
       window.history.pushState({ postId: post.id }, "", url.toString());
@@ -408,7 +407,7 @@ export function Dashboard({
     if (typeof window !== "undefined") {
       try {
         sessionStorage.removeItem("active_post_detail");
-      } catch {}
+      } catch { }
       const url = new URL(window.location.href);
       url.searchParams.delete("post");
       url.searchParams.delete("postId");
@@ -426,7 +425,7 @@ export function Dashboard({
         setSelectedPost(null);
         try {
           sessionStorage.removeItem("active_post_detail");
-        } catch {}
+        } catch { }
       } else {
         try {
           const cached = sessionStorage.getItem("active_post_detail");
@@ -437,7 +436,7 @@ export function Dashboard({
               return;
             }
           }
-        } catch {}
+        } catch { }
         setSelectedPost({
           id: postId,
           caption: "",
@@ -464,7 +463,7 @@ export function Dashboard({
       setSelectedPost((prev) => (prev ? { ...prev, ...found } : found));
       try {
         sessionStorage.setItem("active_post_detail", JSON.stringify(found));
-      } catch {}
+      } catch { }
     }
   }, [insights?.media, selectedPost?.id]);
 
@@ -1110,51 +1109,21 @@ export function Dashboard({
                 </p>
               </div>
 
-              {/* Desktop/Tablet Segmented Switcher (Strictly hidden on mobile) */}
-              <div className="hidden sm:block">
-                <Segmented
-                  size="small"
-                  value={activeChart}
-                  onChange={(val) => setActiveChart(val as "reach" | "automations")}
-                  options={[
-                    {
-                      label: (
-                        <span className="flex items-center justify-center gap-1.5 font-bold text-xs px-2.5 py-0.5">
-                          <LineChartOutlined />
-                          <span>Daily Reach</span>
-                        </span>
-                      ),
-                      value: "reach",
-                    },
-                    {
-                      label: (
-                        <span className="flex items-center justify-center gap-1.5 font-semibold text-xs px-2.5 py-0.5 text-slate-500">
-                          <ThunderboltOutlined />
-                          <span>Automations</span>
-                        </span>
-                      ),
-                      value: "automations",
-                    },
-                  ]}
-                  className="!rounded-xl !bg-[#f1f3f7] !p-1 text-xs shrink-0 shadow-2xs border border-[#e9e9ee]/60"
-                />
-              </div>
-
-              {/* Three dots dropdown placed right side of title at corner (on mobile) */}
+              {/* Three dots dropdown for chart switcher (visible on every screen) */}
               <Dropdown
                 menu={{
                   items: [
                     {
                       key: "reach",
                       icon: <LineChartOutlined />,
-                      label: <span className="font-medium text-xs">Daily Reach</span>,
-                      className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                      label: <span className="font-semibold text-xs">Daily Reach</span>,
+                      className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]" : "",
                     },
                     {
                       key: "automations",
                       icon: <ThunderboltOutlined />,
-                      label: <span className="font-medium text-xs">Automations</span>,
-                      className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                      label: <span className="font-semibold text-xs">Automations</span>,
+                      className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]" : "",
                     },
                   ],
                   onClick: ({ key }) => setActiveChart(key as "reach" | "automations"),
@@ -1166,7 +1135,8 @@ export function Dashboard({
                 <button
                   type="button"
                   aria-label="Chart view options"
-                  className="sm:hidden w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  title="Change chart view"
                 >
                   <EllipsisOutlined className="text-lg text-slate-800" />
                 </button>
@@ -1179,11 +1149,12 @@ export function Dashboard({
                   <AnalyticsChartSkeleton />
                 ) : (
                   <div className="flex-1 flex flex-col justify-between">
-                    <LineChart
+                    <UnifiedChart
+                      type="bar"
                       data={reachSeries}
                       label="Reach"
                       color="#4f46e5"
-                      ribbonClassName="-mx-[5px] sm:-mx-6 -mt-[5px] sm:-mt-6 px-2.5 sm:px-6 py-2 sm:py-3 border-b border-[#e9e9ee] mb-3 sm:mb-4 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
+                      showStats={true}
                     />
                     {reachSeries.length === 0 && (
                       <p className="mt-3 text-xs text-slate-400 text-center">
@@ -1196,31 +1167,32 @@ export function Dashboard({
                 <AnalyticsChartSkeleton />
               ) : data ? (
                 <div className="flex-1 flex flex-col justify-between">
-                  <MultiLineChart
+                  <UnifiedChart
+                    type="stacked-bar"
                     dates={data.series.map((s) => s.date)}
                     series={[
                       {
                         key: "comments",
                         label: "Comments",
-                        color: "#0071e3",
+                        color: "#4f46e5",
                         data: data.series.map((s) => s.comments),
                       },
                       {
                         key: "dmsSent",
                         label: "Comment DMs",
-                        color: "#06b6d4",
+                        color: "#5AC8FA",
                         data: data.series.map((s) => s.dmsSent),
                       },
                       {
                         key: "replies",
                         label: "Replies",
-                        color: "#10b981",
+                        color: "#34C759",
                         data: data.series.map((s) => s.replies),
                       },
                       {
                         key: "conversions",
                         label: "Converted",
-                        color: "#8b5cf6",
+                        color: "#5856D6",
                         data: data.series.map((s) => s.conversions),
                       },
                     ]}
@@ -1279,51 +1251,21 @@ export function Dashboard({
                   </p>
                 </div>
 
-                {/* Desktop/Tablet Segmented Switcher (Strictly hidden on mobile) */}
-                <div className="hidden sm:block">
-                  <Segmented
-                    size="small"
-                    value={postSort}
-                    onChange={(val) => setPostSort(val as "recent" | "top")}
-                    options={[
-                      {
-                        label: (
-                          <span className="flex items-center justify-center gap-1.5 font-bold text-xs px-2.5 py-0.5">
-                            <CalendarOutlined />
-                            <span>Most Recent</span>
-                          </span>
-                        ),
-                        value: "recent",
-                      },
-                      {
-                        label: (
-                          <span className="flex items-center justify-center gap-1.5 font-semibold text-xs px-2.5 py-0.5 text-slate-600">
-                            <HeartOutlined />
-                            <span>Top Engaged</span>
-                          </span>
-                        ),
-                        value: "top",
-                      },
-                    ]}
-                    className="!rounded-xl !bg-[#f1f3f7] !p-1 text-xs shrink-0 shadow-2xs border border-[#e9e9ee]/60"
-                  />
-                </div>
-
-                {/* Three dots dropdown placed right side of title at corner (on mobile) */}
+                {/* Three dots dropdown for post sorting (visible on every screen) */}
                 <Dropdown
                   menu={{
                     items: [
                       {
                         key: "recent",
                         icon: <CalendarOutlined />,
-                        label: <span className="font-medium text-xs">Most Recent</span>,
-                        className: postSort === "recent" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                        label: <span className="font-semibold text-xs">Most Recent</span>,
+                        className: postSort === "recent" ? "!font-bold !bg-[#e2e2fc]" : "",
                       },
                       {
                         key: "top",
                         icon: <HeartOutlined />,
-                        label: <span className="font-medium text-xs">Top Engaged</span>,
-                        className: postSort === "top" ? "!font-bold !bg-[#e2e2fc]/40" : "",
+                        label: <span className="font-semibold text-xs">Top Engaged</span>,
+                        className: postSort === "top" ? "!font-bold !bg-[#e2e2fc]" : "",
                       },
                     ],
                     onClick: ({ key }) => setPostSort(key as "recent" | "top"),
@@ -1335,7 +1277,8 @@ export function Dashboard({
                   <button
                     type="button"
                     aria-label="Sort posts options"
-                    className="sm:hidden w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                    title="Change sort order"
                   >
                     <EllipsisOutlined className="text-lg text-slate-800" />
                   </button>
@@ -1699,13 +1642,13 @@ export function Dashboard({
                                 },
                                 ...(onOpenAutomations
                                   ? [
-                                      {
-                                        key: "automation",
-                                        icon: <ThunderboltOutlined />,
-                                        label: "Open automation",
-                                        onClick: onOpenAutomations,
-                                      },
-                                    ]
+                                    {
+                                      key: "automation",
+                                      icon: <ThunderboltOutlined />,
+                                      label: "Open automation",
+                                      onClick: onOpenAutomations,
+                                    },
+                                  ]
                                   : []),
                               ],
                             }}
@@ -1734,17 +1677,16 @@ export function Dashboard({
                       <div className="flex items-center justify-between gap-2 pt-0.5">
                         <div className="flex items-center">
                           <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                              item.type === "AI DM"
+                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${item.type === "AI DM"
                                 ? "bg-[#FCEEF4] text-[#db2777]"
                                 : item.type === "Comment DM"
-                                ? "bg-[#f3e8ff] text-[#7e22ce]"
-                                : item.type === "Auto DM"
-                                ? "bg-[#eff6ff] text-[#2563eb]"
-                                : item.type === "System DM"
-                                ? "bg-[#fef9c3] text-[#a16207]"
-                                : "bg-slate-100 text-slate-700"
-                            }`}
+                                  ? "bg-[#f3e8ff] text-[#7e22ce]"
+                                  : item.type === "Auto DM"
+                                    ? "bg-[#eff6ff] text-[#2563eb]"
+                                    : item.type === "System DM"
+                                      ? "bg-[#fef9c3] text-[#a16207]"
+                                      : "bg-slate-100 text-slate-700"
+                              }`}
                           >
                             {item.type}
                           </span>

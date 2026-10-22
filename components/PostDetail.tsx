@@ -63,6 +63,8 @@ import {
   HeartFilled,
   MessageOutlined,
   LinkOutlined,
+  FilterOutlined,
+  PieChartOutlined,
   EllipsisOutlined,
 } from "@ant-design/icons";
 import {
@@ -101,9 +103,7 @@ import {
   Zap,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { LineChart } from "./LineChart";
-import { MultiLineChart } from "./MultiLineChart";
-import { DonutChart } from "./DonutChart";
+import { UnifiedChart } from "./UnifiedChart";
 import { InstagramIcon } from "./icons";
 
 type TriggerTag = "ai" | "auto" | "manual" | "comment-dm" | null;
@@ -1297,27 +1297,27 @@ export function PostDetail({
     const totalScore = Math.min(100, Math.max(25, rawScore));
 
     let tierLabel = "Healthy Performer";
-    let tierBadgeCls = "bg-blue-50 text-blue-700 border-blue-200/80";
-    let tierColor = "#2563eb";
+    let tierBadgeCls = "bg-[#4f46e5]/10 text-[#4f46e5] border-[#4f46e5]/25";
+    let tierColor = "#4f46e5"; // Apple System Blue
     let tierPercentile = "Top 25% distribution";
     let summaryText = "Solid engagement pace meeting standard feed & explore delivery criteria.";
 
     if (totalScore >= 85) {
       tierLabel = "Viral Outperformer";
-      tierBadgeCls = "bg-rose-50 text-rose-700 border-rose-200/80";
-      tierColor = "#e11d48";
+      tierBadgeCls = "bg-[#FF2D55]/10 text-[#FF2D55] border-[#FF2D55]/25";
+      tierColor = "#FF2D55"; // Apple System Pink / Activity Red
       tierPercentile = "Top 5% distribution";
       summaryText = "High peer-to-peer share velocity is actively accelerating Explore & Reels distribution.";
     } else if (totalScore >= 70) {
       tierLabel = "Strong Momentum";
-      tierBadgeCls = "bg-emerald-50 text-emerald-700 border-emerald-200/80";
-      tierColor = "#059669";
+      tierBadgeCls = "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/25";
+      tierColor = "#34C759"; // Apple System Green
       tierPercentile = "Top 15% distribution";
       summaryText = "High replay stickiness and healthy comments driving sustained reach expansion.";
     } else if (totalScore >= 50) {
       tierLabel = "Growing Resonance";
-      tierBadgeCls = "bg-indigo-50 text-indigo-700 border-indigo-200/80";
-      tierColor = "#4f46e5";
+      tierBadgeCls = "bg-[#5856D6]/10 text-[#5856D6] border-[#5856D6]/25";
+      tierColor = "#5856D6"; // Apple System Indigo / Purple
       tierPercentile = "Top 35% distribution";
       summaryText = "Steady engagement signals maintaining organic follower feed visibility.";
     }
@@ -1343,7 +1343,7 @@ export function PostDetail({
     };
   }, [insights, meta, data?.dmRules]);
 
-  // Comprehensive Post Funnel
+  // Comprehensive Post Funnel (Apple System Colors)
   const funnelSteps = useMemo(() => {
     const reachVal = insights.reach || insights.views || Math.max(1, insights.totalInteractions);
     const interactions = insights.totalInteractions;
@@ -1357,8 +1357,8 @@ export function PostDetail({
         label: "Accounts Reached / Views",
         value: reachVal,
         pct: 100,
-        badgeCls: "bg-blue-50 text-blue-600 border-blue-200",
-        progressColor: "#2563eb",
+        badgeCls: "bg-[#4f46e5]/10 text-[#4f46e5] border-[#4f46e5]/25",
+        progressColor: "#4f46e5", // Apple System Blue
         icon: <EyeOutlined className="text-xs" />,
       },
       {
@@ -1366,8 +1366,8 @@ export function PostDetail({
         label: "Post Interactions (Engaged)",
         value: interactions,
         pct: reachVal > 0 ? Math.round((interactions / reachVal) * 1000) / 10 : 0,
-        badgeCls: "bg-indigo-50 text-indigo-600 border-indigo-200",
-        progressColor: "#4f46e5",
+        badgeCls: "bg-[#5856D6]/10 text-[#5856D6] border-[#5856D6]/25",
+        progressColor: "#5856D6", // Apple System Indigo
         icon: <HeartOutlined className="text-xs" />,
       },
       {
@@ -1375,8 +1375,8 @@ export function PostDetail({
         label: "Comments Submitted",
         value: comments,
         pct: interactions > 0 ? Math.round((comments / interactions) * 1000) / 10 : 0,
-        badgeCls: "bg-purple-50 text-purple-600 border-purple-200",
-        progressColor: "#9333ea",
+        badgeCls: "bg-[#FF2D55]/10 text-[#FF2D55] border-[#FF2D55]/25",
+        progressColor: "#FF2D55", // Apple System Pink
         icon: <CommentOutlined className="text-xs" />,
       },
       {
@@ -1384,8 +1384,8 @@ export function PostDetail({
         label: "DMs Delivered to Commenters",
         value: dmsSent,
         pct: comments > 0 ? Math.round((dmsSent / comments) * 1000) / 10 : 0,
-        badgeCls: "bg-emerald-50 text-emerald-600 border-emerald-200",
-        progressColor: "#10b981",
+        badgeCls: "bg-[#FF9500]/10 text-[#FF9500] border-[#FF9500]/25",
+        progressColor: "#FF9500", // Apple System Orange
         icon: <SendOutlined className="text-xs" />,
       },
       {
@@ -1393,8 +1393,8 @@ export function PostDetail({
         label: "Customer Engaged Back (Converted)",
         value: dmReplied,
         pct: dmsSent > 0 ? Math.round((dmReplied / dmsSent) * 1000) / 10 : 0,
-        badgeCls: "bg-pink-50 text-pink-600 border-pink-200",
-        progressColor: "#db2777",
+        badgeCls: "bg-[#34C759]/10 text-[#34C759] border-[#34C759]/25",
+        progressColor: "#34C759", // Apple System Green
         icon: <RiseOutlined className="text-xs" />,
       },
     ];
@@ -1407,10 +1407,10 @@ export function PostDetail({
     const unreplied = Math.max(0, totalComments - replied);
 
     return [
-      { label: "AI Replies", value: aiReplied, color: "#8b5cf6" },
-      { label: "Auto Reply Rules", value: autoReplied, color: "#3b82f6" },
-      { label: "Manual Replies", value: manualReplied, color: "#64748b" },
-      { label: "Awaiting Reply", value: unreplied, color: "#f59e0b" },
+      { label: "AI Replies", value: aiReplied, color: "#5856D6" }, // Apple Indigo
+      { label: "Auto Reply Rules", value: autoReplied, color: "#4f46e5" }, // Apple Blue
+      { label: "Manual Replies", value: manualReplied, color: "#8E8E93" }, // Apple Gray
+      { label: "Awaiting Reply", value: unreplied, color: "#FF9500" }, // Apple Orange
     ];
   }, [data?.stats]);
 
@@ -1613,11 +1613,10 @@ export function PostDetail({
                       padding: "5px 10px",
                       ...(isActive ? { backgroundColor: "#000000", color: "#ffffff" } : {}),
                     }}
-                    className={`inline-flex items-center justify-center rounded-full text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${
-                      isActive
+                    className={`inline-flex items-center justify-center rounded-full text-xs sm:text-sm transition-all cursor-pointer whitespace-nowrap ${isActive
                         ? "!bg-black !text-white font-bold shadow-xs"
                         : "text-slate-600 hover:text-slate-950 font-medium hover:bg-white/70"
-                    }`}
+                      }`}
                   >
                     <span>{label}</span>
                   </button>
@@ -1686,11 +1685,10 @@ export function PostDetail({
                       type="button"
                       onClick={() => setActiveTab(key as any)}
                       style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
-                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
-                        isActive
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
                           ? "!bg-black !text-white shadow-xs"
                           : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
-                      }`}
+                        }`}
                     >
                       {TabIcon && <TabIcon size={14} className={isActive ? "text-white" : "text-slate-500"} />}
                       <span>{fullLabel || label}</span>
@@ -2508,12 +2506,12 @@ export function PostDetail({
                       <p className="text-xs text-slate-500 font-normal mt-0.5 truncate">
                         {dates.length > 0
                           ? (() => {
-                              const f = (iso: string) => {
-                                const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
-                                return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                              };
-                              return `${f(dates[0])} – ${f(dates[dates.length - 1])} (${dates.length} days)`;
-                            })()
+                            const f = (iso: string) => {
+                              const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+                              return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                            };
+                            return `${f(dates[0])} – ${f(dates[dates.length - 1])} (${dates.length} days)`;
+                          })()
                           : `Past ${days} days`}
                       </p>
                     </div>
@@ -2568,15 +2566,22 @@ export function PostDetail({
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                     </div>
                   ) : chartView === "engagement" ? (
-                    <div className="flex-1 flex flex-col justify-between p-3 sm:p-6">
-                      <MultiLineChart dates={dates} series={multiChartSeries} hideLegend={false} hideFooter />
+                    <div className="flex-1 flex flex-col p-4 sm:p-6 h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[460px]">
+                      <UnifiedChart
+                        type="stacked-bar"
+                        dates={dates}
+                        series={multiChartSeries}
+                        hideLegend={false}
+                        hideFooter
+                      />
                     </div>
                   ) : (
-                    <div className="flex-1 flex flex-col justify-between p-3 sm:p-6">
-                      <LineChart
+                    <div className="flex-1 flex flex-col p-4 sm:p-6 h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[460px]">
+                      <UnifiedChart
+                        type="bar"
                         data={singleSeriesData}
                         label={chartView === "comments" ? "Comments" : chartView === "dms" ? "DMs Sent" : "Replies"}
-                        color={chartView === "comments" ? "#2563eb" : chartView === "dms" ? "#0284c7" : "#10b981"}
+                        color={chartView === "comments" ? "#4f46e5" : chartView === "dms" ? "#5856D6" : "#34C759"}
                         hideFooter
                       />
                     </div>
@@ -2584,277 +2589,322 @@ export function PostDetail({
                 </div>
 
                 {/* Right: Funnel & Distribution Unified Card */}
-                <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all flex flex-col h-full">
-                  <div className="flex flex-col gap-2.5 pb-4 mb-4 border-b border-[#e9e9ee]">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-base sm:text-lg font-bold text-slate-950 truncate">
+                <div
+                  style={{ padding: 0 }}
+                  className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white !p-0 shadow-2xs transition-all flex flex-col h-full overflow-hidden"
+                >
+                  <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#e9e9ee] bg-white">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-950 truncate">
                         {rightTab === "virality"
                           ? "Virality & Health Score"
                           : rightTab === "funnel"
                             ? "Discovery-to-Lead Funnel"
-                            : "Reply Methods"}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f1f3f7] text-slate-700 text-[11px] font-bold shrink-0">
+                            : "Reply Distribution Methods"}
+                      </h2>
+                      <p className="text-xs text-slate-500 font-normal mt-0.5 truncate">
                         {rightTab === "virality"
-                          ? `${viralityCockpit.totalScore}/100 Score`
+                          ? `${viralityCockpit.totalScore}/100 Score • ${viralityCockpit.tierLabel}`
                           : rightTab === "funnel"
-                            ? "5 Stages"
-                            : "Distribution"}
-                      </span>
+                            ? "5-stage engagement conversion pipeline"
+                            : "AI, automated rule, and manual reply breakdown"}
+                      </p>
                     </div>
-                    <Segmented
-                      block
-                      size="small"
-                      value={rightTab}
-                      onChange={(val) => setRightTab(val as any)}
-                      options={[
-                        { label: "Virality Score", value: "virality" },
-                        { label: "Funnel", value: "funnel" },
-                        { label: "Methods", value: "replyMethods" },
-                      ]}
-                      className="!rounded-full !bg-[#f1f3f7] !p-1 text-xs font-bold w-full"
-                    />
+
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "virality",
+                            icon: <FireOutlined className={rightTab === "virality" ? "text-rose-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">Virality Score</span>,
+                            className: rightTab === "virality" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                          {
+                            key: "funnel",
+                            icon: <FilterOutlined className={rightTab === "funnel" ? "text-blue-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">Discovery Funnel</span>,
+                            className: rightTab === "funnel" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                          {
+                            key: "replyMethods",
+                            icon: <PieChartOutlined className={rightTab === "replyMethods" ? "text-emerald-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">Reply Methods</span>,
+                            className: rightTab === "replyMethods" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                        ],
+                        onClick: ({ key }) => setRightTab(key as any),
+                        selectedKeys: [rightTab],
+                      }}
+                      trigger={["click"]}
+                      placement="bottomRight"
+                    >
+                      <button
+                        type="button"
+                        aria-label="View options"
+                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                        title="Change view"
+                      >
+                        <EllipsisOutlined className="text-lg text-slate-800" />
+                      </button>
+                    </Dropdown>
                   </div>
 
-                  {loading ? (
-                    <div className="flex h-56 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
-                    </div>
-                  ) : rightTab === "virality" ? (
-                    <div className="flex-1 flex flex-col justify-between space-y-4">
-                      {/* Score Gauge & Performance Badge (Soft Pastel borderless) */}
-                      <div style={{ backgroundColor: "#f1f3f7" }} className="flex items-center gap-3.5 p-3.5 rounded-[22px] shadow-2xs border-0">
-                        <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
-                          <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
-                            <circle
-                              cx="38"
-                              cy="38"
-                              r="31"
-                              stroke="#e2e8f0"
-                              strokeWidth="6"
-                              fill="transparent"
-                            />
-                            <circle
-                              cx="38"
-                              cy="38"
-                              r="31"
-                              stroke={viralityCockpit.tierColor}
-                              strokeWidth="6"
-                              strokeDasharray={2 * Math.PI * 31}
-                              strokeDashoffset={2 * Math.PI * 31 * (1 - viralityCockpit.totalScore / 100)}
-                              strokeLinecap="round"
-                              fill="transparent"
-                              className="transition-all duration-700 ease-out"
-                            />
-                          </svg>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="text-xl font-black text-slate-900 leading-none tabular-nums">
-                              {viralityCockpit.totalScore}
-                            </span>
-                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                              / 100
-                            </span>
-                          </div>
-                        </div>
+                  <div className="flex-1 flex flex-col justify-between p-4 sm:p-6">
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white border border-black/80 text-slate-950 shadow-2xs">
-                              <FireOutlined className="text-xs shrink-0 text-amber-500" />
-                              <span>{viralityCockpit.tierLabel}</span>
-                            </span>
-                            <span className="text-[11px] font-semibold text-slate-500">
-                              {viralityCockpit.tierPercentile}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed">
-                            {viralityCockpit.summaryText}
-                          </p>
-                        </div>
+                    {loading ? (
+                      <div className="flex h-56 items-center justify-center">
+                        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                       </div>
-
-                      {/* 4 Algorithmic Signal Diagnostics (White Cards with subtle border) */}
-                      <div className="space-y-2">
-                        {/* 1. Share Velocity */}
-                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                              <ShareAltOutlined className="text-emerald-500 text-xs shrink-0" />
-                              <span>Peer Share Velocity</span>
-                              <span className="text-[10px] text-slate-400 font-normal">(Primary Viral Signal)</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-right">
-                              <span className="font-bold text-slate-900 tabular-nums">
-                                {viralityCockpit.shareRate.toFixed(1)}%
-                              </span>
-                              <span className="text-[11px] text-slate-400 tabular-nums">
-                                ({insights.shares.toLocaleString()} sent)
+                    ) : rightTab === "virality" ? (
+                      <div className="flex-1 flex flex-col justify-between space-y-4">
+                        {/* Score Gauge & Performance Badge (Apple HIG Style) */}
+                        <div className="flex items-center gap-3.5 p-3.5 rounded-[22px] bg-[#f2f2f7] shadow-2xs border-0">
+                          <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
+                            <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
+                              <circle
+                                cx="38"
+                                cy="38"
+                                r="31"
+                                stroke="#e5e5ea"
+                                strokeWidth="6"
+                                fill="transparent"
+                              />
+                              <circle
+                                cx="38"
+                                cy="38"
+                                r="31"
+                                stroke={viralityCockpit.tierColor}
+                                strokeWidth="6"
+                                strokeDasharray={2 * Math.PI * 31}
+                                strokeDashoffset={2 * Math.PI * 31 * (1 - viralityCockpit.totalScore / 100)}
+                                strokeLinecap="round"
+                                fill="transparent"
+                                className="transition-all duration-700 ease-out"
+                              />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                              <span className="text-xl font-black text-slate-900 leading-none tabular-nums">
+                                {viralityCockpit.totalScore}
                               </span>
                             </div>
                           </div>
-                          <div className="mt-1.5">
-                            <Progress
-                              percent={viralityCockpit.shareScore}
-                              showInfo={false}
-                              strokeColor="#10b981"
-                              size="small"
-                              className="!m-0"
-                            />
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border shadow-2xs ${viralityCockpit.tierBadgeCls}`}>
+                                <FireOutlined className="text-xs shrink-0" />
+                                <span>{viralityCockpit.tierLabel}</span>
+                              </span>
+                              <span className="text-[11px] font-semibold text-slate-500">
+                                {viralityCockpit.tierPercentile}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                              {viralityCockpit.summaryText}
+                            </p>
                           </div>
                         </div>
 
-                        {/* 2. Engagement Density */}
-                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                              <HeartOutlined className="text-rose-500 text-xs shrink-0" />
-                              <span>Audience Response</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-right">
-                              <span className="font-bold text-slate-900 tabular-nums">
-                                {viralityCockpit.engRate.toFixed(1)}%
-                              </span>
-                              <span className="text-[11px] text-slate-400 tabular-nums">
-                                ({insights.totalInteractions.toLocaleString()} total)
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-1.5">
-                            <Progress
-                              percent={viralityCockpit.engScore}
-                              showInfo={false}
-                              strokeColor="#e11d48"
-                              size="small"
-                              className="!m-0"
-                            />
-                          </div>
-                        </div>
-
-                        {/* 3. Replay Frequency */}
-                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                              <PlayCircleOutlined className="text-blue-500 text-xs shrink-0" />
-                              <span>Replay Frequency</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-right">
-                              <span className="font-bold text-slate-900 tabular-nums">
-                                {viralityCockpit.freq.toFixed(2)}x
-                              </span>
-                              <span className="text-[11px] text-slate-400 tabular-nums">
-                                (views/reach)
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-1.5">
-                            <Progress
-                              percent={viralityCockpit.freqScore}
-                              showInfo={false}
-                              strokeColor="#2563eb"
-                              size="small"
-                              className="!m-0"
-                            />
-                          </div>
-                        </div>
-
-                        {/* 4. Bookmark Intent */}
-                        <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-900">
-                              <BookOutlined className="text-amber-500 text-xs shrink-0" />
-                              <span>Bookmark Intent</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-right">
-                              <span className="font-bold text-slate-900 tabular-nums">
-                                {viralityCockpit.saveRate.toFixed(1)}%
-                              </span>
-                              <span className="text-[11px] text-slate-400 tabular-nums">
-                                ({insights.saved.toLocaleString()} saved)
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mt-1.5">
-                            <Progress
-                              percent={viralityCockpit.saveScore}
-                              showInfo={false}
-                              strokeColor="#f59e0b"
-                              size="small"
-                              className="!m-0"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Actionable Comment-DM Strategy Callout (Soft Pastel Periwinkle borderless) */}
-                      <div className="mt-auto pt-1">
-                        <div
-                          style={{ backgroundColor: "#e2e2fc" }}
-                          className="rounded-[20px] p-3.5 shadow-2xs border-0"
-                        >
-                          <div className="flex items-start gap-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0 mt-0.5">
-                              <ThunderboltOutlined className="text-xs" />
-                            </div>
-                            <div className="text-xs text-slate-900 leading-snug">
-                              <span className="font-bold">Automation Synergy: </span>
-                              {viralityCockpit.activeRules > 0 ? (
-                                <span>
-                                  <span className="text-emerald-800 font-bold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+                        {/* 4 Algorithmic Signal Diagnostics (Apple HIG Squircle & Activity Colors) */}
+                        <div className="space-y-2">
+                          {/* 1. Share Velocity (Apple System Blue) */}
+                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 font-bold text-slate-900">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#4f46e5]/12 text-[#4f46e5] shrink-0">
+                                  <ShareAltOutlined className="text-xs" />
                                 </span>
-                              ) : (
-                                <span>
-                                  Auto-DM is inactive. Activate keyword triggers to capture high intent from viewers discovering this post.
+                                <span>Peer Share Velocity</span>
+                                <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Primary Viral Signal)</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-right">
+                                <span className="font-bold text-slate-900 tabular-nums">
+                                  {viralityCockpit.shareRate.toFixed(1)}%
                                 </span>
-                              )}
+                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                  ({insights.shares.toLocaleString()} sent)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <Progress
+                                percent={viralityCockpit.shareScore}
+                                showInfo={false}
+                                strokeColor="#4f46e5"
+                                trailColor="#e5e5ea"
+                                strokeLinecap="round"
+                                size="small"
+                                className="!m-0"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 2. Engagement Density (Apple System Pink / Activity Red) */}
+                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 font-bold text-slate-900">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FF2D55]/12 text-[#FF2D55] shrink-0">
+                                  <HeartOutlined className="text-xs" />
+                                </span>
+                                <span>Audience Response</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-right">
+                                <span className="font-bold text-slate-900 tabular-nums">
+                                  {viralityCockpit.engRate.toFixed(1)}%
+                                </span>
+                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                  ({insights.totalInteractions.toLocaleString()} total)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <Progress
+                                percent={viralityCockpit.engScore}
+                                showInfo={false}
+                                strokeColor="#FF2D55"
+                                trailColor="#e5e5ea"
+                                strokeLinecap="round"
+                                size="small"
+                                className="!m-0"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 3. Replay Frequency (Apple System Indigo) */}
+                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 font-bold text-slate-900">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5856D6]/12 text-[#5856D6] shrink-0">
+                                  <PlayCircleOutlined className="text-xs" />
+                                </span>
+                                <span>Replay Frequency</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-right">
+                                <span className="font-bold text-slate-900 tabular-nums">
+                                  {viralityCockpit.freq.toFixed(2)}x
+                                </span>
+                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                  (views/reach)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <Progress
+                                percent={viralityCockpit.freqScore}
+                                showInfo={false}
+                                strokeColor="#5856D6"
+                                trailColor="#e5e5ea"
+                                strokeLinecap="round"
+                                size="small"
+                                className="!m-0"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 4. Bookmark Intent (Apple System Orange) */}
+                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                            <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 font-bold text-slate-900">
+                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FF9500]/12 text-[#FF9500] shrink-0">
+                                  <BookOutlined className="text-xs" />
+                                </span>
+                                <span>Bookmark Intent</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-right">
+                                <span className="font-bold text-slate-900 tabular-nums">
+                                  {viralityCockpit.saveRate.toFixed(1)}%
+                                </span>
+                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                  ({insights.saved.toLocaleString()} saved)
+                                </span>
+                              </div>
+                            </div>
+                            <div className="mt-2">
+                              <Progress
+                                percent={viralityCockpit.saveScore}
+                                showInfo={false}
+                                strokeColor="#FF9500"
+                                trailColor="#e5e5ea"
+                                strokeLinecap="round"
+                                size="small"
+                                className="!m-0"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actionable Comment-DM Strategy Callout (Apple HIG Blue Banner) */}
+                        <div className="mt-auto pt-1">
+                          <div className="rounded-[20px] p-3.5 shadow-2xs bg-[#4f46e5]/8 border border-[#4f46e5]/15">
+                            <div className="flex items-start gap-2.5">
+                              <div className="w-7 h-7 rounded-xl bg-[#4f46e5] text-white shadow-xs flex items-center justify-center shrink-0 mt-0.5">
+                                <ThunderboltOutlined className="text-xs" />
+                              </div>
+                              <div className="text-xs text-slate-900 leading-snug">
+                                <span className="font-bold">Automation Synergy: </span>
+                                {viralityCockpit.activeRules > 0 ? (
+                                  <span>
+                                    <span className="text-[#4f46e5] font-bold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+                                  </span>
+                                ) : (
+                                  <span>
+                                    Auto-DM is inactive. Activate keyword triggers to capture high intent from viewers discovering this post.
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ) : rightTab === "funnel" ? (
-                    <div className="flex-1 flex flex-col justify-between space-y-2.5">
-                      {funnelSteps.map((f) => (
-                        <div
-                          key={f.key}
-                          className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2">
-                              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs text-xs">
-                                {f.icon}
-                              </span>
-                              <span className="text-xs font-bold text-slate-900">{f.label}</span>
+                    ) : rightTab === "funnel" ? (
+                      <div className="flex-1 flex flex-col justify-between space-y-2.5">
+                        {funnelSteps.map((f) => (
+                          <div
+                            key={f.key}
+                            className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`flex h-7 w-7 items-center justify-center rounded-xl border text-xs shadow-2xs ${f.badgeCls}`}>
+                                  {f.icon}
+                                </span>
+                                <span className="text-xs font-bold text-slate-900">{f.label}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-xs font-bold tabular-nums text-slate-900">
+                                  {f.value.toLocaleString()}
+                                </span>
+                                <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-500">
+                                  {f.pct}%
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <span className="text-xs font-bold tabular-nums text-slate-900">
-                                {f.value.toLocaleString()}
-                              </span>
-                              <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-500">
-                                {f.pct}%
-                              </span>
+                            <div className="mt-2">
+                              <Progress
+                                percent={f.pct}
+                                showInfo={false}
+                                strokeColor={f.progressColor}
+                                trailColor="#e5e5ea"
+                                strokeLinecap="round"
+                                size="small"
+                                className="!m-0"
+                              />
                             </div>
                           </div>
-                          <div className="mt-1.5">
-                            <Progress
-                              percent={f.pct}
-                              showInfo={false}
-                              strokeColor="#000000"
-                              size="small"
-                              className="!m-0"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col justify-center">
-                      <DonutChart
-                        segments={replySegments}
-                        centerLabel="Total Comments"
-                        centerValue={data?.stats.totalComments ?? 0}
-                      />
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex flex-col justify-center">
+                        <UnifiedChart
+                          type="donut"
+                          segments={replySegments}
+                          centerLabel="Total Comments"
+                          centerValue={data?.stats.totalComments ?? 0}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -3860,19 +3910,17 @@ export function PostDetail({
                             type="button"
                             onClick={() => setActivitySubTab(item.key as any)}
                             style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : undefined}
-                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                              isActive
+                            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${isActive
                                 ? "!bg-black !text-white shadow-xs"
                                 : "text-slate-600 hover:text-slate-950 hover:bg-white/80"
-                            }`}
+                              }`}
                           >
                             <span>{item.label}</span>
                             <span
-                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
-                                isActive
+                              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive
                                   ? "bg-white/20 text-white"
                                   : "bg-slate-200/80 text-slate-700"
-                              }`}
+                                }`}
                             >
                               {item.count}
                             </span>
@@ -3974,11 +4022,10 @@ export function PostDetail({
                                   onClick={() => toggleDmRule(rule)}
                                   loading={togglingRule === rule.id}
                                   style={!rule.enabled ? { backgroundColor: "#000000", color: "#ffffff", borderColor: "#000000" } : undefined}
-                                  className={`!rounded-full !text-xs !font-bold !px-4 !py-1 transition-all cursor-pointer ${
-                                    rule.enabled
+                                  className={`!rounded-full !text-xs !font-bold !px-4 !py-1 transition-all cursor-pointer ${rule.enabled
                                       ? "!bg-white !text-slate-950 !border !border-[#e9e9ee] hover:!border-black/40 !shadow-2xs"
                                       : "!bg-black hover:!bg-neutral-800 !text-white !border-0 !shadow-xs"
-                                  }`}
+                                    }`}
                                 >
                                   {rule.enabled ? "Pause Rule" : "Activate Rule"}
                                 </Button>

@@ -27,8 +27,7 @@ import {
   BarChartOutlined,
 } from "@ant-design/icons";
 import { api, ApiError } from "@/lib/api";
-import { LineChart, Point } from "./LineChart";
-import { DonutChart } from "./DonutChart";
+import { UnifiedChart, Point } from "./UnifiedChart";
 
 type Rule = {
   id: string;
@@ -403,7 +402,7 @@ export function CommentDmAutomationList({
                     <h3 className="text-sm sm:text-base font-semibold text-slate-900">DMs sent timeline</h3>
                     <p className="text-[11px] sm:text-xs text-slate-500">Automated outbound message volume over time</p>
                   </div>
-                  <LineChart data={stats.series} label="DMs sent" />
+                  <UnifiedChart type="bar" data={stats.series} label="DMs sent" color="#4f46e5" />
                 </div>
               </Card>
 
@@ -417,12 +416,13 @@ export function CommentDmAutomationList({
                     <h3 className="text-sm sm:text-base font-semibold text-slate-900">Delivery status</h3>
                     <p className="text-[11px] sm:text-xs text-slate-500">Successful vs failed trigger dispatches</p>
                   </div>
-                  <DonutChart
+                  <UnifiedChart
+                    type="donut"
                     centerLabel="Total"
                     centerValue={stats.triggered}
                     segments={[
-                      { label: "Sent", value: stats.sent, color: "#22c55e" },
-                      { label: "Failed", value: stats.failed, color: "#ef4444" },
+                      { label: "Sent", value: stats.sent, color: "#34C759" },
+                      { label: "Failed", value: stats.failed, color: "#FF3B30" },
                     ]}
                   />
                 </div>
