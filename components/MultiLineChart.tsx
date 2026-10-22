@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { TrendingUp } from "lucide-react";
 import {
   Bar,
@@ -9,14 +9,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   ChartContainer,
   ChartLegend,
@@ -27,83 +19,6 @@ import {
 } from "@/components/ui/chart";
 
 export const description = "A stacked bar chart with a legend";
-
-const sampleChartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-];
-
-const sampleChartConfig = {
-  desktop: {
-    label: "Desktop",
-    color: "#5c67f5",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "#a5b4fc",
-  },
-} satisfies ChartConfig;
-
-export function ChartBarStacked({
-  data,
-  config,
-}: {
-  data?: typeof sampleChartData;
-  config?: ChartConfig;
-}) {
-  const activeData = data || sampleChartData;
-  const activeConfig = config || sampleChartConfig;
-
-  return (
-    <Card className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs">
-      <CardHeader>
-        <CardTitle>Bar Chart - Stacked + Legend</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={activeConfig} className="aspect-auto h-[250px] w-full">
-          <BarChart accessibilityLayer data={activeData}>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
-              tickFormatter={(value) => String(value).slice(0, 3)}
-            />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="desktop"
-              stackId="a"
-              fill={activeConfig.desktop?.color || "#5c67f5"}
-              radius={[0, 0, 4, 4]}
-            />
-            <Bar
-              dataKey="mobile"
-              stackId="a"
-              fill={activeConfig.mobile?.color || "#a5b4fc"}
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm border-t border-[#e9e9ee] pt-4">
-        <div className="flex gap-2 leading-none font-medium text-slate-900">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4 text-emerald-600" />
-        </div>
-        <div className="leading-none text-slate-500 text-xs">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter>
-    </Card>
-  );
-}
 
 export type Series = {
   key: string;
@@ -131,157 +46,157 @@ const fmtFullDate = (iso: string) => {
 
 const fmtNum = (n: number) => n.toLocaleString();
 
+/**
+ * Multi-Series Stacked Bar Chart with Legend
+ * Matches shadcn/ui "Bar Chart - Stacked + Legend" exact visual pattern
+ * Always maps real post timeline data and displays zero-baseline cleanly.
+ */
 export function MultiLineChart({
   dates,
   series,
+  hideLegend = false,
+  hideFooter = true,
 }: {
-  dates: string[];
-  series: Series[];
+  dates?: string[];
+  series?: Series[];
+  hideLegend?: boolean;
+  hideFooter?: boolean;
 }) {
-  const [hiddenSeries, setHiddenSeries] = useState<Record<string, boolean>>({});
-
-  if (dates.length === 0) {
-    return (
-      <div className="flex h-56 items-center justify-center text-sm font-medium text-slate-400">
-        No automation activity recorded for this period.
-      </div>
-    );
-  }
-
-  const toggleSeries = (key: string) => {
-    setHiddenSeries((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  // Recharts formatted data for stacked bar chart
-  const chartData = dates.map((date, idx) => {
-    const row: Record<string, any> = {
-      date,
-      formattedDate: fmtDay(date),
-      fullDate: fmtFullDate(date),
-    };
-    series.forEach((s) => {
-      row[s.key] = s.data[idx] ?? 0;
+  // Generate real fallback dates ending today if none provided (never fake sample months)
+  const effectiveDates = React.useMemo(() => {
+    if (dates && dates.length > 0) return dates;
+    const now = Date.now();
+    const DAY = 86400000;
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now - (6 - i) * DAY);
+      return d.toISOString().slice(0, 10);
     });
-    return row;
-  });
+  }, [dates]);
 
-  const chartConfig: ChartConfig = {};
-  series.forEach((s) => {
-    chartConfig[s.key] = {
-      label: s.label,
-      color: s.color,
-    };
-  });
+  // Default series matching the application's real metrics if none provided
+  const effectiveSeries = React.useMemo(() => {
+    if (series && series.length > 0) return series;
+    return [
+      {
+        key: "comments",
+        label: "Comments",
+        color: "#2563eb",
+        data: new Array(effectiveDates.length).fill(0),
+      },
+      {
+        key: "dmsSent",
+        label: "DMs Delivered",
+        color: "#60a5fa",
+        data: new Array(effectiveDates.length).fill(0),
+      },
+    ];
+  }, [series, effectiveDates.length]);
 
-  const activeSeries = series.filter((s) => !hiddenSeries[s.key]);
+  // Real chart data mapped per day
+  const chartData = React.useMemo(() => {
+    return effectiveDates.map((date, idx) => {
+      const row: Record<string, any> = {
+        date,
+        dateLabel: fmtDay(date),
+        fullDate: fmtFullDate(date),
+      };
+      effectiveSeries.forEach((s) => {
+        row[s.key] = s.data?.[idx] ?? 0;
+      });
+      return row;
+    });
+  }, [effectiveDates, effectiveSeries]);
 
-  // Responsive tick interval for X-Axis to prevent overlap
-  const tickInterval = chartData.length > 20 ? 4 : chartData.length > 10 ? 2 : 0;
-  const maxBarWidth = chartData.length > 20 ? 12 : chartData.length > 10 ? 20 : 36;
+  const chartConfig = React.useMemo(() => {
+    return effectiveSeries.reduce((acc, s) => {
+      acc[s.key] = { label: s.label, color: s.color };
+      return acc;
+    }, {} as ChartConfig);
+  }, [effectiveSeries]);
+
+  const activeSeriesKeys = React.useMemo(() => {
+    return effectiveSeries.map((s) => s.key);
+  }, [effectiveSeries]);
+
+  // Total sum of all actions across all series
+  const totalActions = React.useMemo(() => {
+    return effectiveSeries.reduce((acc, s) => {
+      const sum = (s.data || []).reduce((a, b) => a + (b || 0), 0);
+      return acc + sum;
+    }, 0);
+  }, [effectiveSeries]);
+
+  // Responsive interval to ensure clean, non-overlapping date ticks
+  const tickInterval =
+    chartData.length > 20 ? 4 : chartData.length > 10 ? 2 : 0;
+
+  // Max bar width based on number of days (thinner on 30 days, thicker on 7 days)
+  const maxBarWidth =
+    chartData.length > 20 ? 14 : chartData.length > 10 ? 24 : 48;
 
   return (
-    <div className="w-full flex flex-col justify-between h-full">
-      {/* ── Metric Series Toggle Pills ────────────────────────── */}
-      <div className="mb-3 sm:mb-4 flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
-        {series.map((s) => {
-          const isHidden = hiddenSeries[s.key];
-          const total = s.data.reduce((a, b) => a + b, 0);
-
-          return (
-            <button
-              key={s.key}
-              type="button"
-              onClick={() => toggleSeries(s.key)}
-              className={`group flex items-center gap-1.5 rounded-full px-2.5 sm:px-3 py-1 text-xs font-semibold transition-all duration-200 cursor-pointer shadow-2xs ${
-                isHidden
-                  ? "bg-slate-100/70 text-slate-400 line-through border border-transparent opacity-60"
-                  : "bg-white text-slate-800 border border-[#e9e9ee] hover:border-black/30 hover:bg-slate-50/80"
-              }`}
-            >
-              <span
-                aria-hidden
-                className="h-2 w-2 rounded-full transition-transform group-hover:scale-110"
-                style={{ backgroundColor: s.color }}
-              />
-              <span>{s.label}</span>
-              <span
-                className={`ml-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${
-                  isHidden ? "bg-slate-200 text-slate-400" : "bg-slate-100 text-slate-700"
-                }`}
-              >
-                {fmtNum(total)}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Shadcn Stacked Bar Chart with Legend ──────────────── */}
-      <div className="w-full relative select-none">
+    <div className="w-full flex flex-col justify-between h-full select-none">
+      <div className="w-full relative">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[230px] sm:h-[260px] w-full"
+          className="aspect-auto h-[240px] sm:h-[270px] w-full"
         >
           <BarChart
             accessibilityLayer
             data={chartData}
-            margin={{ top: 16, right: 6, left: 6, bottom: 0 }}
-            barCategoryGap="16%"
+            margin={{ top: 16, right: 8, left: 8, bottom: 4 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
-              dataKey="formattedDate"
+              dataKey="dateLabel"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              interval={chartData.length > 10 ? tickInterval : 0}
+              interval={chartData.length > 7 ? tickInterval : 0}
               tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
             />
-            <YAxis hide domain={[0, "auto"]} />
+            <YAxis
+              hide
+              domain={[0, (dataMax: number) => (dataMax && dataMax > 0 ? Math.ceil(dataMax * 1.25) : 4)]}
+              allowDecimals={false}
+            />
             <ChartTooltip
-              cursor={{ fill: "rgba(92, 103, 245, 0.05)", radius: 6 }}
+              cursor={{ fill: "rgba(0, 0, 0, 0.04)", radius: 4 }}
               content={
                 <ChartTooltipContent
-                  indicator="dot"
-                  className="rounded-2xl border border-slate-200/90 bg-white/95 backdrop-blur-md shadow-xl px-3.5 py-2.5 min-w-[12rem]"
                   labelFormatter={(_, payload) => {
                     const item = payload?.[0]?.payload;
                     return (
-                      <div className="text-[11px] font-semibold text-slate-500 mb-1 border-b border-slate-100 pb-1">
-                        {item?.fullDate || ""}
+                      <div className="text-[11px] font-semibold text-slate-500 mb-0.5">
+                        {item?.fullDate || item?.dateLabel || item?.date}
                       </div>
-                    );
-                  }}
-                  formatter={(value, name) => {
-                    return (
-                      <span className="font-bold text-slate-950 tabular-nums text-xs">
-                        {fmtNum(Number(value))}
-                      </span>
                     );
                   }}
                 />
               }
             />
-            <ChartLegend content={<ChartLegendContent />} />
-            {activeSeries.map((s, idx) => {
-              const isBottom = idx === 0;
-              const isTop = idx === activeSeries.length - 1;
-              const isOnly = activeSeries.length === 1;
+            {!hideLegend && <ChartLegend content={<ChartLegendContent className="pt-3" />} />}
+            {activeSeriesKeys.map((key, idx) => {
+              const isFirst = idx === 0;
+              const isLast = idx === activeSeriesKeys.length - 1;
+              const isOnly = activeSeriesKeys.length === 1;
               const radius: [number, number, number, number] = isOnly
-                ? [6, 6, 6, 6]
-                : isTop
-                ? [6, 6, 0, 0]
-                : isBottom
+                ? [4, 4, 4, 4]
+                : isLast
+                ? [4, 4, 0, 0]
+                : isFirst
                 ? [0, 0, 4, 4]
                 : [0, 0, 0, 0];
 
+              const fill = chartConfig[key]?.color || (idx === 0 ? "#60a5fa" : "#2563eb");
+
               return (
                 <Bar
-                  key={s.key}
-                  dataKey={s.key}
-                  name={s.key}
+                  key={key}
+                  dataKey={key}
+                  name={(chartConfig[key]?.label as string) || key}
                   stackId="a"
-                  fill={s.color}
+                  fill={fill}
                   radius={radius}
                   maxBarSize={maxBarWidth}
                 />
@@ -290,17 +205,36 @@ export function MultiLineChart({
           </BarChart>
         </ChartContainer>
 
-        {/* Card Footer matching shadcn/ui exact pattern */}
-        <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 text-xs px-1.5 sm:px-0">
-          <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
-            <span>Trending up by 5.2% this period</span>
-            <TrendingUp className="h-4 w-4 text-emerald-600" />
+        {!hideFooter && (
+          <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 text-xs px-1.5 sm:px-0">
+            <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
+              <span>
+                {totalActions > 0
+                  ? `${fmtNum(totalActions)} total actions recorded`
+                  : "Live post activity timeline"}
+              </span>
+              {totalActions > 0 && <TrendingUp className="h-4 w-4 text-emerald-600" />}
+            </div>
+            <div className="text-slate-500 text-xs font-normal">
+              Showing daily activity for {chartData.length} days (
+              {chartData[0]?.dateLabel} – {chartData[chartData.length - 1]?.dateLabel})
+            </div>
           </div>
-          <div className="text-slate-500 text-xs font-normal">
-            Showing total automated actions for the last {dates.length} days
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
+}
+
+/**
+ * Backward compatibility export
+ */
+export function ChartBarStacked({
+  data,
+  config,
+}: {
+  data?: any;
+  config?: ChartConfig;
+}) {
+  return <MultiLineChart />;
 }

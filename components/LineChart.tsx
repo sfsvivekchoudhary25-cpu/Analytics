@@ -207,44 +207,41 @@ export function LineChart({
   color = "#5c67f5",
   showStats = true,
   ribbonClassName,
+  hideFooter = false,
 }: {
   data: Point[];
   label: string;
   color?: string;
   showStats?: boolean;
   ribbonClassName?: string;
+  hideFooter?: boolean;
 }) {
   const chartId = useId().replace(/:/g, "");
 
-  const chartData =
-    data && data.length > 0
-      ? data.map((d) => ({
-          month: fmtDay(d.date),
-          desktop: d.value,
-          date: d.date,
-          fullDate: fmtFullDate(d.date),
-        }))
-      : defaultSampleData.map((d) => ({
-          month: d.month,
-          desktop: d.desktop,
-          date: d.month,
-          fullDate: d.month,
-        }));
+  const fallbackData: Point[] = React.useMemo(() => {
+    const now = Date.now();
+    const DAY = 86400000;
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now - (6 - i) * DAY);
+      return { date: d.toISOString().slice(0, 10), value: 0 };
+    });
+  }, []);
 
-  const totalValue =
-    data && data.length > 0
-      ? data.reduce((acc, d) => acc + d.value, 0)
-      : defaultSampleData.reduce((acc, d) => acc + d.desktop, 0);
+  const activePoints = data && data.length > 0 ? data : fallbackData;
+
+  const chartData = activePoints.map((d) => ({
+    month: fmtDay(d.date),
+    desktop: d.value,
+    date: d.date,
+    fullDate: fmtFullDate(d.date),
+  }));
+
+  const totalValue = activePoints.reduce((acc, d) => acc + (d.value || 0), 0);
 
   const peakValue =
-    data && data.length > 0
-      ? Math.max(...data.map((d) => d.value))
-      : Math.max(...defaultSampleData.map((d) => d.desktop));
+    activePoints.length > 0 ? Math.max(...activePoints.map((d) => d.value || 0)) : 0;
 
-  const activeDays =
-    data && data.length > 0
-      ? data.filter((d) => d.value > 0).length
-      : defaultSampleData.filter((d) => d.desktop > 0).length;
+  const activeDays = activePoints.filter((d) => (d.value || 0) > 0).length;
 
   const barColor = color === "#000000" || color === "#0071e3" ? "#5c67f5" : color || "#5c67f5";
 
@@ -326,7 +323,11 @@ export function LineChart({
                 interval={chartData.length > 10 ? tickInterval : 0}
                 tick={{ fill: "#64748b", fontSize: 11, fontWeight: 500 }}
               />
-              <YAxis hide domain={[0, "auto"]} />
+              <YAxis
+                hide
+                domain={[0, (dataMax: number) => (dataMax && dataMax > 0 ? Math.ceil(dataMax * 1.25) : 4)]}
+                allowDecimals={false}
+              />
               <ChartTooltip
                 cursor={{ fill: "rgba(92, 103, 245, 0.05)", radius: 6 }}
                 content={
@@ -351,7 +352,7 @@ export function LineChart({
               />
               <Bar
                 dataKey="desktop"
-                fill="#5c67f5"
+                fill={barColor}
                 radius={[8, 8, 4, 4]}
                 maxBarSize={maxBarWidth}
               >
@@ -374,15 +375,21 @@ export function LineChart({
           </ChartContainer>
 
           {/* Card Footer matching the user's mobile screenshot */}
-          <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 px-1.5 sm:px-0 text-xs">
-            <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
-              <span>Trending up by 5.2% this period</span>
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
+          {!hideFooter && (
+            <div className="flex flex-col items-start gap-1 border-t border-[#e9e9ee]/80 pt-3.5 mt-3 px-1.5 sm:px-0 text-xs">
+              <div className="flex items-center gap-1.5 font-bold text-slate-950 text-sm">
+                <span>
+                  {totalValue > 0
+                    ? `${fmtNum(totalValue)} total ${label.toLowerCase()} recorded`
+                    : `Live ${label.toLowerCase()} tracking`}
+                </span>
+                {totalValue > 0 && <TrendingUp className="h-4 w-4 text-emerald-600" />}
+              </div>
+              <div className="text-slate-500 text-xs font-normal">
+                Showing daily {label.toLowerCase()} for the last {activePoints.length} days
+              </div>
             </div>
-            <div className="text-slate-500 text-xs font-normal">
-              Showing total reach for the last {data && data.length > 0 ? `${data.length} days` : "7 days"}
-            </div>
-          </div>
+          )}
         </div>
       </div>
     );

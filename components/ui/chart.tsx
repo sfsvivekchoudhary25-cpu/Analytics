@@ -184,7 +184,7 @@ export const ChartTooltipContent = React.forwardRef<
                 <div className="flex items-center gap-1.5 text-slate-600">
                   {!hideIndicator && (
                     <span
-                      className="h-2 w-2 shrink-0 rounded-full"
+                      className="h-2.5 w-2.5 shrink-0 rounded-[2.5px]"
                       style={{
                         backgroundColor: indicatorColor,
                       }}
@@ -243,7 +243,7 @@ export const ChartLegendContent = React.forwardRef<
           <div key={item.value} className="flex items-center gap-1.5 text-slate-600">
             {!hideIcon ? (
               <span
-                className="h-2 w-2 shrink-0 rounded-full"
+                className="h-2.5 w-2.5 shrink-0 rounded-[2.5px]"
                 style={{
                   backgroundColor: item.color,
                 }}

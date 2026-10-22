@@ -63,6 +63,7 @@ import {
   HeartFilled,
   MessageOutlined,
   LinkOutlined,
+  EllipsisOutlined,
 } from "@ant-design/icons";
 import {
   Sparkles,
@@ -1428,20 +1429,14 @@ export function PostDetail({
       {
         key: "dmsSent",
         label: "DMs Delivered",
-        color: "#0284c7",
+        color: "#60a5fa",
         data: data.series.map((s) => s.dmsSent),
       },
       {
         key: "replies",
-        label: "Total Replies",
+        label: "Replies Sent",
         color: "#10b981",
         data: data.series.map((s) => s.replies),
-      },
-      {
-        key: "aiReplied",
-        label: "AI Replies",
-        color: "#8b5cf6",
-        data: data.series.map((s) => s.aiReplied),
       },
     ];
   }, [data?.series]);
@@ -2495,57 +2490,94 @@ export function PostDetail({
               {/* ── GRAPH ANALYTICS SECTION (Dashboard Style 2-Column Grid) ─────── */}
               <div className="grid gap-6 lg:gap-8 lg:grid-cols-[1fr_24rem] items-stretch">
                 {/* Left: Interactive Timeline Card */}
-                <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all flex flex-col h-full">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 mb-4 border-b border-[#e9e9ee]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-base sm:text-lg font-bold text-slate-950">
-                          {chartView === "engagement"
-                            ? "Activity & Automation Over Time"
-                            : chartView === "comments"
-                              ? "Comments Received Timeline"
-                              : chartView === "dms"
-                                ? "Comment DMs Sent Timeline"
-                                : "Replies Sent Timeline"}
-                        </h2>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f1f3f7] text-slate-700 text-[11px] font-bold">
-                          Timeline
-                        </span>
-                      </div>
-                      <p className="text-xs font-normal text-slate-500 mt-0.5">
+                <div
+                  style={{ padding: 0 }}
+                  className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white !p-0 shadow-2xs transition-all flex flex-col h-full overflow-hidden"
+                >
+                  <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#e9e9ee] bg-white">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-950 truncate">
                         {chartView === "engagement"
-                          ? `Comments, automated DMs, and replies recorded over the last ${days} days`
-                          : `Daily volume breakdown over the last ${days} days`}
+                          ? "Activity & Automation Over Time"
+                          : chartView === "comments"
+                            ? "Comments Received Timeline"
+                            : chartView === "dms"
+                              ? "Comment DMs Sent Timeline"
+                              : "Replies Sent Timeline"}
+                      </h2>
+                      <p className="text-xs text-slate-500 font-normal mt-0.5 truncate">
+                        {dates.length > 0
+                          ? (() => {
+                              const f = (iso: string) => {
+                                const d = new Date(iso.includes("T") ? iso : iso + "T00:00:00");
+                                return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                              };
+                              return `${f(dates[0])} – ${f(dates[dates.length - 1])} (${dates.length} days)`;
+                            })()
+                          : `Past ${days} days`}
                       </p>
                     </div>
-                    <Segmented
-                      size="small"
-                      value={chartView}
-                      onChange={(val) => setChartView(val as any)}
-                      options={[
-                        { label: "All Activity", value: "engagement", icon: <ThunderboltOutlined /> },
-                        { label: "Comments", value: "comments" },
-                        { label: "DMs Sent", value: "dms" },
-                        { label: "Replies", value: "replies" },
-                      ]}
-                      className="!rounded-full !bg-[#f1f3f7] !p-1 text-xs font-bold self-start sm:self-auto shrink-0"
-                    />
+
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: "engagement",
+                            icon: <ThunderboltOutlined className={chartView === "engagement" ? "text-amber-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">All Activity</span>,
+                            className: chartView === "engagement" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                          {
+                            key: "comments",
+                            icon: <CommentOutlined className={chartView === "comments" ? "text-blue-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">Comments</span>,
+                            className: chartView === "comments" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                          {
+                            key: "dms",
+                            icon: <SendOutlined className={chartView === "dms" ? "text-cyan-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">DMs Sent</span>,
+                            className: chartView === "dms" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                          {
+                            key: "replies",
+                            icon: <CheckCircleOutlined className={chartView === "replies" ? "text-emerald-500" : "text-slate-400"} />,
+                            label: <span className="font-semibold text-xs">Replies</span>,
+                            className: chartView === "replies" ? "!font-bold !bg-[#e2e2fc]" : "",
+                          },
+                        ],
+                        onClick: ({ key }) => setChartView(key as any),
+                        selectedKeys: [chartView],
+                      }}
+                      trigger={["click"]}
+                      placement="bottomRight"
+                    >
+                      <button
+                        type="button"
+                        aria-label="Chart view options"
+                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                        title="Change chart view"
+                      >
+                        <EllipsisOutlined className="text-lg text-slate-800" />
+                      </button>
+                    </Dropdown>
                   </div>
 
                   {loading ? (
-                    <div className="flex h-56 items-center justify-center">
+                    <div className="flex h-56 items-center justify-center p-4 sm:p-6">
                       <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                     </div>
                   ) : chartView === "engagement" ? (
-                    <div className="flex-1 flex flex-col justify-between">
-                      <MultiLineChart dates={dates} series={multiChartSeries} />
+                    <div className="flex-1 flex flex-col justify-between p-3 sm:p-6">
+                      <MultiLineChart dates={dates} series={multiChartSeries} hideLegend={false} hideFooter />
                     </div>
                   ) : (
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col justify-between p-3 sm:p-6">
                       <LineChart
                         data={singleSeriesData}
                         label={chartView === "comments" ? "Comments" : chartView === "dms" ? "DMs Sent" : "Replies"}
                         color={chartView === "comments" ? "#2563eb" : chartView === "dms" ? "#0284c7" : "#10b981"}
+                        hideFooter
                       />
                     </div>
                   )}
