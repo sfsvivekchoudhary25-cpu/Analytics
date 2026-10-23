@@ -32,6 +32,7 @@ import {
   ClipboardPaste,
 } from "lucide-react";
 import { ReelInfo, extractShortcode } from "@/app/api/instagram/reel/route";
+import { api } from "@/lib/api";
 
 export interface SavedReelItem {
   id: string;
@@ -78,19 +79,59 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [downloadStatus, setDownloadStatus] = useState<{ loading: boolean; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"downloader" | "vault">("downloader");
 
-  // Load saved reels from localStorage on mount
+  // Load saved reels: instant localStorage read + hydration & bidirectional sync with PostgreSQL
   useEffect(() => {
+    let localItems: SavedReelItem[] = [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        setSavedReels(JSON.parse(stored));
+        localItems = JSON.parse(stored);
+        setSavedReels(localItems);
       }
     } catch (e) {
-      console.warn("Failed to read saved reels:", e);
+      console.warn("Failed to read saved reels from localStorage:", e);
     }
+
+    // Hydrate from PostgreSQL database and sync across devices
+    (async () => {
+      try {
+        const dbItems = await api<SavedReelItem[]>("/saved-reels");
+        if (Array.isArray(dbItems)) {
+          if (dbItems.length > 0) {
+            // Merge database items with any un-synced local items
+            const map = new Map<string, SavedReelItem>();
+            dbItems.forEach((item) => map.set(item.shortcode, item));
+            localItems.forEach((item) => {
+              if (!map.has(item.shortcode)) {
+                map.set(item.shortcode, item);
+                api("/saved-reels", {
+                  method: "POST",
+                  body: JSON.stringify(item),
+                }).catch(() => {});
+              }
+            });
+            const merged = Array.from(map.values()).sort(
+              (a, b) => Number(b.savedAt || 0) - Number(a.savedAt || 0)
+            );
+            setSavedReels(merged);
+            try {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+            } catch {}
+          } else if (localItems.length > 0) {
+            // Database is empty but local storage has reels: push them into PostgreSQL
+            api("/saved-reels/sync", {
+              method: "POST",
+              body: JSON.stringify({ items: localItems }),
+            }).catch(() => {});
+          }
+        }
+      } catch (err) {
+        console.warn("[Vault] Database sync offline, using local storage:", err);
+      }
+    })();
   }, []);
 
-  // Sync saved reels to localStorage
+  // Sync saved reels to localStorage helper
   const persistSavedReels = useCallback((items: SavedReelItem[]) => {
     setSavedReels(items);
     try {
@@ -176,11 +217,16 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     return savedReels.some((r) => r.shortcode === activeReel.shortcode);
   }, [activeReel, savedReels]);
 
-  // Toggle save to vault
+  // Toggle save to vault (Optimistic UI update + PostgreSQL sync)
   const toggleSaveReel = (reel: ReelInfo) => {
     const exists = savedReels.some((r) => r.shortcode === reel.shortcode);
     if (exists) {
-      persistSavedReels(savedReels.filter((r) => r.shortcode !== reel.shortcode));
+      const updated = savedReels.filter((r) => r.shortcode !== reel.shortcode);
+      persistSavedReels(updated);
+      // Delete from PostgreSQL database in background
+      api(`/saved-reels/${reel.shortcode}`, { method: "DELETE" }).catch((err) => {
+        console.warn("[Vault] Failed to delete from database:", err);
+      });
     } else {
       const newItem: SavedReelItem = {
         id: reel.id,
@@ -201,6 +247,13 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
         savedAt: Date.now(),
       };
       persistSavedReels([newItem, ...savedReels]);
+      // Save to PostgreSQL database in background
+      api("/saved-reels", {
+        method: "POST",
+        body: JSON.stringify(newItem),
+      }).catch((err) => {
+        console.warn("[Vault] Failed to save to database:", err);
+      });
     }
   };
 
@@ -1192,9 +1245,10 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        persistSavedReels(savedReels.filter((r) => r.shortcode !== item.shortcode))
-                      }
+                      onClick={() => {
+                        persistSavedReels(savedReels.filter((r) => r.shortcode !== item.shortcode));
+                        api(`/saved-reels/${item.shortcode}`, { method: "DELETE" }).catch(() => {});
+                      }}
                       className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 shrink-0"
                       title="Remove from vault"
                     >
