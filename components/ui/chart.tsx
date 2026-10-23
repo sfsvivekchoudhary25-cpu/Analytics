@@ -47,7 +47,7 @@ export const ChartContainer = React.forwardRef<
       <div
         data-chart={chartId}
         ref={ref}
-        className={`flex aspect-auto justify-center text-xs ${className || ""}`}
+        className={`flex aspect-auto justify-center text-xs outline-none focus:outline-none focus-visible:outline-none [&_.recharts-wrapper]:outline-none [&_.recharts-surface]:outline-none [&_svg]:outline-none [&_*]:outline-none ${className || ""}`}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
@@ -65,19 +65,25 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     ([, config]) => config.theme || config.color
   );
 
-  if (!colorConfig.length) {
-    return null;
-  }
-
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(config)
-          .map(([key, item]) => {
-            const color = item.color || item.theme?.light || "#0071e3";
-            return `[data-chart="${id}"] { --color-${key}: ${color}; }`;
-          })
-          .join("\n"),
+        __html: `
+          [data-chart="${id}"] *:focus,
+          [data-chart="${id}"] *:focus-visible,
+          [data-chart="${id}"] .recharts-wrapper,
+          [data-chart="${id}"] .recharts-surface,
+          [data-chart="${id}"] svg {
+            outline: none !important;
+            box-shadow: none !important;
+          }
+          ${colorConfig
+            .map(([key, item]) => {
+              const color = item.color || item.theme?.light || "#0071e3";
+              return `[data-chart="${id}"] { --color-${key}: ${color}; }`;
+            })
+            .join("\n")}
+        `,
       }}
     />
   );
@@ -231,7 +237,7 @@ export const ChartLegendContent = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={`flex items-center justify-center gap-4 text-xs ${
+      className={`hidden sm:flex items-center justify-center gap-4 text-xs ${
         verticalAlign === "top" ? "pb-3" : "pt-3"
       } ${className || ""}`}
     >

@@ -14,7 +14,9 @@ import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, Stor
 import { HashtagSearch } from "@/components/HashtagSearch";
 import { VoiceNotesDashboard } from "@/components/voice-notes/VoiceNotesDashboard";
 import { VoiceNoteGlobalButton } from "@/components/voice-notes/VoiceNoteGlobalButton";
+import { ReelsDownloader } from "@/components/reels/ReelsDownloader";
 import { AudioOutlined } from "@ant-design/icons";
+import { Film } from "lucide-react";
 
 export const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
@@ -23,6 +25,7 @@ export const SECTIONS: Section[] = [
   { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
   { id: "stories", label: "Stories", icon: <StoriesIcon /> },
   { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
+  { id: "reels", label: "Reels Downloader", icon: <Film size={18} /> },
   { id: "voice-notes", label: "Voice Notes", icon: <AudioOutlined /> },
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
@@ -450,6 +453,7 @@ export default function AppDashboard({
             <Stories username={status.username} ownAvatar={status.profilePictureUrl} />
           )}
           {active === "hashtags" && <HashtagSearch />}
+          {active === "reels" && <ReelsDownloader />}
           {active === "voice-notes" && <VoiceNotesDashboard />}
           {active === "account" && accountPanel}
         </div>

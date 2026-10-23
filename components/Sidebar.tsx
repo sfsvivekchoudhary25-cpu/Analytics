@@ -20,6 +20,7 @@ import {
   PanelLeftOpen,
   LogOut,
   ExternalLink,
+  Film,
 } from "lucide-react";
 
 export type SectionId =
@@ -29,6 +30,7 @@ export type SectionId =
   | "comments"
   | "stories"
   | "hashtags"
+  | "reels"
   | "voice-notes"
   | "account";
 
@@ -42,6 +44,7 @@ const ICON_MAP: Record<SectionId, ReactNode> = {
   photos: <ImageIcon size={18} strokeWidth={1.75} />,
   stories: <History size={18} strokeWidth={1.75} />,
   hashtags: <Hash size={18} strokeWidth={1.75} />,
+  reels: <Film size={18} strokeWidth={1.75} />,
   "voice-notes": <Mic size={18} strokeWidth={1.75} />,
   account: <Settings size={18} strokeWidth={1.75} />,
 };

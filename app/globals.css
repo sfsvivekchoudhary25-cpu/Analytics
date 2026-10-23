@@ -249,3 +249,49 @@ a {
   scrollbar-color: #cbd5e1 transparent;
 }
 
+/* ── Recharts Chart Focus & Outline Reset ─────────────────────────────────── */
+/* Eliminate harsh browser focus rings and default outlines across all charts */
+.recharts-responsive-container,
+.recharts-responsive-container *,
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+.recharts-layer,
+.recharts-layer *,
+[data-chart],
+[data-chart] * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-responsive-container:focus,
+.recharts-responsive-container:focus-visible,
+svg.recharts-surface:focus,
+svg.recharts-surface:focus-visible,
+[data-chart]:focus,
+[data-chart]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* ── Hide Chart Legend on Mobile View Only (< 640px) ──────────────────────── */
+@media (max-width: 639px) {
+  .recharts-legend-wrapper,
+  .recharts-default-legend {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+}
+

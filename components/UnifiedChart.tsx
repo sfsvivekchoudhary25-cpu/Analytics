@@ -281,7 +281,11 @@ export function UnifiedChart({
     return (
       <div className={`flex-1 flex flex-col justify-between w-full h-full min-h-[300px] ${className}`}>
         <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[240px] max-h-none">
-          <BarChart data={chartData} margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 12, bottom: 0 }}>
+          <BarChart
+            data={chartData}
+            accessibilityLayer={false}
+            margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 12, bottom: 0 }}
+          >
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
               dataKey="day"
@@ -305,7 +309,7 @@ export function UnifiedChart({
             />
             {!hideLegend && (
               <ChartLegend
-                content={<ChartLegendContent className="text-xs font-semibold text-slate-600 gap-4 pt-2" />}
+                content={<ChartLegendContent className="hidden sm:flex text-xs font-semibold text-slate-600 gap-4 pt-2" />}
               />
             )}
             {series.map((s, index) => {
@@ -389,7 +393,11 @@ export function UnifiedChart({
 
       {effectiveType === "area" ? (
         <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
-          <AreaChart data={chartData} margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 12, bottom: 0 }}>
+          <AreaChart
+            data={chartData}
+            accessibilityLayer={false}
+            margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 12, bottom: 0 }}
+          >
             <defs>
               <linearGradient id={`area-grad-${chartId}`} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor={primaryColor} stopOpacity={0.25} />
@@ -429,7 +437,11 @@ export function UnifiedChart({
         </ChartContainer>
       ) : (
         <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
-          <BarChart data={chartData} margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 16, bottom: 0 }}>
+          <BarChart
+            data={chartData}
+            accessibilityLayer={false}
+            margin={{ left: hideYAxis ? 4 : -16, right: 8, top: 16, bottom: 0 }}
+          >
             <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis
               dataKey="month"
