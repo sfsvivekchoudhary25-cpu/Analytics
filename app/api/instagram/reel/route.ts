@@ -18,6 +18,7 @@ export interface ReelInfo {
   likes: number;
   comments: number;
   views: number;
+  quality?: string | null;
   duration: number | null;
   uploadDate: string | null;
   timestamp: number | null;
@@ -44,6 +45,7 @@ async function fetchOEmbedFallback(shortcode: string, originalUrl: string): Prom
   let embedHtml = "";
   let likes = 0;
   let comments = 0;
+  let views = 0;
   let uploadDate = null;
 
   try {
@@ -97,6 +99,10 @@ async function fetchOEmbedFallback(shortcode: string, originalUrl: string): Prom
           if (countMatch[3] && !author) author = countMatch[3];
           if (countMatch[4]) uploadDate = countMatch[4].trim();
         }
+        const viewMatch = desc.match(/([\d,]+)\s+(?:views?|plays?)/i);
+        if (viewMatch) {
+          views = parseInt(viewMatch[1].replace(/,/g, ""), 10) || 0;
+        }
       }
     }
   } catch (err) {
@@ -114,6 +120,8 @@ async function fetchOEmbedFallback(shortcode: string, originalUrl: string): Prom
     thumbnail,
     likes,
     comments,
+    views: views || 0,
+    quality: "1080p",
     uploadDate,
     embedHtml,
   };
@@ -170,6 +178,20 @@ try:
                 ud = str(r['upload_date'])
                 if len(ud) == 8: u = f'{ud[:4]}-{ud[4:6]}-{ud[6:8]}'
             author = r.get('uploader_id') or r.get('uploader') or 'instagram_user'
+            q = '1080p' if r.get('url') else None
+            fmts = r.get('formats') or []
+            if fmts:
+                best_fmt = fmts[-1]
+                w = best_fmt.get('width') or r.get('width')
+                h = best_fmt.get('height') or r.get('height')
+                if w and h:
+                    dim = min(int(w), int(h))
+                    if dim >= 2160: q = '4K'
+                    elif dim >= 1440: q = '1440p'
+                    elif dim >= 1080: q = '1080p'
+                    elif dim >= 720: q = '720p'
+                    elif dim >= 480: q = '480p'
+                    elif dim > 0: q = f'{dim}p'
             print(json.dumps({'success': True, 'data': {
                 'id': r.get('id') or code,
                 'shortcode': code,
@@ -182,7 +204,8 @@ try:
                 'authorUrl': f'https://www.instagram.com/{author}',
                 'likes': int(r.get('like_count') or 0),
                 'comments': int(r.get('comment_count') or 0),
-                'views': int(r.get('view_count') or 0),
+                'views': int(r.get('view_count') or r.get('play_count') or 0),
+                'quality': q,
                 'duration': r.get('duration'),
                 'uploadDate': u,
                 'timestamp': int(r['timestamp'] * 1000) if r.get('timestamp') else None,
@@ -211,7 +234,8 @@ try:
             'authorUrl': f'https://www.instagram.com/{author}',
             'likes': int(p.likes or 0),
             'comments': int(p.comments or 0),
-            'views': int(p.video_view_count or 0) if hasattr(p, 'video_view_count') else 0,
+            'views': int(getattr(p, 'video_play_count', 0) or getattr(p, 'video_view_count', 0) or 0),
+            'quality': '1080p' if p.video_url else 'HD',
             'duration': p.video_duration if hasattr(p, 'video_duration') else None,
             'uploadDate': ud,
             'timestamp': ts,
@@ -263,6 +287,7 @@ print(json.dumps({'success': False, 'error': 'This Instagram Reel is unavailable
           likes: fallback.likes || reelData?.likes || 0,
           comments: fallback.comments || reelData?.comments || 0,
           views: reelData?.views || 0,
+          quality: reelData?.quality || (fallback.thumbnail ? "1080p" : null),
           duration: reelData?.duration || null,
           uploadDate: fallback.uploadDate || reelData?.uploadDate || null,
           timestamp: reelData?.timestamp || null,

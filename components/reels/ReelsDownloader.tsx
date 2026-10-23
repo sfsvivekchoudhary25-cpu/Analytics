@@ -46,12 +46,20 @@ export interface SavedReelItem {
   likes: number;
   comments: number;
   views: number;
+  quality?: string | null;
   duration: number | null;
   uploadDate: string | null;
   savedAt: number;
 }
 
 const STORAGE_KEY = "fabroniee_saved_reels_vault_v1";
+
+function formatStatCount(num: number | null | undefined): string {
+  if (num === null || num === undefined || num === 0) return "0";
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  return num.toString();
+}
 
 export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [inputUrl, setInputUrl] = useState(initialUrl || "");
@@ -61,6 +69,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [savedReels, setSavedReels] = useState<SavedReelItem[]>([]);
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   const [copiedTag, setCopiedTag] = useState<string | null>(null);
+  const [copiedCaption, setCopiedCaption] = useState(false);
+  const [copiedAllTags, setCopiedAllTags] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [sortBy, setSortBy] = useState<"newest" | "likes" | "comments">("newest");
   const [expandedCaption, setExpandedCaption] = useState(false);
@@ -185,6 +195,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
         likes: reel.likes,
         comments: reel.comments,
         views: reel.views,
+        quality: reel.quality || "1080p",
         duration: reel.duration,
         uploadDate: reel.uploadDate,
         savedAt: Date.now(),
@@ -237,12 +248,27 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     setTimeout(() => setCopiedTag(null), 1800);
   };
 
+  // Copy full caption text
+  const handleCopyCaption = async (text: string) => {
+    await safeCopyText(text);
+    setCopiedCaption(true);
+    setTimeout(() => setCopiedCaption(false), 2000);
+  };
+
+  // Copy all hashtags combined
+  const handleCopyAllTags = async (tags: string[]) => {
+    if (!tags.length) return;
+    await safeCopyText(tags.join(" "));
+    setCopiedAllTags(true);
+    setTimeout(() => setCopiedAllTags(false), 2000);
+  };
+
   // Download media file via server proxy with blob + direct device file-save
   const triggerDownload = async (url: string, filename: string, type: "video" | "image") => {
     if (type === "video") setDownloadingVideo(true);
     setDownloadStatus({
       loading: true,
-      message: `Saving ${type === "video" ? "1080p video" : "cover image"} directly to your device...`,
+      message: type === "video" ? "Downloading video..." : "Downloading cover image...",
     });
 
     try {
@@ -264,9 +290,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
       setDownloadStatus({
         loading: false,
-        message: `Saved ${filename} to your device!`,
+        message: type === "video" ? "Video saved to your device!" : "Cover image saved to your device!",
       });
-      setTimeout(() => setDownloadStatus(null), 4000);
+      setTimeout(() => setDownloadStatus(null), 3500);
     } catch (err) {
       console.warn("Direct blob download failed, falling back to direct proxy anchor:", err);
       const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}&type=${type}`;
@@ -279,9 +305,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
       document.body.removeChild(a);
       setDownloadStatus({
         loading: false,
-        message: `Download initiated for ${filename}.`,
+        message: type === "video" ? "Video download started!" : "Cover image download started!",
       });
-      setTimeout(() => setDownloadStatus(null), 4000);
+      setTimeout(() => setDownloadStatus(null), 3500);
     } finally {
       if (type === "video") setDownloadingVideo(false);
     }
@@ -512,142 +538,148 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
           {/* Active Reel Responsive Studio Card (Mobile Single Column, Tablet & Desktop 2-Column) */}
           {activeReel ? (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-8 items-start animate-scale-in w-full">
+            <div className="flex flex-col md:flex-row gap-5 lg:gap-7 items-start animate-scale-in w-full">
               {/* ── LEFT COLUMN: REEL VIDEO / POSTER PREVIEW ── */}
-              <div className="md:col-span-5 lg:col-span-5 xl:col-span-4">
-                <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-3 sm:p-4 shadow-2xs space-y-3">
-                  {/* Media Story Frame */}
-                  <div className="relative aspect-[9/13] md:aspect-[9/15] w-full max-w-[270px] md:max-w-none mx-auto rounded-[20px] overflow-hidden bg-black shadow-md border border-[#e9e9ee] flex items-center justify-center group">
-                    {/* 1080p HD Badge on top left */}
-                    <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm">
-                      <Video size={11} className="text-[#e2e2fc]" />
-                      <span>1080p HD</span>
-                    </span>
+              <div className="w-full md:w-[265px] lg:w-[280px] xl:w-[295px] shrink-0 mx-auto md:mx-0 flex justify-center md:justify-start">
+                <div className="p-0 sm:p-3 bg-transparent sm:bg-white border-0 sm:border sm:border-[#e9e9ee] shadow-none sm:shadow-2xs rounded-none sm:rounded-[26px] w-full max-w-[275px] md:max-w-none">
+                  {/* Media Story Frame with Right-Side Quick Actions for Mobile */}
+                  <div className="relative flex items-end justify-center gap-2 sm:gap-0 w-full mx-auto">
+                    {/* Media Story Frame (Compact, sleek 9:16 smartphone proportions) */}
+                    <div className="relative aspect-[9/16] w-[240px] xs:w-[250px] md:w-full max-h-[490px] rounded-[20px] overflow-hidden bg-black shadow-md border border-[#e9e9ee] flex items-center justify-center group shrink-0">
+                      {/* 1080p HD Badge on top left */}
+                      <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm">
+                        <Video size={11} className="text-[#e2e2fc]" />
+                        <span>1080p HD</span>
+                      </span>
 
-                    {/* Instant Save Cover Badge on top right */}
-                    {activeReel.thumbnail && (
+                      {/* Instant Save Cover Badge on top right */}
+                      {activeReel.thumbnail && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
+                          }
+                          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+                          title="Download Cover Poster (.jpg)"
+                        >
+                          <ImageIcon size={11} />
+                          <span>Save Cover</span>
+                        </button>
+                      )}
+
+                      {activeReel.videoUrl ? (
+                        <video
+                          src={activeReel.videoUrl}
+                          poster={activeReel.thumbnail || undefined}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : activeReel.thumbnail ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={activeReel.thumbnail}
+                          alt={activeReel.caption || "Reel thumbnail"}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center p-6 text-slate-400">
+                          <Film size={36} className="mx-auto mb-2 opacity-60" />
+                          <p className="text-xs">No media preview available</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Mobile Only: Quick Action Icons Right Side Outside of Video */}
+                    <div className="md:hidden flex flex-col items-center gap-2 pb-1 shrink-0 z-10">
+                      {/* Download Video */}
+                      {activeReel.videoUrl && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            triggerDownload(activeReel.videoUrl!, `reel-${activeReel.shortcode}.mp4`, "video")
+                          }
+                          disabled={downloadingVideo}
+                          style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                          className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer disabled:opacity-70"
+                          title="Download Video (.mp4)"
+                        >
+                          {downloadingVideo ? (
+                            <RefreshCw size={14} className="animate-spin !text-white" />
+                          ) : (
+                            <FileDown size={15} className="!text-white" />
+                          )}
+                        </button>
+                      )}
+
+                      {/* Download Cover */}
+                      {activeReel.thumbnail && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
+                          }
+                          className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                          title="Save Cover Art (.jpg)"
+                        >
+                          <ImageIcon size={15} />
+                        </button>
+                      )}
+
+                      {/* Save to Vault */}
                       <button
                         type="button"
-                        onClick={() =>
-                          triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
-                        }
-                        className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
-                        title="Download Cover Poster (.jpg)"
+                        onClick={() => toggleSaveReel(activeReel)}
+                        style={isSaved ? { backgroundColor: "#feece4" } : {}}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md border transition-all cursor-pointer active:scale-90 ${
+                          isSaved
+                            ? "bg-[#feece4] border-black/80 text-slate-950"
+                            : "bg-white border-[#e9e9ee] hover:border-black text-slate-800"
+                        }`}
+                        title={isSaved ? "Saved in Vault" : "Save to Vault"}
                       >
-                        <ImageIcon size={11} />
-                        <span>Save Cover</span>
+                        {isSaved ? <BookmarkCheck size={15} className="text-emerald-700" /> : <Bookmark size={15} />}
                       </button>
-                    )}
 
-                    {activeReel.videoUrl ? (
-                      <video
-                        src={activeReel.videoUrl}
-                        poster={activeReel.thumbnail || undefined}
-                        controls
-                        playsInline
-                        preload="metadata"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : activeReel.thumbnail ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={activeReel.thumbnail}
-                        alt={activeReel.caption || "Reel thumbnail"}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="text-center p-6 text-slate-400">
-                        <Film size={36} className="mx-auto mb-2 opacity-60" />
-                        <p className="text-xs">No media preview available</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick 1-tap download bar right under preview for mobile */}
-                  {activeReel.videoUrl && (
-                    <div className="md:hidden pt-0.5">
+                      {/* Copy Link */}
                       <button
                         type="button"
-                        onClick={() =>
-                          triggerDownload(activeReel.videoUrl!, `reel-${activeReel.shortcode}.mp4`, "video")
-                        }
-                        disabled={downloadingVideo}
-                        style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                        className="w-full py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 disabled:opacity-75"
+                        onClick={() => handleCopy(activeReel.url)}
+                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-800 flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                        title="Copy Reel Link"
                       >
-                        {downloadingVideo ? (
-                          <RefreshCw size={14} className="animate-spin !text-white" />
-                        ) : (
-                          <FileDown size={14} className="!text-white" />
-                        )}
-                        <span className="!text-white">
-                          {downloadingVideo ? "Saving..." : "Download Video (.mp4)"}
-                        </span>
+                        {copiedUrl === activeReel.url ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                      </button>
+
+                      {/* Close / Cross */}
+                      <button
+                        type="button"
+                        onClick={handleClear}
+                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center text-xs font-black shadow-md active:scale-90 transition-transform cursor-pointer"
+                        title="Close Reel"
+                      >
+                        ✕
                       </button>
                     </div>
-                  )}
-
-                  {/* Sub-Player Quick Links */}
-                  <div className="flex items-center justify-between gap-2 pt-1 text-xs">
-                    <a
-                      href={activeReel.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-slate-600 hover:text-black font-semibold !no-underline"
-                    >
-                      <ExternalLink size={12} />
-                      <span>View on Instagram</span>
-                    </a>
-
-                    {activeReel.videoUrl && (
-                      <a
-                        href={activeReel.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-slate-600 hover:text-black font-semibold !no-underline"
-                      >
-                        <Play size={12} />
-                        <span>Direct Stream</span>
-                      </a>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* ── RIGHT COLUMN: CREATOR INFO, STATS, ACTIONS & CAPTION ── */}
-              <div className="md:col-span-7 lg:col-span-7 xl:col-span-8 space-y-4 sm:space-y-5">
-                {/* Creator Header Card */}
-                <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-[#f1f3f7] border border-[#e9e9ee] flex items-center justify-center shrink-0 font-black text-sm text-slate-800">
-                      <User size={18} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm sm:text-base font-black text-slate-950 truncate">
-                          @{activeReel.author}
-                        </span>
-                        <a
-                          href={activeReel.authorUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-slate-400 hover:text-black shrink-0"
-                          title="Open Instagram Profile"
-                        >
-                          <ExternalLink size={13} />
-                        </a>
-                      </div>
-                      <p className="text-xs text-slate-500 font-medium truncate">
-                        {activeReel.authorName !== activeReel.author
-                          ? activeReel.authorName
-                          : "Instagram Reel Creator"}
-                      </p>
-                    </div>
+              {/* ── RIGHT COLUMN: ACTIONS, STATS & CAPTION ── */}
+              <div className="flex-1 w-full min-w-0 space-y-4 sm:space-y-5">
+                {/* Actions Bar: Save to Vault, Copy Link & Close (Desktop/Tablet Only) */}
+                <div className="hidden md:flex rounded-[24px] border border-[#e9e9ee] bg-white p-3.5 sm:p-4 shadow-2xs items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e2e2fc] text-slate-950 text-xs font-bold border-0 shrink-0 shadow-2xs">
+                      <Film size={13} />
+                      <span>Active Reel</span>
+                    </span>
                   </div>
 
                   {/* Actions: Save to Vault & Copy Link */}
-                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => toggleSaveReel(activeReel)}
@@ -683,67 +715,18 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   </div>
                 </div>
 
-                {/* 3 Soft Pastel Engagement Cards (Borderless per AGENTS.md) */}
-                <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
-                  {/* Likes - Soft Rose Pink #fceef4 */}
-                  <div
-                    style={{ backgroundColor: "#fceef4" }}
-                    className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs border-0 min-h-[85px] sm:min-h-[105px]"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg sm:text-2xl font-black text-slate-950 tabular-nums">
-                        {activeReel.likes.toLocaleString()}
-                      </span>
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                        <Heart size={14} className="text-rose-600" />
-                      </div>
-                    </div>
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 mt-2">Likes</span>
-                  </div>
 
-                  {/* Comments - Soft Butter Yellow #fff9db */}
-                  <div
-                    style={{ backgroundColor: "#fff9db" }}
-                    className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs border-0 min-h-[85px] sm:min-h-[105px]"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg sm:text-2xl font-black text-slate-950 tabular-nums">
-                        {activeReel.comments.toLocaleString()}
-                      </span>
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                        <MessageCircle size={14} className="text-amber-700" />
-                      </div>
-                    </div>
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 mt-2">Comments</span>
-                  </div>
 
-                  {/* Views - Soft Periwinkle #e2e2fc */}
-                  <div
-                    style={{ backgroundColor: "#e2e2fc" }}
-                    className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs border-0 min-h-[85px] sm:min-h-[105px]"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg sm:text-2xl font-black text-slate-950 tabular-nums">
-                        {activeReel.views > 0 ? activeReel.views.toLocaleString() : "Reel"}
-                      </span>
-                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                        <Play size={14} className="text-indigo-700" />
-                      </div>
-                    </div>
-                    <span className="text-xs sm:text-sm font-bold text-slate-800 mt-2">Views</span>
-                  </div>
-                </div>
-
-                {/* Direct 1-Tap Device Download Card */}
-                <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
-                  <div className="flex items-center justify-between">
+                {/* Direct 1-Tap Device Download Card (Desktop & Tablet only; mobile uses floating quick-action buttons) */}
+                <div className="hidden md:block rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                     <div className="flex items-center gap-2">
-                      <FileDown size={16} className="text-slate-950" />
+                      <FileDown size={16} className="text-slate-950 shrink-0" />
                       <span className="text-xs sm:text-sm font-black text-slate-950">
                         Direct Device Downloads
                       </span>
                     </div>
-                    <span className="text-[11px] font-bold text-slate-400">
+                    <span className="text-[11px] font-medium text-slate-400">
                       Saves straight to your Downloads folder
                     </span>
                   </div>
@@ -798,20 +781,47 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   </div>
                 </div>
 
-                {/* Caption & Content Card with Hashtag Cloud */}
+                {/* Caption & Content Card with Hashtags */}
                 {activeReel.caption && (
                   <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-black text-slate-950">Caption</span>
-                      {activeReel.caption.length > 120 && (
-                        <button
-                          type="button"
-                          onClick={() => setExpandedCaption(!expandedCaption)}
-                          className="text-xs font-bold text-slate-600 hover:text-black cursor-pointer"
-                        >
-                          {expandedCaption ? "Show Less" : "Show Full Caption"}
-                        </button>
-                      )}
+                    {/* Header: Title + The Single Copy All Icon/Button */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm font-black text-slate-950">Caption</span>
+                        {activeReel.caption.length > 120 && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedCaption(!expandedCaption)}
+                            className="text-[11px] sm:text-xs font-bold text-slate-500 hover:text-black cursor-pointer transition-colors"
+                          >
+                            {expandedCaption ? "Show Less" : "Show Full"}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* The single icon/button to copy all things (caption & hashtags) */}
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCaption(activeReel.caption)}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer shadow-2xs border ${
+                          copiedCaption
+                            ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                            : "bg-white hover:bg-neutral-50 text-slate-900 border-[#e9e9ee] hover:border-black"
+                        }`}
+                        title="Copy caption and hashtags"
+                      >
+                        {copiedCaption ? (
+                          <>
+                            <Check size={13} className="text-emerald-600" />
+                            <span>Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={13} className="text-slate-700" />
+                            <span>Copy</span>
+                          </>
+                        )}
+                      </button>
                     </div>
 
                     <p
@@ -822,30 +832,20 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                       {activeReel.caption}
                     </p>
 
-                    {/* Hashtags Cloud (1-tap to copy) */}
+                    {/* Hashtags List (Clean, minimal tags without clutter) */}
                     {hashtags.length > 0 && (
-                      <div className="pt-2 border-t border-[#e9e9ee] space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold text-slate-500">
-                            Hashtags ({hashtags.length}) — Click to copy
-                          </span>
-                          {copiedTag && (
-                            <span className="text-[11px] font-bold text-emerald-600 animate-fade-in">
-                              Copied {copiedTag}!
-                            </span>
-                          )}
-                        </div>
+                      <div className="pt-3 border-t border-[#e9e9ee] space-y-2">
+                        <span className="text-[11px] font-bold text-slate-500 block">
+                          Hashtags ({hashtags.length})
+                        </span>
                         <div className="flex flex-wrap gap-1.5">
                           {hashtags.map((tag) => (
-                            <button
+                            <span
                               key={tag}
-                              type="button"
-                              onClick={() => handleCopyTag(tag)}
-                              className="px-2.5 py-1 rounded-full bg-[#f1f3f7] hover:bg-black hover:text-white text-slate-700 text-xs font-semibold transition-all cursor-pointer active:scale-95 shadow-2xs"
-                              title="Click to copy hashtag"
+                              className="px-2.5 py-1 rounded-full bg-[#f1f3f7] text-slate-700 text-xs font-semibold shadow-2xs"
                             >
                               {tag}
-                            </button>
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -1240,6 +1240,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                             title="Download Cover (.jpg)"
                           >
                             <ImageIcon size={12} />
+                          </button>
+                        )}
+
+                        {item.caption && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopyCaption(item.caption)}
+                            className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                            title="Copy Caption"
+                          >
+                            <Copy size={11} />
                           </button>
                         )}
 
