@@ -29,6 +29,7 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
+  ClipboardPaste,
 } from "lucide-react";
 import { ReelInfo, extractShortcode } from "@/app/api/instagram/reel/route";
 
@@ -429,16 +430,18 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               <button
                 type="button"
                 onClick={handlePaste}
-                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#f1f3f7] hover:bg-slate-200 text-slate-700 hover:text-slate-950 text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer active:scale-95"
+                className="w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-full bg-[#f1f3f7] hover:bg-slate-200 text-slate-700 hover:text-slate-950 text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+                title="Paste from clipboard"
               >
-                Paste
+                <ClipboardPaste size={14} className="sm:hidden text-slate-700" />
+                <span className="hidden sm:inline">Paste</span>
               </button>
 
               <button
                 type="submit"
                 disabled={loading}
                 style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                className="h-8 sm:h-10 px-3 sm:px-5 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-60 shrink-0 active:scale-95 text-xs font-bold"
+                className="w-8 h-8 sm:w-auto sm:h-10 p-0 sm:px-5 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-60 shrink-0 active:scale-95 text-xs font-bold"
                 title="Fetch Reel"
               >
                 {loading ? (
@@ -451,13 +454,6 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 )}
               </button>
             </form>
-
-            {/* Format highlights */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 px-1 text-xs text-slate-400 font-medium">
-              <span>• 1080p MP4 device downloads</span>
-              <span>• High-resolution cover art</span>
-              <span>• Zero watermarks</span>
-            </div>
           </div>
 
           {/* Enhanced Error / Notice Card (Soft Peach Coral #feece4) */}
@@ -1161,19 +1157,6 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 placeholder="Search by creator handle or caption..."
                 className="w-full pl-9 pr-4 py-2.5 rounded-full border border-[#e9e9ee] text-xs sm:text-sm focus:outline-none focus:border-black bg-white shadow-2xs"
               />
-            </div>
-
-            <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-              <span className="text-xs font-semibold text-slate-500">Sort:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="py-2 px-3 rounded-full border border-[#e9e9ee] text-xs font-bold bg-white text-slate-800 focus:outline-none focus:border-black cursor-pointer shadow-2xs"
-              >
-                <option value="newest">Newest First</option>
-                <option value="likes">Most Likes</option>
-                <option value="comments">Most Comments</option>
-              </select>
             </div>
           </div>
 
