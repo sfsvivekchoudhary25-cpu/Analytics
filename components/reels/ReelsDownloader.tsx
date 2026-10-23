@@ -449,24 +449,11 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               </button>
             </form>
 
-            {/* Quick tips & sample launcher */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 px-1 text-xs text-slate-500">
-              <span className="font-semibold text-slate-400">Quick:</span>
-              <button
-                type="button"
-                onClick={() => {
-                  const sample = "https://www.instagram.com/reel/Dew3_NSKnoc/";
-                  setInputUrl(sample);
-                  handleFetchReel(sample);
-                }}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-neutral-50 text-slate-800 border border-[#e9e9ee] hover:border-black text-[11px] font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
-              >
-                <Sparkles size={11} className="text-amber-500" />
-                <span>Try Sample (Karan Aujla)</span>
-              </button>
-              <span className="hidden md:inline-flex items-center gap-1 text-[11px] text-slate-400 font-medium">
-                • 1080p MP4 device downloads • Full covers • Zero watermarks
-              </span>
+            {/* Format highlights */}
+            <div className="flex flex-wrap items-center gap-2 pt-2 px-1 text-xs text-slate-400 font-medium">
+              <span>• 1080p MP4 device downloads</span>
+              <span>• High-resolution cover art</span>
+              <span>• Zero watermarks</span>
             </div>
           </div>
 
@@ -489,20 +476,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
                 <button
                   type="button"
-                  onClick={() => {
-                    const sample = "https://www.instagram.com/reel/Dew3_NSKnoc/";
-                    setInputUrl(sample);
-                    handleFetchReel(sample);
-                  }}
-                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
-                >
-                  Try Sample Reel
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setError(null)}
-                  className="text-slate-600 hover:text-black text-xs font-bold px-2 py-1 cursor-pointer"
+                  className="px-3.5 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
                 >
                   Dismiss
                 </button>
@@ -963,22 +938,6 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                       Clean original creator uploads without overlay logos or branding.
                     </p>
                   </div>
-                </div>
-
-                {/* Primary Sample Reel Action */}
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const sample = "https://www.instagram.com/reel/Dew3_NSKnoc/";
-                      setInputUrl(sample);
-                      handleFetchReel(sample);
-                    }}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-black/80 text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
-                  >
-                    <Sparkles size={14} className="text-amber-500" />
-                    <span>Try Sample Reel (Karan Aujla)</span>
-                  </button>
                 </div>
               </div>
 
