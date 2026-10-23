@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import path from "path";
 
 const execFileAsync = promisify(execFile);
 
@@ -146,68 +147,132 @@ export async function POST(request: NextRequest) {
 
     const normalizedUrl = `https://www.instagram.com/reel/${shortcode}/`;
 
-    // Strategy 1: Fast extract with yt-dlp
+const PYTHON_EXTRACT_SCRIPT = `
+import sys, json, re
+
+code = sys.argv[1].strip()
+m = re.search(r'(?:instagram\\.com\\/(?:p|reel|reels|tv)\\/|instagr\\.am\\/(?:p|reel|reels|tv)\\/)([A-Za-z0-9_-]+)', code)
+if m: code = m.group(1)
+url = f'https://www.instagram.com/reel/{code}/'
+
+try:
+    import yt_dlp
+    class L:
+        def debug(self, m): pass
+        def warning(self, m): pass
+        def error(self, m): pass
+    opts = {'quiet': True, 'no_warnings': True, 'extract_flat': False, 'logger': L()}
+    with yt_dlp.YoutubeDL(opts) as y:
+        r = y.extract_info(url, download=False)
+        if r and (r.get('url') or r.get('thumbnail')):
+            u = None
+            if r.get('upload_date'):
+                ud = str(r['upload_date'])
+                if len(ud) == 8: u = f'{ud[:4]}-{ud[4:6]}-{ud[6:8]}'
+            author = r.get('uploader_id') or r.get('uploader') or 'instagram_user'
+            print(json.dumps({'success': True, 'data': {
+                'id': r.get('id') or code,
+                'shortcode': code,
+                'url': url,
+                'videoUrl': r.get('url') or None,
+                'thumbnail': r.get('thumbnail') or None,
+                'caption': r.get('description') or r.get('title') or '',
+                'author': author,
+                'authorName': r.get('uploader') or author,
+                'authorUrl': f'https://www.instagram.com/{author}',
+                'likes': int(r.get('like_count') or 0),
+                'comments': int(r.get('comment_count') or 0),
+                'views': int(r.get('view_count') or 0),
+                'duration': r.get('duration'),
+                'uploadDate': u,
+                'timestamp': int(r['timestamp'] * 1000) if r.get('timestamp') else None,
+            }}))
+            sys.exit(0)
+except Exception:
+    pass
+
+try:
+    import instaloader
+    inst = instaloader.Instaloader()
+    p = instaloader.Post.from_shortcode(inst.context, code)
+    if p and (p.video_url or p.url):
+        author = p.owner_username or 'instagram_user'
+        ud = p.date_utc.strftime('%Y-%m-%d') if p.date_utc else None
+        ts = int(p.date_utc.timestamp() * 1000) if p.date_utc else None
+        print(json.dumps({'success': True, 'data': {
+            'id': str(p.mediaid) if hasattr(p, 'mediaid') else code,
+            'shortcode': code,
+            'url': url,
+            'videoUrl': p.video_url,
+            'thumbnail': p.url,
+            'caption': p.caption or '',
+            'author': author,
+            'authorName': p.owner_username or 'Instagram Creator',
+            'authorUrl': f'https://www.instagram.com/{author}',
+            'likes': int(p.likes or 0),
+            'comments': int(p.comments or 0),
+            'views': int(p.video_view_count or 0) if hasattr(p, 'video_view_count') else 0,
+            'duration': p.video_duration if hasattr(p, 'video_duration') else None,
+            'uploadDate': ud,
+            'timestamp': ts,
+        }}))
+        sys.exit(0)
+except Exception:
+    pass
+
+print(json.dumps({'success': False, 'error': 'This Instagram Reel is unavailable, private, or has been removed. Please verify that the Reel is accessible publicly on Instagram.'}))
+`;
+
+    // Strategy 1: Multi-tier python extractor (yt-dlp + instaloader)
     let reelData: ReelInfo | null = null;
+    let extractorError: string | null = null;
+
     try {
       const { stdout } = await execFileAsync(
         "python",
-        ["-m", "yt_dlp", "--dump-json", "--no-warnings", normalizedUrl],
-        { timeout: 9000, maxBuffer: 10 * 1024 * 1024 }
+        ["-c", PYTHON_EXTRACT_SCRIPT, shortcode],
+        { timeout: 15000, maxBuffer: 10 * 1024 * 1024 }
       );
 
       if (stdout) {
-        const raw = JSON.parse(stdout);
-        const caption = raw.description || raw.title || "";
-        const author = raw.uploader_id || raw.uploader || "instagram_user";
-
-        reelData = {
-          id: raw.id || shortcode,
-          shortcode,
-          url: normalizedUrl,
-          videoUrl: raw.url || null,
-          thumbnail: raw.thumbnail || null,
-          caption,
-          author,
-          authorName: raw.uploader || author,
-          authorUrl: `https://www.instagram.com/${author}`,
-          likes: typeof raw.like_count === "number" ? raw.like_count : 0,
-          comments: typeof raw.comment_count === "number" ? raw.comment_count : 0,
-          views: typeof raw.view_count === "number" ? raw.view_count : 0,
-          duration: typeof raw.duration === "number" ? raw.duration : null,
-          uploadDate: raw.upload_date
-            ? `${raw.upload_date.slice(0, 4)}-${raw.upload_date.slice(4, 6)}-${raw.upload_date.slice(6, 8)}`
-            : null,
-          timestamp: raw.timestamp ? raw.timestamp * 1000 : null,
-        };
+        const parsed = JSON.parse(stdout.trim());
+        if (parsed.success && parsed.data && (parsed.data.videoUrl || parsed.data.thumbnail)) {
+          reelData = parsed.data;
+        } else if (parsed.error) {
+          extractorError = parsed.error;
+        }
       }
     } catch (err: any) {
-      console.warn("yt-dlp extract failed or timed out:", err?.message || err);
+      console.warn("Python extract failed or timed out:", err?.message || err);
     }
 
-    // Strategy 2: Fallback to oEmbed + OpenGraph scraper if yt-dlp did not extract
-    if (!reelData || !reelData.caption) {
+    // Strategy 2: Fallback to oEmbed + OpenGraph scraper if python extractor didn't return media
+    if (!reelData || (!reelData.videoUrl && !reelData.thumbnail)) {
       const fallback = await fetchOEmbedFallback(shortcode, normalizedUrl);
-      reelData = {
-        id: shortcode,
-        shortcode,
-        url: normalizedUrl,
-        videoUrl: reelData?.videoUrl || null,
-        thumbnail: reelData?.thumbnail || fallback.thumbnail || null,
-        caption: fallback.caption || reelData?.caption || "Instagram Reel",
-        author: fallback.author || reelData?.author || "instagram_user",
-        authorName: fallback.authorName || reelData?.authorName || "Instagram Creator",
-        authorUrl: fallback.authorUrl || `https://www.instagram.com/${fallback.author}`,
-        likes: fallback.likes || reelData?.likes || 0,
-        comments: fallback.comments || reelData?.comments || 0,
-        views: reelData?.views || 0,
-        duration: reelData?.duration || null,
-        uploadDate: fallback.uploadDate || reelData?.uploadDate || null,
-        timestamp: reelData?.timestamp || null,
-        embedHtml: fallback.embedHtml,
-      };
+      if (fallback.thumbnail || reelData?.videoUrl) {
+        reelData = {
+          id: shortcode,
+          shortcode,
+          url: normalizedUrl,
+          videoUrl: reelData?.videoUrl || null,
+          thumbnail: fallback.thumbnail || reelData?.thumbnail || null,
+          caption: fallback.caption || reelData?.caption || "Instagram Reel",
+          author: fallback.author || reelData?.author || "instagram_user",
+          authorName: fallback.authorName || reelData?.authorName || "Instagram Creator",
+          authorUrl: fallback.authorUrl || `https://www.instagram.com/${fallback.author}`,
+          likes: fallback.likes || reelData?.likes || 0,
+          comments: fallback.comments || reelData?.comments || 0,
+          views: reelData?.views || 0,
+          duration: reelData?.duration || null,
+          uploadDate: fallback.uploadDate || reelData?.uploadDate || null,
+          timestamp: reelData?.timestamp || null,
+          embedHtml: fallback.embedHtml,
+        };
+      }
     }
 
-    if (reelData) {
+    // Verify media presence: Must have either videoUrl or thumbnail to be a valid reel preview
+    if (reelData && (reelData.videoUrl || reelData.thumbnail)) {
       reelCache.set(shortcode, { timestamp: Date.now(), data: reelData });
       return NextResponse.json({ success: true, data: reelData });
     }
@@ -215,7 +280,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Could not fetch details for this Reel. Please make sure the Reel is from a public Instagram account.",
+        error:
+          extractorError ||
+          "This Instagram Reel is unavailable, private, or has been removed. Please verify that the Reel is accessible publicly on Instagram.",
       },
       { status: 404 }
     );
