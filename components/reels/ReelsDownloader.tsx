@@ -331,16 +331,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   }, [savedReels]);
 
   return (
-    <div className="w-full space-y-5 sm:space-y-6 pb-20 animate-page-entrance">
+    <div className="w-full space-y-3.5 sm:space-y-6 pb-20 animate-page-entrance">
       {/* ── Responsive Header & Mode Switcher ────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-1">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
-            <Film size={20} />
+      <div className="flex items-center justify-between gap-2.5 pt-1">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
+            <Film size={15} className="sm:hidden" />
+            <Film size={20} className="hidden sm:block" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h1 className="text-sm sm:text-2xl font-black text-slate-950 tracking-tight leading-none">
                 Reels Studio
               </h1>
               <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fceef4] text-[11px] font-bold text-slate-900 border-0">
@@ -348,18 +349,19 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 <span>1080p HD</span>
               </span>
             </div>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-1">
-              Download 1080p MP4 videos & high-resolution cover posters
+            <p className="text-[10px] sm:text-sm font-semibold text-slate-500 mt-0.5 sm:mt-1 truncate">
+              <span className="sm:hidden">1080p MP4 & Cover Downloader</span>
+              <span className="hidden sm:inline">Download 1080p MP4 videos & high-resolution cover posters</span>
             </p>
           </div>
         </div>
 
         {/* Segmented Pill Switcher */}
-        <div className="inline-flex self-start sm:self-auto p-1 rounded-full bg-[#f1f3f7] border border-[#e9e9ee] shadow-2xs">
+        <div className="inline-flex shrink-0 p-0.5 sm:p-1 rounded-full bg-[#f1f3f7] border border-[#e9e9ee] shadow-2xs">
           <button
             type="button"
             onClick={() => setActiveTab("downloader")}
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
               activeTab === "downloader"
                 ? "bg-black text-white shadow-xs"
                 : "text-slate-600 hover:text-black"
@@ -370,7 +372,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
           <button
             type="button"
             onClick={() => setActiveTab("vault")}
-            className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 ${
               activeTab === "vault"
                 ? "bg-black text-white shadow-xs"
                 : "text-slate-600 hover:text-black"
@@ -378,7 +380,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
           >
             <span>Vault</span>
             <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+              className={`text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded-full font-black ${
                 activeTab === "vault" ? "bg-white/25 text-white" : "bg-[#e2e2fc] text-slate-950"
               }`}
             >
@@ -390,18 +392,19 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
       {/* ── TAB 1: DOWNLOADER VIEW ────────────────────────────────────── */}
       {activeTab === "downloader" && (
-        <div className="space-y-5 sm:space-y-6">
-          {/* Omnibar Form & Quick Sample Chips */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Omnibar Form & Format Chips */}
           <div className="w-full">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleFetchReel();
               }}
-              className="flex items-center gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-full bg-white border border-[#e9e9ee] shadow-xs hover:border-black/40 focus-within:border-black focus-within:shadow-md transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-2 rounded-full bg-white border border-[#e9e9ee] shadow-xs hover:border-black/40 focus-within:border-black focus-within:shadow-md transition-all"
             >
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0">
-                <LinkIcon size={15} />
+              <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0">
+                <LinkIcon size={13} className="sm:hidden" />
+                <LinkIcon size={15} className="hidden sm:block" />
               </div>
 
               <input
@@ -416,7 +419,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="w-7 h-7 rounded-full text-slate-400 hover:text-black hover:bg-slate-100 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-full text-slate-400 hover:text-black hover:bg-slate-100 flex items-center justify-center text-xs font-bold cursor-pointer transition-colors"
                   title="Clear search and reel"
                 >
                   ✕
@@ -426,7 +429,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               <button
                 type="button"
                 onClick={handlePaste}
-                className="px-3 py-1.5 rounded-full bg-[#f1f3f7] hover:bg-slate-200 text-slate-700 hover:text-slate-950 text-xs font-bold transition-all shrink-0 cursor-pointer active:scale-95"
+                className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#f1f3f7] hover:bg-slate-200 text-slate-700 hover:text-slate-950 text-[11px] sm:text-xs font-bold transition-all shrink-0 cursor-pointer active:scale-95"
               >
                 Paste
               </button>
@@ -435,14 +438,14 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 type="submit"
                 disabled={loading}
                 style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                className="h-9 sm:h-10 px-3.5 sm:px-5 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-60 shrink-0 active:scale-95 text-xs font-bold"
+                className="h-8 sm:h-10 px-3 sm:px-5 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-60 shrink-0 active:scale-95 text-xs font-bold"
                 title="Fetch Reel"
               >
                 {loading ? (
-                  <RefreshCw size={14} className="animate-spin !text-white" />
+                  <RefreshCw size={13} className="animate-spin !text-white" />
                 ) : (
                   <>
-                    <Download size={15} className="!text-white" />
+                    <Download size={14} className="!text-white" />
                     <span className="hidden sm:inline !text-white">Fetch Reel</span>
                   </>
                 )}
