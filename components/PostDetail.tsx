@@ -3584,697 +3584,932 @@ export function PostDetail({
               const visibleTimelineEvents = eventFilter === "all"
                 ? timelineEvents
                 : timelineEvents.filter((e) => e.type === eventFilter);
+
               return (
-                <div className="overview-flow" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  {/* ── 1. HERO GRID (Algorithmic Health + Post Audit) ─── */}
+                <div className="space-y-5 sm:space-y-6">
+                  {/* ── SKELETON LOADING STATE (Soft Pastel Minimal) ─── */}
                   {aiDiagnosisLoading ? (
-                    <section className="hero-grid">
-                      {/* Score skeleton */}
-                      <div className="panel score-panel animate-pulse flex flex-col justify-between items-center text-center">
-                        <div className="w-full flex justify-between items-center">
-                          <div className="h-3 w-28 bg-slate-200 rounded" />
-                          <div className="h-5 w-16 bg-slate-200 rounded-full" />
-                        </div>
-                        <div className="my-3 flex items-center justify-center">
-                          <div className="h-24 w-24 rounded-full border-4 border-slate-200 bg-slate-100 flex flex-col items-center justify-center">
-                            <div className="h-6 w-10 bg-slate-300 rounded mb-1" />
-                            <div className="h-2.5 w-8 bg-slate-200 rounded" />
+                    <div className="space-y-5 animate-pulse">
+                      {/* 4 Stat Cards Skeleton */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                        {[
+                          { bg: "#e2e2fc" },
+                          { bg: "#fff9db" },
+                          { bg: "#feece4" },
+                          { bg: "#fceef4" },
+                        ].map((card, idx) => (
+                          <div
+                            key={idx}
+                            style={{ backgroundColor: card.bg }}
+                            className="rounded-[26px] p-5 border-0 shadow-xs flex flex-col justify-between min-h-[148px]"
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-2">
+                                <div className="h-3 w-24 bg-black/10 rounded-full" />
+                                <div className="h-8 w-16 bg-black/15 rounded-xl" />
+                              </div>
+                              <div className="w-8 h-8 rounded-xl bg-white/70 border border-black/10" />
+                            </div>
+                            <div className="h-5 w-28 bg-white/60 rounded-full mt-3" />
                           </div>
-                        </div>
-                        <div className="h-5 w-36 bg-slate-200 rounded-full mb-2" />
-                        <div className="w-full pt-2 border-t border-slate-100 flex justify-between items-center">
-                          <div className="h-2.5 w-24 bg-slate-200 rounded" />
-                          <div className="h-3.5 w-3.5 bg-slate-200 rounded-full" />
-                        </div>
+                        ))}
                       </div>
 
-                      {/* Insight skeleton */}
-                      <div className="panel insight-panel animate-pulse flex flex-col justify-between space-y-3.5">
-                        <div className="flex justify-between items-center">
-                          <div className="h-3.5 w-40 bg-slate-200 rounded" />
-                          <div className="h-5 w-16 bg-slate-200 rounded-full" />
+                      {/* Post Audit Panel Skeleton */}
+                      <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-5 sm:p-6 shadow-2xs space-y-4">
+                        <div className="flex justify-between items-center pb-3 border-b border-[#e9e9ee]">
+                          <div className="h-6 w-48 bg-slate-100 rounded-full" />
+                          <div className="h-7 w-24 bg-slate-200 rounded-full" />
                         </div>
                         <div className="space-y-2">
-                          <div className="h-5 w-3/4 bg-slate-300 rounded-md" />
-                          <div className="h-3 w-full bg-slate-200 rounded" />
-                          <div className="h-3 w-5/6 bg-slate-200 rounded" />
-                          <div className="h-3 w-2/3 bg-slate-200 rounded" />
+                          <div className="h-6 w-3/4 bg-slate-200 rounded-lg" />
+                          <div className="h-4 w-full bg-slate-100 rounded" />
+                          <div className="h-4 w-5/6 bg-slate-100 rounded" />
                         </div>
-                        <div className="pt-3 border-t border-slate-100 flex justify-between items-center">
-                          <div className="h-3 w-32 bg-slate-200 rounded" />
-                          <div className="h-2.5 w-48 bg-slate-200 rounded" />
+                        <div className="flex gap-2 pt-1">
+                          <div className="h-6 w-32 bg-slate-100 rounded-full" />
+                          <div className="h-6 w-40 bg-slate-100 rounded-full" />
                         </div>
                       </div>
-                    </section>
+                    </div>
                   ) : (
-                    <section className="hero-grid">
-                      {/* Algorithmic health */}
-                      <div className="panel score-panel">
-                        <div className="panel-label">
-                          <span>Algorithmic health</span>
-                          <Badge tone={activeDiagnosis.score >= 85 ? "violet" : activeDiagnosis.score >= 70 ? "blue" : activeDiagnosis.score >= 55 ? "neutral" : "rose"}>
-                            {activeDiagnosis.score >= 85 ? "Tier 1 · A" : activeDiagnosis.score >= 70 ? "Tier 2 · B" : activeDiagnosis.score >= 55 ? "Tier 3 · C" : "Tier 4 · D"}
-                          </Badge>
-                        </div>
-                        <div className="score-ring">
-                          <div>
-                            <strong>{activeDiagnosis.score}</strong>
-                            <span>/ 100</span>
+                    <>
+                      {/* ── 1. TOP 4 COLORED STAT CARDS (Soft Pastel Minimal - Borderless) ─── */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                        {/* Card 1: Algorithmic Health (Soft Periwinkle #e2e2fc) */}
+                        <div
+                          style={{ backgroundColor: "#e2e2fc" }}
+                          className="rounded-[26px] p-5 text-slate-950 shadow-xs flex flex-col justify-between min-h-[148px] border-0 transition-transform hover:scale-[1.01]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Algorithmic Health</div>
+                              <div className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums leading-none">
+                                {activeDiagnosis.score}
+                                <span className="text-sm font-semibold text-slate-600 ml-1">/100</span>
+                              </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <Zap size={16} className="text-amber-500 fill-amber-500" />
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                              {activeDiagnosis.score >= 80 ? "Tier 1 · High Viral" : activeDiagnosis.score >= 65 ? "Tier 2 · Steady" : "Tier 3 · Baseline"}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-600">Assessed today</span>
                           </div>
                         </div>
-                        <Badge tone={activeDiagnosis.score >= 80 ? "mint" : activeDiagnosis.score >= 65 ? "blue" : "neutral"}>
-                          {activeDiagnosis.score >= 80 ? "● High viral potential" : activeDiagnosis.score >= 65 ? "● Steady discovery momentum" : "● Follower baseline"}
-                        </Badge>
-                        <div className="score-foot">
-                          <span>Assessed {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                          <TrendingUp size={14} />
+
+                        {/* Card 2: Discussion Density (Soft Butter Yellow #fff9db) */}
+                        <div
+                          style={{ backgroundColor: "#fff9db" }}
+                          className="rounded-[26px] p-5 text-slate-950 shadow-xs flex flex-col justify-between min-h-[148px] border-0 transition-transform hover:scale-[1.01]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Discussion Density</div>
+                              <div className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums leading-none">
+                                {discussionDensity.toFixed(1)}×
+                              </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <MessageCircle size={16} />
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                              {discussionDensity >= 1.0 ? "Top 1% viral depth" : "Discussion ratio"}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-600">{meta.comments} comments</span>
+                          </div>
+                        </div>
+
+                        {/* Card 3: Audience Sentiment (Soft Peach Coral #feece4) */}
+                        <div
+                          style={{ backgroundColor: "#feece4" }}
+                          className="rounded-[26px] p-5 text-slate-950 shadow-xs flex flex-col justify-between min-h-[148px] border-0 transition-transform hover:scale-[1.01]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Audience Sentiment</div>
+                              <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight leading-tight truncate">
+                                {activeDiagnosis.audienceSentiment || (buyerCount > 0 ? "High-Intent" : "Engaged")}
+                              </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <Users size={16} />
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                              {buyerCount > 0 ? `${buyerCount} Buyer signals` : "Community pulse"}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-600">{praisePercent}% positive</span>
+                          </div>
+                        </div>
+
+                        {/* Card 4: Explore Probability (Soft Rose Pink #fceef4) */}
+                        <div
+                          style={{ backgroundColor: "#fceef4" }}
+                          className="rounded-[26px] p-5 text-slate-950 shadow-xs flex flex-col justify-between min-h-[148px] border-0 transition-transform hover:scale-[1.01]"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="space-y-1">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Explore Probability</div>
+                              <div className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums leading-none">
+                                {exploreProbability}%
+                              </div>
+                            </div>
+                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                              <TrendingUp size={16} />
+                            </div>
+                          </div>
+                          <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                              {viralTrendStatus.tag}
+                            </span>
+                            <span className="text-[11px] font-semibold text-slate-600">
+                              ~{predictedReachMin.toLocaleString()} reach
+                            </span>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Post audit */}
-                      <div className="panel insight-panel">
-                        <div className="panel-label">
-                          <span className="flex items-center gap-1.5">
-                            <Zap size={14} className="text-amber-500" /> Post audit / {auditDateStr}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <Badge tone={activeDiagnosis.isAiGenerated ? "mint" : "neutral"}>
+                      {/* ── 2. MAIN POST AUDIT & AI DIAGNOSIS PANEL (White Widget with Subtle Border) ─── */}
+                      <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                        {/* Header row */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e9e9ee]">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                              <Sparkles size={13} className="text-amber-500 fill-amber-500" />
+                              <span>Post Audit / {auditDateStr}</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f1f3f7] text-slate-950 text-xs font-bold border-0">
+                              {meta.mediaType || "MEDIA"}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
                               {activeDiagnosis.isAiGenerated ? "✨ 100% Real AI" : "Algorithmic Engine"}
-                            </Badge>
-                            <Badge tone="rose">{meta.mediaType || "MEDIA"}</Badge>
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() => runAiDiagnosis()}
                               disabled={aiDiagnosisLoading}
                               title="Re-run AI Diagnosis with real comments and metrics"
-                              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-full shadow-2xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                             >
-                              <RefreshCw size={11} className={aiDiagnosisLoading ? "animate-spin text-indigo-600" : ""} />
-                              <span>{aiDiagnosisLoading ? "Analyzing..." : "Re-run AI"}</span>
+                              <RefreshCw size={12} className={aiDiagnosisLoading ? "animate-spin text-white" : "text-white"} />
+                              <span className="!text-white">{aiDiagnosisLoading ? "Analyzing..." : "Re-run AI"}</span>
                             </button>
                           </div>
                         </div>
 
+                        {/* Error Banner if any */}
                         {aiDiagnosisError && (
-                          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between gap-2">
-                            <span>{aiDiagnosisError}</span>
+                          <div className="p-3.5 rounded-2xl bg-[#fceef4] border-0 text-xs text-rose-950 flex items-center justify-between gap-2 shadow-2xs">
+                            <div className="flex items-center gap-2">
+                              <AlertCircle size={15} className="text-rose-600 shrink-0" />
+                              <span>{aiDiagnosisError}</span>
+                            </div>
                             <button
                               type="button"
                               onClick={() => runAiDiagnosis()}
-                              className="font-bold underline cursor-pointer hover:text-rose-950 shrink-0"
+                              className="font-bold underline cursor-pointer hover:text-black shrink-0 text-xs"
                             >
                               Retry
                             </button>
                           </div>
                         )}
 
-                        <h2>{activeDiagnosis.headline}</h2>
-                        <p>{activeDiagnosis.summary}</p>
+                        {/* Headline & Deep Summary */}
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight leading-snug">
+                            {activeDiagnosis.headline}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal mt-2 max-w-4xl">
+                            {activeDiagnosis.summary}
+                          </p>
+                        </div>
 
+                        {/* Detected Follower Requests & Sentiment Chips */}
                         {(activeDiagnosis.audienceSentiment || (activeDiagnosis.detectedRequests && activeDiagnosis.detectedRequests.length > 0)) && (
-                          <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
                             {activeDiagnosis.audienceSentiment && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#feece4] text-slate-950 text-xs font-bold border-0">
                                 <span>Sentiment:</span>
                                 <strong>{activeDiagnosis.audienceSentiment}</strong>
                               </span>
                             )}
                             {activeDiagnosis.detectedRequests?.map((req, rIdx) => (
-                              <span key={rIdx} className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                              <span
+                                key={rIdx}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f1f3f7] text-slate-900 text-xs font-medium border-0"
+                              >
                                 💬 {req}
                               </span>
                             ))}
                           </div>
                         )}
 
-                        <div className="insight-bottom">
-                          <span>
-                            <i className="live-dot" /> Model: <strong>{activeDiagnosis.model}</strong>
-                          </span>
+                        {/* Model metadata & Meta Explore benchmark */}
+                        <div className="pt-3 border-t border-[#e9e9ee] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-500">
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                            <span>Model: <strong className="text-slate-800 font-semibold">{activeDiagnosis.model}</strong></span>
+                          </div>
                           <span>Benchmarked against Meta Explore recommendation dynamics</span>
                         </div>
                       </div>
-                    </section>
-                  )}
 
-                  {/* ── 2. RECOMMENDATIONS (Step 1 & Step 2) ─── */}
-                  {aiDiagnosisLoading ? (
-                    <section className="recommendations animate-pulse">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="recommendation-card space-y-3.5">
-                          <div className="flex justify-between items-center">
-                            <div className="h-4 w-16 bg-slate-200 rounded" />
-                            <div className="h-4 w-24 bg-slate-200 rounded-full" />
-                          </div>
-                          <div className="h-5 w-3/4 bg-slate-300 rounded" />
-                          <div className="space-y-1.5">
-                            <div className="h-3 w-full bg-slate-200 rounded" />
-                            <div className="h-3 w-4/5 bg-slate-200 rounded" />
-                          </div>
-                          <div className="pt-2">
-                            <div className="h-8 w-36 bg-slate-200 rounded-lg" />
-                          </div>
-                        </div>
-                      ))}
-                    </section>
-                  ) : (
-                    <section className="recommendations">
-                      <div className="recommendation-card">
-                        <div className="step">
-                          STEP 1 <Badge tone="rose">HIGH PRIORITY</Badge>
-                        </div>
-                        <h3>
-                          {activeDiagnosis.actionItems[0]?.title || "Optimize Caption & Conversion Hooks"}
-                        </h3>
-                        <p>
-                          {activeDiagnosis.actionItems[0]?.description ||
-                            (topCommenters[0]
-                              ? `@${topCommenters[0].username} contributed ${topCommenters[0].count} comments. Reach out with a VIP appreciation DM to cement community advocacy.`
-                              : "Deploy a clear comment-to-DM trigger keyword like \"LINK\" in your caption to convert viewers into leads.")}
-                        </p>
-                        <ActionButton onClick={openCaptionOptimizer}>
-                          Optimize caption & CTAs
-                        </ActionButton>
-                      </div>
-
-                      <div className="recommendation-card">
-                        <div className="step">
-                          STEP 2 <Badge>MEDIUM PRIORITY</Badge>
-                        </div>
-                        <h3>
-                          {activeDiagnosis.actionItems[1]?.title || "Expand Trigger Vocabulary"}
-                        </h3>
-                        <p>
-                          {activeDiagnosis.actionItems[1]?.description ||
-                            (topMissedKeywords.length > 0
-                              ? `Followers commented words like “${topMissedKeywords.map(([w]) => w).join('”, “')}”. Add them to your automation keywords to capture more leads.`
-                              : "Ensure all common follower inquiries have automated reply routing.")}
-                        </p>
-                        {topCommenters[0] && onOpenMessages ? (
-                          <ActionButton
-                            onClick={() => {
-                              const u = topCommenters[0].username;
-                              onOpenMessages(u);
-                              notify(`Opening DM conversation with @${u}`);
-                            }}
-                          >
-                            Message @{topCommenters[0].username}
-                          </ActionButton>
-                        ) : null}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* ── 3. SIGNAL STRIP (Algorithmic Engine Signals) ─── */}
-                  {aiDiagnosisLoading ? (
-                    <section className="signal-strip animate-pulse">
-                      <div className="strip-head flex justify-between items-center mb-3">
-                        <div className="h-3.5 w-44 bg-slate-200 rounded" />
-                        <div className="h-3 w-32 bg-slate-200 rounded" />
-                      </div>
-                      <div className="signal-grid">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="signal space-y-2">
-                            <div className="flex justify-between items-center">
-                              <div className="h-3 w-24 bg-slate-200 rounded" />
-                              <div className="h-4 w-14 bg-slate-200 rounded-full" />
-                            </div>
-                            <div className="h-5 w-14 bg-slate-300 rounded" />
-                            <div className="h-2.5 w-full bg-slate-200 rounded" />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  ) : (
-                    <section className="signal-strip">
-                      <div className="strip-head">
-                        <span>
-                          <Activity size={14} /> Algorithmic engine signals
-                        </span>
-                        <small>
-                          {activeDiagnosis.viralLevers.filter((l) => l.status === "strong").length} optimal · {activeDiagnosis.viralLevers.filter((l) => l.status === "opportunity").length} opportunities
-                        </small>
-                      </div>
-                      <div className="signal-grid">
-                        {activeDiagnosis.viralLevers.map((lever, idx) => (
-                          <div className="signal" key={idx}>
-                            <div>
-                              <Check size={13} /> <strong>{lever.label}</strong>
-                              <Badge tone={lever.status === "strong" ? "mint" : "rose"}>
-                                {lever.status === "strong" ? "Optimal" : "Opportunity"}
-                              </Badge>
-                            </div>
-                            <span>
-                              {lever.val || (idx === 0 ? `${discussionDensity.toFixed(1)}×` : idx === 1 ? (detectedCtas.length > 0 ? "Clear" : "Missing") : (activeDmRules.length > 0 ? "Active" : "Disabled"))}
-                            </span>
-                            <small>{lever.detail}</small>
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  {/* ── 4. CONTENT GRID (Content Anatomy + Lifecycle Velocity) ─── */}
-                  <section className="content-grid">
-                    {/* Panel 1: Content anatomy */}
-                    <div className="panel anatomy">
-                      <SectionTitle
-                        icon={Hash}
-                        eyebrow="Content diagnostics"
-                        title="Content & copy anatomy"
-                        meta={meta.mediaType || "MEDIA"}
-                      />
-                      <div className="caption">
-                        <div>
-                          <span className="eyebrow">Caption preview</span>
-                          <Badge tone="violet" onClick={openCaptionOptimizer}>
-                            ✦ AI optimize hooks
-                          </Badge>
-                        </div>
-                        <p>
-                          {captionText ? `“${captionText}”` : <span className="italic text-slate-400">No caption provided for this post.</span>}
-                        </p>
-                        <small>
-                          {charCount} chars · {wordCount} words · {emojiCount} emoji
-                        </small>
-                      </div>
-
-                      <div className="metric-grid four">
-                        <Metric
-                          label="Word count"
-                          value={wordCount}
-                          note={wordCount >= 70 && wordCount <= 160 ? "Optimal copy" : wordCount < 30 ? "Punchy hook" : "Standard length"}
-                        />
-                        <Metric
-                          label="Read time"
-                          value={`~${readingTimeSec}s`}
-                          note={`${charCount} characters`}
-                        />
-                        <Metric
-                          label="Hashtags"
-                          value={uniqueHashtags.length}
-                          note={uniqueHashtags.length > 0 ? `${uniqueHashtags.length} added` : "None added"}
-                        />
-                        <Metric
-                          label="CTAs"
-                          value={detectedCtas.length}
-                          note={detectedCtas.length > 0 ? detectedCtas[0].label : "None found"}
-                        />
-                      </div>
-
-                      <div className="anatomy-footer">
-                        <span className="eyebrow">Call-to-action signals</span>
-                        <Badge tone={detectedCtas.length > 0 ? "mint" : "neutral"}>
-                          <MessageCircle size={13} /> {detectedCtas[0]?.label || "No CTA detected"}
-                        </Badge>
-                        <span className="eyebrow">Hashtags & tagged collaborators ({uniqueMentions.length})</span>
-                        <Badge tone={uniqueMentions.length > 0 ? "violet" : "neutral"}>
-                          {uniqueMentions[0] || "No collaborator tagged"}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    {/* Panel 2: Algorithmic lifecycle & velocity */}
-                    <div className="panel velocity">
-                      <SectionTitle
-                        icon={Gauge}
-                        eyebrow="Post performance"
-                        title="Algorithmic lifecycle & velocity"
-                        meta={performanceDateStr}
-                      />
-                      <div className="velocity-callout">
-                        <div>
-                          <strong>{lifecyclePhase.name}</strong>
-                          <p>{lifecyclePhase.desc}</p>
-                        </div>
-                        <Badge tone="mint">{lifecyclePhase.tag}</Badge>
-                      </div>
-
-                      <div className="metric-grid two">
-                        <Metric
-                          label="Discussion density"
-                          value={`${discussionDensity.toFixed(1)}×`}
-                          note={discussionDensity >= 1.0 ? "High viral conversation depth" : "Below 1.0× benchmark"}
-                          accent="violet-text"
-                        />
-                        <Metric
-                          label="Public reply rate"
-                          value={`${publicReplyRate}%`}
-                          note={avgReplyLatencyMin !== null ? `Avg ${avgReplyLatencyMin < 1 ? Math.round(avgReplyLatencyMin * 60) + 's' : avgReplyLatencyMin + 'm'} response time` : `${publicRepliedCount}/${totalCommentsCount} replied`}
-                          accent="violet-text"
-                        />
-                        <Metric
-                          label="Save rate"
-                          value={`${saveRateVal.toFixed(1)}%`}
-                          note={saveRateVal >= 1.2 ? "Strong bookmark rate" : "Needs bookmark CTAs"}
-                        />
-                        <Metric
-                          label="Daily velocity"
-                          value={dailyVelocity}
-                          note={dailyVelocity >= 10 ? "High velocity" : "Standard steady pace"}
-                        />
-                      </div>
-
-                      <div className="window-row">
-                        <Clock3 size={15} /> Peak engagement window{" "}
-                        <strong>{peakHourUtc !== null ? `${String(peakHourUtc).padStart(2, '0')}:00 UTC` : "Active window"}</strong>{" "}
-                        <small>({totalCommentsCount} comments logged)</small>
-                      </div>
-
-                      <div className="probability">
-                        <div>
-                          <strong>
-                            <Zap size={14} /> Explore recommendation probability
-                          </strong>
-                          <Badge tone={exploreProbability >= 75 ? "mint" : exploreProbability >= 50 ? "blue" : "neutral"}>
-                            {viralTrendStatus.label}
-                          </Badge>
-                        </div>
-                        <div className="progress">
-                          <i style={{ width: `${exploreProbability}%` }} />
-                        </div>
-                        <p>
-                          Predicted reach horizon: <strong>{predictedReachMin.toLocaleString()} – {predictedReachMax.toLocaleString()}</strong>
-                          <Badge tone="violet">{viralTrendStatus.tag}</Badge>
-                        </p>
-                      </div>
-
-                      <div className="alert success">
-                        <TrendingUp size={16} />
-                        <p>
-                          <strong>Algorithmic catalyst</strong> {aiPrimaryCatalyst}
-                        </p>
-                      </div>
-
-                      <div className="alert warning">
-                        <Lightbulb size={16} />
-                        <p>
-                          <strong>Algorithmic bottleneck</strong> {aiPrimaryBottleneck}
-                        </p>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* ── 5. ACTION CENTER (Sentiment Spectrum & Prescriptive Actions) ─── */}
-                  <section className="panel action-center">
-                    <SectionTitle
-                      icon={Zap}
-                      eyebrow="Recommended next moves"
-                      title="AI prescriptive actions & audience monetization center"
-                      meta="Prescriptive interventions"
-                    />
-
-                    <div className="action-layout">
-                      {/* Sentiment */}
-                      <div className="sentiment">
-                        <div className="subhead">
-                          <span>Audience sentiment & intent spectrum</span>
-                          <Badge>NLP classified</Badge>
-                        </div>
-                        <div className="sentiment-grid">
-                          <Metric label="Praise" value={`${praisePercent}%`} note="" />
-                          <Metric label="Buying" value={`${buyerPercent}%`} note="" accent="violet-text" />
-                          <Metric label="Questions" value={`${questionPercent}%`} note="" />
-                          <Metric label="Neutral" value={`${neutralPercent}%`} note="" />
-                        </div>
-                      </div>
-
-                      {/* Interventions */}
-                      <div className="interventions">
-                        <div className="subhead">
-                          <span>
-                            <Sparkles size={14} /> Prescriptive algorithmic interventions
-                          </span>
-                          <small>One-click actions</small>
-                        </div>
-                        <div className="intervention-buttons">
-                          <ActionButton
-                            onClick={() => {
-                              setPinCommentModalOpen(true);
-                              notify("Pin comment dialog opened");
-                            }}
-                            icon={Target}
-                          >
-                            Pin best comment
-                          </ActionButton>
-
-                          <ActionButton
-                            onClick={() => {
-                              handleGenerateStoryReshare(
-                                meta.caption,
-                                discussionDensity,
-                                topQuestionComment?.text || candidatePinComment?.text,
-                                lifecyclePhase.name
-                              );
-                              notify("Story reshare hook generated");
-                            }}
-                            icon={Send}
-                          >
-                            Story reshare hook
-                          </ActionButton>
-
-                          <ActionButton
-                            testId="action-convert-buyers"
-                            onClick={() => {
-                              setBuyerConvertModalOpen(true);
-                              notify("Buyer conversion flow opened");
-                            }}
-                            icon={Users}
-                          >
-                            Convert buyers <Badge tone={buyerCount > 0 ? "mint" : "neutral"}>{buyerCount}</Badge>
-                          </ActionButton>
-                        </div>
-
-                        <p className="tip">
-                          <Lightbulb size={14} /> Tip: Executing these interventions increases post dwell time and unlocks Explore recommendations.
-                        </p>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* ── 6. HISTORY PANEL (Activity Stream & Expandable Events) ─── */}
-                  <section className="panel history-panel">
-                    <div className="history-head">
-                      <SectionTitle
-                        icon={Activity}
-                        eyebrow="Activity stream · live"
-                        title="Automation history"
-                        meta={`${visibleTimelineEvents.length} events logged`}
-                      />
-                      <Badge tone="mint">Live snapshot</Badge>
-                    </div>
-                    <p className="history-intro">
-                      Every trigger, delivery, reply, and conversion in one chronological view.
-                    </p>
-
-                    <div className="history-toolbar">
-                      <div className="filter-tabs">
-                        {[
-                          ["all", "All activity"],
-                          ["triggered", "Triggered"],
-                          ["dm_sent", "DM sent"],
-                          ["reply", "Replies"],
-                          ["converted", "Converted"],
-                        ].map(([key, label]) => (
-                          <button
-                            key={key}
-                            type="button"
-                            className={eventFilter === key ? "active" : ""}
-                            onClick={() => setEventFilter(key as any)}
-                            data-testid={`history-filter-${key}`}
-                          >
-                            {label}
-                            <span>
-                              {key === "all"
-                                ? timelineEvents.length
-                                : timelineEvents.filter((e) => e.type === key).length}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-
-                      <span className="history-updated">
-                        <RefreshCw size={12} /> Live stream
-                      </span>
-                    </div>
-
-                    <div className="timeline">
-                      {visibleTimelineEvents.map((event) => (
+                      {/* ── 3. PRIORITIZED RECOMMENDATIONS (Step 1 & Step 2 in Soft Pastels) ─── */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Step 1: High Priority (Soft Butter Yellow #fff9db - Borderless) */}
                         <div
-                          key={event.id}
-                          className={`timeline-event ${expandedEvent === event.id ? "expanded" : ""}`}
+                          style={{ backgroundColor: "#fff9db" }}
+                          className="rounded-[26px] p-5 sm:p-6 text-slate-950 shadow-xs flex flex-col justify-between border-0 transition-transform hover:scale-[1.008]"
                         >
-                          <button
-                            type="button"
-                            className="event-main"
-                            onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                            data-testid={`history-event-${event.id}`}
-                          >
-                            <span className={`event-dot ${event.tone}`}>
-                              <Activity size={13} />
-                            </span>
-                            <span className="event-copy">
-                              <strong>{event.title}</strong>
-                              <small>{event.detail}</small>
-                            </span>
-                            <span className="event-time">{event.time}</span>
-                            <ChevronRight size={15} className="event-chevron" />
-                          </button>
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                                <Zap size={13} className="text-amber-500 fill-amber-500" />
+                                <span>STEP 1 · HIGH PRIORITY</span>
+                              </span>
+                              <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                                <RocketOutlined className="text-xs" />
+                              </div>
+                            </div>
+                            <div className="mt-4">
+                              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight leading-snug">
+                                {activeDiagnosis.actionItems[0]?.title || "Optimize Caption & Conversion Hooks"}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-slate-800/85 mt-2 font-normal leading-relaxed">
+                                {activeDiagnosis.actionItems[0]?.description ||
+                                  (topCommenters[0]
+                                    ? `@${topCommenters[0].username} contributed ${topCommenters[0].count} comments. Reach out with a VIP appreciation DM to cement community advocacy.`
+                                    : "Deploy a clear comment-to-DM trigger keyword like \"LINK\" in your caption to convert viewers into leads.")}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-5 pt-3 border-t border-black/10 flex items-center justify-between gap-3">
+                            <button
+                              type="button"
+                              onClick={openCaptionOptimizer}
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                            >
+                              <span className="!text-white">Optimize caption & CTAs</span>
+                              <ArrowRight size={13} className="text-white" />
+                            </button>
+                            <span className="text-[11px] font-semibold text-slate-600">Instant AI generation</span>
+                          </div>
+                        </div>
 
-                          {expandedEvent === event.id && (
-                            <div className="event-detail" data-testid={`history-detail-${event.id}`}>
-                              <span>
-                                <b>Post</b> {event.post}
+                        {/* Step 2: Medium Priority (Soft Rose Pink #fceef4 - Borderless) */}
+                        <div
+                          style={{ backgroundColor: "#fceef4" }}
+                          className="rounded-[26px] p-5 sm:p-6 text-slate-950 shadow-xs flex flex-col justify-between border-0 transition-transform hover:scale-[1.008]"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                                <Target size={13} />
+                                <span>STEP 2 · RECOMMENDED</span>
                               </span>
-                              <span>
-                                <b>Actor</b> {event.actor}
+                              <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                                <Bot size={15} />
+                              </div>
+                            </div>
+                            <div className="mt-4">
+                              <h3 className="text-base sm:text-lg font-bold text-slate-950 tracking-tight leading-snug">
+                                {activeDiagnosis.actionItems[1]?.title || "Expand Trigger Vocabulary"}
+                              </h3>
+                              <p className="text-xs sm:text-sm text-slate-800/85 mt-2 font-normal leading-relaxed">
+                                {activeDiagnosis.actionItems[1]?.description ||
+                                  (topMissedKeywords.length > 0
+                                    ? `Followers commented words like “${topMissedKeywords.map(([w]) => w).join('”, “')}”. Add them to your automation keywords to capture more leads.`
+                                    : "Ensure all common follower inquiries have automated reply routing.")}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-5 pt-3 border-t border-black/10 flex items-center justify-between gap-3">
+                            {topCommenters[0] && onOpenMessages ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const u = topCommenters[0].username;
+                                  onOpenMessages(u);
+                                  notify(`Opening DM conversation with @${u}`);
+                                }}
+                                style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                              >
+                                <span className="!text-white">Message @{topCommenters[0].username}</span>
+                                <ArrowRight size={13} className="text-white" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setQuickRuleModalOpen(true)}
+                                style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                              >
+                                <span className="!text-white">Configure keywords</span>
+                                <ArrowRight size={13} className="text-white" />
+                              </button>
+                            )}
+                            <span className="text-[11px] font-semibold text-slate-600">Community outreach</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── 4. ALGORITHMIC ENGINE SIGNALS STRIP (White Widget Card with Subtle Border) ─── */}
+                      <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                            <Activity size={13} />
+                            <span>Algorithmic Engine Signals</span>
+                          </span>
+                          <span className="text-xs font-bold text-slate-600">
+                            {activeDiagnosis.viralLevers.filter((l) => l.status === "strong").length} Optimal · {activeDiagnosis.viralLevers.filter((l) => l.status === "opportunity").length} Opportunities
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                          {activeDiagnosis.viralLevers.map((lever, idx) => (
+                            <div
+                              key={idx}
+                              className="rounded-[20px] p-4 bg-[#f1f3f7] flex flex-col justify-between border-0 transition-transform hover:scale-[1.01]"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-slate-950 truncate">{lever.label}</span>
+                                {lever.status === "strong" ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
+                                    <Check size={11} /> Optimal
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#fceef4] text-rose-950 text-[10px] font-bold border-0">
+                                    Opportunity
+                                  </span>
+                                )}
+                              </div>
+                              <div className="my-2.5">
+                                <div className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums">
+                                  {lever.val || (idx === 0 ? `${discussionDensity.toFixed(1)}×` : idx === 1 ? (detectedCtas.length > 0 ? "Clear" : "Missing") : (activeDmRules.length > 0 ? "Active" : "Disabled"))}
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-slate-600 font-normal leading-relaxed line-clamp-2">
+                                {lever.detail}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* ── 5. TWO-COLUMN INTELLIGENCE SECTION: CONTENT ANATOMY & VELOCITY ─── */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        {/* Panel A: Content & Copy Anatomy (White Widget) */}
+                        <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all flex flex-col justify-between space-y-4">
+                          <div>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                                <Hash size={13} />
+                                <span>Content & Copy Anatomy</span>
                               </span>
-                              <span>
-                                <b>Outcome</b> {event.value}
+                              <button
+                                type="button"
+                                onClick={openCaptionOptimizer}
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-900 bg-white hover:bg-slate-50 border border-black/80 px-2.5 py-1 rounded-full shadow-2xs transition-all active:scale-95 cursor-pointer"
+                              >
+                                <Sparkles size={11} className="text-amber-500 fill-amber-500" />
+                                <span>AI Optimize Hooks</span>
+                              </button>
+                            </div>
+
+                            {/* Caption preview box */}
+                            <div className="mt-4 p-4 rounded-2xl bg-[#f1f3f7] border-0 text-slate-800 text-xs sm:text-sm italic leading-relaxed">
+                              {captionText ? `“${captionText}”` : <span className="text-slate-400 not-italic">No caption provided for this post.</span>}
+                              <div className="mt-2.5 pt-2 border-t border-slate-200/60 not-italic text-[11px] text-slate-500 font-semibold flex items-center justify-between gap-2 flex-wrap">
+                                <span>{charCount} characters · {wordCount} words · {emojiCount} emoji</span>
+                                <span>Est. ~{readingTimeSec}s read</span>
+                              </div>
+                            </div>
+
+                            {/* 4-Stat Metric Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Word Count</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{wordCount}</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                  {wordCount >= 70 && wordCount <= 160 ? "Optimal copy" : wordCount < 30 ? "Punchy hook" : "Standard"}
+                                </div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Read Time</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">~{readingTimeSec}s</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{charCount} chars</div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hashtags</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{uniqueHashtags.length}</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                  {uniqueHashtags.length > 0 ? `${uniqueHashtags.length} tags` : "None"}
+                                </div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">CTAs</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{detectedCtas.length}</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                  {detectedCtas.length > 0 ? detectedCtas[0].label : "None"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Call to actions & Collaborator footer */}
+                          <div className="pt-3 border-t border-[#e9e9ee] space-y-2">
+                            <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
+                              <span className="text-slate-500 font-semibold">Detected CTA Signals:</span>
+                              {detectedCtas.length > 0 ? (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#feece4] text-slate-950 text-xs font-bold border-0">
+                                  <MessageCircle size={12} /> {detectedCtas[0].label}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-medium">No conversion prompt found</span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between gap-2 flex-wrap text-xs">
+                              <span className="text-slate-500 font-semibold">Tagged Collaborators ({uniqueMentions.length}):</span>
+                              {uniqueMentions.length > 0 ? (
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e2e2fc] text-slate-950 text-xs font-bold border-0">
+                                  {uniqueMentions[0]}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-medium">No collaborator tags</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Panel B: Algorithmic Lifecycle & Velocity (White Widget) */}
+                        <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                              <Gauge size={13} />
+                              <span>Algorithmic Lifecycle & Velocity</span>
+                            </span>
+                            <span className="text-xs font-bold text-slate-600">{performanceDateStr}</span>
+                          </div>
+
+                          {/* Lifecycle callout in Soft Periwinkle */}
+                          <div
+                            style={{ backgroundColor: "#e2e2fc" }}
+                            className="rounded-2xl p-4 text-slate-950 border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs"
+                          >
+                            <div>
+                              <div className="text-sm font-bold text-slate-950">{lifecyclePhase.name}</div>
+                              <p className="text-xs text-slate-700 font-normal leading-relaxed mt-0.5">{lifecyclePhase.desc}</p>
+                            </div>
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs shrink-0 self-start sm:self-center">
+                              {lifecyclePhase.tag}
+                            </span>
+                          </div>
+
+                          {/* 4-Stat Metric Grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Discussion</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{discussionDensity.toFixed(1)}×</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {discussionDensity >= 1.0 ? "High virality" : "Standard"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Public Reply</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{publicReplyRate}%</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {avgReplyLatencyMin ? `~${avgReplyLatencyMin}m speed` : "Logged"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Save Rate</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{saveRateVal.toFixed(1)}%</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {saveRateVal >= 1.2 ? "Strong" : "Benchmark: 1.2%"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Daily Velocity</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dailyVelocity}</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">Interactions/day</div>
+                            </div>
+                          </div>
+
+                          {/* Explore Recommendation Probability Bar */}
+                          <div className="p-4 rounded-2xl bg-[#f1f3f7] border-0 space-y-2">
+                            <div className="flex items-center justify-between text-xs font-bold text-slate-950">
+                              <span className="flex items-center gap-1.5">
+                                <Zap size={13} className="text-amber-500 fill-amber-500" /> Explore Recommendation Probability
                               </span>
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
+                                {viralTrendStatus.label}
+                              </span>
+                            </div>
+                            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                              <div
+                                style={{ width: `${exploreProbability}%` }}
+                                className="h-full bg-black rounded-full transition-all duration-500"
+                              />
+                            </div>
+                            <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium pt-0.5">
+                              <span>Predicted reach horizon: <strong className="text-slate-950">{predictedReachMin.toLocaleString()} – {predictedReachMax.toLocaleString()}</strong></span>
+                              <span className="font-bold text-slate-950">{exploreProbability}%</span>
+                            </div>
+                          </div>
+
+                          {/* Catalysts & Bottlenecks */}
+                          <div className="space-y-2 pt-1">
+                            <div className="p-3 rounded-2xl bg-[#fff9db] border-0 text-xs text-slate-950 flex items-start gap-2.5">
+                              <TrendingUp size={16} className="text-slate-900 shrink-0 mt-0.5" />
+                              <p className="leading-relaxed">
+                                <strong className="font-bold">Algorithmic catalyst:</strong> {aiPrimaryCatalyst}
+                              </p>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#feece4] border-0 text-xs text-slate-950 flex items-start gap-2.5">
+                              <Lightbulb size={16} className="text-slate-900 shrink-0 mt-0.5" />
+                              <p className="leading-relaxed">
+                                <strong className="font-bold">Algorithmic bottleneck:</strong> {aiPrimaryBottleneck}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── 6. AUDIENCE SENTIMENT & ACTION CENTER (White Widget) ─── */}
+                      <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                            <Zap size={13} />
+                            <span>Audience Sentiment & Action Center</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#f1f3f7] text-slate-700 text-xs font-bold border-0">
+                            NLP Classified
+                          </span>
+                        </div>
+
+                        {/* Sentiment Spectrum 4-grid in Soft Pastels */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          <div style={{ backgroundColor: "#fff9db" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Praise & Love</span>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{praisePercent}%</div>
+                            <span className="text-[11px] font-medium text-slate-600">{praiseCount} comments</span>
+                          </div>
+                          <div style={{ backgroundColor: "#fceef4" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Buying Intent</span>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{buyerPercent}%</div>
+                            <span className="text-[11px] font-medium text-slate-600">{buyerCount} purchase signals</span>
+                          </div>
+                          <div style={{ backgroundColor: "#e2e2fc" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Questions</span>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{questionPercent}%</div>
+                            <span className="text-[11px] font-medium text-slate-600">{questionCount} inquiries</span>
+                          </div>
+                          <div style={{ backgroundColor: "#f1f3f7" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Neutral</span>
+                            <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{neutralPercent}%</div>
+                            <span className="text-[11px] font-medium text-slate-600">Standard remarks</span>
+                          </div>
+                        </div>
+
+                        {/* Prescriptive Action Buttons */}
+                        <div className="pt-2">
+                          <div className="text-xs font-bold text-slate-950 mb-2.5 flex items-center gap-1.5">
+                            <Sparkles size={13} className="text-amber-500 fill-amber-500" />
+                            <span>Prescriptive Algorithmic Interventions</span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPinCommentModalOpen(true);
+                                notify("Pin comment dialog opened");
+                              }}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-slate-50 text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            >
+                              <Target size={14} />
+                              <span>Pin best comment</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleGenerateStoryReshare(
+                                  meta.caption,
+                                  discussionDensity,
+                                  topQuestionComment?.text || candidatePinComment?.text,
+                                  lifecyclePhase.name
+                                );
+                                notify("Story reshare hook generated");
+                              }}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-slate-50 text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            >
+                              <Send size={14} />
+                              <span>Story reshare hook</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              data-testid="action-convert-buyers"
+                              onClick={() => {
+                                setBuyerConvertModalOpen(true);
+                                notify("Buyer conversion flow opened");
+                              }}
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            >
+                              <Users size={14} className="text-white" />
+                              <span className="!text-white">Convert buyers</span>
+                              <span className="px-2 py-0.5 rounded-full bg-white !text-black text-[10px] font-black">
+                                {buyerCount}
+                              </span>
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-500 font-normal mt-2.5 flex items-center gap-1.5">
+                            <Lightbulb size={13} />
+                            <span>Executing these interventions increases post dwell time and unlocks Explore recommendations.</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* ── 7. AUTOMATION ACTIVITY STREAM TIMELINE (White Widget) ─── */}
+                      <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e9e9ee]">
+                          <div className="flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                              <Activity size={13} />
+                              <span>Automation History</span>
+                            </span>
+                            <span className="text-xs font-semibold text-slate-500">
+                              {visibleTimelineEvents.length} events logged
+                            </span>
+                          </div>
+
+                          {/* Filter tabs */}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {[
+                              ["all", "All activity"],
+                              ["triggered", "Triggered"],
+                              ["dm_sent", "DM sent"],
+                              ["reply", "Replies"],
+                              ["converted", "Converted"],
+                            ].map(([key, label]) => {
+                              const count = key === "all" ? timelineEvents.length : timelineEvents.filter((e) => e.type === key).length;
+                              const isActive = eventFilter === key;
+                              return (
+                                <button
+                                  key={key}
+                                  type="button"
+                                  style={isActive ? { backgroundColor: "#000000", color: "#ffffff" } : {}}
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                                    isActive
+                                      ? "!bg-black !text-white shadow-xs"
+                                      : "bg-white text-slate-700 border border-slate-200 hover:border-black/40 hover:bg-slate-50"
+                                  }`}
+                                  onClick={() => setEventFilter(key as any)}
+                                  data-testid={`history-filter-${key}`}
+                                >
+                                  <span className={isActive ? "!text-white" : ""}>{label}</span>
+                                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${isActive ? "bg-white/20 !text-white" : "bg-slate-100 text-slate-700"}`}>
+                                    {count}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Event items list */}
+                        <div className="space-y-2.5">
+                          {visibleTimelineEvents.map((event) => (
+                            <div
+                              key={event.id}
+                              className={`rounded-2xl border transition-all ${
+                                expandedEvent === event.id
+                                  ? "border-black/60 bg-slate-50/50 shadow-xs"
+                                  : "border-[#e9e9ee] hover:border-black/30 bg-white"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                className="w-full p-3.5 flex items-center justify-between gap-3 text-left cursor-pointer"
+                                onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
+                                data-testid={`history-event-${event.id}`}
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-8 h-8 rounded-xl bg-[#f1f3f7] flex items-center justify-center shrink-0 text-slate-900">
+                                    <Activity size={14} />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-bold text-slate-950 flex items-center gap-2">
+                                      <span>{event.title}</span>
+                                      <span className="text-[10px] font-semibold text-slate-400">· {event.time}</span>
+                                    </div>
+                                    <div className="text-xs text-slate-600 truncate font-normal mt-0.5">
+                                      {event.detail}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#f1f3f7] text-slate-800 text-[10px] font-bold">
+                                    {event.value}
+                                  </span>
+                                  <ChevronRight
+                                    size={14}
+                                    className={`text-slate-400 transition-transform ${expandedEvent === event.id ? "rotate-90" : ""}`}
+                                  />
+                                </div>
+                              </button>
+
+                              {expandedEvent === event.id && (
+                                <div className="px-4 pb-3.5 pt-1 border-t border-[#e9e9ee] text-xs text-slate-600 space-y-1" data-testid={`history-detail-${event.id}`}>
+                                  <div><strong className="text-slate-950 font-semibold">Post:</strong> {event.post}</div>
+                                  <div><strong className="text-slate-950 font-semibold">Actor:</strong> {event.actor}</div>
+                                  <div><strong className="text-slate-950 font-semibold">Outcome:</strong> {event.value}</div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+
+                          {visibleTimelineEvents.length === 0 && (
+                            <div className="p-8 text-center text-xs text-slate-400 rounded-2xl bg-[#f1f3f7]" data-testid="history-empty-state">
+                              No activity in this filter yet.
                             </div>
                           )}
                         </div>
-                      ))}
-
-                      {visibleTimelineEvents.length === 0 && (
-                        <div className="empty-history" data-testid="history-empty-state">
-                          No activity in this filter yet.
-                        </div>
-                      )}
-                    </div>
-                  </section>
-
-                  {/* ── 7. BOTTOM GRID (Conversation Radar & Automation Strategy) ─── */}
-                  <section className="bottom-grid">
-                    {/* Panel: Audience conversation */}
-                    <div className="panel conversation">
-                      <SectionTitle
-                        icon={MessageCircle}
-                        eyebrow="NLP classification of follower inquiries, praise & purchase signals"
-                        title="Audience conversation & intent radar"
-                        meta={`${totalCommentsCount} comments`}
-                      />
-                      <div className="metric-grid four">
-                        <Metric
-                          label="Buyer intent"
-                          value={buyerCount}
-                          note={totalCommentsCount > 0 ? `${Math.round((buyerCount / totalCommentsCount) * 100)}% of comments` : "0% of comments"}
-                          accent="violet-text"
-                        />
-                        <Metric
-                          label="Questions"
-                          value={questionCount}
-                          note={totalCommentsCount > 0 ? `${Math.round((questionCount / totalCommentsCount) * 100)}% of comments` : "0% of comments"}
-                        />
-                        <Metric
-                          label="Praise & affinity"
-                          value={praiseCount}
-                          note={totalCommentsCount > 0 ? `${Math.round((praiseCount / totalCommentsCount) * 100)}% of comments` : "0% of comments"}
-                          accent="violet-text"
-                        />
-                        <Metric
-                          label="Peer tags"
-                          value={referralCount}
-                          note={totalCommentsCount > 0 ? `${Math.round((referralCount / totalCommentsCount) * 100)}% of comments` : "0% of comments"}
-                        />
                       </div>
 
-                      <div className="contributors">
-                        <span className="eyebrow">Top contributors & audience reach</span>
-                        <div>
-                          {topCommenters.length > 0 ? (
-                            topCommenters.slice(0, 3).map((u) => (
-                              <Badge key={u.username}>
-                                @{u.username} <b>({u.count})</b>
-                              </Badge>
-                            ))
-                          ) : (
-                            <small className="text-slate-400">No commenters recorded yet</small>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="keyword">
-                        <span className="eyebrow">High-frequency keywords in comments</span>
-                        <div>
-                          {topCommentKeywords.length > 0 ? (
-                            topCommentKeywords.slice(0, 5).map(([word, count]) => (
-                              <Badge tone="violet" key={word}>
-                                {word} <b>({count})</b>
-                              </Badge>
-                            ))
-                          ) : (
-                            <small className="text-slate-400">No repeated keywords</small>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Panel: Automation strategy */}
-                    <div className="panel automation">
-                      <SectionTitle
-                        icon={Bot}
-                        eyebrow="Comment-to-DM triggers and lead conversion status"
-                        title="Automation strategy & lead engine"
-                        meta={`● ${activeDmRules.length} ${activeDmRules.length === 1 ? 'rule' : 'rules'} active`}
-                      />
-                      <div className="metric-grid four">
-                        <Metric
-                          label="Trigger matches"
-                          value={dmTriggered}
-                          note={`${keywordMatchRate}% coverage`}
-                        />
-                        <Metric
-                          label="DM delivery"
-                          value={`${dmDeliveryRate}%`}
-                          note={`${dmSent} / ${dmTriggered} sent`}
-                          accent="violet-text"
-                        />
-                        <Metric
-                          label="DM conversion"
-                          value={`${dmConversionRate}%`}
-                          note={`${dmReplied} replied`}
-                          accent="mint-text"
-                        />
-                        <Metric
-                          label="Follow gate"
-                          value={`${followGateRate}%`}
-                          note={`${followGateConverted} verified`}
-                        />
-                      </div>
-
-                      <div className="automation-rule">
-                        {activeDmRules.length > 0 ? (
-                          <>
-                            <span>
-                              <Bot size={14} /> {activeDmRules[0].name}
+                      {/* ── 8. BOTTOM GRID: AUDIENCE CONVERSATION RADAR & AUTOMATION STRATEGY ─── */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        {/* Panel A: Audience Conversation & Intent Radar (White Widget) */}
+                        <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                              <MessageCircle size={13} />
+                              <span>Conversation & Intent Radar</span>
                             </span>
-                            <Badge tone="mint">Active</Badge>
-                            <small>
-                              Trigger keywords: “{activeDmRules[0].keywords || "All comments"}” · {dmTriggered} runs
-                            </small>
-                          </>
-                        ) : (
-                          <>
-                            <span>
-                              <Bot size={14} /> No active automation rule
-                            </span>
-                            <Badge tone="neutral">Disabled</Badge>
-                            <small>Enable an automation rule to auto-reply to comments</small>
-                          </>
-                        )}
-                      </div>
+                            <span className="text-xs font-bold text-slate-600">{totalCommentsCount} comments</span>
+                          </div>
 
-                      <button
-                        type="button"
-                        className="manage-button"
-                        onClick={() => setQuickRuleModalOpen(true)}
-                      >
-                        Configure automation <ChevronRight size={14} />
-                      </button>
-                    </div>
-                  </section>
+                          {/* 4-Stat Metric Grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buyer Intent</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{buyerCount}</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {totalCommentsCount > 0 ? `${Math.round((buyerCount / totalCommentsCount) * 100)}%` : "0%"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Questions</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{questionCount}</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {totalCommentsCount > 0 ? `${Math.round((questionCount / totalCommentsCount) * 100)}%` : "0%"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Praise</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{praiseCount}</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {totalCommentsCount > 0 ? `${Math.round((praiseCount / totalCommentsCount) * 100)}%` : "0%"}
+                              </div>
+                            </div>
+                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Peer Tags</div>
+                              <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{referralCount}</div>
+                              <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
+                                {totalCommentsCount > 0 ? `${Math.round((referralCount / totalCommentsCount) * 100)}%` : "0%"}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Top Contributors */}
+                          <div className="pt-2 border-t border-[#e9e9ee]">
+                            <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                              Top Contributors & Advocates
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {topCommenters.length > 0 ? (
+                                topCommenters.slice(0, 3).map((u) => (
+                                  <span
+                                    key={u.username}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs"
+                                  >
+                                    @{u.username} <b className="text-slate-500 font-normal">({u.count})</b>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-slate-400">No commenters recorded yet</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* High-frequency keywords */}
+                          <div className="pt-2 border-t border-[#e9e9ee]">
+                            <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-2">
+                              High-Frequency Comment Keywords
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              {topCommentKeywords.length > 0 ? (
+                                topCommentKeywords.slice(0, 6).map(([word, count]) => (
+                                  <span
+                                    key={word}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e2e2fc] text-slate-950 text-xs font-bold border-0"
+                                  >
+                                    {word} <b className="text-slate-600 font-normal">({count})</b>
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-xs text-slate-400">No repeated keywords</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Panel B: Automation Strategy & Lead Engine (White Widget) */}
+                        <div className="rounded-[24px] border border-[#e9e9ee] hover:border-black/30 bg-white p-5 sm:p-6 shadow-2xs transition-all space-y-4 flex flex-col justify-between">
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                                <Bot size={13} />
+                                <span>Automation Strategy & Lead Engine</span>
+                              </span>
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+                                ● {activeDmRules.length} {activeDmRules.length === 1 ? 'Rule' : 'Rules'} Active
+                              </span>
+                            </div>
+
+                            {/* 4-Stat Metric Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Triggers</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmTriggered}</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{keywordMatchRate}% match</div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">DM Delivery</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmDeliveryRate}%</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{dmSent}/{dmTriggered} sent</div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">DM Conversions</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmConversionRate}%</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{dmReplied} replied</div>
+                              </div>
+                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Follow Gate</div>
+                                <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{followGateRate}%</div>
+                                <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{followGateConverted} verified</div>
+                              </div>
+                            </div>
+
+                            {/* Active Rule Details Card */}
+                            <div className="p-4 rounded-2xl bg-[#f1f3f7] border-0 space-y-1.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-slate-950 flex items-center gap-1.5">
+                                  <Bot size={13} /> {activeDmRules[0]?.name || "No Active Rule"}
+                                </span>
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  activeDmRules.length > 0 ? "bg-white text-slate-950 border border-black/80 shadow-2xs" : "bg-slate-200 text-slate-600"
+                                }`}>
+                                  {activeDmRules.length > 0 ? "Active" : "Disabled"}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-600 font-normal leading-relaxed">
+                                {activeDmRules.length > 0
+                                  ? `Trigger keywords: “${activeDmRules[0].keywords || "All comments"}” · ${dmTriggered} runs executed`
+                                  : "Enable an automation rule to auto-reply to comments and deliver instant DMs."}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="pt-3 border-t border-[#e9e9ee] flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => setQuickRuleModalOpen(true)}
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                            >
+                              <span className="!text-white">Configure automation</span>
+                              <ChevronRight size={13} className="text-white" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })()}
