@@ -1210,7 +1210,7 @@ export function PostDetail({
   const aiAttemptedPostIdRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const currentPostId = meta.shortcode || post?.id || post?.shortcode || "default_post";
+    const currentPostId = mediaId || data?.mediaId || "default_post";
     // Only auto-trigger once per post when data is ready, no diagnosis exists,
     // not currently loading, and no prior error encountered. Prevents infinite retry loops.
     if (
@@ -1229,9 +1229,7 @@ export function PostDetail({
     aiDiagnosisLoading,
     aiDiagnosisError,
     runAiDiagnosis,
-    meta.shortcode,
-    post?.id,
-    post?.shortcode,
+    mediaId,
   ]);
 
   async function openHashtagModal() {
