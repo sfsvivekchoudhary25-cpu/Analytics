@@ -648,10 +648,14 @@ export function PostDetail({
     model: string;
     headline: string;
     summary: string;
+    audienceSentiment?: string;
+    detectedRequests?: string[];
+    isAiGenerated?: boolean;
     actionItems: { title: string; description: string; priority: "high" | "medium" }[];
     viralLevers: { label: string; status: "strong" | "opportunity"; detail: string; val?: string }[];
   } | null>(null);
   const [aiDiagnosisLoading, setAiDiagnosisLoading] = useState(false);
+  const [aiDiagnosisError, setAiDiagnosisError] = useState<string | null>(null);
 
   const [captionModalOpen, setCaptionModalOpen] = useState(false);
   const [captionLoading, setCaptionLoading] = useState(false);
@@ -1149,28 +1153,59 @@ export function PostDetail({
 
   const runAiDiagnosis = useCallback(async () => {
     setAiDiagnosisLoading(true);
+    setAiDiagnosisError(null);
     try {
       const activeKws = (data?.dmRules || [])
         .filter((r) => r.enabled)
         .flatMap((r) => (r.keywords ? r.keywords.split(",").map((k) => k.trim()) : []));
+
+      // Extract real comments text and usernames from audience interactions
+      const realComments = (data?.comments || []).slice(0, 30).map((c) => ({
+        text: c.text,
+        username: c.username,
+      }));
+
       const res = await api<any>("/ai/diagnose-post", {
         method: "POST",
         body: JSON.stringify({
           caption: meta.caption,
+          mediaType: meta.mediaType,
+          postedAt: meta.postedAt,
           likes: meta.likes,
           commentsCount: meta.comments,
+          reach: insights.reach,
+          saved: insights.saved,
+          shares: insights.shares,
+          impressions: insights.impressions ?? insights.views,
+          recentComments: realComments,
           topCommenters: data?.topCommenters || [],
           keywordMatchRate: (data?.comments?.length ?? 0) > 0 ? 94.4 : 0,
           activeRuleKeywords: activeKws,
         }),
       });
       setAiDiagnosis(res);
-    } catch {
-      // Gracefully falls back to dynamic client heuristics
+      setAiDiagnosisError(null);
+    } catch (err: any) {
+      console.warn("AI diagnosis request error:", err?.message || err);
+      setAiDiagnosisError(err?.message || "Failed to generate AI diagnosis. Click retry to run again.");
     } finally {
       setAiDiagnosisLoading(false);
     }
-  }, [meta.caption, meta.likes, meta.comments, data?.topCommenters, data?.dmRules, data?.comments]);
+  }, [
+    meta.caption,
+    meta.mediaType,
+    meta.postedAt,
+    meta.likes,
+    meta.comments,
+    insights.reach,
+    insights.saved,
+    insights.shares,
+    insights.impressions,
+    insights.views,
+    data?.topCommenters,
+    data?.dmRules,
+    data?.comments,
+  ]);
 
   useEffect(() => {
     if (data && !aiDiagnosis && !aiDiagnosisLoading) {
@@ -1834,9 +1869,12 @@ export function PostDetail({
     if (aiDiagnosis) {
       return {
         score: aiDiagnosis.score ?? dynamicScore,
-        model: aiDiagnosis.model || "Algorithmic Growth Engine",
+        model: aiDiagnosis.model || "OpenRouter AI Copilot",
         headline: aiDiagnosis.headline || defaultHeadline,
         summary: aiDiagnosis.summary || defaultSummary,
+        audienceSentiment: aiDiagnosis.audienceSentiment,
+        detectedRequests: aiDiagnosis.detectedRequests,
+        isAiGenerated: true,
         actionItems: (aiDiagnosis.actionItems && aiDiagnosis.actionItems.length > 0)
           ? aiDiagnosis.actionItems
           : dynamicActionItems,
@@ -1853,6 +1891,7 @@ export function PostDetail({
       summary: defaultSummary,
       actionItems: dynamicActionItems,
       viralLevers: dynamicViralLevers,
+      isAiGenerated: false,
     };
   }, [aiDiagnosis, data?.topCommenters, data?.comments, data?.dmRules, meta.likes, meta.comments, meta.caption]);
 
@@ -3615,13 +3654,59 @@ export function PostDetail({
                       {/* Post audit */}
                       <div className="panel insight-panel">
                         <div className="panel-label">
-                          <span>
-                            <Zap size={14} /> Post audit / {auditDateStr}
+                          <span className="flex items-center gap-1.5">
+                            <Zap size={14} className="text-amber-500" /> Post audit / {auditDateStr}
                           </span>
-                          <Badge tone="rose">{meta.mediaType || "MEDIA"}</Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge tone={activeDiagnosis.isAiGenerated ? "mint" : "neutral"}>
+                              {activeDiagnosis.isAiGenerated ? "✨ 100% Real AI" : "Algorithmic Engine"}
+                            </Badge>
+                            <Badge tone="rose">{meta.mediaType || "MEDIA"}</Badge>
+                            <button
+                              type="button"
+                              onClick={() => runAiDiagnosis()}
+                              disabled={aiDiagnosisLoading}
+                              title="Re-run AI Diagnosis with real comments and metrics"
+                              className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 px-2.5 py-1 rounded-full shadow-2xs transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                            >
+                              <RefreshCw size={11} className={aiDiagnosisLoading ? "animate-spin text-indigo-600" : ""} />
+                              <span>{aiDiagnosisLoading ? "Analyzing..." : "Re-run AI"}</span>
+                            </button>
+                          </div>
                         </div>
+
+                        {aiDiagnosisError && (
+                          <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center justify-between gap-2">
+                            <span>{aiDiagnosisError}</span>
+                            <button
+                              type="button"
+                              onClick={() => runAiDiagnosis()}
+                              className="font-bold underline cursor-pointer hover:text-rose-950 shrink-0"
+                            >
+                              Retry
+                            </button>
+                          </div>
+                        )}
+
                         <h2>{activeDiagnosis.headline}</h2>
                         <p>{activeDiagnosis.summary}</p>
+
+                        {(activeDiagnosis.audienceSentiment || (activeDiagnosis.detectedRequests && activeDiagnosis.detectedRequests.length > 0)) && (
+                          <div className="flex flex-wrap items-center gap-2 pt-1 pb-1">
+                            {activeDiagnosis.audienceSentiment && (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                                <span>Sentiment:</span>
+                                <strong>{activeDiagnosis.audienceSentiment}</strong>
+                              </span>
+                            )}
+                            {activeDiagnosis.detectedRequests?.map((req, rIdx) => (
+                              <span key={rIdx} className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                                💬 {req}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
                         <div className="insight-bottom">
                           <span>
                             <i className="live-dot" /> Model: <strong>{activeDiagnosis.model}</strong>
