@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   Card,
   Button,
@@ -1207,11 +1207,32 @@ export function PostDetail({
     data?.comments,
   ]);
 
+  const aiAttemptedPostIdRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (data && !aiDiagnosis && !aiDiagnosisLoading) {
+    const currentPostId = meta.shortcode || post?.id || post?.shortcode || "default_post";
+    // Only auto-trigger once per post when data is ready, no diagnosis exists,
+    // not currently loading, and no prior error encountered. Prevents infinite retry loops.
+    if (
+      data &&
+      !aiDiagnosis &&
+      !aiDiagnosisLoading &&
+      !aiDiagnosisError &&
+      aiAttemptedPostIdRef.current !== currentPostId
+    ) {
+      aiAttemptedPostIdRef.current = currentPostId;
       runAiDiagnosis();
     }
-  }, [data, aiDiagnosis, aiDiagnosisLoading, runAiDiagnosis]);
+  }, [
+    data,
+    aiDiagnosis,
+    aiDiagnosisLoading,
+    aiDiagnosisError,
+    runAiDiagnosis,
+    meta.shortcode,
+    post?.id,
+    post?.shortcode,
+  ]);
 
   async function openHashtagModal() {
     setHashtagModalOpen(true);
