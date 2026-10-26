@@ -1150,6 +1150,7 @@ export function Dashboard({
                 ) : (
                   <div className="flex-1 flex flex-col justify-between">
                     <UnifiedChart
+                      key="reach-chart"
                       type="bar"
                       data={reachSeries}
                       label="Reach"
@@ -1168,6 +1169,7 @@ export function Dashboard({
               ) : data ? (
                 <div className="flex-1 flex flex-col justify-between">
                   <UnifiedChart
+                    key="automations-chart"
                     type="stacked-bar"
                     dates={data.series.map((s) => s.date)}
                     series={[

@@ -14,6 +14,8 @@ import {
   Spin,
   App,
   Skeleton,
+  Popconfirm,
+  Switch,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -102,6 +104,18 @@ import {
   Users,
   Zap,
   Download,
+  ShoppingBag,
+  Tag as LucideTag,
+  Gift,
+  ExternalLink,
+  Globe,
+  Edit3,
+  Trash2,
+  Plus,
+  Settings,
+  Power,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { UnifiedChart } from "./UnifiedChart";
@@ -135,6 +149,13 @@ type DmRule = {
   keywords: string;
   mediaId: string | null;
   dmText: string;
+  templateType?: "text" | "button" | "product" | "file" | "card";
+  cardButtons?: { type: "web_url" | "postback"; title: string; url?: string; payload?: string }[] | null;
+  cardTitle?: string | null;
+  cardSubtitle?: string | null;
+  cardImageUrl?: string | null;
+  cardFileUrl?: string | null;
+  createdAt?: string;
 };
 
 type AutoReplyRule = { id: string; keywords: string; replyText: string; enabled: boolean };
@@ -302,6 +323,28 @@ function Badge({
     >
       {children}
     </span>
+  );
+}
+
+function TwoColorPaperPlane({
+  className = "w-4 h-4",
+  color1 = "#000000",
+  color2,
+}: {
+  className?: string;
+  color1?: string;
+  color2?: string;
+}) {
+  const c2 = color2 ?? color1;
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      {/* Primary Wing / Main Facet (Single Color) */}
+      <path d="M22 2L2 10.2L10.5 14L22 2Z" fill={color1} />
+      {/* Secondary Under-Wing Facet (Single Color) */}
+      <path d="M22 2L10.5 14L13.8 22L22 2Z" fill={c2} />
+      {/* Crisp Center Fold Crease */}
+      <path d="M22 2L10.5 14" stroke={color1 === "#ffffff" ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.35)"} strokeWidth="0.8" />
+    </svg>
   );
 }
 
@@ -636,14 +679,58 @@ export function PostDetail({
   const [hashtagCommentPosted, setHashtagCommentPosted] = useState(false);
 
   const [quickRuleModalOpen, setQuickRuleModalOpen] = useState(false);
+  const [quickRuleStep, setQuickRuleStep] = useState<1 | 2>(1);
   const [activatingRule, setActivatingRule] = useState(false);
   const [quickRuleTrigger, setQuickRuleTrigger] = useState("LINK");
+  const [quickRuleDestUrl, setQuickRuleDestUrl] = useState("https://yourbrand.com/shop");
+  const [quickRulePreset, setQuickRulePreset] = useState<"product" | "promo" | "guide" | "custom">("product");
+  const [quickRuleButtonTitle, setQuickRuleButtonTitle] = useState("Shop Now");
   const [quickRuleDmText, setQuickRuleDmText] = useState(
-    "Hey! Thanks for commenting on our post! 💛 Here is the link with all details: https://instagram.com"
+    "Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇"
   );
+  const [quickRuleReplyVariations, setQuickRuleReplyVariations] = useState<string[]>([
+    "Sent you a DM with the link! Check your inbox.",
+    "Check your DMs! Just sent you all details.",
+    "Link is on its way to your inbox! Check your message requests.",
+  ]);
   const [quickRuleReplyText, setQuickRuleReplyText] = useState(
-    "Sent you a DM with the link! Check your inbox 🚀"
+    "Sent you a DM with the link! Check your inbox."
   );
+
+  const applyQuickRulePreset = (presetKey: "product" | "promo" | "guide") => {
+    setQuickRulePreset(presetKey);
+    if (presetKey === "product") {
+      setQuickRuleTrigger("LINK");
+      setQuickRuleDestUrl("https://yourbrand.com/shop");
+      setQuickRuleDmText("Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇");
+      setQuickRuleButtonTitle("Shop Now");
+      setQuickRuleReplyVariations([
+        "Sent you a DM with the link! Check your inbox.",
+        "Check your DMs! Just sent you all details.",
+        "Link is on its way to your inbox! Check your message requests.",
+      ]);
+    } else if (presetKey === "promo") {
+      setQuickRuleTrigger("PROMO");
+      setQuickRuleDestUrl("https://yourbrand.com/sale?code=VIP20");
+      setQuickRuleDmText("Hey {username}! Use code VIP20 at checkout for 20% off today. Tap below to claim your discount 👇");
+      setQuickRuleButtonTitle("Claim 20% Off");
+      setQuickRuleReplyVariations([
+        "Just sent your discount code to your DMs!",
+        "Check your inbox for your VIP promo code.",
+        "Sent you a DM with the code & link.",
+      ]);
+    } else if (presetKey === "guide") {
+      setQuickRuleTrigger("GUIDE");
+      setQuickRuleDestUrl("https://yourbrand.com/free-guide.pdf");
+      setQuickRuleDmText("Hey {username}! Here is your free guide as requested. Tap below to access your download 👇");
+      setQuickRuleButtonTitle("Download Guide");
+      setQuickRuleReplyVariations([
+        "Sent the free guide to your inbox.",
+        "Check your DMs! Your guide is ready.",
+        "Sent you a DM with the direct download link.",
+      ]);
+    }
+  };
 
   const [collabModalOpen, setCollabModalOpen] = useState(false);
   const [dwellStrategyReady, setDwellStrategyReady] = useState(() => {
@@ -666,6 +753,234 @@ export function PostDetail({
     }
     return false;
   });
+
+  const [persistedTrigger, setPersistedTrigger] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(`post_rule_trigger_${mediaId}`) || "LINK";
+    }
+    return "LINK";
+  });
+
+  // Ongoing Post Automations Management State & Handlers
+  const [ongoingRulesModalOpen, setOngoingRulesModalOpen] = useState(false);
+  const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+  const [togglingRuleId, setTogglingRuleId] = useState<string | null>(null);
+  const [deletingRuleId, setDeletingRuleId] = useState<string | null>(null);
+
+  const targetPostMediaId = mediaId || data?.mediaId;
+
+  // Rules associated specifically with this post
+  const postRules = useMemo(() => {
+    const postSpecific = (data?.dmRules || []).filter(
+      (r) => r.mediaId && r.mediaId === targetPostMediaId
+    );
+    if (postSpecific.length > 0) return postSpecific;
+
+    const enabled = (data?.dmRules || []).filter((r) => r.enabled);
+    if (enabled.length > 0) return [enabled[0]];
+
+    if (data?.dmRules && data.dmRules.length > 0) {
+      return [data.dmRules[0]];
+    }
+
+    return [];
+  }, [data?.dmRules, targetPostMediaId]);
+
+  // Effective rules for viewing/editing (falls back gracefully to locally active rule if pending sync)
+  const effectiveRules: DmRule[] = useMemo(() => {
+    if (postRules.length > 0) return postRules;
+    if (quickRuleActivated) {
+      return [
+        {
+          id: "local_quick_rule",
+          name: `${persistedTrigger || "LINK"} Lead Delivery`,
+          enabled: true,
+          keywords: persistedTrigger || "LINK",
+          mediaId: targetPostMediaId || null,
+          dmText: "Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇",
+          templateType: "button",
+          cardButtons: [
+            {
+              type: "web_url",
+              title: "Shop Now",
+              url: "https://yourbrand.com/shop",
+            },
+          ],
+        },
+      ];
+    }
+    return [];
+  }, [postRules, quickRuleActivated, persistedTrigger, targetPostMediaId]);
+
+  // Check if current quickRuleTrigger keyword conflicts with an existing rule on this post
+  const isDuplicateTrigger = useMemo(() => {
+    const currentKw = quickRuleTrigger.trim().toUpperCase();
+    if (!currentKw) return false;
+    const allRelevantRules = [
+      ...effectiveRules,
+      ...(data?.dmRules || []).filter((r) => !r.mediaId || r.mediaId === targetPostMediaId),
+    ];
+    return allRelevantRules.some((r) => {
+      if (editingRuleId && r.id === editingRuleId) return false;
+      const kws = (r.keywords || "")
+        .split(",")
+        .map((k) => k.trim().toUpperCase())
+        .filter(Boolean);
+      return kws.includes(currentKw);
+    });
+  }, [quickRuleTrigger, effectiveRules, data?.dmRules, targetPostMediaId, editingRuleId]);
+
+  // Set of all keywords currently in use on this post (excluding the one being edited)
+  const usedKeywordsOnPost = useMemo(() => {
+    const kws = new Set<string>();
+    const allRelevantRules = [
+      ...effectiveRules,
+      ...(data?.dmRules || []).filter((r) => !r.mediaId || r.mediaId === targetPostMediaId),
+    ];
+    allRelevantRules.forEach((r) => {
+      if (editingRuleId && r.id === editingRuleId) return;
+      (r.keywords || "")
+        .split(",")
+        .map((k) => k.trim().toUpperCase())
+        .filter(Boolean)
+        .forEach((k) => kws.add(k));
+    });
+    return kws;
+  }, [effectiveRules, data?.dmRules, targetPostMediaId, editingRuleId]);
+
+  const handleOpenEditRule = (rule: DmRule) => {
+    setEditingRuleId(rule.id === "local_quick_rule" ? null : rule.id);
+    setQuickRuleTrigger(rule.keywords || "LINK");
+
+    const isLegacyGenericDm =
+      !rule.dmText ||
+      rule.dmText.trim() === "Hey {username}! Thanks for your comment." ||
+      rule.dmText.trim() === "Hey! 👋 Thanks for your comment.";
+    setQuickRuleDmText(
+      isLegacyGenericDm
+        ? "Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇"
+        : rule.dmText
+    );
+
+    if (rule.cardButtons && rule.cardButtons.length > 0 && rule.cardButtons[0]) {
+      const btn = rule.cardButtons[0];
+      setQuickRuleButtonTitle(
+        !btn.title || btn.title === "Visit Website" ? "Shop Now" : btn.title
+      );
+      setQuickRuleDestUrl(
+        !btn.url || btn.url === "https://yourbrand.com/item"
+          ? "https://yourbrand.com/shop"
+          : btn.url
+      );
+    } else {
+      setQuickRuleButtonTitle("Shop Now");
+      setQuickRuleDestUrl("https://yourbrand.com/shop");
+    }
+    setQuickRulePreset("custom");
+    setQuickRuleStep(1);
+    setOngoingRulesModalOpen(false);
+    setQuickRuleModalOpen(true);
+  };
+
+  const handleOpenCreateRule = () => {
+    setEditingRuleId(null);
+
+    // Determine what trigger keywords are already used on this post
+    const used = new Set<string>();
+    [
+      ...effectiveRules,
+      ...(data?.dmRules || []).filter((r) => !r.mediaId || r.mediaId === targetPostMediaId),
+    ].forEach((r) => {
+      (r.keywords || "")
+        .split(",")
+        .map((k) => k.trim().toUpperCase())
+        .filter(Boolean)
+        .forEach((k) => used.add(k));
+    });
+
+    // Pick first preset that is not already in use on this post
+    if (!used.has("LINK")) {
+      applyQuickRulePreset("product");
+    } else if (!used.has("PROMO")) {
+      applyQuickRulePreset("promo");
+    } else if (!used.has("GUIDE")) {
+      applyQuickRulePreset("guide");
+    } else {
+      const candidates = ["SHOP", "PRICE", "INFO", "BUY", "VIP", "DEAL", "OFFER"];
+      const nextKw = candidates.find((k) => !used.has(k)) || "DEAL";
+      setQuickRulePreset("custom");
+      setQuickRuleTrigger(nextKw);
+      setQuickRuleDestUrl("https://yourbrand.com/shop");
+      setQuickRuleButtonTitle("Shop Now");
+      setQuickRuleDmText(
+        "Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇"
+      );
+    }
+
+    setQuickRuleStep(1);
+    setOngoingRulesModalOpen(false);
+    setQuickRuleModalOpen(true);
+  };
+
+  const handleToggleRule = async (rule: DmRule) => {
+    setTogglingRuleId(rule.id);
+    const newStatus = !rule.enabled;
+    try {
+      if (rule.id !== "local_quick_rule") {
+        await api(`/comment-dm/automations/${rule.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ enabled: newStatus }),
+        });
+      }
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          dmRules: (prev.dmRules || []).map((r) =>
+            r.id === rule.id ? { ...r, enabled: newStatus } : r
+          ),
+        };
+      });
+      message.success(newStatus ? `Automation "${rule.keywords || "Rule"}" is now Active ⚡` : "Automation paused");
+      load();
+    } catch (e: any) {
+      message.error(e.message || "Failed to update status");
+    } finally {
+      setTogglingRuleId(null);
+    }
+  };
+
+  const handleDeleteRule = async (ruleId: string, ruleKeyword?: string) => {
+    setDeletingRuleId(ruleId);
+    try {
+      if (ruleId !== "local_quick_rule") {
+        await api(`/comment-dm/automations/${ruleId}`, {
+          method: "DELETE",
+        });
+      }
+      message.success(`Automation for "${ruleKeyword || "trigger"}" deleted`);
+      const targetId = mediaId || data?.mediaId;
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          dmRules: (prev.dmRules || []).filter((r) => r.id !== ruleId),
+        };
+      });
+      const remaining = (data?.dmRules || []).filter((r) => r.id !== ruleId);
+      if (remaining.length === 0 || ruleId === "local_quick_rule") {
+        setQuickRuleActivated(false);
+        if (typeof window !== "undefined" && targetId) {
+          localStorage.removeItem(`post_rule_active_${targetId}`);
+        }
+      }
+      load();
+    } catch (e: any) {
+      message.error(e.message || "Failed to delete automation");
+    } finally {
+      setDeletingRuleId(null);
+    }
+  };
 
   // AI Algorithmic Lifecycle & Velocity Interventions State
   const [storyReshareModalOpen, setStoryReshareModalOpen] = useState(false);
@@ -921,47 +1236,89 @@ export function PostDetail({
 
   async function handleQuickDeployRule() {
     const targetMediaId = mediaId || data?.mediaId;
+    if (isDuplicateTrigger) {
+      message.warning(
+        `An automation for trigger keyword "${quickRuleTrigger}" already exists on this post. Please choose a unique trigger keyword.`
+      );
+      return;
+    }
     setActivatingRule(true);
     try {
-      const created = await api<{ id: string }>("/comment-dm/automations", {
-        method: "POST",
-      });
-      if (!created?.id) throw new Error("Could not create automation rule");
+      let ruleId = editingRuleId;
 
-      await api(`/comment-dm/automations/${created.id}`, {
+      if (!ruleId) {
+        const created = await api<{ id: string }>("/comment-dm/automations", {
+          method: "POST",
+        });
+        if (!created?.id) throw new Error("Could not create automation rule");
+        ruleId = created.id;
+      }
+
+      // Prepare clean DM text without raw link if button template is used
+      let finalDm = quickRuleDmText.trim();
+      const cleanUrl = quickRuleDestUrl.trim() || "https://instagram.com";
+      if (finalDm.includes("{link}")) {
+        finalDm = finalDm.replace(/{link}/g, "").trim();
+      }
+
+      const buttonTitle = (quickRuleButtonTitle.trim() || "Visit Website").slice(0, 20);
+
+      await api(`/comment-dm/automations/${ruleId}`, {
         method: "PUT",
         body: JSON.stringify({
           name: `${quickRuleTrigger} Lead Delivery`,
           enabled: true,
           keywords: quickRuleTrigger,
-          dmText: quickRuleDmText,
+          dmText: finalDm || "Hey {username}! Thanks for your comment.",
+          templateType: "button",
+          cardButtons: [
+            {
+              type: "web_url",
+              title: buttonTitle,
+              url: cleanUrl,
+            },
+          ],
           mediaId: targetMediaId || null,
           mediaPermalink: initialPermalink || data?.mediaMeta?.permalink || null,
           mediaThumb: initialThumb || data?.mediaMeta?.thumbnail_url || data?.mediaMeta?.media_url || null,
         }),
       });
 
-      if (quickRuleReplyText.trim()) {
+      // Multi-variation replies: register variations so replies alternate safely (Anti-Spam)
+      const validReplies = quickRuleReplyVariations.map((r) => r.trim()).filter(Boolean);
+      if (validReplies.length === 0 && quickRuleReplyText.trim()) {
+        validReplies.push(quickRuleReplyText.trim());
+      }
+
+      for (const reply of validReplies) {
         try {
           await api("/comments/auto-reply/rules", {
             method: "POST",
             body: JSON.stringify({
               keywords: quickRuleTrigger,
-              replyText: quickRuleReplyText.trim(),
+              replyText: reply,
             }),
           });
         } catch { }
       }
 
-      message.success(`Automation rule for "${quickRuleTrigger}" is now active! ⚡`);
+      message.success(
+        editingRuleId
+          ? `Automation rule "${quickRuleTrigger}" updated! ⚡`
+          : `Automation rule for "${quickRuleTrigger}" is now active! ⚡`
+      );
       setQuickRuleActivated(true);
+      setPersistedTrigger(quickRuleTrigger);
       if (typeof window !== "undefined") {
         localStorage.setItem(`post_rule_active_${targetMediaId}`, "true");
+        localStorage.setItem(`post_rule_trigger_${targetMediaId}`, quickRuleTrigger);
       }
       setQuickRuleModalOpen(false);
+      setQuickRuleStep(1);
+      setEditingRuleId(null);
       load();
     } catch (e: any) {
-      message.error(e.message || "Failed to activate rule");
+      message.error(e.message || "Failed to save rule");
     } finally {
       setActivatingRule(false);
     }
@@ -1499,6 +1856,142 @@ export function PostDetail({
     };
   }, [aiDiagnosis, data?.topCommenters, data?.comments, data?.dmRules, meta.likes, meta.comments, meta.caption]);
 
+  const renderCommentDmCard = (isMobile = false) => {
+    const hasActive = quickRuleActivated || (postRules && postRules.length > 0);
+    const primaryRule = effectiveRules[0];
+    const triggerKeyword = primaryRule?.keywords || quickRuleTrigger || "LINK";
+
+    return (
+      <div className={`rounded-[28px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs transition-all hover:border-black/30 space-y-3.5 ${isMobile ? "" : "flex-1 flex flex-col justify-between"}`}>
+        <div>
+          {/* Header & Status Indicator */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                <TwoColorPaperPlane className="w-4 h-4" color1="#000000" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-slate-950 leading-tight">Comment-to-DM Engine</div>
+                <div className="text-[10px] text-slate-500 font-medium">Lead delivery automation</div>
+              </div>
+            </div>
+
+            {hasActive ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                Active
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Ready
+              </span>
+            )}
+          </div>
+
+          {/* Micro Stats Grid (Theme Pastels - BORDERLESS) */}
+          <div className="grid grid-cols-3 gap-2 mt-3.5">
+            <div style={{ backgroundColor: "#f1f3f7" }} className="rounded-[18px] p-2.5 text-center shadow-2xs border-0">
+              <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">DMs</span>
+              <span className="text-sm font-black text-slate-950 tabular-nums">
+                {data?.stats.dmSent ?? 0}
+              </span>
+            </div>
+            <div style={{ backgroundColor: "#fff9db" }} className="rounded-[18px] p-2.5 text-center shadow-2xs border-0">
+              <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Replies</span>
+              <span className="text-sm font-black text-slate-950 tabular-nums">
+                {data?.stats.replied ?? 0}
+              </span>
+            </div>
+            <div style={{ backgroundColor: "#e2e2fc" }} className="rounded-[18px] p-2.5 text-center shadow-2xs border-0">
+              <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Trigger</span>
+              <span className="text-xs font-black text-slate-950 truncate block">
+                {triggerKeyword}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-600 leading-snug mt-3">
+            {hasActive
+              ? `Auto-dispatches DMs & replies instantly when users comment "${triggerKeyword}".`
+              : "Convert comment threads into qualified DM leads automatically with 1-click trigger setup."}
+          </p>
+        </div>
+
+        {/* Action Buttons: Single row (Edit, View, Delete) */}
+        {hasActive ? (
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            {/* 1. Edit */}
+            <button
+              type="button"
+              onClick={() => {
+                if (primaryRule) {
+                  handleOpenEditRule(primaryRule);
+                } else {
+                  handleOpenCreateRule();
+                }
+              }}
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-[#e9e9ee] hover:border-black/40 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
+            >
+              <Edit3 size={12} className="text-slate-700 shrink-0" />
+              <span>Edit</span>
+            </button>
+
+            {/* 2. View */}
+            <button
+              type="button"
+              onClick={() => setOngoingRulesModalOpen(true)}
+              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer group active:scale-95"
+            >
+              <Eye size={12} className="text-white shrink-0 group-hover:scale-110 transition-transform" />
+              <span className="!text-white font-bold">View</span>
+            </button>
+
+            {/* 3. Delete */}
+            <Popconfirm
+              title="Delete Automation?"
+              description={`Are you sure you want to delete the automation${primaryRule?.keywords ? ` for "${primaryRule.keywords}"` : ""}?`}
+              okText="Delete"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true, className: "!rounded-full !font-bold" }}
+              cancelButtonProps={{ className: "!rounded-full" }}
+              onConfirm={() => {
+                if (primaryRule) {
+                  handleDeleteRule(primaryRule.id, primaryRule.keywords);
+                } else {
+                  setOngoingRulesModalOpen(true);
+                }
+              }}
+            >
+              <button
+                type="button"
+                disabled={deletingRuleId === primaryRule?.id}
+                className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full bg-white hover:bg-rose-50 text-rose-600 border border-[#e9e9ee] hover:border-rose-300 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+              >
+                <Trash2 size={12} className="text-rose-500 shrink-0" />
+                <span>Delete</span>
+              </button>
+            </Popconfirm>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={handleOpenCreateRule}
+            style={{ backgroundColor: "#000000", color: "#ffffff" }}
+            className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer group active:scale-95"
+          >
+            <TwoColorPaperPlane className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" color1="#ffffff" />
+            <span className="!text-white font-bold">Configure 1-Click Auto-DM</span>
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <main className="app-shell !p-0 sm:!p-0 lg:!p-[16px_20px_60px]">
       {/* ── Top Hero Header (Soft Pastel Minimal) ────────────────────── */}
@@ -1707,55 +2200,29 @@ export function PostDetail({
                         </span>
                       </div>
 
-                      {/* Caption Card (Soft Neutral Memo #f1f3f7, BORDERLESS) */}
+                      {/* Caption Card (Soft Neutral Memo #f1f3f7, BORDERLESS - without header bar) */}
                       <div
                         style={{ backgroundColor: "#f1f3f7" }}
                         className="rounded-[20px] p-2.5 sm:p-3 flex flex-col justify-between flex-1 border-0 shadow-2xs"
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
-                            <Menu size={11} className="text-slate-950" />
-                            <span>CAPTION</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={handleCopyCaption}
-                            className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                            title="Copy caption"
-                            aria-label="Copy caption"
-                          >
-                            {copiedCaption ? <Check size={12} className="text-slate-950" /> : <Copy size={12} className="text-slate-950" />}
-                          </button>
-                        </div>
-
-                        <div className="mt-1.5">
+                        <div className="mt-0.5">
                           <h3 className="text-xs font-bold text-slate-950 leading-snug line-clamp-2">
                             {parsedCaption.title}
                           </h3>
-                          {expandedCaption && parsedCaption.rest && (
-                            <p className="mt-1.5 text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed">
+                          {parsedCaption.rest && (
+                            <p className="mt-1 text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed line-clamp-2">
                               {parsedCaption.rest}
                             </p>
                           )}
                         </div>
 
-                        <div className="border-t border-[#e9e9ee] my-2" />
+                        <div className="border-t border-[#e9e9ee] my-1.5" />
 
                         <div className="flex items-center justify-between text-[11px]">
                           <div className="flex items-center gap-2 text-slate-600 font-semibold">
                             <span><strong className="text-slate-950">{captionStats.hashtags}</strong> hashtags</span>
                             <span><strong className="text-slate-950">{captionStats.mentions}</strong> mentions</span>
                           </div>
-                          {parsedCaption.hasMore && (
-                            <button
-                              type="button"
-                              onClick={() => setExpandedCaption(!expandedCaption)}
-                              className="font-bold text-slate-950 hover:underline flex items-center gap-0.5 cursor-pointer ml-auto"
-                            >
-                              <span>{expandedCaption ? "Show less" : "Show more"}</span>
-                              <ChevronDown size={12} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
-                            </button>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1930,6 +2397,9 @@ export function PostDetail({
                       </div>
                     </div>
                   </div>
+
+                  {/* Comment-to-DM Engine Widget for Mobile Phones */}
+                  {renderCommentDmCard(true)}
                 </div>
               </div>
 
@@ -2060,80 +2530,7 @@ export function PostDetail({
                     </div>
 
                     {/* 2. Secondary Widget: Comment-to-DM Engine Card */}
-                    <div className="rounded-[28px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs transition-all hover:border-black/30 space-y-3.5 flex-1 flex flex-col justify-between">
-                      <div>
-                        {/* Header & Status Indicator */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                              <Zap size={14} />
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-slate-950 leading-tight">Comment-to-DM Engine</div>
-                              <div className="text-[10px] text-slate-500 font-medium">Lead delivery automation</div>
-                            </div>
-                          </div>
-
-                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0) ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
-                              <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                              </span>
-                              Active
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                              Ready
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Micro Stats Grid (Theme Pastels - BORDERLESS) */}
-                        <div className="grid grid-cols-3 gap-2 mt-3.5">
-                          <div style={{ backgroundColor: "#f1f3f7" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
-                            <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">DMs</span>
-                            <span className="text-sm font-black text-slate-950 tabular-nums">
-                              {data?.stats.dmSent ?? 0}
-                            </span>
-                          </div>
-                          <div style={{ backgroundColor: "#fff9db" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
-                            <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Replies</span>
-                            <span className="text-sm font-black text-slate-950 tabular-nums">
-                              {data?.stats.replied ?? 0}
-                            </span>
-                          </div>
-                          <div style={{ backgroundColor: "#e2e2fc" }} className="rounded-[18px] p-2.5 text-center shadow-2xs">
-                            <span className="text-[10px] font-bold text-slate-600 block uppercase tracking-wider">Trigger</span>
-                            <span className="text-xs font-black text-slate-950 truncate block">
-                              {data?.dmRules?.[0]?.keywords || quickRuleTrigger || "LINK"}
-                            </span>
-                          </div>
-                        </div>
-
-                        <p className="text-[11px] text-slate-600 leading-snug mt-3 line-clamp-2">
-                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
-                            ? `Auto-dispatches DMs & replies instantly when users comment "${data?.dmRules?.[0]?.keywords || quickRuleTrigger}".`
-                            : "Convert comment threads into qualified DM leads automatically with 1-click trigger setup."}
-                        </p>
-                      </div>
-
-                      {/* CTA Trigger */}
-                      <button
-                        type="button"
-                        onClick={() => setQuickRuleModalOpen(true)}
-                        style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                        className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer group"
-                      >
-                        <Zap size={13} className="text-amber-300 group-hover:scale-110 transition-transform" />
-                        <span className="!text-white font-bold">
-                          {quickRuleActivated || (data?.dmRules && data.dmRules.length > 0)
-                            ? "Manage DM Automation"
-                            : "Configure 1-Click Auto-DM"}
-                        </span>
-                      </button>
-                    </div>
+                    {renderCommentDmCard(false)}
                   </div>
 
                   {/* Right Column: Intelligence Cockpit (7 cols on Tablet, 8 cols on Desktop) */}
@@ -2185,37 +2582,8 @@ export function PostDetail({
                         </div>
                       </div>
 
-                      {/* Description / Caption Card */}
+                      {/* Description / Caption Card (without CAPTION DETAILS header row) */}
                       <div className="mt-3.5 rounded-[22px] border border-[#e9e9ee] bg-[#fafbff] p-4 space-y-2.5">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
-                              <Menu size={12} />
-                            </div>
-                            <span className="text-xs font-bold text-slate-950 tracking-wider">CAPTION DETAILS</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={handleCopyCaption}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-white border border-[#e9e9ee] hover:border-black/50 text-xs font-bold text-slate-700 hover:text-black transition-colors cursor-pointer shadow-2xs"
-                            >
-                              {copiedCaption ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
-                              <span>{copiedCaption ? "Copied" : "Copy"}</span>
-                            </button>
-                            {parsedCaption.hasMore && (
-                              <button
-                                type="button"
-                                onClick={() => setExpandedCaption(!expandedCaption)}
-                                className="inline-flex items-center gap-0.5 px-3 py-1 rounded-full bg-white border border-[#e9e9ee] hover:border-black/50 text-xs font-bold text-slate-950 transition-colors cursor-pointer shadow-2xs"
-                              >
-                                <span>{expandedCaption ? "Collapse" : "Expand"}</span>
-                                <ChevronDown size={12} className={`transition-transform duration-200 ${expandedCaption ? "rotate-180" : ""}`} />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
                         <p className={`text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-wrap ${expandedCaption ? "" : "line-clamp-2"}`}>
                           {meta.caption || <span className="italic text-slate-400">No caption description provided for this media.</span>}
                         </p>
@@ -2231,10 +2599,6 @@ export function PostDetail({
                               <strong className="text-slate-950">{captionStats.mentions}</strong> mentions
                             </span>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                            Algorithmic Explore Eligible
-                          </span>
                         </div>
                       </div>
                     </div>
@@ -2316,187 +2680,116 @@ export function PostDetail({
                           </div>
                         </div>
                       </div>
-
-                      {/* Row B: Algorithmic Health & Lead Conversion Status Strip */}
-                      <div className="rounded-[22px] border border-[#e9e9ee] bg-[#ffffff] p-3.5 sm:p-4 shadow-2xs flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 w-full lg:w-auto">
-                          {/* Virality score badge */}
-                          <div className="w-12 h-12 rounded-2xl bg-black text-white flex flex-col items-center justify-center shrink-0 shadow-xs">
-                            <span className="text-base font-black leading-none tabular-nums">{viralityCockpit.totalScore}</span>
-                            <span className="text-[9px] font-bold text-slate-300 uppercase leading-none mt-0.5">/ 100</span>
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-black text-slate-950">{viralityCockpit.tierLabel}</span>
-                              <span className="text-[11px] font-semibold text-slate-500">· {viralityCockpit.tierPercentile}</span>
-                            </div>
-                            <p className="text-xs text-slate-600 truncate mt-0.5 max-w-[420px]">
-                              {viralityCockpit.summaryText}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Lead status & Quick Link */}
-                        <div className="flex items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#e9e9ee]">
-                          <div className="text-left lg:text-right">
-                            <div className="text-xs font-bold text-slate-950">
-                              {buyerLeads.length} Buyer Lead{buyerLeads.length === 1 ? "" : "s"}
-                            </div>
-                            <div className="text-[11px] font-semibold text-emerald-700">
-                              {buyerLeads.filter((l) => l.needsReply).length > 0
-                                ? `${buyerLeads.filter((l) => l.needsReply).length} awaiting reply`
-                                : "All leads engaged"}
-                            </div>
-                          </div>
-                          {onOpenMessages && (
-                            <button
-                              type="button"
-                              onClick={() => onOpenMessages()}
-                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
-                            >
-                              <span className="!text-white font-bold">Open Inbox</span>
-                              <ArrowRight size={12} className="!text-white" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
                     </div>
 
-                    {/* Section 3: Engagement Velocity Banner */}
-                    <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fafbff] p-4 flex items-center justify-between shadow-2xs">
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center flex-shrink-0 shadow-xs">
-                          <TrendingUp size={20} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-slate-950">Engagement Velocity</span>
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                              High Virality Index
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-600 font-medium mt-0.5">
-                            Interactions relative to total audience reach across Feed, Explore & Reels.
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-3xl font-black text-slate-950 tracking-tight tabular-nums">
-                          {insights.engagementRate != null ? `${insights.engagementRate}%` : "4.7%"}
-                        </div>
-                        <span className="text-[11px] text-slate-500 font-semibold">Meta Benchmark: ~2.5%</span>
-                      </div>
-                    </div>
 
-                    {/* Section 4: 6 Metric Cards (Soft Pastel Minimal tokens - 2 Cols on Tab for Breathing Room) */}
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3">
+                    {/* Section 4: 6 Metric Cards (3-Column Grid System to fill space comfortably) */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-3.5">
                       {/* 1. Likes - Soft Rose Pink (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#fceef4" }}
-                        className="rounded-2xl sm:rounded-[22px] p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[105px] sm:min-h-[115px]"
+                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {meta.likes.toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <Heart size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <Heart size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Likes</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">Audience appreciation</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Likes</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-600 mt-0.5 leading-snug">Audience appreciation</div>
                         </div>
                       </div>
 
                       {/* 2. Comments - Soft Butter Yellow (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#fff9db" }}
-                        className="rounded-2xl sm:rounded-[22px] p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[105px] sm:min-h-[115px]"
+                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {meta.comments.toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <MessageCircle size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <MessageCircle size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Comments</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">Active conversations</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Comments</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-600 mt-0.5 leading-snug">Active conversations</div>
                         </div>
                       </div>
 
                       {/* 3. Shares - Soft Periwinkle (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#e2e2fc" }}
-                        className="rounded-2xl sm:rounded-[22px] p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[105px] sm:min-h-[115px]"
+                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {insights.shares.toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <Share2 size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <Share2 size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Shares</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">Peer recommendations</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Shares</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-600 mt-0.5 leading-snug">Peer recommendations</div>
                         </div>
                       </div>
 
                       {/* 4. Saves - Soft Peach Coral (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#feece4" }}
-                        className="rounded-2xl sm:rounded-[22px] p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[105px] sm:min-h-[115px]"
+                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {insights.saved.toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <Bookmark size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <Bookmark size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Saves</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">Bookmarked reference</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Saves</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-600 mt-0.5 leading-snug">Bookmarked reference</div>
                         </div>
                       </div>
 
                       {/* 5. Reach - White Card (SUBTLE BORDER) */}
-                      <div className="rounded-2xl sm:rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[105px] sm:min-h-[115px]">
+                      <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {(insights.reach ?? 141).toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <Eye size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <Eye size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Reach</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-0.5 truncate">Unique accounts</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Reach</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 mt-0.5 leading-snug">Unique accounts</div>
                         </div>
                       </div>
 
                       {/* 6. Views - White Card (SUBTLE BORDER) */}
-                      <div className="rounded-2xl sm:rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3 sm:p-4 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[105px] sm:min-h-[115px]">
+                      <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
-                          <span className="text-xl sm:text-2xl font-black text-slate-950 tabular-nums leading-none">
+                          <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {(insights.views ?? 186).toLocaleString()}
                           </span>
-                          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
-                            <Play size={13} />
+                          <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                            <Play size={14} />
                           </div>
                         </div>
-                        <div className="mt-2.5 sm:mt-3">
-                          <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Views</div>
-                          <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-0.5 truncate">Total impressions</div>
+                        <div className="mt-3">
+                          <div className="text-xs sm:text-sm font-bold text-slate-950">Views</div>
+                          <div className="text-[11px] sm:text-xs font-semibold text-slate-500 mt-0.5 leading-snug">Total impressions</div>
                         </div>
                       </div>
                     </div>
@@ -2676,16 +2969,19 @@ export function PostDetail({
                         <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-950 border-t-transparent" />
                       </div>
                     ) : rightTab === "virality" ? (
-                      <div className="flex-1 flex flex-col justify-between space-y-4">
-                        {/* Score Gauge & Performance Badge (Apple HIG Style) */}
-                        <div className="flex items-center gap-3.5 p-3.5 rounded-[22px] bg-[#f2f2f7] shadow-2xs border-0">
+                      <div className="flex-1 flex flex-col justify-between space-y-3.5">
+                        {/* Score Gauge & Performance Badge (Soft Pastel Minimal Style) */}
+                        <div
+                          style={{ backgroundColor: "#e2e2fc" }}
+                          className="flex items-center gap-3.5 p-4 rounded-[26px] border-0 shadow-xs"
+                        >
                           <div className="relative flex items-center justify-center w-[72px] h-[72px] shrink-0">
                             <svg className="w-[72px] h-[72px] -rotate-90" viewBox="0 0 76 76">
                               <circle
                                 cx="38"
                                 cy="38"
                                 r="31"
-                                stroke="#e5e5ea"
+                                stroke="#ffffff"
                                 strokeWidth="6"
                                 fill="transparent"
                               />
@@ -2693,7 +2989,7 @@ export function PostDetail({
                                 cx="38"
                                 cy="38"
                                 r="31"
-                                stroke={viralityCockpit.tierColor}
+                                stroke="#000000"
                                 strokeWidth="6"
                                 strokeDasharray={2 * Math.PI * 31}
                                 strokeDashoffset={2 * Math.PI * 31 * (1 - viralityCockpit.totalScore / 100)}
@@ -2703,7 +2999,7 @@ export function PostDetail({
                               />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                              <span className="text-xl font-black text-slate-900 leading-none tabular-nums">
+                              <span className="text-2xl font-black text-slate-950 leading-none tabular-nums">
                                 {viralityCockpit.totalScore}
                               </span>
                             </div>
@@ -2711,37 +3007,37 @@ export function PostDetail({
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border shadow-2xs ${viralityCockpit.tierBadgeCls}`}>
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
                                 <FireOutlined className="text-xs shrink-0" />
                                 <span>{viralityCockpit.tierLabel}</span>
                               </span>
-                              <span className="text-[11px] font-semibold text-slate-500">
+                              <span className="text-[11px] font-semibold text-slate-700">
                                 {viralityCockpit.tierPercentile}
                               </span>
                             </div>
-                            <p className="mt-1 text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                            <p className="mt-1.5 text-xs text-slate-700 line-clamp-2 leading-relaxed font-medium">
                               {viralityCockpit.summaryText}
                             </p>
                           </div>
                         </div>
 
-                        {/* 4 Algorithmic Signal Diagnostics (Apple HIG Squircle & Activity Colors) */}
+                        {/* 4 Algorithmic Signal Diagnostics */}
                         <div className="space-y-2">
-                          {/* 1. Share Velocity (Apple System Blue) */}
-                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                          {/* 1. Share Velocity */}
+                          <div className="rounded-[20px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 font-bold text-slate-900">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#4f46e5]/12 text-[#4f46e5] shrink-0">
+                              <div className="flex items-center gap-2.5 font-bold text-slate-950">
+                                <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                                   <ShareAltOutlined className="text-xs" />
-                                </span>
+                                </div>
                                 <span>Peer Share Velocity</span>
-                                <span className="text-[10px] text-slate-400 font-normal hidden sm:inline">(Primary Viral Signal)</span>
+                                <span className="text-[10px] text-slate-500 font-medium hidden sm:inline">(Primary Viral Signal)</span>
                               </div>
                               <div className="flex items-center gap-1.5 text-right">
-                                <span className="font-bold text-slate-900 tabular-nums">
+                                <span className="font-black text-slate-950 tabular-nums">
                                   {viralityCockpit.shareRate.toFixed(1)}%
                                 </span>
-                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                <span className="text-[11px] text-slate-500 font-medium tabular-nums">
                                   ({insights.shares.toLocaleString()} sent)
                                 </span>
                               </div>
@@ -2750,8 +3046,8 @@ export function PostDetail({
                               <Progress
                                 percent={viralityCockpit.shareScore}
                                 showInfo={false}
-                                strokeColor="#4f46e5"
-                                railColor="#e5e5ea"
+                                strokeColor="#000000"
+                                railColor="#f1f3f7"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2759,20 +3055,20 @@ export function PostDetail({
                             </div>
                           </div>
 
-                          {/* 2. Engagement Density (Apple System Pink / Activity Red) */}
-                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                          {/* 2. Audience Response */}
+                          <div className="rounded-[20px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 font-bold text-slate-900">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FF2D55]/12 text-[#FF2D55] shrink-0">
+                              <div className="flex items-center gap-2.5 font-bold text-slate-950">
+                                <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                                   <HeartOutlined className="text-xs" />
-                                </span>
+                                </div>
                                 <span>Audience Response</span>
                               </div>
                               <div className="flex items-center gap-1.5 text-right">
-                                <span className="font-bold text-slate-900 tabular-nums">
+                                <span className="font-black text-slate-950 tabular-nums">
                                   {viralityCockpit.engRate.toFixed(1)}%
                                 </span>
-                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                <span className="text-[11px] text-slate-500 font-medium tabular-nums">
                                   ({insights.totalInteractions.toLocaleString()} total)
                                 </span>
                               </div>
@@ -2781,8 +3077,8 @@ export function PostDetail({
                               <Progress
                                 percent={viralityCockpit.engScore}
                                 showInfo={false}
-                                strokeColor="#FF2D55"
-                                railColor="#e5e5ea"
+                                strokeColor="#000000"
+                                railColor="#f1f3f7"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2790,20 +3086,20 @@ export function PostDetail({
                             </div>
                           </div>
 
-                          {/* 3. Replay Frequency (Apple System Indigo) */}
-                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                          {/* 3. Replay Frequency */}
+                          <div className="rounded-[20px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 font-bold text-slate-900">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#5856D6]/12 text-[#5856D6] shrink-0">
+                              <div className="flex items-center gap-2.5 font-bold text-slate-950">
+                                <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                                   <PlayCircleOutlined className="text-xs" />
-                                </span>
+                                </div>
                                 <span>Replay Frequency</span>
                               </div>
                               <div className="flex items-center gap-1.5 text-right">
-                                <span className="font-bold text-slate-900 tabular-nums">
+                                <span className="font-black text-slate-950 tabular-nums">
                                   {viralityCockpit.freq.toFixed(2)}x
                                 </span>
-                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                <span className="text-[11px] text-slate-500 font-medium tabular-nums">
                                   (views/reach)
                                 </span>
                               </div>
@@ -2812,8 +3108,8 @@ export function PostDetail({
                               <Progress
                                 percent={viralityCockpit.freqScore}
                                 showInfo={false}
-                                strokeColor="#5856D6"
-                                railColor="#e5e5ea"
+                                strokeColor="#000000"
+                                railColor="#f1f3f7"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2821,20 +3117,20 @@ export function PostDetail({
                             </div>
                           </div>
 
-                          {/* 4. Bookmark Intent (Apple System Orange) */}
-                          <div className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
+                          {/* 4. Bookmark Intent */}
+                          <div className="rounded-[20px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all">
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 font-bold text-slate-900">
-                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FF9500]/12 text-[#FF9500] shrink-0">
+                              <div className="flex items-center gap-2.5 font-bold text-slate-950">
+                                <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                                   <BookOutlined className="text-xs" />
-                                </span>
+                                </div>
                                 <span>Bookmark Intent</span>
                               </div>
                               <div className="flex items-center gap-1.5 text-right">
-                                <span className="font-bold text-slate-900 tabular-nums">
+                                <span className="font-black text-slate-950 tabular-nums">
                                   {viralityCockpit.saveRate.toFixed(1)}%
                                 </span>
-                                <span className="text-[11px] text-slate-400 tabular-nums">
+                                <span className="text-[11px] text-slate-500 font-medium tabular-nums">
                                   ({insights.saved.toLocaleString()} saved)
                                 </span>
                               </div>
@@ -2843,8 +3139,8 @@ export function PostDetail({
                               <Progress
                                 percent={viralityCockpit.saveScore}
                                 showInfo={false}
-                                strokeColor="#FF9500"
-                                railColor="#e5e5ea"
+                                strokeColor="#000000"
+                                railColor="#f1f3f7"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -2853,21 +3149,24 @@ export function PostDetail({
                           </div>
                         </div>
 
-                        {/* Actionable Comment-DM Strategy Callout (Apple HIG Blue Banner) */}
+                        {/* Actionable Comment-DM Strategy Callout (Soft Pastel Minimal Peach Coral) */}
                         <div className="mt-auto pt-1">
-                          <div className="rounded-[20px] p-3.5 shadow-2xs bg-[#4f46e5]/8 border border-[#4f46e5]/15">
+                          <div
+                            style={{ backgroundColor: "#feece4" }}
+                            className="rounded-[22px] p-3.5 sm:p-4 shadow-xs border-0"
+                          >
                             <div className="flex items-start gap-2.5">
-                              <div className="w-7 h-7 rounded-xl bg-[#4f46e5] text-white shadow-xs flex items-center justify-center shrink-0 mt-0.5">
+                              <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0 mt-0.5">
                                 <ThunderboltOutlined className="text-xs" />
                               </div>
-                              <div className="text-xs text-slate-900 leading-snug">
+                              <div className="text-xs text-slate-950 leading-relaxed">
                                 <span className="font-bold">Automation Synergy: </span>
                                 {viralityCockpit.activeRules > 0 ? (
                                   <span>
-                                    <span className="text-[#4f46e5] font-bold">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
+                                    <span className="font-bold underline decoration-black/40 underline-offset-2">{viralityCockpit.activeRules} rule{viralityCockpit.activeRules > 1 ? "s" : ""} active</span> converting viral commenters into DM leads automatically.
                                   </span>
                                 ) : (
-                                  <span>
+                                  <span className="font-medium text-slate-800">
                                     Auto-DM is inactive. Activate keyword triggers to capture high intent from viewers discovering this post.
                                   </span>
                                 )}
@@ -2881,17 +3180,17 @@ export function PostDetail({
                         {funnelSteps.map((f) => (
                           <div
                             key={f.key}
-                            className="rounded-[18px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all"
+                            className="rounded-[20px] border border-[#e9e9ee] bg-white p-3 hover:border-black/30 shadow-2xs transition-all"
                           >
                             <div className="flex items-center justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <span className={`flex h-7 w-7 items-center justify-center rounded-xl border text-xs shadow-2xs ${f.badgeCls}`}>
+                                <div className="w-7 h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                                   {f.icon}
-                                </span>
-                                <span className="text-xs font-bold text-slate-900">{f.label}</span>
+                                </div>
+                                <span className="text-xs font-bold text-slate-950">{f.label}</span>
                               </div>
                               <div className="text-right">
-                                <span className="text-xs font-bold tabular-nums text-slate-900">
+                                <span className="text-xs font-black tabular-nums text-slate-950">
                                   {f.value.toLocaleString()}
                                 </span>
                                 <span className="ml-1 text-[11px] font-bold tabular-nums text-slate-500">
@@ -2903,8 +3202,8 @@ export function PostDetail({
                               <Progress
                                 percent={f.pct}
                                 showInfo={false}
-                                strokeColor={f.progressColor}
-                                railColor="#e5e5ea"
+                                strokeColor="#000000"
+                                railColor="#f1f3f7"
                                 strokeLinecap="round"
                                 size="small"
                                 className="!m-0"
@@ -4212,80 +4511,732 @@ export function PostDetail({
         </div>
       </Modal>
 
-      {/* ── MODAL 2: 1-CLICK COMMENT-TO-DM RULE ACTIVATOR ─────────── */}
+      {/* ── MODAL 2: 1-CLICK COMMENT-TO-DM RULE ACTIVATOR (2-STEP GUIDED WIZARD) ─────────── */}
       <Modal
         open={quickRuleModalOpen}
-        onCancel={() => setQuickRuleModalOpen(false)}
+        onCancel={() => {
+          setQuickRuleModalOpen(false);
+          setQuickRuleStep(1);
+        }}
         footer={null}
-        width={560}
+        width={620}
+        centered
+        destroyOnHidden
+        className="[&_.ant-modal]:!max-w-[calc(100vw-20px)] [&_.ant-modal]:!m-auto [&_.ant-modal-content]:!rounded-[26px] [&_.ant-modal-content]:!p-3.5 sm:[&_.ant-modal-content]:!p-6 [&_.ant-modal-content]:!border [&_.ant-modal-content]:!border-[#e9e9ee] [&_.ant-modal-content]:!shadow-2xl [&_.ant-modal-content]:!max-h-[90vh] [&_.ant-modal-content]:!overflow-y-auto"
         title={
-          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white shadow-xs">
-              <ThunderboltOutlined className="text-sm" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-900 leading-tight">1-Click &ldquo;LINK&rdquo; Automation Setup</h4>
-              <p className="text-[11px] text-slate-500 font-normal">
-                Instantly creates and activates an automated DM & reply engine for this post
-              </p>
+          <div className="flex items-center justify-between pb-2.5 sm:pb-3 border-b border-[#e9e9ee]">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                <TwoColorPaperPlane className="w-4 h-4" color1="#000000" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm sm:text-base font-black text-slate-950 leading-tight">
+                    {editingRuleId ? (
+                      `Edit Automation: "${quickRuleTrigger}"`
+                    ) : (
+                      <>
+                        <span className="sm:hidden">1 Click Comment-to-DM</span>
+                        <span className="hidden sm:inline">1-Click Comment-to-DM Setup</span>
+                      </>
+                    )}
+                  </h4>
+                  <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs">
+                    {quickRuleStep === 1 ? "Step 1 of 2: Trigger & Link" : "Step 2 of 2: Messages & Preview"}
+                  </span>
+                </div>
+                <p className="hidden sm:block text-xs text-slate-500 font-medium mt-0.5">
+                  {editingRuleId
+                    ? `Modify trigger keyword, message & button link for this post`
+                    : "Instantly creates and activates an automated DM & reply engine for this post"}
+                </p>
+              </div>
             </div>
           </div>
         }
       >
-        <div className="space-y-3.5 pt-3 text-xs">
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-              Trigger Keyword (when followers comment this)
-            </label>
-            <Input
-              value={quickRuleTrigger}
-              onChange={(e) => setQuickRuleTrigger(e.target.value.toUpperCase())}
-              placeholder="LINK"
-              className="!rounded-lg !text-xs font-mono font-bold"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-              Automated Direct Message (Sent instantly to their DM)
-            </label>
-            <Input.TextArea
-              rows={2}
-              value={quickRuleDmText}
-              onChange={(e) => setQuickRuleDmText(e.target.value)}
-              className="!rounded-xl !text-xs"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-700 mb-1">
-              Automated Public Comment Reply (Signals high engagement to Meta)
-            </label>
-            <Input
-              value={quickRuleReplyText}
-              onChange={(e) => setQuickRuleReplyText(e.target.value)}
-              className="!rounded-lg !text-xs"
-            />
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 space-y-1">
-            <div className="font-semibold text-slate-800">Target Media Filter:</div>
-            <p>Locked specifically to this post ({meta.caption?.slice(0, 40) || mediaId}...). Only comments on this post will trigger this rule.</p>
-          </div>
-
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-            <Button onClick={() => setQuickRuleModalOpen(false)} className="!rounded-lg text-xs">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              loading={activatingRule}
-              onClick={handleQuickDeployRule}
-              className="!rounded-lg !bg-indigo-600 hover:!bg-indigo-500 text-xs font-semibold"
+        <div className="pt-2 sm:pt-3 space-y-3 sm:space-y-4">
+          {/* Step Navigation Tabs */}
+          <div className="flex items-center gap-1.5 sm:gap-2 p-1 bg-[#f1f3f7] rounded-full">
+            <button
+              type="button"
+              onClick={() => setQuickRuleStep(1)}
+              className={`flex-1 inline-flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 px-2 sm:px-3 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                quickRuleStep === 1
+                  ? "bg-black text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-950"
+              }`}
             >
-              ⚡ Activate Rule Now
-            </Button>
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black ${quickRuleStep === 1 ? "bg-white/20 text-white" : "bg-black/10 text-slate-700"}`}>1</span>
+              <span className="sm:hidden">Trigger</span>
+              <span className="hidden sm:inline">Trigger & Destination</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!quickRuleTrigger.trim()) {
+                  message.warning("Please enter a trigger keyword first");
+                  return;
+                }
+                setQuickRuleStep(2);
+              }}
+              className={`flex-1 inline-flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 px-2 sm:px-3 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                quickRuleStep === 2
+                  ? "bg-black text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-950"
+              }`}
+            >
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-black ${quickRuleStep === 2 ? "bg-white/20 text-white" : "bg-black/10 text-slate-700"}`}>2</span>
+              <span className="sm:hidden">Messages</span>
+              <span className="hidden sm:inline">Messages & Anti-Spam Variations</span>
+            </button>
           </div>
+
+          {/* ══════════ STEP 1: TRIGGER & DESTINATION LINK ══════════ */}
+          {quickRuleStep === 1 && (
+            <div className="space-y-3 sm:space-y-4">
+              {/* Target Post Filter (Soft Peach Coral BORDERLESS) */}
+              <div
+                style={{ backgroundColor: "#feece4" }}
+                className="rounded-[18px] sm:rounded-[22px] p-2.5 sm:p-3.5 flex items-center gap-2.5 sm:gap-3 border-0 shadow-xs"
+              >
+                {(initialThumb || data?.mediaMeta?.thumbnail_url || data?.mediaMeta?.media_url) ? (
+                  <img
+                    src={initialThumb || data?.mediaMeta?.thumbnail_url || data?.mediaMeta?.media_url || ""}
+                    alt="Target post thumbnail"
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover shrink-0 border border-black/10"
+                  />
+                ) : (
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white border border-black/80 flex items-center justify-center shrink-0 text-slate-950 shadow-2xs">
+                    <TwoColorPaperPlane className="w-4 h-4 sm:w-5 sm:h-5" color1="#000000" />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[9px] sm:text-[10px] font-bold shadow-2xs">
+                      Locked to This Post
+                    </span>
+                    <span className="text-[10px] sm:text-[11px] font-semibold text-slate-700 truncate max-w-[200px]">
+                      {meta.caption ? (meta.caption.startsWith("🔥") ? meta.caption.slice(0, 36) : `🔥 ${meta.caption.slice(0, 36)}...`) : `ID: ${mediaId || data?.mediaId}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Goal Presets (Two Flat Color Icons) */}
+              <div>
+                <label className="block text-xs font-bold text-slate-900 mb-1 sm:mb-1.5">
+                  Choose Goal Template <span className="hidden sm:inline font-normal text-slate-500">(Auto-configures keyword & messages)</span>
+                </label>
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
+                  <button
+                    type="button"
+                    onClick={() => applyQuickRulePreset("product")}
+                    style={{ backgroundColor: quickRulePreset === "product" ? "#e2e2fc" : "#ffffff" }}
+                    className={`rounded-[16px] sm:rounded-[18px] p-2 sm:p-3 text-left transition-all cursor-pointer border ${
+                      quickRulePreset === "product"
+                        ? "border-black/80 shadow-xs"
+                        : "border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+                    }`}
+                  >
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black text-white flex items-center justify-center mb-1 sm:mb-1.5 shadow-2xs">
+                      <ShoppingBag size={12} className="text-white" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-black text-slate-950 block leading-tight">Product Link</span>
+                    <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-0.5 block truncate">Trigger: LINK</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => applyQuickRulePreset("promo")}
+                    style={{ backgroundColor: quickRulePreset === "promo" ? "#fff9db" : "#ffffff" }}
+                    className={`rounded-[16px] sm:rounded-[18px] p-2 sm:p-3 text-left transition-all cursor-pointer border ${
+                      quickRulePreset === "promo"
+                        ? "border-black/80 shadow-xs"
+                        : "border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+                    }`}
+                  >
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black text-white flex items-center justify-center mb-1 sm:mb-1.5 shadow-2xs">
+                      <LucideTag size={12} className="text-white" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-black text-slate-950 block leading-tight">Promo Code</span>
+                    <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-0.5 block truncate">Trigger: PROMO</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => applyQuickRulePreset("guide")}
+                    style={{ backgroundColor: quickRulePreset === "guide" ? "#feece4" : "#ffffff" }}
+                    className={`rounded-[16px] sm:rounded-[18px] p-2 sm:p-3 text-left transition-all cursor-pointer border ${
+                      quickRulePreset === "guide"
+                        ? "border-black/80 shadow-xs"
+                        : "border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+                    }`}
+                  >
+                    <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black text-white flex items-center justify-center mb-1 sm:mb-1.5 shadow-2xs">
+                      <Gift size={12} className="text-white" />
+                    </div>
+                    <span className="text-[11px] sm:text-xs font-black text-slate-950 block leading-tight">Free Resource</span>
+                    <span className="text-[9px] sm:text-[10px] text-slate-500 font-semibold mt-0.5 block truncate">Trigger: GUIDE</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Trigger Keyword */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-900">
+                    Trigger Keyword <span className="hidden sm:inline font-normal text-slate-500">(when followers comment this)</span>
+                  </label>
+                  <span className="hidden sm:inline text-[10px] font-semibold text-slate-500">Case-insensitive</span>
+                </div>
+                <Input
+                  value={quickRuleTrigger}
+                  onChange={(e) => {
+                    setQuickRuleTrigger(e.target.value.toUpperCase());
+                    setQuickRulePreset("custom");
+                  }}
+                  placeholder="LINK"
+                  status={isDuplicateTrigger ? "error" : ""}
+                  className={`!rounded-xl !text-sm !py-2 sm:!py-2.5 font-mono font-black ${
+                    isDuplicateTrigger
+                      ? "!border-rose-400 !bg-rose-50/20"
+                      : "border-[#e9e9ee] hover:border-black/40 focus:border-black"
+                  }`}
+                />
+
+                {/* Duplicate Trigger Keyword Warning */}
+                {isDuplicateTrigger && (
+                  <div className="flex items-start gap-2 mt-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold animate-in fade-in">
+                    <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold">Duplicate Trigger Keyword:</span> An automation for trigger &ldquo;{quickRuleTrigger}&rdquo; already exists on this post. Please choose a different trigger keyword or edit the existing rule.
+                    </div>
+                  </div>
+                )}
+
+                {/* Suggested Quick Keyword Chips */}
+                <div className="hidden sm:flex items-center gap-1.5 mt-2 flex-wrap">
+                  <span className="text-[11px] font-semibold text-slate-500">Suggestions:</span>
+                  {["LINK", "PRICE", "INFO", "BUY", "PROMO", "GUIDE"].map((kw) => {
+                    const isUsed = usedKeywordsOnPost.has(kw);
+                    return (
+                      <button
+                        key={kw}
+                        type="button"
+                        disabled={isUsed}
+                        onClick={() => {
+                          if (isUsed) return;
+                          setQuickRuleTrigger(kw);
+                          setQuickRulePreset("custom");
+                        }}
+                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border transition-all ${
+                          isUsed
+                            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through"
+                            : quickRuleTrigger === kw
+                            ? "bg-black text-white border-black cursor-pointer"
+                            : "bg-white text-slate-800 border-black/80 hover:bg-slate-50 cursor-pointer"
+                        }`}
+                        title={isUsed ? `Trigger "${kw}" already exists on this post` : `Use trigger "${kw}"`}
+                      >
+                        {kw} {isUsed ? "(Active)" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Destination URL */}
+              <div>
+                <label className="block text-xs font-bold text-slate-900 mb-1">
+                  Destination URL / Product Link
+                </label>
+                <Input
+                  value={quickRuleDestUrl}
+                  onChange={(e) => setQuickRuleDestUrl(e.target.value)}
+                  placeholder="https://yourbrand.com/item"
+                  className="!rounded-xl !text-xs !py-2 sm:!py-2.5 font-mono border-[#e9e9ee] hover:border-black/40 focus:border-black"
+                />
+                <p className="hidden sm:block text-[11px] text-slate-500 font-medium mt-1">
+                  This URL will be inserted into the DM. Followers can tap it directly to convert without opening bio links.
+                </p>
+              </div>
+
+              {/* Step 1 Actions */}
+              <div className="flex items-center justify-between pt-2 sm:pt-2.5 border-t border-[#e9e9ee]">
+                <button
+                  type="button"
+                  onClick={() => setQuickRuleModalOpen(false)}
+                  className="px-4 py-2 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white text-xs font-bold text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={!quickRuleTrigger.trim() || isDuplicateTrigger}
+                  onClick={() => {
+                    if (!quickRuleTrigger.trim()) {
+                      message.warning("Please enter a trigger keyword");
+                      return;
+                    }
+                    if (isDuplicateTrigger) {
+                      message.warning(`An automation for trigger keyword "${quickRuleTrigger}" already exists on this post.`);
+                      return;
+                    }
+                    setQuickRuleStep(2);
+                  }}
+                  className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-black hover:bg-neutral-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-black shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span className="sm:hidden">Continue to Messages</span>
+                  <span className="hidden sm:inline">Continue to Messages & Preview</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ══════════ STEP 2: MESSAGES & ANTI-SPAM PREVIEW ══════════ */}
+          {quickRuleStep === 2 && (
+            <div className="space-y-3 sm:space-y-3.5">
+              {/* Automated Direct Message Bubble */}
+              <div>
+                <div className="flex items-center justify-between mb-1 sm:mb-1.5">
+                  <label className="text-xs font-bold text-slate-900">
+                    Message Bubble Text <span className="hidden sm:inline font-normal text-slate-500">(Sent instantly to user inbox)</span>
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <span className="hidden sm:inline text-[10px] font-semibold text-slate-500 mr-1">Insert:</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuickRuleDmText((prev) => prev + " {username}")}
+                      className="px-2 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs hover:bg-slate-50 cursor-pointer"
+                      title="Insert recipient @username"
+                    >
+                      + @username
+                    </button>
+                  </div>
+                </div>
+                <Input.TextArea
+                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  value={quickRuleDmText}
+                  onChange={(e) => setQuickRuleDmText(e.target.value)}
+                  placeholder="Hey {username}! Thanks for your comment."
+                  className="!rounded-[18px] sm:!rounded-[20px] !text-xs sm:!text-[13px] !px-4 !py-3 sm:!py-3.5 !leading-relaxed font-sans border-[#e9e9ee] hover:border-black/40 focus:border-black bg-[#fafbff] shadow-2xs !resize-none"
+                  style={{
+                    padding: "12px 16px",
+                    lineHeight: "1.6",
+                    fontSize: "13px",
+                    borderRadius: "18px",
+                  }}
+                />
+              </div>
+
+              {/* Native Instagram Clickable Action Button */}
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#0095f6]" />
+                    <span>Clickable Action Button</span>
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {quickRuleButtonTitle.length}/20 chars
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Input
+                    value={quickRuleButtonTitle}
+                    maxLength={20}
+                    onChange={(e) => setQuickRuleButtonTitle(e.target.value)}
+                    placeholder="e.g. Visit Website"
+                    className="!rounded-xl !text-xs !px-3 !py-1.5 sm:!py-2 font-bold text-[#0095f6] border-[#e9e9ee] hover:border-black/40 focus:border-black flex-1"
+                  />
+                  <Dropdown
+                    trigger={["click"]}
+                    placement="bottomRight"
+                    menu={{
+                      items: [
+                        {
+                          key: "Visit Website",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Globe size={14} className="text-slate-700 shrink-0" />
+                              <span>Visit Website</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Shop Now",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <ShoppingBag size={14} className="text-slate-700 shrink-0" />
+                              <span>Shop Now</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Claim 20% Off",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Gift size={14} className="text-slate-700 shrink-0" />
+                              <span>Claim 20% Off</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Download Guide",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Download size={14} className="text-slate-700 shrink-0" />
+                              <span>Download Guide</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Learn More",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Info size={14} className="text-slate-700 shrink-0" />
+                              <span>Learn More</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Get Special Offer",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <LucideTag size={14} className="text-slate-700 shrink-0" />
+                              <span>Get Special Offer</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "View Pricing",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Activity size={14} className="text-slate-700 shrink-0" />
+                              <span>View Pricing</span>
+                            </span>
+                          ),
+                        },
+                        {
+                          key: "Sign Up Free",
+                          label: (
+                            <span className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+                              <Sparkles size={14} className="text-slate-700 shrink-0" />
+                              <span>Sign Up Free</span>
+                            </span>
+                          ),
+                        },
+                      ],
+                      onClick: ({ key }) => {
+                        setQuickRuleButtonTitle(String(key));
+                      },
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="px-2.5 py-1.5 sm:py-2 rounded-xl bg-white border border-[#e9e9ee] hover:border-black/40 text-xs font-bold text-slate-800 shadow-2xs flex items-center gap-1 cursor-pointer shrink-0 transition-all hover:bg-slate-50 active:scale-95"
+                      title="Select from pre-defined list"
+                    >
+                      <span>Presets</span>
+                      <ChevronDown size={13} className="text-slate-500" />
+                    </button>
+                  </Dropdown>
+                </div>
+                <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[11px]">
+                  <span className="text-slate-500 font-medium truncate max-w-[200px] sm:max-w-[260px]">
+                    Opens: <span className="font-mono text-slate-700">{quickRuleDestUrl || "https://yourbrand.com/item"}</span>
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1">
+                    <Check size={10} /> 100% Clickable Link
+                  </span>
+                </div>
+              </div>
+
+              {/* Live Follower Simulation Preview (Soft Neutral Memo) */}
+              <div
+                style={{ backgroundColor: "#f1f3f7" }}
+                className="rounded-[18px] sm:rounded-[22px] p-2.5 sm:p-3.5 border-0 shadow-xs space-y-2 sm:space-y-2.5"
+              >
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <Eye size={12} />
+                    <span>Live Simulation</span>
+                  </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white text-slate-800 border border-black/20 text-[9px] sm:text-[10px] font-bold">
+                    Automated
+                  </span>
+                </div>
+
+                {/* Follower comment + bot reply */}
+                <div className="bg-white rounded-xl p-2 sm:p-2.5 border border-[#e9e9ee] text-xs space-y-1.5 sm:space-y-2">
+                  <div className="flex items-start gap-1.5 sm:gap-2">
+                    <div className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 text-[9px] font-black flex items-center justify-center shrink-0">
+                      U
+                    </div>
+                    <div>
+                      <span className="font-bold text-slate-900 text-[10px] sm:text-[11px]">@follower: </span>
+                      <span className="font-mono font-bold bg-slate-100 px-1 py-0.2 rounded text-slate-900 text-[10px] sm:text-[11px]">
+                        {quickRuleTrigger || "LINK"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-1.5 sm:gap-2 pl-3 border-l-2 border-black/20">
+                    <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <TwoColorPaperPlane className="w-3 h-3" color1="#ffffff" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-bold text-slate-900 text-[10px] sm:text-[11px]">Your Brand:</span>
+                        <span className="text-[8px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded-full">
+                          Randomized
+                        </span>
+                      </div>
+                      <p className="text-slate-700 text-[10px] sm:text-[11px] mt-0.5">
+                        {quickRuleReplyVariations[0] || "Sent you a DM with the link! Check your inbox."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Direct Message Delivered (Instagram Button Template Card) */}
+                <div className="bg-white rounded-xl p-2 sm:p-2.5 border border-[#e9e9ee] text-xs space-y-1.5">
+                  <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-bold text-slate-500">
+                    <span className="flex items-center gap-1.5">
+                      <TwoColorPaperPlane className="w-3 h-3" color1="#000000" />
+                      <span>Direct Message Delivered</span>
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[8px] sm:text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded-full font-bold">
+                      <Check size={9} /> Clickable Link
+                    </span>
+                  </div>
+
+                  {/* Official Instagram Button Template Card */}
+                  <div className="rounded-2xl border border-black/10 bg-white shadow-xs overflow-hidden">
+                    <div className="p-3 text-slate-900 text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                      {quickRuleDmText
+                        .replace(/{username}/g, "@follower")
+                        .replace(/{link}/g, "")
+                        .trim() || "Hey @follower! Thanks for your comment."}
+                    </div>
+                    <div className="border-t border-black/10 bg-slate-50/50 py-2.5 px-3 text-center text-xs font-bold text-[#0095f6] hover:bg-slate-100/80 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                      <span>{quickRuleButtonTitle.trim() || "Visit Website"}</span>
+                      <ExternalLink size={12} className="opacity-70" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step 2 Actions */}
+              <div className="flex items-center justify-between pt-2 sm:pt-2.5 border-t border-[#e9e9ee]">
+                <button
+                  type="button"
+                  onClick={() => setQuickRuleStep(1)}
+                  className="px-3.5 sm:px-4 py-2 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white text-xs font-bold text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+                >
+                  <ChevronLeft size={13} />
+                  <span>Back</span>
+                </button>
+                <Button
+                  type="primary"
+                  loading={activatingRule}
+                  onClick={handleQuickDeployRule}
+                  className="!rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs !font-black !px-5 sm:!px-6 !py-2 sm:!py-2.5 shadow-xs transition-all active:scale-95 !border-0 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <TwoColorPaperPlane className="w-3.5 h-3.5" color1="#ffffff" />
+                  <span>{editingRuleId ? "Save Changes" : "Activate Rule Now"}</span>
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* ── MODAL: ONGOING POST AUTOMATIONS (VIEW / EDIT / DELETE) ── */}
+      <Modal
+        open={ongoingRulesModalOpen}
+        onCancel={() => setOngoingRulesModalOpen(false)}
+        footer={null}
+        width={480}
+        centered
+        destroyOnHidden
+        closeIcon={
+          <span className="text-slate-400 hover:text-slate-600 transition-colors inline-flex items-center justify-center p-0.5">
+            <X size={18} strokeWidth={2.2} />
+          </span>
+        }
+        className="[&_.ant-modal]:!max-w-[480px] [&_.ant-modal]:!m-auto [&_.ant-modal-content]:!rounded-[26px] [&_.ant-modal-content]:!p-5 sm:[&_.ant-modal-content]:!p-6 [&_.ant-modal-content]:!border [&_.ant-modal-content]:!border-[#e9e9ee] [&_.ant-modal-content]:!shadow-2xl [&_.ant-modal-close]:!top-4.5 [&_.ant-modal-close]:!right-4.5 [&_.ant-modal-close]:!border-0 [&_.ant-modal-close]:!outline-none [&_.ant-modal-close:focus]:!outline-none [&_.ant-modal-close:focus-visible]:!outline-none [&_.ant-modal-close]:!shadow-none [&_.ant-modal-close]:!ring-0 [&_.ant-modal-close-x]:!leading-none"
+        title={
+          <div className="flex items-center justify-between pb-3.5 border-b border-[#e9e9ee]/80">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                <Activity className="w-4 h-4 text-slate-950" strokeWidth={2.5} />
+              </div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-base sm:text-lg font-black text-slate-950 leading-tight">
+                  Ongoing Automations
+                </h4>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs">
+                  {effectiveRules.filter((r) => r.enabled).length || 1} Active
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      >
+        <div className="pt-3 space-y-4">
+          {effectiveRules.length === 0 ? (
+            <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-6 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#f1f3f7] flex items-center justify-center mx-auto text-slate-400">
+                <TwoColorPaperPlane className="w-6 h-6" color1="#000000" />
+              </div>
+              <div>
+                <h5 className="text-sm font-bold text-slate-900">No active automation on this post</h5>
+                <p className="text-xs text-slate-500 mt-1">
+                  Start sending automated private DMs and comment replies with 1-click.
+                </p>
+              </div>
+              <Button
+                type="primary"
+                onClick={handleOpenCreateRule}
+                className="!rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs !font-bold !px-5 !py-2 !border-0 cursor-pointer shadow-xs"
+              >
+                + Set Up Comment-to-DM
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {effectiveRules.map((rule, idx) => {
+                const buttonItem = rule.cardButtons && rule.cardButtons.length > 0 ? rule.cardButtons[0] : null;
+                const isLegacyGenericTitle = !buttonItem?.title || buttonItem.title === "Visit Website";
+                const buttonTitle = isLegacyGenericTitle ? "Shop Now" : buttonItem.title;
+                const isLegacyGenericUrl = !buttonItem?.url || buttonItem.url === "https://yourbrand.com/item";
+                const buttonUrl = isLegacyGenericUrl ? "https://yourbrand.com/shop" : buttonItem.url;
+
+                const isLegacyGenericDm =
+                  !rule.dmText ||
+                  rule.dmText.trim() === "Hey {username}! Thanks for your comment." ||
+                  rule.dmText.trim() === "Hey! 👋 Thanks for your comment.";
+
+                const dmMessage = isLegacyGenericDm
+                  ? "Hey {username}! Thanks for checking out our post. Tap the button below to view all product specs & sizes 👇"
+                  : rule.dmText;
+
+                return (
+                  <div key={rule.id || idx} className="space-y-3">
+                    {/* Top Row: Trigger Keyword + Active Switch */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        style={{ backgroundColor: "#e2e2fc" }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-slate-950 font-black text-xs border-0 shadow-2xs"
+                      >
+                        <Sparkles size={13} className="text-slate-950" />
+                        <span>Trigger: &quot;{rule.keywords || "LINK"}&quot;</span>
+                      </span>
+
+                      {/* Enable/Disable Toggle */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-[#10b981] flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-[#10b981] inline-block" />
+                          Active
+                        </span>
+                        <Switch
+                          size="small"
+                          checked={rule.enabled}
+                          loading={togglingRuleId === rule.id}
+                          onChange={() => handleToggleRule(rule)}
+                          className={rule.enabled ? "!bg-[#10b981]" : ""}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Middle: DM Message Content (Soft Neutral Memo) */}
+                    <div
+                      style={{ backgroundColor: "#f1f3f7" }}
+                      className="rounded-[20px] p-4 border-0 text-xs space-y-2 mt-3"
+                    >
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center justify-between">
+                        <span>DIRECT MESSAGE (DM) PREVIEW:</span>
+                        <span className="text-[9px] font-semibold text-slate-400">INSTAGRAM BUTTON TEMPLATE</span>
+                      </div>
+                      <p className="text-slate-800 font-medium text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap">
+                        {dmMessage}
+                      </p>
+                    </div>
+
+                    {/* Clickable Button Box (Soft Butter Yellow) */}
+                    <div
+                      style={{ backgroundColor: "#fff9db" }}
+                      className="rounded-[20px] p-4 border-0 space-y-1 mt-3"
+                    >
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
+                        CLICKABLE BUTTON:
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="font-black text-slate-950 text-sm">
+                          {buttonTitle}
+                        </div>
+                        <a
+                          href={buttonUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[#0095f6] hover:text-[#0077c5] transition-colors p-0.5"
+                          title="Open link in new tab"
+                        >
+                          <ExternalLink size={15} />
+                        </a>
+                      </div>
+                      <div className="text-xs font-normal text-slate-500 truncate">
+                        {buttonUrl}
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Row: Edit Rule & Delete Buttons */}
+                    <div className="flex items-center justify-end gap-2.5 mt-3.5">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditRule(rule)}
+                        className="inline-flex items-center gap-1.5 px-4.5 py-1.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-all cursor-pointer active:scale-95"
+                      >
+                        <Edit3 size={13} />
+                        <span>Edit Rule</span>
+                      </button>
+
+                      <Popconfirm
+                        title="Delete Automation?"
+                        description={`Are you sure you want to delete the automation${rule.keywords ? ` for "${rule.keywords}"` : ""}? This will stop auto-sending DMs on this post.`}
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true, className: "!rounded-full !font-bold" }}
+                        cancelButtonProps={{ className: "!rounded-full" }}
+                        onConfirm={() => handleDeleteRule(rule.id, rule.keywords)}
+                      >
+                        <button
+                          type="button"
+                          disabled={deletingRuleId === rule.id}
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#fceef4] hover:bg-[#fadce7] text-[#e11d48] font-bold text-xs shadow-2xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 border-0"
+                        >
+                          <Trash2 size={13} />
+                          <span>Delete</span>
+                        </button>
+                      </Popconfirm>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Add Another Automation button */}
+              <button
+                type="button"
+                onClick={handleOpenCreateRule}
+                className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-full border border-dashed border-[#b4b7fc] hover:border-black text-[#2e384d] hover:text-black bg-white hover:bg-slate-50 text-xs font-bold transition-all cursor-pointer shadow-2xs mt-3.5"
+              >
+                <Plus size={14} className="text-[#2e384d]" />
+                <span>Add Another Trigger Keyword for this Post</span>
+              </button>
+            </div>
+          )}
         </div>
       </Modal>
 

@@ -145,6 +145,16 @@ export function UnifiedChart({
     return "bar";
   }, [type, segments, series]);
 
+  // Static fallback points for single-series charts (must be declared before any conditional returns)
+  const fallbackData: Point[] = useMemo(() => {
+    const now = Date.now();
+    const DAY = 86400000;
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now - (6 - i) * DAY);
+      return { date: d.toISOString().slice(0, 10), value: 0 };
+    });
+  }, []);
+
   // Loading skeleton
   if (loading) {
     return (
@@ -343,15 +353,6 @@ export function UnifiedChart({
   // ─────────────────────────────────────────────────────────────
   // 3. SINGLE SERIES (BAR / AREA)
   // ─────────────────────────────────────────────────────────────
-  const fallbackData: Point[] = useMemo(() => {
-    const now = Date.now();
-    const DAY = 86400000;
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(now - (6 - i) * DAY);
-      return { date: d.toISOString().slice(0, 10), value: 0 };
-    });
-  }, []);
-
   const activePoints = data && data.length > 0 ? data : fallbackData;
 
   const chartData = activePoints.map((d) => ({
