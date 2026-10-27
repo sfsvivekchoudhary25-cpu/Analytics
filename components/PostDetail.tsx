@@ -2301,7 +2301,7 @@ export function PostDetail({
                       </div>
                     </div>
                     <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight tabular-nums">
-                      {insights.engagementRate != null ? `${insights.engagementRate}%` : "8.5%"}
+                      {insights.engagementRate != null ? `${insights.engagementRate}%` : "0.0%"}
                     </div>
                   </div>
 
@@ -2424,7 +2424,7 @@ export function PostDetail({
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
-                          {(insights.reach ?? 141).toLocaleString()}
+                          {(insights.reach ?? 0).toLocaleString()}
                         </span>
                         <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                           <Eye size={12} className="text-slate-950" />
@@ -2443,7 +2443,7 @@ export function PostDetail({
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
-                          {(insights.views ?? 180).toLocaleString()}
+                          {(insights.views ?? 0).toLocaleString()}
                         </span>
                         <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                           <Play size={12} className="text-slate-950" />
@@ -2823,7 +2823,7 @@ export function PostDetail({
                       <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
-                            {(insights.reach ?? 141).toLocaleString()}
+                            {(insights.reach ?? 0).toLocaleString()}
                           </span>
                           <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                             <Eye size={14} />
@@ -2839,7 +2839,7 @@ export function PostDetail({
                       <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
-                            {(insights.views ?? 186).toLocaleString()}
+                            {(insights.views ?? 0).toLocaleString()}
                           </span>
                           <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                             <Play size={14} />
