@@ -62,6 +62,83 @@ function formatStatCount(num: number | null | undefined): string {
   return num.toString();
 }
 
+export function getCleanAuthor(item: { author?: string; authorName?: string }): string {
+  if (item.author && !/^\d+$/.test(item.author)) {
+    return item.author;
+  }
+  if (item.authorName && !/^\d+$/.test(item.authorName) && item.authorName !== "Instagram Creator") {
+    const candidate = item.authorName.split(/[\s|•]/)[0]?.trim();
+    if (candidate && !/^\d+$/.test(candidate)) {
+      return candidate.toLowerCase().replace(/[^a-z0-9._]/g, "");
+    }
+  }
+  return item.author || "instagram_user";
+}
+
+function VaultReelThumbnail({
+  thumbnail,
+  shortcode,
+  author,
+}: {
+  thumbnail: string | null;
+  shortcode: string;
+  author: string;
+}) {
+  const [src, setSrc] = useState<string>(
+    thumbnail || `/api/instagram/thumbnail?shortcode=${encodeURIComponent(shortcode)}`
+  );
+  const [attemptedProxy, setAttemptedProxy] = useState(false);
+  const [isBroken, setIsBroken] = useState(false);
+
+  useEffect(() => {
+    if (thumbnail) {
+      setSrc(thumbnail);
+      setAttemptedProxy(false);
+      setIsBroken(false);
+    }
+  }, [thumbnail]);
+
+  const handleError = () => {
+    if (!attemptedProxy) {
+      setAttemptedProxy(true);
+      // Fallback to our Next.js thumbnail proxy which fetches live oEmbed fresh image
+      setSrc(
+        `/api/instagram/thumbnail?shortcode=${encodeURIComponent(shortcode)}&url=${encodeURIComponent(
+          thumbnail || ""
+        )}&_t=${Date.now()}`
+      );
+    } else {
+      setIsBroken(true);
+    }
+  };
+
+  if (isBroken) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950/80 p-4 text-center">
+        <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center mb-2.5 shadow-sm text-white">
+          <Film size={20} className="text-[#e2e2fc]" />
+        </div>
+        <span className="text-[11px] font-bold text-white/90 truncate max-w-[120px]">
+          @{author}
+        </span>
+        <span className="text-[10px] font-medium text-slate-400 mt-0.5">Instagram Reel</span>
+      </div>
+    );
+  }
+
+  return (
+    /* eslint-disable-next-line @next/next/no-img-element */
+    <img
+      src={src}
+      alt={`Reel by @${author}`}
+      referrerPolicy="no-referrer"
+      crossOrigin="anonymous"
+      onError={handleError}
+      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+    />
+  );
+}
+
 export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [inputUrl, setInputUrl] = useState(initialUrl || "");
   const [loading, setLoading] = useState(false);
@@ -140,6 +217,62 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
       console.warn("Failed to save reels to localStorage:", e);
     }
   }, []);
+
+  // Background auto-repair: for any saved reel with numeric author or missing videoUrl, refresh metadata
+  useEffect(() => {
+    if (savedReels.length === 0) return;
+    const needsRepair = savedReels.filter(
+      (r) => /^\d+$/.test(r.author) || !r.videoUrl
+    );
+    if (needsRepair.length === 0) return;
+
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      let hasChanges = false;
+      const copy = [...savedReels];
+      for (const item of needsRepair.slice(0, 4)) {
+        if (!isMounted) break;
+        try {
+          const res = await fetch("/api/instagram/reel", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              url: item.url || `https://www.instagram.com/reel/${item.shortcode}/`,
+            }),
+          });
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && json.data) {
+              const idx = copy.findIndex((r) => r.shortcode === item.shortcode);
+              if (idx !== -1) {
+                copy[idx] = {
+                  ...copy[idx],
+                  author:
+                    json.data.author && !/^\d+$/.test(json.data.author)
+                      ? json.data.author
+                      : copy[idx].author,
+                  authorName: json.data.authorName || copy[idx].authorName,
+                  videoUrl: json.data.videoUrl || copy[idx].videoUrl,
+                  thumbnail: json.data.thumbnail || copy[idx].thumbnail,
+                  likes: json.data.likes || copy[idx].likes,
+                  comments: json.data.comments || copy[idx].comments,
+                };
+                hasChanges = true;
+              }
+            }
+          }
+        } catch {}
+      }
+      if (hasChanges && isMounted) {
+        persistSavedReels(copy);
+      }
+    }, 1200);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [savedReels.length, persistSavedReels]);
 
   // Fetch reel details from API
   const handleFetchReel = useCallback(
@@ -317,7 +450,12 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   };
 
   // Download media file via server proxy with blob + direct device file-save
-  const triggerDownload = async (url: string, filename: string, type: "video" | "image") => {
+  const triggerDownload = async (
+    url: string | null | undefined,
+    filename: string,
+    type: "video" | "image",
+    shortcode?: string
+  ) => {
     if (type === "video") setDownloadingVideo(true);
     setDownloadStatus({
       loading: true,
@@ -325,7 +463,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     });
 
     try {
-      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}&type=${type}`;
+      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url || "")}&filename=${encodeURIComponent(
+        filename
+      )}&type=${type}${shortcode ? `&shortcode=${encodeURIComponent(shortcode)}` : ""}`;
 
       // Fetch as Blob for guaranteed device filesystem saving
       const res = await fetch(proxyUrl);
@@ -348,7 +488,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
       setTimeout(() => setDownloadStatus(null), 3500);
     } catch (err) {
       console.warn("Direct blob download failed, falling back to direct proxy anchor:", err);
-      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(filename)}&type=${type}`;
+      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url || "")}&filename=${encodeURIComponent(
+        filename
+      )}&type=${type}${shortcode ? `&shortcode=${encodeURIComponent(shortcode)}` : ""}`;
       const a = document.createElement("a");
       a.href = proxyUrl;
       a.download = filename;
@@ -1053,64 +1195,57 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
               {/* Responsive Grid: 2 cols on mobile, 4 on desktop */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                {savedReels.slice(0, 4).map((item) => (
-                  <div
-                    key={item.shortcode}
-                    className="group relative aspect-[9/14] rounded-[20px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between"
-                  >
-                    {item.thumbnail ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={item.thumbnail}
-                        alt={item.caption || "Reel"}
-                        referrerPolicy="no-referrer"
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                {savedReels.slice(0, 4).map((item) => {
+                  const cleanAuthor = getCleanAuthor(item);
+                  return (
+                    <div
+                      key={item.shortcode}
+                      className="group relative aspect-[9/14] rounded-[20px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between"
+                    >
+                      <VaultReelThumbnail
+                        thumbnail={item.thumbnail}
+                        shortcode={item.shortcode}
+                        author={cleanAuthor}
                       />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-white/40">
-                        <Film size={26} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/50 pointer-events-none" />
+
+                      <div className="relative z-10 p-2.5 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-white/90 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full truncate max-w-[110px]">
+                          @{cleanAuthor}
+                        </span>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/50 pointer-events-none" />
 
-                    <div className="relative z-10 p-2.5 flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-white/90 bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full truncate max-w-[110px]">
-                        @{item.author}
-                      </span>
-                    </div>
+                      <div className="relative z-10 p-2.5 flex items-center justify-between border-t border-white/15">
+                        <span className="text-[10px] font-bold text-white flex items-center gap-1">
+                          <Heart size={11} className="fill-white" />
+                          <span>{item.likes > 999 ? `${(item.likes / 1000).toFixed(1)}k` : item.likes}</span>
+                        </span>
 
-                    <div className="relative z-10 p-2.5 flex items-center justify-between border-t border-white/15">
-                      <span className="text-[10px] font-bold text-white flex items-center gap-1">
-                        <Heart size={11} className="fill-white" />
-                        <span>{item.likes > 999 ? `${(item.likes / 1000).toFixed(1)}k` : item.likes}</span>
-                      </span>
-
-                      <div className="flex items-center gap-1">
-                        {item.videoUrl && (
+                        <div className="flex items-center gap-1">
                           <button
                             type="button"
                             onClick={() =>
-                              triggerDownload(item.videoUrl!, `reel-${item.shortcode}.mp4`, "video")
+                              triggerDownload(item.videoUrl, `reel-${item.shortcode}.mp4`, "video", item.shortcode)
                             }
                             className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90"
                             title="Download MP4 to device"
                           >
                             <Download size={12} />
                           </button>
-                        )}
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center border border-white/20 !no-underline"
-                          title="Open on Instagram"
-                        >
-                          <ExternalLink size={11} />
-                        </a>
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center border border-white/20 !no-underline"
+                            title="Open on Instagram"
+                          >
+                            <ExternalLink size={11} />
+                          </a>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1216,112 +1351,103 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
           {/* Responsive Saved Reels Grid: 2-col on mobile, 3-col on tablet, 4-col on desktop */}
           {displayedSavedReels.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-              {displayedSavedReels.map((item) => (
-                <div
-                  key={item.shortcode}
-                  className="group relative aspect-[9/15] rounded-[22px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between hover:shadow-md transition-all duration-300"
-                >
-                  {item.thumbnail ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={item.thumbnail}
-                      alt={item.caption || "Saved reel"}
-                      referrerPolicy="no-referrer"
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              {displayedSavedReels.map((item) => {
+                const cleanAuthor = getCleanAuthor(item);
+                return (
+                  <div
+                    key={item.shortcode}
+                    className="group relative aspect-[9/15] rounded-[22px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between hover:shadow-md transition-all duration-300"
+                  >
+                    <VaultReelThumbnail
+                      thumbnail={item.thumbnail}
+                      shortcode={item.shortcode}
+                      author={cleanAuthor}
                     />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-white/40">
-                      <Film size={32} />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/60 pointer-events-none" />
+
+                    {/* Top Bar: Creator & Delete */}
+                    <div className="relative z-10 p-2.5 sm:p-3 flex items-center justify-between gap-1">
+                      <span className="text-[10px] sm:text-xs font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20 truncate max-w-[110px]">
+                        @{cleanAuthor}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          persistSavedReels(savedReels.filter((r) => r.shortcode !== item.shortcode));
+                          api(`/saved-reels/${item.shortcode}`, { method: "DELETE" }).catch(() => {});
+                        }}
+                        className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 shrink-0"
+                        title="Remove from vault"
+                      >
+                        <Trash2 size={12} />
+                      </button>
                     </div>
-                  )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/60 pointer-events-none" />
+                    {/* Bottom Bar: Stats & Quick Download Actions */}
+                    <div className="relative z-10 p-2.5 sm:p-3 space-y-2">
+                      <p className="text-[11px] sm:text-xs text-white/90 line-clamp-2 font-medium drop-shadow-sm">
+                        {item.caption || "Instagram Reel"}
+                      </p>
 
-                  {/* Top Bar: Creator & Delete */}
-                  <div className="relative z-10 p-2.5 sm:p-3 flex items-center justify-between gap-1">
-                    <span className="text-[10px] sm:text-xs font-bold text-white bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/20 truncate max-w-[110px]">
-                      @{item.author}
-                    </span>
+                      <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-white/15">
+                        <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-white/90">
+                          <span className="flex items-center gap-1">
+                            <Heart size={11} className="fill-white" />
+                            <span>{item.likes > 999 ? `${(item.likes / 1000).toFixed(1)}k` : item.likes}</span>
+                          </span>
+                        </div>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        persistSavedReels(savedReels.filter((r) => r.shortcode !== item.shortcode));
-                        api(`/saved-reels/${item.shortcode}`, { method: "DELETE" }).catch(() => {});
-                      }}
-                      className="w-7 h-7 rounded-full bg-black/60 backdrop-blur-md hover:bg-rose-600 text-white flex items-center justify-center transition-colors cursor-pointer border border-white/20 shrink-0"
-                      title="Remove from vault"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-
-                  {/* Bottom Bar: Stats & Quick Download Actions */}
-                  <div className="relative z-10 p-2.5 sm:p-3 space-y-2">
-                    <p className="text-[11px] sm:text-xs text-white/90 line-clamp-2 font-medium drop-shadow-sm">
-                      {item.caption || "Instagram Reel"}
-                    </p>
-
-                    <div className="flex items-center justify-between gap-1 pt-1.5 border-t border-white/15">
-                      <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-white/90">
-                        <span className="flex items-center gap-1">
-                          <Heart size={11} className="fill-white" />
-                          <span>{item.likes > 999 ? `${(item.likes / 1000).toFixed(1)}k` : item.likes}</span>
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        {item.videoUrl && (
+                        <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() =>
-                              triggerDownload(item.videoUrl!, `reel-${item.shortcode}.mp4`, "video")
+                              triggerDownload(item.videoUrl, `reel-${item.shortcode}.mp4`, "video", item.shortcode)
                             }
                             className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
                             title="Download MP4 to device"
                           >
                             <Download size={12} />
                           </button>
-                        )}
 
-                        {item.thumbnail && (
                           <button
                             type="button"
                             onClick={() =>
-                              triggerDownload(item.thumbnail!, `cover-${item.shortcode}.jpg`, "image")
+                              triggerDownload(item.thumbnail, `cover-${item.shortcode}.jpg`, "image", item.shortcode)
                             }
                             className="w-7 h-7 rounded-full bg-white/90 text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
                             title="Download Cover (.jpg)"
                           >
                             <ImageIcon size={12} />
                           </button>
-                        )}
 
-                        {item.caption && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopyCaption(item.caption)}
-                            className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
-                            title="Copy Caption"
+                          {item.caption && (
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCaption(item.caption)}
+                              className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                              title="Copy Caption"
+                            >
+                              <Copy size={11} />
+                            </button>
+                          )}
+
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center border border-white/20 !no-underline"
+                            title="View on Instagram"
                           >
-                            <Copy size={11} />
-                          </button>
-                        )}
-
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-7 h-7 rounded-full bg-black/70 text-white flex items-center justify-center border border-white/20 !no-underline"
-                          title="View on Instagram"
-                        >
-                          <ExternalLink size={11} />
-                        </a>
+                            <ExternalLink size={11} />
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-[26px] border border-dashed border-[#e9e9ee] bg-white p-8 sm:p-12 text-center space-y-3 max-w-xl mx-auto">
