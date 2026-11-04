@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   Download,
   Film,
@@ -158,6 +159,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [downloadStatus, setDownloadStatus] = useState<{ loading: boolean; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"downloader" | "vault">("downloader");
   const [selectedReelForMenu, setSelectedReelForMenu] = useState<SavedReelItem | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   // Load saved reels: instant localStorage read + hydration & bidirectional sync with PostgreSQL
   useEffect(() => {
@@ -1514,22 +1517,22 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
         </div>
       )}
 
-      {/* ── GLOBAL THREE-DOTS ACTION SHEET / MODAL (100% IMMUNE TO OVERFLOW CLIPPING) ── */}
-      {selectedReelForMenu && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+            {/* ── NATIVE MOBILE BOTTOM SHEET (PORTALED TO BODY FOR 100% FULL-WIDTH FLUSH DISPLAY) ── */}
+      {mounted && selectedReelForMenu && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
           {/* Dark Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
             onClick={() => setSelectedReelForMenu(null)}
           />
 
-          {/* Modal / Bottom Sheet */}
+          {/* Native Mobile Bottom Sheet / Desktop Centered Card */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative z-10 w-full sm:max-w-sm bg-white rounded-t-[28px] sm:rounded-[28px] p-5 sm:p-6 shadow-2xl space-y-4 border border-[#e9e9ee] animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-200"
+            className="relative z-10 w-full max-w-full sm:max-w-md bg-white rounded-t-[32px] sm:rounded-[32px] px-5 pt-3 pb-8 sm:p-6 shadow-2xl space-y-3.5 border-t sm:border border-[#e9e9ee] animate-in slide-in-from-bottom duration-250 ease-out"
           >
-            {/* Mobile Drag Indicator */}
-            <div className="w-10 h-1.5 rounded-full bg-slate-200 mx-auto sm:hidden -mt-1 mb-2" />
+            {/* Mobile Drag Pill */}
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 mx-auto my-1 sm:hidden" />
 
             {/* Reel Header */}
             <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#f1f3f7]">
@@ -1539,18 +1542,18 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   <img
                     src={selectedReelForMenu.thumbnail}
                     alt=""
-                    className="w-10 h-10 rounded-xl object-cover shrink-0 border border-[#e9e9ee]"
+                    className="w-11 h-11 rounded-xl object-cover shrink-0 border border-[#e9e9ee]"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-xl bg-[#e2e2fc] text-slate-900 flex items-center justify-center shrink-0">
-                    <Film size={18} />
+                  <div className="w-11 h-11 rounded-xl bg-[#e2e2fc] text-slate-900 flex items-center justify-center shrink-0">
+                    <Film size={20} />
                   </div>
                 )}
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-slate-950 truncate">
+                  <div className="text-sm font-bold text-slate-950 truncate">
                     @{getCleanAuthor(selectedReelForMenu)}
                   </div>
-                  <div className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                  <div className="text-xs text-slate-500 truncate mt-0.5 font-medium">
                     {selectedReelForMenu.caption || "Instagram Reel"}
                   </div>
                 </div>
@@ -1562,11 +1565,11 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
                 title="Close"
               >
-                <X size={15} />
+                <X size={16} />
               </button>
             </div>
 
-            {/* Actions List */}
+            {/* Action Buttons */}
             <div className="space-y-2">
               {/* 1. Download Video (.mp4) */}
               <a
@@ -1585,14 +1588,14 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               >
                 <div className="flex items-center gap-2.5">
                   <Download size={18} className="!text-white shrink-0" />
-                  <span className="!text-white">Download Video</span>
+                  <span className="!text-white font-bold">Download Video</span>
                 </div>
-                <span className="text-[11px] font-black !text-black bg-white px-2 py-0.5 rounded-full shrink-0">
+                <span className="text-[11px] font-black !text-black bg-white px-2.5 py-0.5 rounded-full shrink-0">
                   .mp4
                 </span>
               </a>
 
-              {/* 2. Download Cover (.jpg) */}
+              {/* 2. Download Cover (.jpg) - Strictly Monochrome */}
               <a
                 href={`/api/instagram/download?url=${encodeURIComponent(selectedReelForMenu.thumbnail || "")}&filename=cover-${selectedReelForMenu.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(selectedReelForMenu.shortcode)}`}
                 download={`cover-${selectedReelForMenu.shortcode}.jpg`}
@@ -1604,13 +1607,13 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   });
                   setTimeout(() => setDownloadStatus(null), 3500);
                 }}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-[#e9e9ee] text-slate-950 text-xs sm:text-sm font-bold shadow-2xs cursor-pointer !no-underline transition-all active:scale-98"
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-[#e9e9ee] !text-slate-950 text-xs sm:text-sm font-bold shadow-2xs cursor-pointer !no-underline transition-all active:scale-98"
               >
                 <div className="flex items-center gap-2.5">
-                  <ImageIcon size={18} className="text-slate-900 shrink-0" />
-                  <span>Download Cover Poster</span>
+                  <ImageIcon size={18} className="!text-slate-950 shrink-0" />
+                  <span className="!text-slate-950 font-bold">Download Cover Poster</span>
                 </div>
-                <span className="text-[11px] font-black text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                <span className="text-[11px] font-black text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full shrink-0">
                   .jpg
                 </span>
               </a>
@@ -1625,10 +1628,10 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     handleCopyCaption(selectedReelForMenu.caption);
                     setSelectedReelForMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
                 >
                   <Copy size={17} className="text-slate-700 shrink-0" />
-                  <span>Copy Caption</span>
+                  <span className="!text-slate-900">Copy Caption</span>
                 </button>
               )}
 
@@ -1639,10 +1642,10 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   handleCopy(selectedReelForMenu.url || `https://www.instagram.com/reel/${selectedReelForMenu.shortcode}/`);
                   setSelectedReelForMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
               >
                 <LinkIcon size={17} className="text-slate-700 shrink-0" />
-                <span>Copy Reel Link</span>
+                <span className="!text-slate-900">Copy Reel Link</span>
               </button>
 
               {/* 5. Open on Instagram */}
@@ -1654,7 +1657,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer !no-underline transition-colors text-left"
               >
                 <ExternalLink size={17} className="text-slate-700 shrink-0" />
-                <span>Open on Instagram</span>
+                <span className="!text-slate-900">Open on Instagram</span>
               </a>
 
               {/* 6. Remove from Vault */}
@@ -1667,15 +1670,25 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     persistSavedReels(savedReels.filter((r) => r.shortcode !== code));
                     api(`/saved-reels/${code}`, { method: "DELETE" }).catch(() => {});
                   }}
-                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-rose-50 text-rose-600 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-rose-50 !text-rose-600 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
                 >
                   <Trash2 size={17} className="text-rose-600 shrink-0" />
-                  <span>Remove from Vault</span>
+                  <span className="!text-rose-600">Remove from Vault</span>
                 </button>
               </div>
             </div>
+
+            {/* Cancel Button */}
+            <button
+              type="button"
+              onClick={() => setSelectedReelForMenu(null)}
+              className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition-colors cursor-pointer mt-1"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
