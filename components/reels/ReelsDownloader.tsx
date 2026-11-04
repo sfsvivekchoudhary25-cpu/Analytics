@@ -31,7 +31,7 @@ import {
   Layers,
   ClipboardPaste,
 } from "lucide-react";
-import { ReelInfo, extractShortcode } from "@/app/api/instagram/reel/route";
+import { ReelInfo, extractShortcode } from "@/lib/reel-types";
 import { api } from "@/lib/api";
 
 export interface SavedReelItem {
@@ -72,7 +72,7 @@ export function getCleanAuthor(item: { author?: string; authorName?: string }): 
       return candidate.toLowerCase().replace(/[^a-z0-9._]/g, "");
     }
   }
-  return item.author || "instagram_user";
+  return item.author && !/^\d+$/.test(item.author) ? item.author : "instagram_creator";
 }
 
 function VaultReelThumbnail({
@@ -331,16 +331,45 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     setDownloadStatus(null);
   }, []);
 
-  // Handle clipboard paste
+  // Computed download proxy URLs for active reel
+  const videoDownloadUrl = useMemo(() => {
+    if (!activeReel?.videoUrl) return "";
+    return `/api/instagram/download?url=${encodeURIComponent(
+      activeReel.videoUrl
+    )}&filename=reel-${activeReel.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(
+      activeReel.shortcode
+    )}`;
+  }, [activeReel]);
+
+  const coverDownloadUrl = useMemo(() => {
+    if (!activeReel?.thumbnail) return "";
+    return `/api/instagram/download?url=${encodeURIComponent(
+      activeReel.thumbnail
+    )}&filename=cover-${activeReel.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(
+      activeReel.shortcode
+    )}`;
+  }, [activeReel]);
+
+  // Handle clipboard paste with mobile browser resilience
   const handlePaste = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        setInputUrl(text);
-        handleFetchReel(text);
+      if (typeof navigator !== "undefined" && navigator?.clipboard?.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text && text.trim()) {
+          setInputUrl(text.trim());
+          handleFetchReel(text.trim());
+          return;
+        }
       }
     } catch {
-      // Fallback
+      // Non-secure HTTP LAN origin or permission prompt declined
+    }
+
+    // Mobile fallback: focus the input element so the native Paste tooltip appears
+    const inputEl = document.querySelector<HTMLInputElement>("input[inputmode='url']");
+    if (inputEl) {
+      inputEl.focus();
+      inputEl.select();
     }
   };
 
@@ -449,62 +478,55 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     setTimeout(() => setCopiedAllTags(false), 2000);
   };
 
-  // Download media file via server proxy with blob + direct device file-save
-  const triggerDownload = async (
+  // Download media file via server proxy with cross-platform native browser saving
+  const triggerDownload = (
     url: string | null | undefined,
     filename: string,
     type: "video" | "image",
     shortcode?: string
   ) => {
-    if (type === "video") setDownloadingVideo(true);
     setDownloadStatus({
       loading: true,
-      message: type === "video" ? "Downloading video..." : "Downloading cover image...",
+      message: type === "video" ? "Starting video download..." : "Starting cover download...",
     });
 
-    try {
-      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url || "")}&filename=${encodeURIComponent(
-        filename
-      )}&type=${type}${shortcode ? `&shortcode=${encodeURIComponent(shortcode)}` : ""}`;
+    const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url || "")}&filename=${encodeURIComponent(
+      filename
+    )}&type=${type}${shortcode ? `&shortcode=${encodeURIComponent(shortcode)}` : ""}`;
 
-      // Fetch as Blob for guaranteed device filesystem saving
-      const res = await fetch(proxyUrl);
-      if (!res.ok) throw new Error("Proxy download returned non-200");
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
+    // On mobile devices (iOS Safari, Android Chrome), programmatic blob clicks after async fetch
+    // are blocked by WebKit/Blink security policies. Navigating to a Content-Disposition: attachment
+    // URL triggers the OS native system download prompt without reloading or leaving the page.
+    const isMobile =
+      typeof navigator !== "undefined" &&
+      /iPhone|iPad|iPod|Android|Mobile|webOS/i.test(navigator.userAgent);
 
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+    if (isMobile) {
+      window.location.href = proxyUrl;
       setDownloadStatus({
         loading: false,
-        message: type === "video" ? "Video saved to your device!" : "Cover image saved to your device!",
+        message: type === "video" ? "Download started! Check notifications." : "Cover download started!",
       });
-      setTimeout(() => setDownloadStatus(null), 3500);
-    } catch (err) {
-      console.warn("Direct blob download failed, falling back to direct proxy anchor:", err);
-      const proxyUrl = `/api/instagram/download?url=${encodeURIComponent(url || "")}&filename=${encodeURIComponent(
-        filename
-      )}&type=${type}${shortcode ? `&shortcode=${encodeURIComponent(shortcode)}` : ""}`;
+      setTimeout(() => setDownloadStatus(null), 4000);
+      return;
+    }
+
+    // On desktop browsers: use invisible download anchor
+    try {
       const a = document.createElement("a");
       a.href = proxyUrl;
       a.download = filename;
-      a.target = "_blank";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+
       setDownloadStatus({
         loading: false,
-        message: type === "video" ? "Video download started!" : "Cover image download started!",
+        message: type === "video" ? "Video saved to Downloads!" : "Cover saved to Downloads!",
       });
       setTimeout(() => setDownloadStatus(null), 3500);
-    } finally {
-      if (type === "video") setDownloadingVideo(false);
+    } catch {
+      window.location.href = proxyUrl;
     }
   };
 
@@ -618,6 +640,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
           {/* Omnibar Form & Format Chips */}
           <div className="w-full">
             <form
+              noValidate
               onSubmit={(e) => {
                 e.preventDefault();
                 handleFetchReel();
@@ -630,10 +653,28 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               </div>
 
               <input
-                type="url"
+                type="text"
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                placeholder="Paste Instagram Reel link (e.g. https://www.instagram.com/reel/...)"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setInputUrl(val);
+                  // Auto-trigger fetch if user typed or pasted an Instagram URL
+                  if (val.length > 25 && /instagram\.com\/(?:[^\/\?#]+\/)*(?:reel|reels|p|share)\/[A-Za-z0-9_-]+/i.test(val)) {
+                    handleFetchReel(val);
+                  }
+                }}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData("text");
+                  if (pasted && extractShortcode(pasted)) {
+                    setInputUrl(pasted);
+                    setTimeout(() => handleFetchReel(pasted), 60);
+                  }
+                }}
+                placeholder="Paste Instagram Reel or Post link..."
                 className="flex-1 min-w-0 bg-transparent border-0 outline-none text-xs sm:text-sm font-medium text-slate-950 placeholder-slate-400 pl-1"
               />
 
@@ -669,7 +710,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   <RefreshCw size={13} className="animate-spin !text-white" />
                 ) : (
                   <>
-                    <Download size={14} className="!text-white" />
+                    <ArrowRight size={14} className="!text-white" />
                     <span className="hidden sm:inline !text-white">Fetch Reel</span>
                   </>
                 )}
@@ -749,17 +790,22 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
                       {/* Instant Save Cover Badge on top right */}
                       {activeReel.thumbnail && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
-                          }
-                          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+                        <a
+                          href={coverDownloadUrl}
+                          download={`cover-${activeReel.shortcode}.jpg`}
+                          onClick={() => {
+                            setDownloadStatus({
+                              loading: false,
+                              message: "Cover download started!",
+                            });
+                            setTimeout(() => setDownloadStatus(null), 3500);
+                          }}
+                          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95 !no-underline"
                           title="Download Cover Poster (.jpg)"
                         >
                           <ImageIcon size={11} />
                           <span>Save Cover</span>
-                        </button>
+                        </a>
                       )}
 
                       {activeReel.videoUrl ? (
@@ -791,36 +837,41 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     <div className="md:hidden flex flex-col items-center gap-2 pb-1 shrink-0 z-10">
                       {/* Download Video */}
                       {activeReel.videoUrl && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            triggerDownload(activeReel.videoUrl!, `reel-${activeReel.shortcode}.mp4`, "video")
-                          }
-                          disabled={downloadingVideo}
+                        <a
+                          href={videoDownloadUrl}
+                          download={`reel-${activeReel.shortcode}.mp4`}
+                          onClick={() => {
+                            setDownloadStatus({
+                              loading: false,
+                              message: "Video download started! Check Downloads.",
+                            });
+                            setTimeout(() => setDownloadStatus(null), 3500);
+                          }}
                           style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                          className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer disabled:opacity-70"
+                          className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Download Video (.mp4)"
                         >
-                          {downloadingVideo ? (
-                            <RefreshCw size={14} className="animate-spin !text-white" />
-                          ) : (
-                            <FileDown size={15} className="!text-white" />
-                          )}
-                        </button>
+                          <FileDown size={15} className="!text-white" />
+                        </a>
                       )}
 
                       {/* Download Cover */}
                       {activeReel.thumbnail && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
-                          }
-                          className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                        <a
+                          href={coverDownloadUrl}
+                          download={`cover-${activeReel.shortcode}.jpg`}
+                          onClick={() => {
+                            setDownloadStatus({
+                              loading: false,
+                              message: "Cover download started!",
+                            });
+                            setTimeout(() => setDownloadStatus(null), 3500);
+                          }}
+                          className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Save Cover Art (.jpg)"
                         >
                           <ImageIcon size={15} />
-                        </button>
+                        </a>
                       )}
 
                       {/* Save to Vault */}
@@ -912,8 +963,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
 
 
-                {/* Direct 1-Tap Device Download Card (Desktop & Tablet only; mobile uses floating quick-action buttons) */}
-                <div className="hidden md:block rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
+                {/* Direct 1-Tap Device Download Card (Both Mobile & Desktop) */}
+                <div className="w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                     <div className="flex items-center gap-2">
                       <FileDown size={16} className="text-slate-950 shrink-0" />
@@ -929,24 +980,22 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                     {/* Primary Button: 1080p MP4 Video */}
                     {activeReel.videoUrl ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          triggerDownload(activeReel.videoUrl!, `reel-${activeReel.shortcode}.mp4`, "video")
-                        }
-                        disabled={downloadingVideo}
+                      <a
+                        href={videoDownloadUrl}
+                        download={`reel-${activeReel.shortcode}.mp4`}
+                        onClick={() => {
+                          setDownloadStatus({
+                            loading: false,
+                            message: "Video download started! Check Downloads folder.",
+                          });
+                          setTimeout(() => setDownloadStatus(null), 3500);
+                        }}
                         style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                        className="py-3.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 disabled:opacity-75"
+                        className="py-3.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline"
                       >
-                        {downloadingVideo ? (
-                          <RefreshCw size={16} className="animate-spin !text-white" />
-                        ) : (
-                          <FileDown size={17} className="!text-white" />
-                        )}
-                        <span className="!text-white">
-                          {downloadingVideo ? "Saving to device..." : "Download Video (.mp4)"}
-                        </span>
-                      </button>
+                        <FileDown size={17} className="!text-white" />
+                        <span className="!text-white">Download Video (.mp4)</span>
+                      </a>
                     ) : (
                       <a
                         href={activeReel.url}
@@ -962,16 +1011,21 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
                     {/* Secondary Button: High-Res Cover Poster */}
                     {activeReel.thumbnail ? (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          triggerDownload(activeReel.thumbnail!, `cover-${activeReel.shortcode}.jpg`, "image")
-                        }
-                        className="py-3.5 px-4 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-[#e9e9ee] hover:border-black text-xs sm:text-sm font-bold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98"
+                      <a
+                        href={coverDownloadUrl}
+                        download={`cover-${activeReel.shortcode}.jpg`}
+                        onClick={() => {
+                          setDownloadStatus({
+                            loading: false,
+                            message: "Cover poster download started!",
+                          });
+                          setTimeout(() => setDownloadStatus(null), 3500);
+                        }}
+                        className="py-3.5 px-4 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-[#e9e9ee] hover:border-black text-xs sm:text-sm font-bold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline"
                       >
                         <ImageIcon size={16} />
                         <span>Download Cover (.jpg)</span>
-                      </button>
+                      </a>
                     ) : null}
                   </div>
                 </div>
@@ -1222,16 +1276,21 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                         </span>
 
                         <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              triggerDownload(item.videoUrl, `reel-${item.shortcode}.mp4`, "video", item.shortcode)
-                            }
-                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90"
+                          <a
+                            href={`/api/instagram/download?url=${encodeURIComponent(item.videoUrl || "")}&filename=reel-${item.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(item.shortcode)}`}
+                            download={`reel-${item.shortcode}.mp4`}
+                            onClick={() => {
+                              setDownloadStatus({
+                                loading: false,
+                                message: "Video download started!",
+                              });
+                              setTimeout(() => setDownloadStatus(null), 3000);
+                            }}
+                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform !no-underline"
                             title="Download MP4 to device"
                           >
                             <Download size={12} />
-                          </button>
+                          </a>
                           <a
                             href={item.url}
                             target="_blank"
@@ -1400,27 +1459,37 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                         </div>
 
                         <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              triggerDownload(item.videoUrl, `reel-${item.shortcode}.mp4`, "video", item.shortcode)
-                            }
-                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                          <a
+                            href={`/api/instagram/download?url=${encodeURIComponent(item.videoUrl || "")}&filename=reel-${item.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(item.shortcode)}`}
+                            download={`reel-${item.shortcode}.mp4`}
+                            onClick={() => {
+                              setDownloadStatus({
+                                loading: false,
+                                message: "Video download started!",
+                              });
+                              setTimeout(() => setDownloadStatus(null), 3000);
+                            }}
+                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform !no-underline"
                             title="Download MP4 to device"
                           >
                             <Download size={12} />
-                          </button>
+                          </a>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              triggerDownload(item.thumbnail, `cover-${item.shortcode}.jpg`, "image", item.shortcode)
-                            }
-                            className="w-7 h-7 rounded-full bg-white/90 text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                          <a
+                            href={`/api/instagram/download?url=${encodeURIComponent(item.thumbnail || "")}&filename=cover-${item.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(item.shortcode)}`}
+                            download={`cover-${item.shortcode}.jpg`}
+                            onClick={() => {
+                              setDownloadStatus({
+                                loading: false,
+                                message: "Cover download started!",
+                              });
+                              setTimeout(() => setDownloadStatus(null), 3000);
+                            }}
+                            className="w-7 h-7 rounded-full bg-white/90 text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform !no-underline"
                             title="Download Cover (.jpg)"
                           >
                             <ImageIcon size={12} />
-                          </button>
+                          </a>
 
                           {item.caption && (
                             <button

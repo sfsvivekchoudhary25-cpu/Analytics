@@ -1,39 +1,15 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { ReelInfo, extractShortcode } from "./reel-types";
+
+export type { ReelInfo };
+export { extractShortcode };
 
 const execFileAsync = promisify(execFile);
-
-export interface ReelInfo {
-  id: string;
-  shortcode: string;
-  url: string;
-  videoUrl: string | null;
-  thumbnail: string | null;
-  caption: string;
-  author: string;
-  authorName: string;
-  authorUrl: string;
-  likes: number;
-  comments: number;
-  views: number;
-  quality?: string | null;
-  duration: number | null;
-  uploadDate: string | null;
-  timestamp: number | null;
-  embedHtml?: string;
-}
 
 // In-memory cache for fast repeat reel lookups (10 minutes)
 const reelCache = new Map<string, { timestamp: number; data: ReelInfo }>();
 const CACHE_TTL_MS = 10 * 60 * 1000;
-
-export function extractShortcode(inputUrl: string): string | null {
-  if (!inputUrl) return null;
-  const match = inputUrl.match(
-    /(?:instagram\.com\/(?:p|reel|reels|tv)\/|instagr\.am\/(?:p|reel|reels|tv)\/)([A-Za-z0-9_-]+)/i
-  );
-  return match ? match[1] : null;
-}
 
 /**
  * Fetch official Instagram oEmbed + OpenGraph meta tags
@@ -142,13 +118,74 @@ export async function fetchOEmbedFallback(
 }
 
 const PYTHON_EXTRACT_SCRIPT = `
-import sys, json, re
+import sys, json, re, os
+
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 
 code = sys.argv[1].strip()
-m = re.search(r'(?:instagram\\.com\\/(?:p|reel|reels|tv)\\/|instagr\\.am\\/(?:p|reel|reels|tv)\\/)([A-Za-z0-9_-]+)', code)
-if m: code = m.group(1)
+m = re.search(r'(?:instagram\\.com|instagr\\.am)(?:\\/[^\\/\\?#]+)*?\\/(?:reel|reels|p|tv|share\\/reel|share\\/p)\\/([A-Za-z0-9_-]+)', code, re.I)
+if m:
+    code = m.group(1)
+else:
+    f = re.search(r'(?:\\/(?:reel|reels|p|tv)\\/)([A-Za-z0-9_-]+)', code, re.I)
+    if f:
+        code = f.group(1)
+    else:
+        s = re.search(r'\\/share\\/([A-Za-z0-9_-]+)', code, re.I)
+        if s and s.group(1) not in ['reel', 'p']:
+            code = s.group(1)
+
 url = f'https://www.instagram.com/reel/{code}/'
 
+# Tier 1: parth_dl (Ultra fast, handles Polaris GraphQL with LSD tokens & contextJSON)
+try:
+    import parth_dl
+    info = parth_dl.get_info(url)
+    if info:
+        video_url = None
+        formats = info.get('formats') or []
+        if not formats and info.get('entries'):
+            for entry in info['entries']:
+                if entry.get('formats'):
+                    formats = entry['formats']
+                    break
+        for f in formats:
+            if f.get('url'):
+                video_url = f['url']
+                break
+        thumb = info.get('thumbnail')
+        uploader = info.get('uploader') or 'instagram_user'
+        title = info.get('title') or ''
+        duration = float(info.get('duration')) if info.get('duration') else None
+        
+        if video_url or thumb:
+            print(json.dumps({'success': True, 'data': {
+                'id': code,
+                'shortcode': code,
+                'url': url,
+                'videoUrl': video_url,
+                'thumbnail': thumb,
+                'caption': title,
+                'author': uploader,
+                'authorName': uploader,
+                'authorUrl': f'https://www.instagram.com/{uploader}',
+                'likes': 0,
+                'comments': 0,
+                'views': 0,
+                'quality': '1080p' if video_url else 'HD',
+                'duration': duration,
+                'uploadDate': None,
+                'timestamp': None,
+            }}, ensure_ascii=False))
+            sys.exit(0)
+except Exception:
+    pass
+
+# Tier 2: yt_dlp
 try:
     import yt_dlp
     class L:
@@ -160,7 +197,6 @@ try:
         r = y.extract_info(url, download=False)
         if r:
             fmts = r.get('formats') or []
-            # 1. Select best video stream: prioritize progressive MP4 (audio + video)
             video_url = None
             progressive_fmts = [f for f in fmts if f.get('ext') == 'mp4' and ('progressive' in str(f.get('url', '')) or 'progressive' in str(f.get('efg', '')) or str(f.get('format_id', '')) in ['1', '2', '3'])]
             if progressive_fmts:
@@ -172,12 +208,10 @@ try:
             if not video_url:
                 video_url = r.get('url')
 
-            # 2. Select best thumbnail
             thumb = r.get('thumbnail')
             if not thumb and r.get('thumbnails'):
                 thumb = r['thumbnails'][-1].get('url')
 
-            # 3. Clean author handle (prefer channel or non-numeric username over numeric ID)
             channel = r.get('channel')
             uploader = r.get('uploader')
             uploader_id = r.get('uploader_id')
@@ -185,26 +219,22 @@ try:
             author = None
             if channel and not channel.isdigit():
                 author = channel
-            elif uploader and not uploader.isdigit() and ' ' not in uploader:
-                author = uploader
+            elif uploader and not uploader.isdigit() and len(uploader) < 35:
+                author = uploader.split()[0].replace('@', '').strip()
             elif uploader_id and not uploader_id.isdigit():
                 author = uploader_id
             elif channel:
                 author = channel
-            elif uploader:
-                author = uploader
             else:
-                author = uploader_id or 'instagram_user'
+                author = channel or 'instagram_user'
 
-            author_name = uploader or channel or author
+            author_name = channel or uploader or author
 
-            # 4. Dates & stats
             u = None
             if r.get('upload_date'):
                 ud = str(r['upload_date'])
                 if len(ud) == 8: u = f'{ud[:4]}-{ud[4:6]}-{ud[6:8]}'
 
-            # 5. Quality resolution
             q = '1080p' if video_url else None
             if fmts:
                 best_fmt = progressive_fmts[-1] if progressive_fmts else (valid_fmts[-1] if valid_fmts else fmts[-1])
@@ -237,11 +267,12 @@ try:
                     'duration': r.get('duration'),
                     'uploadDate': u,
                     'timestamp': int(r['timestamp'] * 1000) if r.get('timestamp') else None,
-                }}))
+                }}, ensure_ascii=False))
                 sys.exit(0)
 except Exception:
     pass
 
+# Tier 3: instaloader
 try:
     import instaloader
     inst = instaloader.Instaloader()
@@ -267,7 +298,7 @@ try:
             'duration': p.video_duration if hasattr(p, 'video_duration') else None,
             'uploadDate': ud,
             'timestamp': ts,
-        }}))
+        }}, ensure_ascii=False))
         sys.exit(0)
 except Exception:
     pass
@@ -287,49 +318,75 @@ export async function resolveReelData(shortcode: string): Promise<ReelInfo | nul
   const normalizedUrl = `https://www.instagram.com/reel/${shortcode}/`;
   let reelData: ReelInfo | null = null;
 
-  // 1. Python yt-dlp / instaloader extraction
-  try {
-    const { stdout } = await execFileAsync(
-      "python",
-      ["-c", PYTHON_EXTRACT_SCRIPT, shortcode],
-      { timeout: 15000, maxBuffer: 10 * 1024 * 1024 }
-    );
+  // 1. Python multi-tier extraction (parth_dl -> yt-dlp -> instaloader)
+  const pyCandidates = ["python", "python3"];
+  for (const pyCmd of pyCandidates) {
+    if (reelData && (reelData.videoUrl || reelData.thumbnail)) break;
+    try {
+      const { stdout } = await execFileAsync(
+        pyCmd,
+        ["-c", PYTHON_EXTRACT_SCRIPT, shortcode],
+        { timeout: 15000, maxBuffer: 10 * 1024 * 1024 }
+      );
 
-    if (stdout) {
-      const parsed = JSON.parse(stdout.trim());
-      if (parsed.success && parsed.data && (parsed.data.videoUrl || parsed.data.thumbnail)) {
-        reelData = parsed.data;
+      if (stdout) {
+        const parsed = JSON.parse(stdout.trim());
+        if (parsed.success && parsed.data && (parsed.data.videoUrl || parsed.data.thumbnail)) {
+          reelData = parsed.data;
+          break;
+        }
+      }
+    } catch (err: any) {
+      // Continue to next python candidate or fallback
+    }
+  }
+
+  // 2. Enrich with oEmbed / OpenGraph stats or use as fallback
+  try {
+    const fallback = await fetchOEmbedFallback(shortcode, normalizedUrl);
+    if (!reelData || (!reelData.videoUrl && !reelData.thumbnail)) {
+      if (fallback.thumbnail || reelData?.videoUrl) {
+        reelData = {
+          id: shortcode,
+          shortcode,
+          url: normalizedUrl,
+          videoUrl: reelData?.videoUrl || null,
+          thumbnail: fallback.thumbnail || reelData?.thumbnail || null,
+          caption: fallback.caption || reelData?.caption || "Instagram Reel",
+          author: fallback.author || reelData?.author || "instagram_user",
+          authorName: fallback.authorName || reelData?.authorName || "Instagram Creator",
+          authorUrl: fallback.authorUrl || `https://www.instagram.com/${fallback.author}`,
+          likes: fallback.likes || reelData?.likes || 0,
+          comments: fallback.comments || reelData?.comments || 0,
+          views: reelData?.views || 0,
+          quality: reelData?.quality || (fallback.thumbnail ? "1080p" : null),
+          duration: reelData?.duration || null,
+          uploadDate: fallback.uploadDate || reelData?.uploadDate || null,
+          timestamp: reelData?.timestamp || null,
+          embedHtml: fallback.embedHtml,
+        };
+      }
+    } else {
+      // Enrich existing reelData if stats or caption were missing
+      if ((!reelData.likes || reelData.likes === 0) && fallback.likes) {
+        reelData.likes = fallback.likes;
+      }
+      if ((!reelData.comments || reelData.comments === 0) && fallback.comments) {
+        reelData.comments = fallback.comments;
+      }
+      if ((!reelData.views || reelData.views === 0) && fallback.views) {
+        reelData.views = fallback.views;
+      }
+      if (!reelData.caption && fallback.caption) {
+        reelData.caption = fallback.caption;
+      }
+      if ((!reelData.author || reelData.author === "instagram_user" || /^\d+$/.test(reelData.author)) && fallback.author) {
+        reelData.author = fallback.author;
+        reelData.authorName = fallback.authorName || fallback.author;
+        reelData.authorUrl = fallback.authorUrl || `https://www.instagram.com/${fallback.author}`;
       }
     }
-  } catch (err: any) {
-    console.warn("[Extractor] Python extract failed:", err?.message || err);
-  }
-
-  // 2. Fallback to oEmbed + OpenGraph scraper
-  if (!reelData || (!reelData.videoUrl && !reelData.thumbnail)) {
-    const fallback = await fetchOEmbedFallback(shortcode, normalizedUrl);
-    if (fallback.thumbnail || reelData?.videoUrl) {
-      reelData = {
-        id: shortcode,
-        shortcode,
-        url: normalizedUrl,
-        videoUrl: reelData?.videoUrl || null,
-        thumbnail: fallback.thumbnail || reelData?.thumbnail || null,
-        caption: fallback.caption || reelData?.caption || "Instagram Reel",
-        author: fallback.author || reelData?.author || "instagram_user",
-        authorName: fallback.authorName || reelData?.authorName || "Instagram Creator",
-        authorUrl: fallback.authorUrl || `https://www.instagram.com/${fallback.author}`,
-        likes: fallback.likes || reelData?.likes || 0,
-        comments: fallback.comments || reelData?.comments || 0,
-        views: reelData?.views || 0,
-        quality: reelData?.quality || (fallback.thumbnail ? "1080p" : null),
-        duration: reelData?.duration || null,
-        uploadDate: fallback.uploadDate || reelData?.uploadDate || null,
-        timestamp: reelData?.timestamp || null,
-        embedHtml: fallback.embedHtml,
-      };
-    }
-  }
+  } catch {}
 
   if (reelData && (reelData.videoUrl || reelData.thumbnail)) {
     reelCache.set(shortcode, { timestamp: Date.now(), data: reelData });
