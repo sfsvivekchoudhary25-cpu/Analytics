@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   Download,
   Film,
@@ -274,6 +274,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     };
   }, [savedReels.length, persistSavedReels]);
 
+  const isFetchingRef = useRef(false);
+  const lastFetchedCodeRef = useRef<string | null>(null);
+
   // Fetch reel details from API
   const handleFetchReel = useCallback(
     async (urlToFetch?: string) => {
@@ -283,14 +286,30 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
         return;
       }
 
+      const shortcode = extractShortcode(targetUrl);
+      if (!shortcode) {
+        setError("Please enter a valid Instagram Reel or Post link (e.g. instagram.com/reel/...).");
+        return;
+      }
+
+      // Prevent concurrent duplicate requests for the same reel
+      if (isFetchingRef.current && lastFetchedCodeRef.current === shortcode) {
+        return;
+      }
+
+      isFetchingRef.current = true;
+      lastFetchedCodeRef.current = shortcode;
       setError(null);
       setLoading(true);
+
+      const cleanUrl = `https://www.instagram.com/reel/${shortcode}/`;
+      setInputUrl(cleanUrl);
 
       try {
         const res = await fetch("/api/instagram/reel", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: targetUrl }),
+          body: JSON.stringify({ url: cleanUrl }),
         });
 
         const json = await res.json();
@@ -304,6 +323,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
         setError(err.message || "Could not fetch reel. Make sure the Instagram link is public.");
       } finally {
         setLoading(false);
+        isFetchingRef.current = false;
       }
     },
     [inputUrl]
@@ -329,6 +349,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     setActiveReel(null);
     setError(null);
     setDownloadStatus(null);
+    lastFetchedCodeRef.current = null;
   }, []);
 
   // Computed download proxy URLs for active reel
@@ -662,16 +683,21 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 onChange={(e) => {
                   const val = e.target.value;
                   setInputUrl(val);
-                  // Auto-trigger fetch if user typed or pasted an Instagram URL
-                  if (val.length > 25 && /instagram\.com\/(?:[^\/\?#]+\/)*(?:reel|reels|p|share)\/[A-Za-z0-9_-]+/i.test(val)) {
+                  const code = extractShortcode(val);
+                  if (code && code !== lastFetchedCodeRef.current && !isFetchingRef.current) {
                     handleFetchReel(val);
                   }
                 }}
                 onPaste={(e) => {
                   const pasted = e.clipboardData.getData("text");
-                  if (pasted && extractShortcode(pasted)) {
-                    setInputUrl(pasted);
-                    setTimeout(() => handleFetchReel(pasted), 60);
+                  if (pasted) {
+                    const code = extractShortcode(pasted);
+                    if (code) {
+                      e.preventDefault();
+                      const clean = `https://www.instagram.com/reel/${code}/`;
+                      setInputUrl(clean);
+                      handleFetchReel(clean);
+                    }
                   }
                 }}
                 placeholder="Paste Instagram Reel or Post link..."
@@ -964,7 +990,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
 
                 {/* Direct 1-Tap Device Download Card (Both Mobile & Desktop) */}
-                <div className="w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
+                <div className="hidden md:block w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                     <div className="flex items-center gap-2">
                       <FileDown size={16} className="text-slate-950 shrink-0" />
