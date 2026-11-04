@@ -157,7 +157,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
   const [downloadingVideo, setDownloadingVideo] = useState(false);
   const [downloadStatus, setDownloadStatus] = useState<{ loading: boolean; message: string } | null>(null);
   const [activeTab, setActiveTab] = useState<"downloader" | "vault">("downloader");
-  const [activeMenuShortcode, setActiveMenuShortcode] = useState<string | null>(null);
+  const [selectedReelForMenu, setSelectedReelForMenu] = useState<SavedReelItem | null>(null);
 
   // Load saved reels: instant localStorage read + hydration & bidirectional sync with PostgreSQL
   useEffect(() => {
@@ -1304,121 +1304,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           <span>{item.likes > 999 ? `${(item.likes / 1000).toFixed(1)}k` : item.likes}</span>
                         </span>
 
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveMenuShortcode(activeMenuShortcode === item.shortcode ? null : item.shortcode);
-                            }}
-                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
-                            title="More actions"
-                          >
-                            <MoreVertical size={13} />
-                          </button>
-
-                          {activeMenuShortcode === item.shortcode && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-30"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveMenuShortcode(null);
-                                }}
-                              />
-                              <div
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl bg-white border border-[#e9e9ee] shadow-2xl p-1.5 z-40 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 text-slate-950 text-left"
-                              >
-                                {/* Download Video (.mp4) - Always Available via Shortcode Auto-Refresh */}
-                                <a
-                                  href={`/api/instagram/download?url=${encodeURIComponent(item.videoUrl || "")}&filename=reel-${item.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(item.shortcode)}`}
-                                  download={`reel-${item.shortcode}.mp4`}
-                                  onClick={() => {
-                                    setActiveMenuShortcode(null);
-                                    setDownloadStatus({
-                                      loading: false,
-                                      message: "Video download started! Check Downloads.",
-                                    });
-                                    setTimeout(() => setDownloadStatus(null), 3500);
-                                  }}
-                                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-bold cursor-pointer !no-underline transition-colors group"
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <Download size={14} className="text-slate-900 shrink-0 group-hover:scale-110 transition-transform" />
-                                    <span className="truncate">Download Video</span>
-                                  </div>
-                                  <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">.mp4</span>
-                                </a>
-
-                                {/* Download Cover (.jpg) - Always Available via Shortcode Auto-Refresh */}
-                                <a
-                                  href={`/api/instagram/download?url=${encodeURIComponent(item.thumbnail || "")}&filename=cover-${item.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(item.shortcode)}`}
-                                  download={`cover-${item.shortcode}.jpg`}
-                                  onClick={() => {
-                                    setActiveMenuShortcode(null);
-                                    setDownloadStatus({
-                                      loading: false,
-                                      message: "Cover poster download started!",
-                                    });
-                                    setTimeout(() => setDownloadStatus(null), 3500);
-                                  }}
-                                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-bold cursor-pointer !no-underline transition-colors group"
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <ImageIcon size={14} className="text-slate-900 shrink-0 group-hover:scale-110 transition-transform" />
-                                    <span className="truncate">Download Cover</span>
-                                  </div>
-                                  <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">.jpg</span>
-                                </a>
-
-                                <div className="my-1 border-t border-slate-100" />
-
-                                {/* Copy Caption */}
-                                {item.caption && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleCopyCaption(item.caption);
-                                      setActiveMenuShortcode(null);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer transition-colors text-left"
-                                  >
-                                    <Copy size={14} className="text-slate-700 shrink-0" />
-                                    <span className="truncate">Copy Caption</span>
-                                  </button>
-                                )}
-
-                                {/* Copy Link */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleCopy(item.url || `https://www.instagram.com/reel/${item.shortcode}/`);
-                                    setActiveMenuShortcode(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer transition-colors text-left"
-                                >
-                                  <LinkIcon size={14} className="text-slate-700 shrink-0" />
-                                  <span className="truncate">Copy Link</span>
-                                </button>
-
-                                {/* Open on Instagram */}
-                                <a
-                                  href={item.url || `https://www.instagram.com/reel/${item.shortcode}/`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => setActiveMenuShortcode(null)}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer !no-underline transition-colors"
-                                >
-                                  <ExternalLink size={14} className="text-slate-700 shrink-0" />
-                                  <span className="truncate">Open on Instagram</span>
-                                </a>
-
-                                
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedReelForMenu(item);
+                          }}
+                          className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                          title="More actions"
+                        >
+                          <MoreVertical size={13} />
+                        </button>
                       </div>
                     </div>
                   );
@@ -1576,134 +1472,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           </span>
                         </div>
 
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveMenuShortcode(activeMenuShortcode === item.shortcode ? null : item.shortcode);
-                            }}
-                            className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
-                            title="More actions"
-                          >
-                            <MoreVertical size={13} />
-                          </button>
-
-                          {activeMenuShortcode === item.shortcode && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-30"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveMenuShortcode(null);
-                                }}
-                              />
-                              <div
-                                onClick={(e) => e.stopPropagation()}
-                                className="absolute bottom-full right-0 mb-2 w-52 rounded-2xl bg-white border border-[#e9e9ee] shadow-2xl p-1.5 z-40 space-y-0.5 animate-in fade-in zoom-in-95 duration-150 text-slate-950 text-left"
-                              >
-                                {/* Download Video (.mp4) - Always Available via Shortcode Auto-Refresh */}
-                                <a
-                                  href={`/api/instagram/download?url=${encodeURIComponent(item.videoUrl || "")}&filename=reel-${item.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(item.shortcode)}`}
-                                  download={`reel-${item.shortcode}.mp4`}
-                                  onClick={() => {
-                                    setActiveMenuShortcode(null);
-                                    setDownloadStatus({
-                                      loading: false,
-                                      message: "Video download started! Check Downloads.",
-                                    });
-                                    setTimeout(() => setDownloadStatus(null), 3500);
-                                  }}
-                                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-bold cursor-pointer !no-underline transition-colors group"
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <Download size={14} className="text-slate-900 shrink-0 group-hover:scale-110 transition-transform" />
-                                    <span className="truncate">Download Video</span>
-                                  </div>
-                                  <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">.mp4</span>
-                                </a>
-
-                                {/* Download Cover (.jpg) - Always Available via Shortcode Auto-Refresh */}
-                                <a
-                                  href={`/api/instagram/download?url=${encodeURIComponent(item.thumbnail || "")}&filename=cover-${item.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(item.shortcode)}`}
-                                  download={`cover-${item.shortcode}.jpg`}
-                                  onClick={() => {
-                                    setActiveMenuShortcode(null);
-                                    setDownloadStatus({
-                                      loading: false,
-                                      message: "Cover poster download started!",
-                                    });
-                                    setTimeout(() => setDownloadStatus(null), 3500);
-                                  }}
-                                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-bold cursor-pointer !no-underline transition-colors group"
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <ImageIcon size={14} className="text-slate-900 shrink-0 group-hover:scale-110 transition-transform" />
-                                    <span className="truncate">Download Cover</span>
-                                  </div>
-                                  <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0">.jpg</span>
-                                </a>
-
-                                <div className="my-1 border-t border-slate-100" />
-
-                                {/* Copy Caption */}
-                                {item.caption && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleCopyCaption(item.caption);
-                                      setActiveMenuShortcode(null);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer transition-colors text-left"
-                                  >
-                                    <Copy size={14} className="text-slate-700 shrink-0" />
-                                    <span className="truncate">Copy Caption</span>
-                                  </button>
-                                )}
-
-                                {/* Copy Link */}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleCopy(item.url || `https://www.instagram.com/reel/${item.shortcode}/`);
-                                    setActiveMenuShortcode(null);
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer transition-colors text-left"
-                                >
-                                  <LinkIcon size={14} className="text-slate-700 shrink-0" />
-                                  <span className="truncate">Copy Link</span>
-                                </button>
-
-                                {/* Open on Instagram */}
-                                <a
-                                  href={item.url || `https://www.instagram.com/reel/${item.shortcode}/`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  onClick={() => setActiveMenuShortcode(null)}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 !text-slate-900 text-xs font-semibold cursor-pointer !no-underline transition-colors"
-                                >
-                                  <ExternalLink size={14} className="text-slate-700 shrink-0" />
-                                  <span className="truncate">Open on Instagram</span>
-                                </a>
-
-                                {/* Remove from Vault */}
-                                <div className="my-1 border-t border-slate-100" />
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setActiveMenuShortcode(null);
-                                    persistSavedReels(savedReels.filter((r) => r.shortcode !== item.shortcode));
-                                    api(`/saved-reels/${item.shortcode}`, { method: "DELETE" }).catch(() => {});
-                                  }}
-                                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-rose-50 !text-rose-600 text-xs font-semibold cursor-pointer transition-colors text-left"
-                                >
-                                  <Trash2 size={14} className="text-rose-600 shrink-0" />
-                                  <span className="truncate">Remove from Vault</span>
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedReelForMenu(item);
+                          }}
+                          className="w-7 h-7 rounded-full bg-white text-slate-950 flex items-center justify-center shadow-xs cursor-pointer active:scale-90 hover:scale-105 transition-transform"
+                          title="More actions"
+                        >
+                          <MoreVertical size={13} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -1734,6 +1513,171 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
           )}
         </div>
       )}
+
+      {/* ── GLOBAL THREE-DOTS ACTION SHEET / MODAL (100% IMMUNE TO OVERFLOW CLIPPING) ── */}
+      {selectedReelForMenu && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          {/* Dark Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setSelectedReelForMenu(null)}
+          />
+
+          {/* Modal / Bottom Sheet */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative z-10 w-full sm:max-w-sm bg-white rounded-t-[28px] sm:rounded-[28px] p-5 sm:p-6 shadow-2xl space-y-4 border border-[#e9e9ee] animate-in slide-in-from-bottom-8 sm:zoom-in-95 duration-200"
+          >
+            {/* Mobile Drag Indicator */}
+            <div className="w-10 h-1.5 rounded-full bg-slate-200 mx-auto sm:hidden -mt-1 mb-2" />
+
+            {/* Reel Header */}
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#f1f3f7]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {selectedReelForMenu.thumbnail ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={selectedReelForMenu.thumbnail}
+                    alt=""
+                    className="w-10 h-10 rounded-xl object-cover shrink-0 border border-[#e9e9ee]"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-[#e2e2fc] text-slate-900 flex items-center justify-center shrink-0">
+                    <Film size={18} />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-slate-950 truncate">
+                    @{getCleanAuthor(selectedReelForMenu)}
+                  </div>
+                  <div className="text-[11px] text-slate-500 truncate mt-0.5 font-medium">
+                    {selectedReelForMenu.caption || "Instagram Reel"}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedReelForMenu(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
+                title="Close"
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Actions List */}
+            <div className="space-y-2">
+              {/* 1. Download Video (.mp4) */}
+              <a
+                href={`/api/instagram/download?url=${encodeURIComponent(selectedReelForMenu.videoUrl || "")}&filename=reel-${selectedReelForMenu.shortcode}.mp4&type=video&shortcode=${encodeURIComponent(selectedReelForMenu.shortcode)}`}
+                download={`reel-${selectedReelForMenu.shortcode}.mp4`}
+                onClick={() => {
+                  setSelectedReelForMenu(null);
+                  setDownloadStatus({
+                    loading: false,
+                    message: "Video download started! Check Downloads.",
+                  });
+                  setTimeout(() => setDownloadStatus(null), 3500);
+                }}
+                style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer !no-underline transition-all active:scale-98"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Download size={18} className="!text-white shrink-0" />
+                  <span className="!text-white">Download Video</span>
+                </div>
+                <span className="text-[11px] font-black !text-black bg-white px-2 py-0.5 rounded-full shrink-0">
+                  .mp4
+                </span>
+              </a>
+
+              {/* 2. Download Cover (.jpg) */}
+              <a
+                href={`/api/instagram/download?url=${encodeURIComponent(selectedReelForMenu.thumbnail || "")}&filename=cover-${selectedReelForMenu.shortcode}.jpg&type=image&shortcode=${encodeURIComponent(selectedReelForMenu.shortcode)}`}
+                download={`cover-${selectedReelForMenu.shortcode}.jpg`}
+                onClick={() => {
+                  setSelectedReelForMenu(null);
+                  setDownloadStatus({
+                    loading: false,
+                    message: "Cover poster download started!",
+                  });
+                  setTimeout(() => setDownloadStatus(null), 3500);
+                }}
+                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-[#e9e9ee] text-slate-950 text-xs sm:text-sm font-bold shadow-2xs cursor-pointer !no-underline transition-all active:scale-98"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ImageIcon size={18} className="text-slate-900 shrink-0" />
+                  <span>Download Cover Poster</span>
+                </div>
+                <span className="text-[11px] font-black text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                  .jpg
+                </span>
+              </a>
+
+              <div className="my-1 border-t border-slate-100" />
+
+              {/* 3. Copy Caption */}
+              {selectedReelForMenu.caption && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleCopyCaption(selectedReelForMenu.caption);
+                    setSelectedReelForMenu(null);
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                >
+                  <Copy size={17} className="text-slate-700 shrink-0" />
+                  <span>Copy Caption</span>
+                </button>
+              )}
+
+              {/* 4. Copy Reel Link */}
+              <button
+                type="button"
+                onClick={() => {
+                  handleCopy(selectedReelForMenu.url || `https://www.instagram.com/reel/${selectedReelForMenu.shortcode}/`);
+                  setSelectedReelForMenu(null);
+                }}
+                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+              >
+                <LinkIcon size={17} className="text-slate-700 shrink-0" />
+                <span>Copy Reel Link</span>
+              </button>
+
+              {/* 5. Open on Instagram */}
+              <a
+                href={selectedReelForMenu.url || `https://www.instagram.com/reel/${selectedReelForMenu.shortcode}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setSelectedReelForMenu(null)}
+                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer !no-underline transition-colors text-left"
+              >
+                <ExternalLink size={17} className="text-slate-700 shrink-0" />
+                <span>Open on Instagram</span>
+              </a>
+
+              {/* 6. Remove from Vault */}
+              <div className="pt-1 border-t border-[#f1f3f7]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const code = selectedReelForMenu.shortcode;
+                    setSelectedReelForMenu(null);
+                    persistSavedReels(savedReels.filter((r) => r.shortcode !== code));
+                    api(`/saved-reels/${code}`, { method: "DELETE" }).catch(() => {});
+                  }}
+                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-rose-50 text-rose-600 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                >
+                  <Trash2 size={17} className="text-rose-600 shrink-0" />
+                  <span>Remove from Vault</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
