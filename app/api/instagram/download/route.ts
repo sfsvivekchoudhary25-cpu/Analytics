@@ -63,10 +63,14 @@ export async function GET(request: NextRequest) {
   }
 
   if (!upstreamRes || !upstreamRes.body) {
-    return NextResponse.json(
-      { error: "Could not download media. The source reel may be private or unavailable." },
-      { status: 502 }
-    );
+    if (shortcode) {
+      // Graceful fallback: redirect to the reel directly rather than downloading a broken .mp4.json error file
+      return NextResponse.redirect(`https://www.instagram.com/reel/${shortcode}/`, 307);
+    }
+    return new NextResponse("The requested Instagram reel media is private or unavailable.", {
+      status: 404,
+      headers: { "Content-Type": "text/plain" },
+    });
   }
 
   const contentType =
