@@ -30,6 +30,7 @@ import {
   Calendar,
   Layers,
   ClipboardPaste,
+  X,
 } from "lucide-react";
 import { ReelInfo, extractShortcode } from "@/lib/reel-types";
 import { api } from "@/lib/api";
@@ -877,7 +878,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Download Video (.mp4)"
                         >
-                          <FileDown size={15} className="!text-white" />
+                          <Download size={15} className="!text-white" />
                         </a>
                       )}
 
@@ -896,7 +897,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Save Cover Art (.jpg)"
                         >
-                          <ImageIcon size={15} />
+                          <ImageIcon size={15} className="!text-slate-900" />
                         </a>
                       )}
 
@@ -922,17 +923,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                         className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-800 flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
                         title="Copy Reel Link"
                       >
-                        {copiedUrl === activeReel.url ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                        {copiedUrl === activeReel.url ? <Check size={14} className="text-emerald-600" /> : <LinkIcon size={14} className="!text-slate-900" />}
                       </button>
 
                       {/* Close / Cross */}
                       <button
                         type="button"
                         onClick={handleClear}
-                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center text-xs font-black shadow-md active:scale-90 transition-transform cursor-pointer"
+                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
                         title="Close Reel"
                       >
-                        ✕
+                        <X size={14} className="text-slate-600" />
                       </button>
                     </div>
                   </div>
@@ -972,17 +973,17 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                       className="px-3 py-1.5 rounded-full bg-white hover:bg-neutral-50 border border-[#e9e9ee] hover:border-black text-slate-950 flex items-center gap-1.5 text-xs font-bold shadow-2xs transition-all cursor-pointer"
                       title="Copy reel URL"
                     >
-                      {copiedUrl === activeReel.url ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                      {copiedUrl === activeReel.url ? <Check size={13} className="text-emerald-600" /> : <LinkIcon size={13} />}
                       <span>{copiedUrl === activeReel.url ? "Copied" : "Copy"}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleClear}
-                      className="w-8 h-8 rounded-full bg-white hover:bg-neutral-100 border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-white hover:bg-neutral-100 border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-2xs transition-all cursor-pointer"
                       title="Close reel preview"
                     >
-                      ✕
+                      <X size={14} className="text-slate-600" />
                     </button>
                   </div>
                 </div>
@@ -993,7 +994,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 <div className="hidden md:block w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
                     <div className="flex items-center gap-2">
-                      <FileDown size={16} className="text-slate-950 shrink-0" />
+                      <Download size={16} className="text-slate-950 shrink-0" />
                       <span className="text-xs sm:text-sm font-black text-slate-950">
                         Direct Device Downloads
                       </span>
@@ -1019,7 +1020,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                         style={{ backgroundColor: "#000000", color: "#ffffff" }}
                         className="py-3.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline"
                       >
-                        <FileDown size={17} className="!text-white" />
+                        <Download size={17} className="!text-white" />
                         <span className="!text-white">Download Video (.mp4)</span>
                       </a>
                     ) : (
