@@ -302,9 +302,9 @@ export default function AuthPage() {
   const currentSlide = CAROUSEL_SLIDES[activeSlide];
 
   return (
-    <main className="min-h-screen w-full flex bg-white font-sans antialiased text-slate-900 overflow-x-hidden">
+    <main className="min-h-screen lg:h-screen w-full flex bg-white font-sans antialiased text-slate-900 overflow-x-hidden lg:overflow-hidden">
       {/* ── LEFT HALF: BRAND SHOWCASE CAROUSEL (50% on desktop) ─────────────── */}
-      <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-[#090b14] relative overflow-hidden flex-col justify-between p-8 sm:p-12 xl:p-16 text-white select-none shrink-0">
+      <div className="hidden lg:flex lg:w-1/2 h-full bg-[#090b14] relative overflow-hidden flex-col justify-between p-6 sm:p-8 xl:p-12 text-white select-none shrink-0">
         {/* Dark Neon Atmospheric Glows */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d1b] via-[#100d28] to-[#060812] z-0" />
         <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" />
@@ -324,7 +324,7 @@ export default function AuthPage() {
         <div className="relative z-10" />
 
         {/* ── CENTER FLOATING MOCKUP CARDS ───────────────────────────── */}
-        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-8">
+        <div className="relative z-10 my-auto flex flex-col items-center justify-center py-2 xl:py-4">
           {/* SLIDE 1: COMMENT AUTOMATION */}
           {activeSlide === 0 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
@@ -524,24 +524,24 @@ export default function AuthPage() {
         </div>
 
         {/* ── BOTTOM HEADLINE & SLIDER INDICATORS ────────────────────── */}
-        <div className="relative z-10 space-y-5">
-          <div className="space-y-1.5 max-w-lg">
-            <h3 className="text-2xl xl:text-3xl font-bold text-white tracking-tight leading-tight">
+        <div className="relative z-10 space-y-3 xl:space-y-4">
+          <div className="space-y-1 max-w-lg">
+            <h3 className="text-xl xl:text-2xl font-bold text-white tracking-tight leading-tight">
               {currentSlide.title}
             </h3>
-            <p className="text-sm xl:text-base text-white/70 leading-relaxed">
+            <p className="text-xs xl:text-sm text-white/70 leading-relaxed">
               {currentSlide.subtitle}
             </p>
           </div>
 
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2 pt-0.5">
             {CAROUSEL_SLIDES.map((slide, idx) => (
               <button
                 key={slide.id}
                 type="button"
                 onClick={() => setActiveSlide(idx)}
                 className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  activeSlide === idx ? "w-12 bg-white" : "w-5 bg-white/25 hover:bg-white/50"
+                  activeSlide === idx ? "w-10 bg-white" : "w-4 bg-white/25 hover:bg-white/50"
                 }`}
                 aria-label={`Jump to slide ${idx + 1}`}
               />
@@ -551,16 +551,16 @@ export default function AuthPage() {
       </div>
 
       {/* ── RIGHT HALF: REAL AUTHENTICATION WORKSPACE (50% on desktop) ────── */}
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col items-center justify-center p-6 sm:p-10 lg:p-12 xl:p-16 bg-slate-50/50 relative overflow-y-auto">
-        <div className="w-full max-w-[420px] space-y-6 my-auto py-8 animate-page-entrance">
+      <div className="w-full lg:w-1/2 h-full min-h-screen lg:min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-6 xl:p-8 bg-slate-50/50 relative overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="w-full max-w-[390px] xl:max-w-[415px] space-y-3.5 xl:space-y-4 my-auto py-2 xl:py-4 animate-page-entrance">
           {/* Back to Home Button & URL */}
-          <div className="flex items-center justify-between pb-1">
+          <div className="flex items-center justify-between pb-0.5">
             <Link
               href="/"
               id="back-to-home-btn"
-              className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all active:scale-[0.98]"
             >
-              <ArrowLeftOutlined className="text-[11px] transition-transform group-hover:-translate-x-1 text-slate-500 group-hover:text-slate-900" />
+              <ArrowLeftOutlined className="text-[10px] transition-transform group-hover:-translate-x-1 text-slate-500 group-hover:text-slate-900" />
               <span>Back to Home</span>
             </Link>
             <span className="text-[11px] font-medium text-slate-400">
@@ -570,18 +570,18 @@ export default function AuthPage() {
 
           {/* Header Row: Official Fabroniee Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center gap-2.5 group" title="Return to Home">
+            <Link href="/" className="flex items-center gap-2 group" title="Return to Home">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
                 alt="Fabroniee"
-                className="w-9 h-9 object-contain rounded-xl shadow-xs group-hover:opacity-90 transition-opacity"
+                className="w-8 h-8 object-contain rounded-xl shadow-xs group-hover:opacity-90 transition-opacity"
               />
               <div>
-                <span className="text-lg font-bold tracking-tight text-slate-900 block leading-tight group-hover:text-black">
+                <span className="text-base font-bold tracking-tight text-slate-900 block leading-tight group-hover:text-black">
                   Fabroniee
                 </span>
-                <span className="text-[11px] font-medium text-slate-400">
+                <span className="text-[10px] font-medium text-slate-400">
                   Automation &amp; CRM
                 </span>
               </div>
@@ -590,7 +590,7 @@ export default function AuthPage() {
 
           {/* ── MODE TABS (Sign In / Sign Up) ─────────────────────────── */}
           {mode !== "forgot" && (
-            <div className="grid grid-cols-2 p-1 bg-slate-200/60 rounded-2xl text-xs font-semibold">
+            <div className="grid grid-cols-2 p-1 bg-slate-200/60 rounded-xl text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => {
@@ -598,7 +598,7 @@ export default function AuthPage() {
                   setError(null);
                   setSuccessMsg(null);
                 }}
-                className={`py-2 rounded-xl transition-all cursor-pointer ${
+                className={`py-1.5 rounded-lg transition-all cursor-pointer ${
                   mode === "signin"
                     ? "bg-white text-slate-900 shadow-xs"
                     : "text-slate-500 hover:text-slate-900"
@@ -613,7 +613,7 @@ export default function AuthPage() {
                   setError(null);
                   setSuccessMsg(null);
                 }}
-                className={`py-2 rounded-xl transition-all cursor-pointer ${
+                className={`py-1.5 rounded-lg transition-all cursor-pointer ${
                   mode === "signup"
                     ? "bg-white text-slate-900 shadow-xs"
                     : "text-slate-500 hover:text-slate-900"
@@ -626,12 +626,12 @@ export default function AuthPage() {
 
           {/* Feedback Alerts */}
           {error && (
-            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug animate-page-entrance">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-medium text-rose-700 leading-snug animate-page-entrance">
               {error}
             </div>
           )}
           {successMsg && (
-            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800 leading-snug flex items-center gap-2 animate-page-entrance">
+            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-medium text-emerald-800 leading-snug flex items-center gap-2 animate-page-entrance">
               <CheckCircleFilled className="text-emerald-600 text-sm shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -641,9 +641,9 @@ export default function AuthPage() {
               FORM 1: SIGN IN
              ══════════════════════════════════════════════════════════════ */}
           {mode === "signin" && (
-            <form onSubmit={handleSignIn} className="space-y-4 pt-1 animate-page-entrance">
-              <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+            <form onSubmit={handleSignIn} className="space-y-3 xl:space-y-3.5 pt-0.5 animate-page-entrance">
+              <div className="space-y-0.5">
+                <h1 className="text-xl xl:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
                   Sign in to Fabroniee
                 </h1>
                 <p className="text-xs text-slate-500">
@@ -652,13 +652,13 @@ export default function AuthPage() {
               </div>
 
               {/* Email Input */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <label className="block text-xs font-semibold text-slate-700">
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <MailOutlined className="text-sm" />
+                    <MailOutlined className="text-xs" />
                   </div>
                   <input
                     type="email"
@@ -666,13 +666,13 @@ export default function AuthPage() {
                     placeholder="creator@fabroniee.store"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
 
               {/* Password Input */}
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-semibold text-slate-700">
                     Password
@@ -694,7 +694,7 @@ export default function AuthPage() {
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <LockOutlined className="text-sm" />
+                    <LockOutlined className="text-xs" />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
@@ -702,7 +702,7 @@ export default function AuthPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
@@ -721,7 +721,7 @@ export default function AuthPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                    className="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
                   />
                   <span className="text-xs text-slate-600 font-medium">Remember this browser</span>
                 </label>
@@ -731,15 +731,14 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full h-12 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                 <span>Sign In</span>
               </button>
 
-
               {/* Bottom Switch to Sign Up */}
-              <div className="text-center pt-2">
+              <div className="text-center pt-1">
                 <p className="text-xs text-slate-500">
                   Don&apos;t have an account yet?{" "}
                   <button
@@ -762,9 +761,9 @@ export default function AuthPage() {
               FORM 2: SIGN UP
              ══════════════════════════════════════════════════════════════ */}
           {mode === "signup" && (
-            <form onSubmit={handleSignUp} className="space-y-4 pt-1 animate-page-entrance">
-              <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+            <form onSubmit={handleSignUp} className="space-y-2.5 xl:space-y-3 pt-0.5 animate-page-entrance">
+              <div className="space-y-0.5">
+                <h1 className="text-xl xl:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
                   Create your creator account
                 </h1>
                 <p className="text-xs text-slate-500">
@@ -773,13 +772,13 @@ export default function AuthPage() {
               </div>
 
               {/* Full Name */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
+              <div className="space-y-1">
+                <label className="block text-[11px] xl:text-xs font-semibold text-slate-700">
                   Full Name / Creator Name
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <UserOutlined className="text-sm" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <UserOutlined className="text-xs" />
                   </div>
                   <input
                     type="text"
@@ -787,19 +786,19 @@ export default function AuthPage() {
                     placeholder="Alex Morgan"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
 
               {/* Email */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
+              <div className="space-y-1">
+                <label className="block text-[11px] xl:text-xs font-semibold text-slate-700">
                   Email Address
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <MailOutlined className="text-sm" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <MailOutlined className="text-xs" />
                   </div>
                   <input
                     type="email"
@@ -807,19 +806,19 @@ export default function AuthPage() {
                     placeholder="alex@creator.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
 
               {/* Password */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
+              <div className="space-y-1">
+                <label className="block text-[11px] xl:text-xs font-semibold text-slate-700">
                   Create Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <LockOutlined className="text-sm" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <LockOutlined className="text-xs" />
                   </div>
                   <input
                     type={showPassword ? "text" : "password"}
@@ -828,12 +827,12 @@ export default function AuthPage() {
                     placeholder="Minimum 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                   </button>
@@ -841,13 +840,13 @@ export default function AuthPage() {
               </div>
 
               {/* Confirm Password */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
+              <div className="space-y-1">
+                <label className="block text-[11px] xl:text-xs font-semibold text-slate-700">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <LockOutlined className="text-sm" />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <LockOutlined className="text-xs" />
                   </div>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
@@ -856,12 +855,12 @@ export default function AuthPage() {
                     placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
                   >
                     {showConfirmPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                   </button>
@@ -869,18 +868,18 @@ export default function AuthPage() {
               </div>
 
               {/* Terms agreement checkbox */}
-              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-1">
+              <label className="flex items-start gap-2 cursor-pointer select-none pt-0.5">
                 <input
                   type="checkbox"
                   required
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="w-4 h-4 mt-0.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                  className="w-3.5 h-3.5 mt-0.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
                 />
-                <span className="text-[11px] text-slate-500 leading-snug">
+                <span className="text-[10px] xl:text-[11px] text-slate-500 leading-snug">
                   I agree to the{" "}
                   <Link href="/terms" target="_blank" className="text-slate-800 underline">
-                    Terms of Service
+                    Terms
                   </Link>
                   ,{" "}
                   <Link href="/privacy" target="_blank" className="text-slate-800 underline">
@@ -888,7 +887,7 @@ export default function AuthPage() {
                   </Link>
                   , and{" "}
                   <Link href="/data-deletion" target="_blank" className="text-slate-800 underline">
-                    Data Deletion Instructions
+                    Data Deletion
                   </Link>
                   .
                 </span>
@@ -898,14 +897,14 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full h-12 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-[#5046e5] hover:bg-[#4338ca] flex items-center justify-center gap-2"
+                className="w-full h-10 xl:h-10.5 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-[#5046e5] hover:bg-[#4338ca] flex items-center justify-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                 <span>Create Account &amp; Continue &rarr;</span>
               </button>
 
               {/* Bottom Switch to Sign In */}
-              <div className="text-center pt-2">
+              <div className="text-center pt-0.5">
                 <p className="text-xs text-slate-500">
                   Already have an account?{" "}
                   <button
@@ -928,9 +927,9 @@ export default function AuthPage() {
               FORM 3: FORGOT PASSWORD
              ══════════════════════════════════════════════════════════════ */}
           {mode === "forgot" && (
-            <div className="space-y-4 pt-1 animate-page-entrance">
-              <div className="space-y-1">
-                <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-tight">
+            <div className="space-y-3 pt-0.5 animate-page-entrance">
+              <div className="space-y-0.5">
+                <h1 className="text-xl xl:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
                   Reset your password
                 </h1>
                 <p className="text-xs text-slate-500">
@@ -941,7 +940,7 @@ export default function AuthPage() {
               </div>
 
               {devCodeHint && (
-                <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center justify-between">
                   <span>Demo / Dev Reset Code: <strong>{devCodeHint}</strong></span>
                   <button
                     type="button"
@@ -954,14 +953,14 @@ export default function AuthPage() {
               )}
 
               {forgotStep === 1 ? (
-                <form onSubmit={handleSendResetCode} className="space-y-4">
-                  <div className="space-y-1.5">
+                <form onSubmit={handleSendResetCode} className="space-y-3">
+                  <div className="space-y-1">
                     <label className="block text-xs font-semibold text-slate-700">
                       Account Email Address
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <MailOutlined className="text-sm" />
+                        <MailOutlined className="text-xs" />
                       </div>
                       <input
                         type="email"
@@ -969,7 +968,7 @@ export default function AuthPage() {
                         placeholder="you@creator.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                        className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
                       />
                     </div>
                   </div>
@@ -977,15 +976,15 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="w-full h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
                   >
                     {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                     <span>Send Reset Code</span>
                   </button>
                 </form>
               ) : (
-                <form onSubmit={handleResetPassword} className="space-y-4">
-                  <div className="space-y-1.5">
+                <form onSubmit={handleResetPassword} className="space-y-3">
+                  <div className="space-y-1">
                     <label className="block text-xs font-semibold text-slate-700">
                       6-Digit Verification Code
                     </label>
@@ -995,17 +994,17 @@ export default function AuthPage() {
                       placeholder="e.g. 123456"
                       value={resetCode}
                       onChange={(e) => setResetCode(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono tracking-widest text-center focus:outline-none focus:border-blue-500"
+                      className="w-full h-10 xl:h-11 px-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono tracking-widest text-center focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     <label className="block text-xs font-semibold text-slate-700">
                       New Password
                     </label>
                     <div className="relative">
                       <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <LockOutlined className="text-sm" />
+                        <LockOutlined className="text-xs" />
                       </div>
                       <input
                         type={showNewPassword ? "text" : "password"}
@@ -1014,7 +1013,7 @@ export default function AuthPage() {
                         placeholder="At least 6 characters"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                        className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:border-blue-500"
                       />
                       <button
                         type="button"
@@ -1029,7 +1028,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="w-full h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
                   >
                     {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                     <span>Update Password &amp; Sign In</span>
@@ -1038,7 +1037,7 @@ export default function AuthPage() {
               )}
 
               {/* Back to sign in */}
-              <div className="text-center pt-2">
+              <div className="text-center pt-1">
                 <button
                   type="button"
                   onClick={() => {
