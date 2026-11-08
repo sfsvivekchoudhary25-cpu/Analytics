@@ -1,22 +1,35 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Montserrat, Inter } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { AntdProvider } from "@/components/AntdProvider";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+const montserrat = Montserrat({
   subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
   subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Instagram Hub",
-  description: "Control your Instagram from one place",
+  title: "Fabroniee | The Operating System for Instagram Commerce",
+  description: "Official Instagram comment-to-DM funnels, autonomous AI co-pilot, and social commerce automation built on the Meta Graph API v21.0.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -27,14 +40,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#f8fafc] text-slate-900">
+      <body className="min-h-full flex flex-col bg-[#fafaf9] text-slate-900 font-sans">
         <AntdRegistry>
-          <AntdProvider>{children}</AntdProvider>
+          <AntdProvider>
+            {children}
+            <CookieConsent />
+          </AntdProvider>
         </AntdRegistry>
       </body>
     </html>
   );
 }
-

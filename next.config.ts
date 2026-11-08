@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+
 const nextConfig: NextConfig = {
   // Lets a second copy (e.g. a preview on another port) build into its own folder without touching a running site.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
@@ -15,6 +17,44 @@ const nextConfig: NextConfig = {
     "rc-table",
     "rc-tree",
   ],
+  async rewrites() {
+    return [
+      {
+        source: "/backend-proxy/:path*",
+        // Proxy to whatever NEXT_PUBLIC_API_URL is set to (localhost:4000 for dev, production URL otherwise)
+        destination: `${apiUrl}/:path*`,
+      },
+      {
+        source: "/media/:path*",
+        destination: `${apiUrl}/media/:path*`,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(self), microphone=(self), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

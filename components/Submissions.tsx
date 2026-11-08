@@ -63,6 +63,12 @@ type Submission = {
   chatUrl: string | null;
 };
 
+function getMediaSrc(file?: string | null): string {
+  if (!file) return "/brand-avatar.jpg";
+  if (file.startsWith("http://") || file.startsWith("https://")) return file;
+  return `${API_BASE}/media/${file}`;
+}
+
 // Deterministic pastel avatar gradient based on username
 const AVATAR_GRADIENTS = [
   "from-fuchsia-500 to-rose-400",
@@ -858,7 +864,7 @@ export function Submissions() {
               <div className="relative aspect-square w-full bg-slate-950 overflow-hidden cursor-pointer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${API_BASE}/media/${s.imageFile}`}
+                  src={getMediaSrc(s.imageFile)}
                   alt={`Photo from @${s.igUsername}`}
                   className="h-full w-full object-cover group-hover:scale-103 transition-transform duration-500"
                   onClick={() => setPreviewItem(s)}
@@ -1076,7 +1082,7 @@ export function Submissions() {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`${API_BASE}/media/${s.imageFile}`}
+                    src={getMediaSrc(s.imageFile)}
                     alt={`Photo from @${s.igUsername}`}
                     className="h-full w-full object-cover group-hover:scale-105 transition-transform"
                   />
@@ -1850,7 +1856,7 @@ console.log("Customer photo submitted:", data);`}
                     <div className="relative aspect-square w-full bg-black overflow-hidden flex items-center justify-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`${API_BASE}/media/${previewItem.imageFile}`}
+                        src={getMediaSrc(previewItem.imageFile)}
                         alt={`Photo featuring @${previewItem.igUsername}`}
                         className="w-full h-full object-cover"
                       />
@@ -1925,7 +1931,7 @@ console.log("Customer photo submitted:", data);`}
               <div className="rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center max-h-[70vh]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={`${API_BASE}/media/${previewItem.imageFile}`}
+                  src={getMediaSrc(previewItem.imageFile)}
                   alt={`Photo from @${previewItem.igUsername}`}
                   className="max-h-[70vh] w-auto object-contain"
                 />
@@ -2063,7 +2069,7 @@ console.log("Customer photo submitted:", data);`}
                   <div className="relative aspect-[4/5] bg-slate-950 overflow-hidden flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={`${API_BASE}/media/${reviewSubmission.imageFile}`}
+                      src={getMediaSrc(reviewSubmission.imageFile)}
                       alt="Live post preview"
                       className="w-full h-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).src = "/brand-avatar.jpg"; }}

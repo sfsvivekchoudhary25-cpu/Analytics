@@ -4,14 +4,17 @@ import { Pool } from "pg";
 
 const scryptAsync = promisify(scrypt);
 
-const DATABASE_URL =
-  process.env.DATABASE_URL || "postgres://ighub:ighub@localhost:5433/ighub";
+// Supabase connection string (set in .env.local). No local fallback on purpose.
+const DATABASE_URL = process.env.DATABASE_URL;
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  "f03f8e176335e323a6a9a3dd5139fe95f8a2545c22d4b9f54cd408f4e031b6e0";
+const JWT_SECRET = process.env.JWT_SECRET;
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "fdjNiJdowLNR";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+function requireJwtSecret(): string {
+  if (!JWT_SECRET) throw new Error("JWT_SECRET is not set (expected in .env.local)");
+  return JWT_SECRET;
+}
 
 // Global connection pool (cached across hot reloads in development)
 declare global {
@@ -20,10 +23,29 @@ declare global {
 
 export function getDbPool(): Pool {
   if (!global.__ighub_db_pool) {
+    if (!DATABASE_URL) {
+      throw new Error("DATABASE_URL is not set (expected the Supabase connection string in .env.local)");
+    }
     const newPool = new Pool({
       connectionString: DATABASE_URL,
+      // Verified TLS for remote hosts; off for local dev.
+      // Set DATABASE_CA_CERT to the Supabase CA PEM if the cert isn't trusted.
+      ssl: /localhost|127\.0\.0\.1/.test(DATABASE_URL)
+        ? false
+        : process.env.DATABASE_CA_CERT
+          ? { ca: process.env.DATABASE_CA_CERT.replace(/\\n/g, "\n") }
+          : true,
       max: 10,
       idleTimeoutMillis: 30000,
+    });
+
+    // The app DB role does not bypass Row-Level Security. This pool serves
+    // server-side login/session lookups (no tenant yet), so run it in the same
+    // server-task bypass mode the backend uses for unauthenticated queries.
+    newPool.on("connect", (client) => {
+      client.query("SET app.bypass_rls = 'on'").catch((err) => {
+        console.warn("Failed to set app.bypass_rls on pooled client:", err.message || err);
+      });
     });
 
     // Handle unexpected errors on idle clients so they do not crash the Node.js process
@@ -69,7 +91,7 @@ export function createJwt(payload: Record<string, any>, expiresInSec = 30 * 8640
       exp: now + expiresInSec,
     })
   );
-  const signature = createHmac("sha256", JWT_SECRET)
+  const signature = createHmac("sha256", requireJwtSecret())
     .update(`${header}.${body}`)
     .digest("base64url");
   return `${header}.${body}.${signature}`;
@@ -80,7 +102,7 @@ export function verifyJwt(token: string): Record<string, any> | null {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
     const [header, body, signature] = parts;
-    const expectedSig = createHmac("sha256", JWT_SECRET)
+    const expectedSig = createHmac("sha256", requireJwtSecret())
       .update(`${header}.${body}`)
       .digest("base64url");
     if (signature !== expectedSig) return null;
@@ -95,6 +117,7 @@ export function verifyJwt(token: string): Record<string, any> | null {
 
 export async function seedInitialAdmin(): Promise<void> {
   try {
+    if (!ADMIN_PASSWORD) return; // never seed an admin without an explicit password
     const db = getDbPool();
     const existing = await db.query("SELECT COUNT(*) FROM app_users");
     if (parseInt(existing.rows[0].count, 10) === 0) {

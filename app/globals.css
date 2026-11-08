@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Montserrat:ital,wght@0,300..900;1,300..900&family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 @import "../components/minimal-modern-theme.css";
 
@@ -11,19 +11,74 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Fabulate Design Tokens */
+  --base--white: #ffffff;
+  --base--black: #000000;
+  --base--grey: #e9e9ee;
+  --grey--400: #3c3c3fb3;
+
+  /* Fabulate Site Pink */
+  --site-pink--200: #f7cbdf;
+  --site-pink--300: #ed83b3;
+  --site-pink--400: #e13181;
+  --site-pink--text: #871d4d;
+
+  /* Fabulate Site Orange */
+  --site-orange--200: #f8d7ca;
+  --site-orange--300: #eea07f;
+  --site-orange--400: #e3622b;
+  --site-orange--text: #883a19;
+
+  /* Fabulate Site Yellow */
+  --site-yellow--200: #ffefb2;
+  --site-yellow--300: #ffe006;
+  --site-yellow--400: #ffcc00;
+  --site-yellow--text: #997a00;
+
+  /* Fabulate Site Blue */
+  --site-blue--200: #bfbff9;
+  --site-blue--300: #6666f1;
+  --site-blue--400: #0000e9;
+  --site-blue--text: #00008b;
+
+  /* Fabulate Purple */
+  --purple--200: #ede9fe;
+  --purple--300: #c6b6ff;
+  --purple--400: #9579ff;
+  --purple--text: #2e1065;
+
+  /* Soft Pastel Minimal Theme Tokens */
+  --pastel-periwinkle: #e2e2fc;
+  --pastel-yellow: #fff9db;
+  --pastel-pink: #fceef4;
+  --pastel-coral: #feece4;
+  --pastel-neutral: #f1f3f7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-montserrat), "Montserrat", sans-serif;
+  --font-mono: var(--font-inter), "Inter", monospace;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+}
+
+html,
+body {
+  overflow-anchor: none;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  letter-spacing: -0.012em;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
 }
 
 /* Chart tokens (dataviz reference palette; single blue series) */
@@ -172,5 +227,71 @@ body {
 .ant-card .ant-card-head-title {
   white-space: normal !important;
   overflow: visible !important;
+}
+
+/* Sleek custom scrollbar utility */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+/* ── Recharts Chart Focus & Outline Reset ─────────────────────────────────── */
+/* Eliminate harsh browser focus rings and default outlines across all charts */
+.recharts-responsive-container,
+.recharts-responsive-container *,
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+.recharts-layer,
+.recharts-layer *,
+[data-chart],
+[data-chart] * {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-responsive-container:focus,
+.recharts-responsive-container:focus-visible,
+svg.recharts-surface:focus,
+svg.recharts-surface:focus-visible,
+[data-chart]:focus,
+[data-chart]:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* ── Hide Chart Legend on Mobile View Only (< 640px) ──────────────────────── */
+@media (max-width: 639px) {
+  .recharts-legend-wrapper,
+  .recharts-default-legend {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
 }
 

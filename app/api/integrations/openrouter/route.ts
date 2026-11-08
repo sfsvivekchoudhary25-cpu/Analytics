@@ -1,10 +1,35 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const t0 = Date.now();
+  const authHeader = request.headers.get("authorization") || "";
+
+  // 1. Try querying the NestJS backend
+  try {
+    const backendRes = await fetch("http://localhost:4000/ai/ping", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({}),
+      cache: "no-store",
+    });
+
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return NextResponse.json({
+        ...data,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (err) {
+    // Backend offline fallback
+  }
+
+  // 2. Direct fallback using environment variables
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  const model =
-    process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free";
+  const model = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra";
 
   try {
     const res = await fetch("https://openrouter.ai/api/v1/auth/key", {
@@ -27,7 +52,7 @@ export async function GET() {
         remainingRequests: dailyReqs?.remaining ?? 49,
         totalLimit: dailyReqs?.limit ?? 50,
         isFreeTier: body.data?.is_free_tier ?? true,
-        label: body.data?.label ?? "Primary Production Key",
+        label: body.data?.label ?? "System Key",
         timestamp: new Date().toISOString(),
       });
     }
@@ -52,5 +77,81 @@ export async function GET() {
       message: (err as Error).message,
       timestamp: new Date().toISOString(),
     });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { apiKey, model } = body;
+    const authHeader = request.headers.get("authorization") || "";
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { ok: false, message: "OpenRouter API Key is required" },
+        { status: 400 }
+      );
+    }
+
+    // Proxy to backend to encrypt with AES-256-GCM and store in PostgreSQL
+    const backendRes = await fetch("http://localhost:4000/ai/config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({ apiKey, model }),
+    });
+
+    const data = await backendRes.json();
+    if (!backendRes.ok) {
+      return NextResponse.json(
+        { ok: false, message: data.message || "Failed to save key in backend" },
+        { status: backendRes.status }
+      );
+    }
+
+    // Ping OpenRouter with the key to measure latency and verify health
+    const pingRes = await fetch("http://localhost:4000/ai/ping", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({ apiKey, model }),
+    });
+    const pingData = await pingRes.json().catch(() => ({}));
+
+    return NextResponse.json({
+      ok: true,
+      message: "OpenRouter API Key encrypted and saved securely.",
+      config: data,
+      health: pingData,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { ok: false, message: error.message || "Request failed" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const authHeader = request.headers.get("authorization") || "";
+    const backendRes = await fetch("http://localhost:4000/ai/config", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+    });
+    const data = await backendRes.json();
+    return NextResponse.json(data);
+  } catch (error: any) {
+    return NextResponse.json(
+      { ok: false, message: error.message || "Failed to remove key" },
+      { status: 500 }
+    );
   }
 }

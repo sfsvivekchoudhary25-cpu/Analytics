@@ -56,9 +56,71 @@ type Props = {
   maxReplyLength: number;
 };
 
-const when = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+
+export type StatusType = "enabled" | "disabled" | "warning";
+
+export function StatusDot({
+  status,
+  pulse = true,
+}: {
+  status: StatusType;
+  pulse?: boolean;
+}) {
+  if (status === "enabled") {
+    return (
+      <span className="relative flex h-2 w-2 shrink-0">
+        {pulse && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+        )}
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+      </span>
+    );
+  }
+  if (status === "warning") {
+    return (
+      <span className="relative flex h-2 w-2 shrink-0">
+        {pulse && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+        )}
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+      </span>
+    );
+  }
+  return (
+    <span className="relative flex h-2 w-2 shrink-0">
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+    </span>
+  );
+}
+
+export function StatusBadge({
+  status,
+  text,
+  className = "",
+}: {
+  status: StatusType;
+  text?: string;
+  className?: string;
+}) {
+  const styles =
+    status === "enabled"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : status === "warning"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : "border-rose-200 bg-rose-50 text-rose-700";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full ${
+        text ? "px-2.5 py-0.5" : "px-2 py-1"
+      } text-[11px] sm:text-xs font-semibold border shrink-0 ${styles} ${className}`}
+    >
+      <StatusDot status={status} />
+      {text ? <span>{text}</span> : null}
+    </span>
+  );
+}
 
 export function AutoReplyCard({
   basePath,
@@ -143,15 +205,67 @@ export function AutoReplyCard({
   const aiOn = !!auto?.ai?.enabled;
   const active = rulesOn || aiOn;
 
-  const statusDescription = !auto
-    ? "Loading automation configuration…"
-    : rulesOn && aiOn
-    ? `Your keyword rules answer first, and the AI answers all other incoming ${noun}.`
-    : aiOn
-    ? `The AI answers new ${noun}. Keyword rules are currently disabled.`
-    : rulesOn
-    ? `Your keyword rules answer matching ${noun}. The AI assistant is turned off.`
-    : `Automation is off. No ${noun} are answered automatically.`;
+  // Diagnostics & Status detection
+  const rulesCount = auto?.rules.filter((r) => r.enabled).length ?? 0;
+  const rulesViolation = rulesOn && rulesCount === 0;
+  const aiIssue = aiOn && (!auto?.ai?.available || !!auto?.ai?.pausedUntil || !!aiError);
+  const generalIssue = !!error || !!auto?.dryRun;
+  const hasIssue = active && (rulesViolation || aiIssue || generalIssue);
+
+  // Overall status resolution
+  let overallStatus: StatusType = "disabled";
+  let overallBadgeText = "Disabled";
+
+  if (!auto) {
+    overallStatus = "warning";
+    overallBadgeText = "Loading…";
+  } else if (!active) {
+    overallStatus = "disabled";
+    overallBadgeText = "Disabled";
+  } else if (hasIssue) {
+    overallStatus = "warning";
+    if (auto.dryRun) overallBadgeText = "Simulation Mode";
+    else if (rulesViolation) overallBadgeText = "No Rules Active";
+    else if (aiIssue && auto.ai?.pausedUntil) overallBadgeText = "AI Paused";
+    else if (aiIssue && !auto.ai?.available) overallBadgeText = "AI Setup Needed";
+    else if (aiError || error) overallBadgeText = "Issue Detected";
+    else overallBadgeText = "Warning";
+  } else {
+    overallStatus = "enabled";
+    overallBadgeText = "Active";
+  }
+
+  // AI individual status
+  const aiStatus: StatusType = !aiOn
+    ? "disabled"
+    : !auto?.ai?.available || !!auto?.ai?.pausedUntil || !!aiError
+    ? "warning"
+    : "enabled";
+
+  const aiBadgeText = !aiOn
+    ? "Disabled"
+    : !auto?.ai?.available
+    ? "Setup Needed"
+    : auto?.ai?.pausedUntil
+    ? "Paused"
+    : aiError
+    ? "Issue"
+    : "Active";
+
+  // Rules individual status
+  const rulesStatus: StatusType = !rulesOn
+    ? "disabled"
+    : rulesViolation || !!error
+    ? "warning"
+    : "enabled";
+
+  const rulesBadgeText = !rulesOn
+    ? "Disabled"
+    : rulesViolation
+    ? "0 Rules"
+    : !!error
+    ? "Issue"
+    : "Active";
 
   // Dynamic naming, icon, and status badge reflecting exact active behavior
   const behaviorConfig = !auto
@@ -162,21 +276,21 @@ export function AutoReplyCard({
       }
     : rulesOn && aiOn
     ? {
-        title: "AI & Keyword Auto-reply",
+        title: "AI & Keyword",
         icon: <RobotOutlined className="text-lg" />,
-        badgeText: "AI + Rules Active",
+        badgeText: overallBadgeText,
       }
     : aiOn
     ? {
         title: "AI Auto-responder",
         icon: <RobotOutlined className="text-lg" />,
-        badgeText: "AI Active",
+        badgeText: overallBadgeText,
       }
     : rulesOn
     ? {
         title: "Keyword Auto-reply",
         icon: <ThunderboltOutlined className="text-lg" />,
-        badgeText: "Rules Active",
+        badgeText: overallBadgeText,
       }
     : {
         title: "Auto-reply (Inactive)",
@@ -189,64 +303,67 @@ export function AutoReplyCard({
       {/* ── Top Header Card (Minimalist Monochromatic with Subtle Accents) ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm w-full"
-        styles={{ body: { padding: "24px 28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-5">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white shadow-2xs">
               {behaviorConfig.icon}
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h2 className="text-lg font-bold tracking-tight text-slate-900">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap sm:flex-nowrap">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 leading-tight">
                   {behaviorConfig.title}
                 </h2>
-                {active ? (
-                  <Tag
-                    color="success"
-                    className="!rounded-full !px-3 !py-0.5 !text-xs !font-semibold !flex !items-center !gap-1.5 !m-0 !border-emerald-200 !bg-emerald-50 !text-emerald-700"
-                  >
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    {behaviorConfig.badgeText}
-                  </Tag>
-                ) : (
-                  <Tag
-                    color="default"
-                    className="!rounded-full !px-3 !py-0.5 !text-xs !font-semibold !m-0 !bg-slate-100 !text-slate-500"
-                  >
-                    ● {behaviorConfig.badgeText}
-                  </Tag>
-                )}
+                <StatusBadge status={overallStatus} text={behaviorConfig.badgeText} />
               </div>
-              <p className="mt-1 text-xs text-slate-500">
-                {statusDescription}
-                {active && auto?.enabledAt ? (
-                  <span className="text-slate-700 font-medium"> Only {noun} received after {when(auto.enabledAt)} are answered.</span>
-                ) : null}
-              </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">AI Replies:</span>
-              <span className={`font-semibold ${aiOn ? "text-slate-900" : "text-slate-400"}`}>
-                {aiOn ? "Enabled" : "Off"}
+          <div className="grid grid-cols-3 gap-2 w-full lg:w-auto lg:flex lg:items-center lg:gap-2.5 shrink-0 pt-3 border-t border-slate-100 lg:border-t-0 lg:pt-0">
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                AI Replies
               </span>
+              <div className="flex items-center gap-1.5">
+                <StatusDot status={aiStatus} pulse={false} />
+                <span
+                  className={`text-xs font-bold lg:font-semibold ${
+                    aiStatus === "enabled"
+                      ? "text-slate-900"
+                      : aiStatus === "warning"
+                      ? "text-amber-800"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {aiOn ? (aiStatus === "warning" ? "Attention" : "Enabled") : "Off"}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">Trigger Rules:</span>
-              <span className={`font-semibold ${rulesOn ? "text-slate-900" : "text-slate-400"}`}>
-                {auto?.rules.filter((r) => r.enabled).length ?? 0} active
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                KeyWord
               </span>
+              <div className="flex items-center gap-1.5">
+                <StatusDot status={rulesStatus} pulse={false} />
+                <span
+                  className={`text-xs font-bold lg:font-semibold ${
+                    rulesStatus === "enabled"
+                      ? "text-slate-900"
+                      : rulesStatus === "warning"
+                      ? "text-amber-800"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {rulesOn ? `${rulesCount} active` : "Off"}
+                </span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
-              <span className="text-slate-400 font-medium">Hourly Cap:</span>
-              <span className="font-semibold text-slate-900">
+            <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-start gap-1 lg:gap-2 rounded-xl lg:rounded-lg bg-slate-50 border border-slate-200/80 px-2 py-2 lg:px-3 lg:py-1.5 text-center lg:text-left">
+              <span className="text-[10px] lg:text-xs text-slate-400 font-medium uppercase lg:normal-case tracking-wider lg:tracking-normal truncate">
+                Hourly Cap
+              </span>
+              <span className="text-xs font-bold lg:font-semibold text-slate-900">
                 {auto?.maxPerHour ?? 35} / hr
               </span>
             </div>
@@ -267,31 +384,20 @@ export function AutoReplyCard({
       {/* ── AI Replies Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        {/* Header row: Icon + Title + Switch */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
               <RobotOutlined className="text-lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-base font-semibold text-slate-900">AI replies</h3>
-                {aiOn && (
-                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-700 !font-medium">
-                    AI Enabled
-                  </Tag>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-3xl">
-                Works on its own: no rules needed. The AI reads each new {one} and writes a short, friendly reply. It
-                knows nothing about your prices, stock or delivery, so it never states them: those questions are left for
-                you. It also stays silent whenever it is not sure.
-              </p>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <h3 className="text-base font-bold text-slate-900 leading-tight">AI replies</h3>
+              <StatusBadge status={aiStatus} text={aiBadgeText} />
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 pt-1">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">
               {aiOn ? "Enabled" : "Disabled"}
             </span>
@@ -303,6 +409,13 @@ export function AutoReplyCard({
             />
           </div>
         </div>
+
+        {/* Description text full-width */}
+        <p className="mt-2.5 text-xs text-slate-500 leading-relaxed max-w-3xl">
+          Works on its own: no rules needed. The AI reads each new {one} and writes a short, friendly reply. It
+          knows nothing about your prices, stock or delivery, so it never states them: those questions are left for
+          you. It also stays silent whenever it is not sure.
+        </p>
 
         {auto && !auto.ai?.available && (
           <Alert
@@ -341,22 +454,22 @@ export function AutoReplyCard({
         )}
 
         {/* ── Try It - Neutral Sleek Sandbox ── */}
-        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/60 p-5 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="mt-5 sm:mt-6 rounded-xl border border-slate-200/80 bg-slate-50/60 p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <div className="flex items-center gap-2">
-              <ExperimentOutlined className="text-slate-600" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
+              <ExperimentOutlined className="text-slate-600 text-xs sm:text-sm" />
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                 Try it (Live Sandbox)
               </span>
             </div>
             <span className="text-[11px] text-slate-400">
-              Draft sandbox preview • Evaluated by active model • No message is sent
+              Draft sandbox preview • No message is sent
             </span>
           </div>
 
-          <div className="flex gap-2.5">
+          <div className="flex items-center gap-2">
             <Input
-              size="large"
+              size="middle"
               value={tryText}
               onChange={(e) => setTryText(e.target.value)}
               onKeyDown={(e) => {
@@ -364,22 +477,22 @@ export function AutoReplyCard({
                   tryIt();
                 }
               }}
-              placeholder={`Type a customer ${one} to see what the AI would answer…`}
-              prefix={<MessageOutlined className="text-slate-400 mr-1" />}
+              placeholder={`Type a message to test AI reply…`}
+              prefix={<MessageOutlined className="text-slate-400 mr-1 text-xs" />}
               maxLength={500}
-              className="!rounded-xl flex-1 !border-slate-200"
+              className="!rounded-xl flex-1 !border-slate-200 text-xs sm:text-sm !h-10"
               disabled={!auto?.ai?.available}
             />
             <Button
               type="primary"
-              size="large"
+              size="middle"
               onClick={tryIt}
               loading={trying}
               disabled={trying || !tryText.trim() || !auto?.ai?.available}
               icon={<SendOutlined />}
-              className="!rounded-xl !px-6"
+              className="!rounded-xl !px-4 sm:!px-6 shrink-0 !h-10 text-xs sm:text-sm font-semibold"
             >
-              {trying ? "Thinking…" : "Try"}
+              {trying ? "…" : "Try"}
             </Button>
           </div>
 
@@ -477,30 +590,20 @@ export function AutoReplyCard({
       {/* ── Keyword Rules Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4">
+        {/* Header row: Icon + Title + Switch */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
               <ThunderboltOutlined className="text-lg" />
             </div>
-            <div>
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-base font-semibold text-slate-900">Keyword rules</h3>
-                {rulesOn && (
-                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-700 !font-medium">
-                    Rules Active
-                  </Tag>
-                )}
-              </div>
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed max-w-3xl">
-                Your exact wording, used first when a {one} contains one of the keywords. When rules are off, they are
-                ignored and the AI (if on) answers everything.
-              </p>
+            <div className="flex items-center gap-2 flex-wrap min-w-0">
+              <h3 className="text-base font-bold text-slate-900 leading-tight">Keyword</h3>
+              <StatusBadge status={rulesStatus} text={rulesBadgeText} />
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 pt-1">
+          <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">
               {rulesOn ? "Enabled" : "Disabled"}
             </span>
@@ -512,6 +615,12 @@ export function AutoReplyCard({
             />
           </div>
         </div>
+
+        {/* Description text full-width */}
+        <p className="mt-2.5 text-xs text-slate-500 leading-relaxed max-w-3xl">
+          Your exact wording, used first when a {one} contains one of the keywords. When rules are off, they are
+          ignored and the AI (if on) answers everything.
+        </p>
 
         {error && (
           <Alert
@@ -538,15 +647,16 @@ export function AutoReplyCard({
           {auto?.rules.map((r) => (
             <div
               key={r.id}
-              className={`flex items-start justify-between gap-4 rounded-xl border p-4.5 transition-all ${
+              className={`flex flex-col gap-3 rounded-xl border p-3.5 sm:p-4.5 transition-all ${
                 r.enabled && rulesOn
                   ? "border-slate-200/90 bg-white shadow-2xs hover:border-slate-300"
-                  : "border-slate-200/60 bg-slate-50/70 opacity-60"
+                  : "border-slate-200/60 bg-slate-50/70 opacity-70"
               }`}
             >
-              <div className="min-w-0 flex-1 space-y-2">
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="text-xs font-medium text-slate-500">
+              {/* Header row: Keywords & Status badge & Desktop actions */}
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex flex-wrap items-center gap-1.5 min-w-0 flex-1">
+                  <span className="text-xs font-semibold text-slate-500 shrink-0">
                     {r.keywords.trim() ? "Contains:" : "Applies to:"}
                   </span>
                   {(r.keywords.trim()
@@ -555,35 +665,74 @@ export function AutoReplyCard({
                   ).map((k) => (
                     <Tag
                       key={k}
-                      className="!rounded-md !bg-slate-100 !border-slate-200 !text-slate-800 !text-xs !font-medium"
+                      className="!rounded-md !bg-slate-100 !border-slate-200 !text-slate-800 !text-xs !font-medium !m-0"
                     >
                       {k}
                     </Tag>
                   ))}
-                  {r.enabled ? (
-                    <Tag color="success" className="!rounded-md !text-[11px] !ml-auto">Active</Tag>
-                  ) : (
-                    <Tag color="default" className="!rounded-md !text-[11px] !ml-auto">Paused</Tag>
-                  )}
                 </div>
 
-                <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 text-xs text-slate-800 font-mono whitespace-pre-wrap break-words leading-relaxed">
-                  &ldquo;{r.replyText}&rdquo;
+                <div className="flex items-center gap-2 shrink-0">
+                  {r.enabled && rulesOn ? (
+                    <StatusBadge status="enabled" text="Active" />
+                  ) : r.enabled && !rulesOn ? (
+                    <StatusBadge status="warning" text="Inactive" />
+                  ) : (
+                    <StatusBadge status="disabled" text="Paused" />
+                  )}
+
+                  {/* Desktop Actions */}
+                  <div className="hidden sm:flex items-center gap-1.5 ml-1">
+                    <Tooltip title={r.enabled ? "Pause this rule" : "Resume this rule"}>
+                      <Button
+                        size="small"
+                        icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                        onClick={() => pause(r)}
+                        disabled={busy === `rule-${r.id}`}
+                        className="!text-xs"
+                      >
+                        {r.enabled ? "Pause" : "Resume"}
+                      </Button>
+                    </Tooltip>
+
+                    <Popconfirm
+                      title="Delete this rule?"
+                      description="Are you sure you want to delete this auto-reply rule?"
+                      onConfirm={() => remove(r)}
+                      okText="Delete"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                    >
+                      <Tooltip title="Delete rule">
+                        <Button
+                          size="small"
+                          danger
+                          icon={<DeleteOutlined />}
+                          disabled={busy === `rule-${r.id}`}
+                          className="!text-xs"
+                        />
+                      </Tooltip>
+                    </Popconfirm>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2 pt-1">
-                <Tooltip title={r.enabled ? "Pause this rule" : "Resume this rule"}>
-                  <Button
-                    size="small"
-                    icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
-                    onClick={() => pause(r)}
-                    disabled={busy === `rule-${r.id}`}
-                    className="!text-xs"
-                  >
-                    {r.enabled ? "Pause" : "Resume"}
-                  </Button>
-                </Tooltip>
+              {/* Full width message bubble */}
+              <div className="w-full rounded-lg bg-slate-50 border border-slate-200/60 p-3 text-xs text-slate-800 font-mono whitespace-pre-wrap break-words leading-relaxed">
+                &ldquo;{r.replyText}&rdquo;
+              </div>
+
+              {/* Mobile Action Footer */}
+              <div className="flex sm:hidden items-center justify-end gap-2 pt-1.5 border-t border-slate-100/90">
+                <Button
+                  size="small"
+                  icon={r.enabled ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+                  onClick={() => pause(r)}
+                  disabled={busy === `rule-${r.id}`}
+                  className="!text-xs !h-7 !px-3 !rounded-lg"
+                >
+                  {r.enabled ? "Pause" : "Resume"}
+                </Button>
 
                 <Popconfirm
                   title="Delete this rule?"
@@ -593,15 +742,13 @@ export function AutoReplyCard({
                   cancelText="Cancel"
                   okButtonProps={{ danger: true }}
                 >
-                  <Tooltip title="Delete rule">
-                    <Button
-                      size="small"
-                      danger
-                      icon={<DeleteOutlined />}
-                      disabled={busy === `rule-${r.id}`}
-                      className="!text-xs"
-                    />
-                  </Tooltip>
+                  <Button
+                    size="small"
+                    danger
+                    icon={<DeleteOutlined />}
+                    disabled={busy === `rule-${r.id}`}
+                    className="!text-xs !h-7 !w-7 !rounded-lg !flex !items-center !justify-center"
+                  />
                 </Popconfirm>
               </div>
             </div>
@@ -622,22 +769,24 @@ export function AutoReplyCard({
         </div>
 
         {/* ── Add Rule Form ── */}
-        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-5 space-y-4">
-          <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-semibold text-slate-700 flex items-center gap-1.5 mr-1">
-              <BulbOutlined className="text-slate-500" />
+        <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-5 space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+              <BulbOutlined className="text-amber-500 text-xs" />
               <span>Start from template:</span>
-            </span>
-            {templates.map((t) => (
-              <button
-                key={t.name}
-                type="button"
-                onClick={() => setNewRule({ keywords: t.keywords, replyText: t.replyText })}
-                className="cursor-pointer rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs hover:border-slate-400 hover:bg-slate-50 transition-colors active:scale-95"
-              >
-                {t.name}
-              </button>
-            ))}
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:flex-wrap no-scrollbar">
+              {templates.map((t) => (
+                <button
+                  key={t.name}
+                  type="button"
+                  onClick={() => setNewRule({ keywords: t.keywords, replyText: t.replyText })}
+                  className="cursor-pointer shrink-0 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-2xs hover:border-slate-400 hover:bg-slate-50 transition-all active:scale-95"
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           <form
@@ -646,16 +795,16 @@ export function AutoReplyCard({
               if (newRule.replyText.trim()) addRule();
             }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
               {/* Left Column: Inputs */}
               <div className="lg:col-span-7 space-y-3.5 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">
                       If the {one} contains{" "}
-                      <span className="font-normal text-slate-400">(optional, separate with commas)</span>
+                      <span className="font-normal text-slate-400 text-[11px]">(optional, comma-separated)</span>
                     </label>
-                    <span className="text-[11px] text-slate-400">Leave blank to answer any {one}</span>
+                    <span className="text-[11px] text-slate-400">Leave blank for all {noun}</span>
                   </div>
                   <Input
                     size="large"
@@ -664,26 +813,25 @@ export function AutoReplyCard({
                     placeholder={keywordsExample}
                     prefix={<TagOutlined className="text-slate-400 mr-1" />}
                     maxLength={500}
-                    className="!rounded-xl !border-slate-200"
+                    className="!rounded-xl !border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">Reply with</label>
-                    <Button
-                      size="small"
-                      type="link"
+                    <button
+                      type="button"
                       onClick={() =>
                         setNewRule((r) => ({
                           ...r,
                           replyText: (r.replyText.trim() ? r.replyText + " " : "") + "{username}",
                         }))
                       }
-                      className="!text-xs !p-0 !h-auto !text-blue-600"
+                      className="cursor-pointer text-[11px] font-medium text-blue-600 bg-blue-50/80 hover:bg-blue-100 border border-blue-200/60 rounded-md px-2 py-0.5 transition-colors active:scale-95"
                     >
                       + Insert {"{username}"}
-                    </Button>
+                    </button>
                   </div>
                   <Input.TextArea
                     value={newRule.replyText}
@@ -692,13 +840,13 @@ export function AutoReplyCard({
                     rows={3}
                     maxLength={maxReplyLength}
                     showCount
-                    className="!rounded-xl resize-none !border-slate-200"
+                    className="!rounded-xl resize-none !border-slate-200 text-xs sm:text-sm"
                   />
                 </div>
               </div>
 
               {/* Right Column: Live Follower Preview Box */}
-              <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-2xs space-y-3">
+              <div className="lg:col-span-5 flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-3.5 sm:p-4 shadow-2xs space-y-3">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500">
                     <div className="flex items-center gap-1.5">
@@ -707,16 +855,16 @@ export function AutoReplyCard({
                     </div>
                     <span className="text-slate-400 font-normal">Customer view</span>
                   </div>
-                  <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 min-h-[90px] flex items-center">
+                  <div className="rounded-lg bg-slate-50 border border-slate-200/60 p-3 min-h-[80px] sm:min-h-[90px] flex items-center">
                     <p className="text-xs text-slate-800 whitespace-pre-wrap break-words leading-relaxed font-mono">
                       {newRule.replyText.trim()
                         ? newRule.replyText.replaceAll("{username}", "riya.styles")
-                        : "Type a reply message on the left to see customer preview…"}
+                        : "Type a reply message to see customer preview…"}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-100">
                   <span className="text-[11px] text-slate-400">
                     <code>{"{username}"}</code> is personalized
                   </span>
@@ -727,7 +875,7 @@ export function AutoReplyCard({
                     loading={busy === "add"}
                     disabled={busy === "add" || !newRule.replyText.trim()}
                     icon={<PlusOutlined />}
-                    className="!rounded-xl !px-5"
+                    className="!rounded-xl !h-10 sm:!h-11 w-full sm:w-auto sm:!px-6 font-semibold"
                   >
                     Add Rule
                   </Button>
@@ -741,8 +889,7 @@ export function AutoReplyCard({
       {/* ── Safety Limits Card ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full"
-        styles={{ body: { padding: "24px 28px" } }}
+        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-start gap-4">
