@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createJwt, getDbPool, hashPassword, seedInitialAdmin, verifyPassword } from "@/lib/auth-server";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "fdjNiJdowLNR";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export async function POST(request: NextRequest) {
   try {
+    if (!ADMIN_PASSWORD) {
+      throw new Error("ADMIN_PASSWORD is not set (expected in .env.local)");
+    }
     await seedInitialAdmin();
 
     const body = await request.json();
