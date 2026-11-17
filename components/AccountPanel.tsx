@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { App, Button, Card, Input, Modal, Progress, Select, Space, Switch, Tag, Tooltip } from "antd";
+import { Alert, App, Button, Card, Input, Modal, Progress, Segmented, Select, Space, Switch, Tag, Tooltip } from "antd";
 import {
-  AimOutlined,
   ApiOutlined,
   ApartmentOutlined,
-  BarChartOutlined,
   CalendarOutlined,
   CheckCircleFilled,
   CheckCircleOutlined,
@@ -17,7 +15,6 @@ import {
   CommentOutlined,
   CopyOutlined,
   CustomerServiceOutlined,
-  DatabaseOutlined,
   DeleteOutlined,
   DisconnectOutlined,
   ExclamationCircleOutlined,
@@ -225,11 +222,12 @@ export function AccountPanel({
   const [openRouterHealth, setOpenRouterHealth] = useState<OpenRouterHealth | null>(null);
   const [openRouterLoading, setOpenRouterLoading] = useState(false);
   const [openRouterModalOpen, setOpenRouterModalOpen] = useState(false);
-  const [openRouterKeyInput, setOpenRouterKeyInput] = useState("");
   const [openRouterModelInput, setOpenRouterModelInput] = useState("nvidia/nemotron-3-ultra");
+  const [modelCatalog, setModelCatalog] = useState<{ id: string; name: string; free: boolean }[]>([]);
+  const [freeTierOnly, setFreeTierOnly] = useState<boolean | null>(null);
+  const [catalogError, setCatalogError] = useState(false);
+  const [modelFilter, setModelFilter] = useState<"all" | "free" | "paid">("all");
   const [savingOpenRouter, setSavingOpenRouter] = useState(false);
-  const [isCustomKey, setIsCustomKey] = useState(false);
-  const [keyLast4, setKeyLast4] = useState<string | null>(null);
   const [allPinging, setAllPinging] = useState(false);
 
   // Instagram Manual Token Modal
@@ -311,7 +309,6 @@ export function AccountPanel({
         return res.json();
       });
       setOpenRouterHealth(data);
-      if (data.isCustom !== undefined) setIsCustomKey(data.isCustom);
       if (data.model) setOpenRouterModelInput(data.model);
       return data as OpenRouterHealth;
     } catch {
@@ -335,52 +332,39 @@ export function AccountPanel({
     try {
       const data: any = await api("/ai/config").catch(() => null);
       if (data) {
-        setIsCustomKey(Boolean(data.isCustom));
-        if (data.keyLast4) setKeyLast4(data.keyLast4);
         if (data.model) setOpenRouterModelInput(data.model);
       }
     } catch {}
   };
 
+  // Full OpenRouter catalog (free + paid) and whether this account can only use free models.
+  useEffect(() => {
+    if (!openRouterModalOpen || modelCatalog.length) return;
+    api("/ai/models")
+      .then((d: any) => {
+        setModelCatalog(d.models);
+        setFreeTierOnly(d.freeTierOnly);
+        setCatalogError(false);
+      })
+      .catch(() => setCatalogError(true));
+  }, [openRouterModalOpen, modelCatalog.length]);
+
+  const selectedModel = modelCatalog.find((m) => m.id === openRouterModelInput);
+  const selectedPaid = selectedModel ? !selectedModel.free : false;
+
   const handleSaveOpenRouter = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!openRouterKeyInput.trim()) {
-      message.warning("Please enter your OpenRouter API Key (starts with sk-or-)");
-      return;
-    }
     setSavingOpenRouter(true);
     try {
       const data: any = await api("/ai/config", {
         method: "POST",
-        body: JSON.stringify({
-          apiKey: openRouterKeyInput.trim(),
-          model: openRouterModelInput,
-        }),
+        body: JSON.stringify({ model: openRouterModelInput }),
       });
-      message.success(`Key encrypted with AES-256-GCM & stored in database! Model: ${data.model}`);
-      setIsCustomKey(true);
-      setKeyLast4(data.keyLast4);
-      setOpenRouterKeyInput("");
+      message.success(`AI model changed to ${data.model}`);
       setOpenRouterModalOpen(false);
       await pingOpenRouter();
     } catch (err: any) {
-      message.error(err.message || "Failed to verify and save OpenRouter key");
-    } finally {
-      setSavingOpenRouter(false);
-    }
-  };
-
-  const handleRemoveOpenRouter = async () => {
-    setSavingOpenRouter(true);
-    try {
-      await api("/ai/config", { method: "DELETE" });
-      setIsCustomKey(false);
-      setKeyLast4(null);
-      setOpenRouterModalOpen(false);
-      message.info("Custom OpenRouter key removed. System default active.");
-      await pingOpenRouter();
-    } catch (err: any) {
-      message.error(err.message || "Failed to remove key");
+      message.error(err.message || "Failed to save the AI model");
     } finally {
       setSavingOpenRouter(false);
     }
@@ -1318,47 +1302,6 @@ export function AccountPanel({
                   @{cloudinaryConfig.cloudName || "hrnqhbaa"}
                 </div>
               </div>
-
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <GlobalOutlined className="text-sky-500 text-xs sm:text-sm" />
-                    <span>Edge Domain</span>
-                  </span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px] sm:text-xs truncate text-right">
-                    res.cloudinary.com
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <ThunderboltOutlined className="text-sky-500 text-xs sm:text-sm" />
-                    <span>Auto Optimization</span>
-                  </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
-                    <CheckCircleFilled className="text-[11px]" />
-                    <span>f_auto, q_auto</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <DatabaseOutlined className="text-sky-500 text-xs sm:text-sm" />
-                    <span>Meta Publishing</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    Direct HTTPS Ingestion
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <KeyOutlined className="text-sky-500 text-xs sm:text-sm" />
-                    <span>API Credentials</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    {cloudinaryConfig.apiKey ? "API Key Attached" : "Public Edge Access"}
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Actions (Structured 2-Row Layout: Never Clips on Mobile or Tablet) */}
@@ -1433,7 +1376,7 @@ export function AccountPanel({
                     onClick={() => setOpenRouterModalOpen(true)}
                     className="!h-7 !px-2 !rounded-lg text-[10px] font-semibold text-purple-700 bg-purple-100/60 hover:bg-purple-200/80"
                   >
-                    {isCustomKey ? "BYOK Key" : "Configure"}
+                    Model
                   </Button>
                 </div>
               </div>
@@ -1452,52 +1395,6 @@ export function AccountPanel({
                   {openRouterHealth?.model || openRouterModelInput || "nvidia/nemotron-3-ultra"}
                 </div>
               </div>
-
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 sm:space-y-2.5 text-xs pt-0.5">
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <BarChartOutlined className="text-purple-500 text-xs sm:text-sm" />
-                    <span>Daily Requests</span>
-                  </span>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span className="font-semibold text-slate-700 text-[11px] sm:text-xs">
-                      {openRouterHealth?.remainingRequests ?? 49} / {openRouterHealth?.totalLimit ?? 50} left
-                    </span>
-                    <div className="h-1.5 w-20 sm:w-24 rounded-full bg-purple-100/80 overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full w-full" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <MessageOutlined className="text-purple-500 text-xs sm:text-sm" />
-                    <span>Comment Sentiment</span>
-                  </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
-                    <CheckCircleFilled className="text-[11px]" />
-                    <span>Real-time</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <SettingOutlined className="text-purple-500 text-xs sm:text-sm" />
-                    <span>DM Auto-Reply</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    Dynamic Discount Code
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <SafetyCertificateOutlined className="text-purple-500 text-xs sm:text-sm" />
-                    <span>Security</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    {isCustomKey ? `Custom Key (••••${keyLast4 || "••••"}) AES-256` : "Bearer Token Encrypted"}
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Actions */}
@@ -1511,11 +1408,11 @@ export function AccountPanel({
                 Ping AI Gateway
               </Button>
               <Button
-                icon={<KeyOutlined className="text-purple-600" />}
+                icon={<SettingOutlined className="text-purple-600" />}
                 onClick={() => setOpenRouterModalOpen(true)}
                 className="!rounded-xl !text-xs font-semibold !border-purple-200 !bg-white hover:!bg-purple-50 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5 px-3"
               >
-                Configure Key
+                Change Model
               </Button>
             </div>
           </div>
@@ -1557,47 +1454,6 @@ export function AccountPanel({
                 </div>
                 <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title="trycloudflare.com tunnel">
                   municipality-tour-lawsuit...
-                </div>
-              </div>
-
-              {/* Specs & Capabilities (Responsive 2-Col on Tablet Span, 1-Col on Mobile/Desktop) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-x-6 gap-y-2 text-xs pt-0.5">
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <AimOutlined className="text-amber-500 text-xs sm:text-sm" />
-                    <span>Target Path</span>
-                  </span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px] sm:text-xs truncate text-right">
-                    /instagram/webhook
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <SafetyCertificateOutlined className="text-amber-500 text-xs sm:text-sm" />
-                    <span>Signature Check</span>
-                  </span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1 text-[11px] sm:text-xs text-right shrink-0">
-                    <CheckCircleFilled className="text-[11px]" />
-                    <span>HMAC-SHA256</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <ThunderboltOutlined className="text-amber-500 text-xs sm:text-sm" />
-                    <span>Event Delivery</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    Instant Comment &amp; DM Push
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-2 py-0.5">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <DatabaseOutlined className="text-amber-500 text-xs sm:text-sm" />
-                    <span>Firewall Security</span>
-                  </span>
-                  <span className="font-semibold text-slate-800 text-[11px] sm:text-xs truncate text-right">
-                    Zero open inbound ports
-                  </span>
                 </div>
               </div>
             </div>
@@ -1776,11 +1632,11 @@ export function AccountPanel({
         title={
           <div className="flex items-center gap-2.5">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white shadow-sm">
-              <KeyOutlined className="text-base" />
+              <SettingOutlined className="text-base" />
             </div>
             <div>
-              <div className="text-sm font-bold text-slate-900">Configure Your OpenRouter AI Key</div>
-              <div className="text-[11px] text-slate-400 font-normal">Encrypted with AES-256-GCM in PostgreSQL</div>
+              <div className="text-sm font-bold text-slate-900">Choose Your AI Model</div>
+              <div className="text-[11px] text-slate-400 font-normal">Runs on the platform&apos;s AI connection</div>
             </div>
           </div>
         }
@@ -1791,86 +1647,72 @@ export function AccountPanel({
         className="!rounded-2xl"
       >
         <form onSubmit={handleSaveOpenRouter} className="space-y-4 pt-3">
-          <div className="p-3.5 rounded-2xl bg-purple-50/60 border border-purple-200/60 text-xs space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-purple-900 flex items-center gap-1.5">
-                <SafetyCertificateOutlined className="text-purple-600" />
-                <span>Client-Side &amp; Database Security</span>
-              </span>
-              <Tag color="purple" className="!mr-0 text-[10px] font-semibold">AES-256-GCM</Tag>
-            </div>
-            <p className="text-[11px] text-purple-800/80 leading-relaxed">
-              Your OpenRouter API key is encrypted using AES-256-GCM before being stored in PostgreSQL. It is never exposed in plaintext and is decrypted only in-memory when processing Instagram automated DMs and comments.
-            </p>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-bold text-slate-700">
-                OpenRouter API Key <span className="text-rose-500">*</span>
-              </label>
-              <a
-                href="https://openrouter.ai/keys"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[11px] text-purple-600 hover:text-purple-700 font-semibold inline-flex items-center gap-1"
-              >
-                Get Key on OpenRouter <ExportOutlined className="text-[10px]" />
-              </a>
-            </div>
-            <Input.Password
-              value={openRouterKeyInput}
-              onChange={(e) => setOpenRouterKeyInput(e.target.value)}
-              placeholder={isCustomKey && keyLast4 ? `Current key: ••••••••${keyLast4} (paste new key to update)` : "sk-or-v1-xxxxxxxxxxxxxxxx"}
-              className="!rounded-xl font-mono text-xs"
-              required={!isCustomKey}
-            />
-            {isCustomKey && keyLast4 && (
-              <p className="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
-                <CheckCircleFilled className="text-[10px]" />
-                Active encrypted key ending in ••••{keyLast4}
-              </p>
-            )}
-          </div>
-
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Active Architecture / Model
             </label>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <Segmented
+                size="small"
+                value={modelFilter}
+                onChange={(v) => setModelFilter(v as "all" | "free" | "paid")}
+                options={[
+                  { label: `All (${modelCatalog.length})`, value: "all" },
+                  { label: `Free (${modelCatalog.filter((m) => m.free).length})`, value: "free" },
+                  { label: `Paid (${modelCatalog.filter((m) => !m.free).length})`, value: "paid" },
+                ]}
+              />
+              {freeTierOnly !== null && (
+                <Tag color={freeTierOnly ? "green" : "gold"} className="!mr-0 text-[10px] font-semibold">
+                  {freeTierOnly ? "Account: free models only" : "Account: credits available"}
+                </Tag>
+              )}
+            </div>
             <Select
+              showSearch
               value={openRouterModelInput}
               onChange={setOpenRouterModelInput}
               className="w-full !rounded-xl"
-              options={[
-                { value: "nvidia/nemotron-3-ultra", label: "nvidia/nemotron-3-ultra (Ultra Low-Latency & High Reasoning)" },
-                { value: "meta-llama/llama-3.3-70b-instruct", label: "meta-llama/llama-3.3-70b-instruct (Fast & Accurate)" },
-                { value: "anthropic/claude-3.5-sonnet", label: "anthropic/claude-3.5-sonnet (Smartest Commerce Funnels)" },
-                { value: "openai/gpt-4o-mini", label: "openai/gpt-4o-mini (High Speed & Natural Conversational)" },
-                { value: "deepseek/deepseek-chat", label: "deepseek/deepseek-chat (Deep Reasoning & Multilingual)" },
-                { value: "google/gemini-2.0-flash", label: "google/gemini-2.0-flash (Fast Multimodal Response)" },
-                { value: "qwen/qwen-2.5-72b-instruct", label: "qwen/qwen-2.5-72b-instruct (E-commerce & Multilingual)" },
-              ]}
+              loading={!modelCatalog.length && !catalogError}
+              placeholder="Search models…"
+              filterOption={(input, opt) => `${opt?.value} ${opt?.name}`.toLowerCase().includes(input.toLowerCase())}
+              optionRender={(o) => (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    {o.data.name} <span className="text-slate-400 text-[11px]">{o.data.value}</span>
+                  </span>
+                  <Tag color={o.data.free ? "green" : "gold"} className="!mr-0 text-[10px] font-semibold shrink-0">
+                    {o.data.free ? "Free" : "Paid"}
+                  </Tag>
+                </div>
+              )}
+              options={modelCatalog
+                .filter((m) => modelFilter === "all" || (modelFilter === "free") === m.free)
+                .map((m) => ({ value: m.id, label: m.id, name: m.name, free: m.free }))}
             />
+            {catalogError && (
+              <p className="text-[11px] text-rose-500 mt-1">Could not load the model list. Close and reopen this window to retry.</p>
+            )}
+            {selectedPaid && (
+              <Alert
+                className="!mt-2 !rounded-xl"
+                showIcon
+                type={freeTierOnly ? "error" : "warning"}
+                message={
+                  freeTierOnly === true
+                    ? "Your account can only use free models. Pick a free model, or add credits on OpenRouter (openrouter.ai/settings/credits) first."
+                    : freeTierOnly === false
+                      ? "This is a paid model: every reply is billed to your OpenRouter credits."
+                      : "This is a paid model. We could not check your account, so it may fail if you have no credits."
+                }
+              />
+            )}
             <p className="text-[11px] text-slate-400 mt-1">
-              Select any model from OpenRouter to power your Instagram automated sales and DM conversations.
+              Pick the AI model that writes your replies and captions.
             </p>
           </div>
 
-          <div className="pt-2 flex items-center justify-between border-t border-slate-100">
-            {isCustomKey ? (
-              <Button
-                type="text"
-                danger
-                size="small"
-                onClick={handleRemoveOpenRouter}
-                loading={savingOpenRouter}
-                className="text-xs font-semibold"
-              >
-                Remove Custom Key
-              </Button>
-            ) : (
-              <div />
-            )}
+          <div className="pt-2 flex items-center justify-end border-t border-slate-100">
             <div className="flex items-center gap-2">
               <Button onClick={() => setOpenRouterModalOpen(false)} className="!rounded-xl">
                 Cancel
@@ -1879,9 +1721,10 @@ export function AccountPanel({
                 type="primary"
                 htmlType="submit"
                 loading={savingOpenRouter}
+                disabled={selectedPaid && freeTierOnly === true}
                 className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
               >
-                Encrypt &amp; Save Key
+                Save Model
               </Button>
             </div>
           </div>

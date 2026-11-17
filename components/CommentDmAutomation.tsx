@@ -54,6 +54,7 @@ type Rule = {
   mediaThumb: string | null;
   dmText: string;
   requireFollow: boolean;
+  recoveryEnabled?: boolean;
   followGateText: string;
   templateType?: "text" | "button" | "product" | "file" | "card";
   cardTitle?: string | null;
@@ -175,6 +176,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const [keywordDraft, setKeywordDraft] = useState("");
   const [dmText, setDmText] = useState("");
   const [requireFollow, setRequireFollow] = useState(false);
+  const [recoveryEnabled, setRecoveryEnabled] = useState(false);
   const [followGateText, setFollowGateText] = useState("");
   const [templateType, setTemplateType] = useState<"text" | "button" | "product" | "file" | "card">("text");
   const [cardTitle, setCardTitle] = useState("");
@@ -203,6 +205,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         setTriggerMode(r.keywords && r.keywords.trim() ? "keywords" : "any");
         setDmText(r.dmText);
         setRequireFollow(r.requireFollow ?? false);
+        setRecoveryEnabled(r.recoveryEnabled ?? false);
         setFollowGateText(r.followGateText ?? "");
         const inferredTemplate =
           r.templateType && r.templateType !== "text"
@@ -388,6 +391,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           keywords: keywordDraft,
           dmText,
           requireFollow,
+          recoveryEnabled,
           followGateText,
           templateType,
           cardTitle: templateType === "text" || templateType === "button" ? null : (cardTitle.trim() || null),
@@ -2509,6 +2513,38 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         )}
       </div>
 
+      {/* ── Check-in Reminder ─────────────────────────────────────── */}
+      <div className={card}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[var(--viz-ink)]">5. Check-in Reminder</p>
+            <p className="text-xs text-[var(--viz-muted)] mt-0.5">
+              About 20 hours after your DM, if the customer has not replied, send one short &quot;just checking in&quot; message with two buttons. Off by default.
+            </p>
+          </div>
+          <button
+            id="recovery-toggle"
+            role="switch"
+            aria-checked={recoveryEnabled}
+            onClick={(e) =>
+              handleButtonClick(e, () => {
+                setRecoveryEnabled((v) => !v);
+                setDirty(true);
+              })
+            }
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+              recoveryEnabled ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                recoveryEnabled ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
       {/* ── Overlay Modal: Choose Target Post ────────────────────── */}
       <Modal
         open={pickerOpen}
@@ -2869,6 +2905,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 setKeywordDraft(rule.keywords);
                 setDmText(rule.dmText);
                 setRequireFollow(rule.requireFollow ?? false);
+                setRecoveryEnabled(rule.recoveryEnabled ?? false);
                 setFollowGateText(rule.followGateText ?? "");
                 setTemplateType(rule.templateType || "text");
                 setCardTitle(rule.cardTitle ?? "");
