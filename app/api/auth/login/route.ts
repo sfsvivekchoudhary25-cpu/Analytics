@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createJwt, getDbPool, hashPassword, seedInitialAdmin, verifyPassword } from "@/lib/auth-server";
+import { createJwt, getDbPool, seedInitialAdmin, verifyPassword } from "@/lib/auth-server";
 
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
         const isValid = await verifyPassword(password, user.password_hash);
 
         // Fallback: check if matches master ADMIN_PASSWORD
-        const isMaster = password === ADMIN_PASSWORD;
+        // Master password only works for admin accounts, never to sign in as a regular user.
+        const isMaster = user.role === "admin" && password === ADMIN_PASSWORD;
 
         if (isValid || isMaster) {
           const token = createJwt({
@@ -65,32 +66,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // If user email doesn't exist in DB, but password matches ADMIN_PASSWORD, create and log them in!
-      if (password === ADMIN_PASSWORD) {
-        const newHash = await hashPassword(password);
-        const name = email.split("@")[0] || "Admin";
-        const created = await db.query(
-          `INSERT INTO app_users (email, name, password_hash, role)
-           VALUES ($1, $2, $3, 'admin')
-           RETURNING id, email, name, instagram_handle, role`,
-          [email, name, newHash]
-        );
-        const user = created.rows[0];
-        const token = createJwt({
-          sub: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        });
-
-        return NextResponse.json({
-          ok: true,
-          token,
-          user,
-          message: "Login successful",
-        });
-      }
-
+      // An unknown email is never auto-created (it used to become an admin when given the master password).
       return NextResponse.json(
         { ok: false, message: "No account found with this email. Please sign up." },
         { status: 404 }
