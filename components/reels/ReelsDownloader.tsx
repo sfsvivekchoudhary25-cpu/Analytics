@@ -994,7 +994,6 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 </div>
 
 
-
                 {/* Direct 1-Tap Device Download Card (Both Mobile & Desktop) */}
                 <div className="hidden md:block w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">

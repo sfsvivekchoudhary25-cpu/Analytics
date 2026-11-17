@@ -14,6 +14,7 @@ interface AudioRecorderHook {
   audioBlob: Blob | null;
   audioUrl: string | null;
   error: string | null;
+  stream: MediaStream | null;
   startRecording: (options?: StartRecordingOptions) => Promise<boolean>;
   stopRecording: () => Promise<Blob | null>;
   resetRecording: () => void;
@@ -246,6 +247,11 @@ export function useAudioRecorder(): AudioRecorderHook {
   }, [audioUrl]);
 
   const getSnapshotBlob = useCallback((): Blob | null => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      try {
+        mediaRecorderRef.current.requestData();
+      } catch {}
+    }
     if (audioChunksRef.current.length === 0) return null;
     const mimeType = mediaRecorderRef.current?.mimeType || "audio/webm";
     return new Blob(audioChunksRef.current, { type: mimeType });
@@ -279,6 +285,7 @@ export function useAudioRecorder(): AudioRecorderHook {
     audioBlob,
     audioUrl,
     error,
+    stream: streamRef.current,
     startRecording,
     stopRecording,
     resetRecording,
