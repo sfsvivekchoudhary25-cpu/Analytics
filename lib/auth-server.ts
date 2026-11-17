@@ -35,7 +35,7 @@ export function getDbPool(): Pool {
         : process.env.DATABASE_CA_CERT
           ? { ca: process.env.DATABASE_CA_CERT.replace(/\\n/g, "\n") }
           : true,
-      max: 10,
+      max: Number(process.env.DB_POOL_MAX) || 10,
       idleTimeoutMillis: 30000,
     });
 
