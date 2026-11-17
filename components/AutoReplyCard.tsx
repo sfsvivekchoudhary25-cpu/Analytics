@@ -161,13 +161,19 @@ export function AutoReplyCard({
       setTick((n) => n + 1);
     } catch (err) {
       set((err as Error).message);
+      setTick((n) => n + 1); // a failed save must not leave an optimistic value on screen: reload the real one
     } finally {
       setBusy(null);
     }
   }
 
   const put = (body: object) => api(basePath, { method: "PUT", body: JSON.stringify(body) });
-  const toggleRules = () => run("toggle", () => put({ enabled: !auto?.enabled }));
+  // The server round trip takes seconds on a remote database, so flip the switch at once and reconcile after.
+  const toggleRules = () => {
+    const next = !auto?.enabled;
+    setAuto((a) => (a ? { ...a, enabled: next } : a));
+    run("toggle", () => put({ enabled: next }));
+  };
   const addRule = () =>
     run("add", async () => {
       await api(`${basePath}/rules`, { method: "POST", body: JSON.stringify(newRule) });
@@ -180,7 +186,11 @@ export function AutoReplyCard({
   const remove = (r: Rule) =>
     run(`rule-${r.id}`, () => api(`${basePath}/rules/${r.id}`, { method: "DELETE" }));
 
-  const toggleAi = () => run("ai", () => put({ aiEnabled: !auto?.ai?.enabled }), "ai");
+  const toggleAi = () => {
+    const next = !auto?.ai?.enabled;
+    setAuto((a) => (a?.ai ? { ...a, ai: { ...a.ai, enabled: next } } : a));
+    run("ai", () => put({ aiEnabled: next }), "ai");
+  };
 
   async function tryIt() {
     if (!tryText.trim() || !auto?.ai?.available || trying) return;
@@ -242,7 +252,9 @@ export function AutoReplyCard({
     ? "warning"
     : "enabled";
 
-  const aiBadgeText = !aiOn
+  const aiBadgeText = !auto
+    ? "Loading…"
+    : !aiOn
     ? "Disabled"
     : !auto?.ai?.available
     ? "Setup Needed"
@@ -336,7 +348,7 @@ export function AutoReplyCard({
                       : "text-slate-500"
                   }`}
                 >
-                  {aiOn ? (aiStatus === "warning" ? "Attention" : "Enabled") : "Off"}
+                  {!auto ? "…" : aiOn ? (aiStatus === "warning" ? "Attention" : "Enabled") : "Off"}
                 </span>
               </div>
             </div>
@@ -355,7 +367,7 @@ export function AutoReplyCard({
                       : "text-slate-500"
                   }`}
                 >
-                  {rulesOn ? `${rulesCount} active` : "Off"}
+                  {!auto ? "…" : rulesOn ? `${rulesCount} active` : "Off"}
                 </span>
               </div>
             </div>
@@ -364,7 +376,7 @@ export function AutoReplyCard({
                 Hourly Cap
               </span>
               <span className="text-xs font-bold lg:font-semibold text-slate-900">
-                {auto?.maxPerHour ?? 35} / hr
+                {auto ? auto.maxPerHour : "…"} / hr
               </span>
             </div>
           </div>
@@ -399,13 +411,13 @@ export function AutoReplyCard({
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs font-medium text-slate-500 hidden sm:inline">
-              {aiOn ? "Enabled" : "Disabled"}
+              {!auto ? "Loading…" : aiOn ? "Enabled" : "Disabled"}
             </span>
             <Switch
               checked={aiOn}
               onChange={toggleAi}
               disabled={!auto?.ai?.available || busy === "ai"}
-              loading={busy === "ai"}
+              loading={busy === "ai" || !auto}
             />
           </div>
         </div>

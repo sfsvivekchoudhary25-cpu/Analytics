@@ -564,6 +564,19 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
     return matches ? Array.from(new Set(matches)).slice(0, 16) : [];
   }, [activeReel]);
 
+  // Stat tiles for the active reel (zero / unknown values are hidden rather than shown as "0")
+  const reelStats = useMemo(() => {
+    if (!activeReel) return [];
+    const d = activeReel.duration;
+    const duration = d && d > 0 ? `${Math.floor(d / 60)}:${String(Math.round(d % 60)).padStart(2, "0")}` : "";
+    return [
+      { label: "Views", value: formatStatCount(activeReel.views), show: activeReel.views > 0, bg: "#e2e2fc", Icon: Eye },
+      { label: "Likes", value: formatStatCount(activeReel.likes), show: activeReel.likes > 0, bg: "#fceef4", Icon: Heart },
+      { label: "Comments", value: formatStatCount(activeReel.comments), show: activeReel.comments > 0, bg: "#feece4", Icon: MessageCircle },
+      { label: "Duration", value: duration, show: !!duration, bg: "#fff9db", Icon: Clock },
+    ].filter((s) => s.show);
+  }, [activeReel]);
+
   // Filtered and sorted saved reels
   const displayedSavedReels = useMemo(() => {
     let list = [...savedReels];
@@ -846,7 +859,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           poster={activeReel.thumbnail || undefined}
                           controls
                           playsInline
-                          preload="metadata"
+                          preload="none"
+                          aria-label={`Preview of reel by @${getCleanAuthor(activeReel)}`}
                           className="w-full h-full object-cover"
                         />
                       ) : activeReel.thumbnail ? (
@@ -946,14 +960,26 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
               </div>
 
               {/* ── RIGHT COLUMN: ACTIONS, STATS & CAPTION ── */}
-              <div className="flex-1 w-full min-w-0 space-y-4 sm:space-y-5">
+              <div className="@container flex-1 w-full min-w-0 space-y-4 sm:space-y-5">
+                {/* Top row: actions + downloads side by side when the panel is wide enough, stacked otherwise */}
+                <div className="grid grid-cols-1 @3xl:grid-cols-2 gap-4 sm:gap-5 items-stretch">
                 {/* Actions Bar: Save to Vault, Copy Link & Close (Desktop/Tablet Only) */}
-                <div className="hidden md:flex rounded-[24px] border border-[#e9e9ee] bg-white p-3.5 sm:p-4 shadow-2xs items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 min-w-0">
+                <div className="hidden md:flex flex-wrap rounded-[24px] border border-[#e9e9ee] bg-white p-3.5 sm:p-4 shadow-2xs items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e2e2fc] text-slate-950 text-xs font-bold border-0 shrink-0 shadow-2xs">
                       <Film size={13} />
                       <span>Active Reel</span>
                     </span>
+                    <a
+                      href={activeReel.authorUrl || activeReel.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 min-w-0 text-xs font-bold text-slate-600 hover:text-black rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black !no-underline"
+                      aria-label={`Open @${getCleanAuthor(activeReel)} on Instagram`}
+                    >
+                      <span className="truncate">@{getCleanAuthor(activeReel)}</span>
+                      <ExternalLink size={11} className="shrink-0" />
+                    </a>
                   </div>
 
                   {/* Actions: Save to Vault & Copy Link */}
@@ -985,8 +1011,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     <button
                       type="button"
                       onClick={handleClear}
-                      className="w-8 h-8 rounded-full bg-white hover:bg-neutral-100 border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-2xs transition-all cursor-pointer"
+                      className="w-10 h-10 rounded-full bg-white hover:bg-neutral-100 border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-2xs transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                       title="Close reel preview"
+                      aria-label="Close reel preview"
                     >
                       <X size={14} className="text-slate-600" />
                     </button>
@@ -995,8 +1022,8 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
 
 
                 {/* Direct 1-Tap Device Download Card (Both Mobile & Desktop) */}
-                <div className="hidden md:block w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                <div className="@container hidden md:block w-full rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
+                  <div className="flex flex-col @md:flex-row @md:items-center justify-between gap-1 @md:gap-2">
                     <div className="flex items-center gap-2">
                       <Download size={16} className="text-slate-950 shrink-0" />
                       <span className="text-xs sm:text-sm font-black text-slate-950">
@@ -1008,7 +1035,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                  <div className="grid grid-cols-1 @md:grid-cols-2 gap-2.5 pt-1">
                     {/* Primary Button: 1080p MP4 Video */}
                     {activeReel.videoUrl ? (
                       <a
@@ -1022,7 +1049,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           setTimeout(() => setDownloadStatus(null), 3500);
                         }}
                         style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                        className="py-3.5 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline"
+                        className="min-h-12 py-3 px-4 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                       >
                         <Download size={17} className="!text-white" />
                         <span className="!text-white">Download Video (.mp4)</span>
@@ -1052,7 +1079,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                           });
                           setTimeout(() => setDownloadStatus(null), 3500);
                         }}
-                        className="py-3.5 px-4 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-[#e9e9ee] hover:border-black text-xs sm:text-sm font-bold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline"
+                        className="min-h-12 py-3 px-4 rounded-full bg-white hover:bg-neutral-50 text-slate-950 border border-[#e9e9ee] hover:border-black text-xs sm:text-sm font-bold shadow-2xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-98 !no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                       >
                         <ImageIcon size={16} />
                         <span>Download Cover (.jpg)</span>
@@ -1061,6 +1088,42 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   </div>
                 </div>
 
+                </div>
+
+                {/* Screen-reader announcement for copy actions (visual feedback lives on each button) */}
+                <p role="status" aria-live="polite" className="sr-only">
+                  {copiedUrl
+                    ? "Reel link copied"
+                    : copiedCaption
+                    ? "Caption copied"
+                    : copiedAllTags
+                    ? "All hashtags copied"
+                    : copiedTag
+                    ? `${copiedTag} copied`
+                    : ""}
+                </p>
+
+                {/* Stat tiles: borderless pastel cards, only shown when the data exists */}
+                {reelStats.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {reelStats.map(({ label, value, bg, Icon }) => (
+                      <div
+                        key={label}
+                        style={{ backgroundColor: bg }}
+                        className="rounded-[22px] px-4 py-3 shadow-xs flex items-center justify-between gap-2 min-w-0"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xl font-black text-slate-950 tabular-nums leading-none">{value}</div>
+                          <div className="text-xs font-bold text-slate-700 mt-1">{label}</div>
+                        </div>
+                        <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                          <Icon size={15} aria-hidden="true" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
                 {/* Caption & Content Card with Hashtags */}
                 {activeReel.caption && (
                   <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-4 sm:p-5 shadow-2xs space-y-3">
@@ -1068,15 +1131,6 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs sm:text-sm font-black text-slate-950">Caption</span>
-                        {activeReel.caption.length > 120 && (
-                          <button
-                            type="button"
-                            onClick={() => setExpandedCaption(!expandedCaption)}
-                            className="text-[11px] sm:text-xs font-bold text-slate-500 hover:text-black cursor-pointer transition-colors"
-                          >
-                            {expandedCaption ? "Show Less" : "Show Full"}
-                          </button>
-                        )}
                       </div>
 
                       {/* The single icon/button to copy all things (caption & hashtags) */}
@@ -1089,6 +1143,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                             : "bg-white hover:bg-neutral-50 text-slate-900 border-[#e9e9ee] hover:border-black"
                         }`}
                         title="Copy caption and hashtags"
+                        aria-label={copiedCaption ? "Caption copied" : "Copy caption and hashtags"}
                       >
                         {copiedCaption ? (
                           <>
@@ -1111,21 +1166,48 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     >
                       {activeReel.caption}
                     </p>
+                    {activeReel.caption.length > 120 && (
+                      <button
+                        type="button"
+                        onClick={() => setExpandedCaption(!expandedCaption)}
+                        aria-expanded={expandedCaption}
+                        className="text-xs font-bold text-slate-950 underline underline-offset-2 decoration-slate-300 hover:decoration-black cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                      >
+                        {expandedCaption ? "Show less" : "Show full caption"}
+                      </button>
+                    )}
 
-                    {/* Hashtags List (Clean, minimal tags without clutter) */}
+                    {/* Hashtags: tap a chip to copy it, or copy them all */}
                     {hashtags.length > 0 && (
-                      <div className="pt-3 border-t border-[#e9e9ee] space-y-2">
-                        <span className="text-[11px] font-bold text-slate-500 block">
-                          Hashtags ({hashtags.length})
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
+                      <div className="pt-3 border-t border-[#e9e9ee] space-y-2.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-bold text-slate-500">
+                            Hashtags ({hashtags.length}) · tap to copy
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyAllTags(hashtags)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-950 bg-[#f1f3f7] hover:bg-slate-200 cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                          >
+                            {copiedAllTags ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                            <span>{copiedAllTags ? "Copied" : "Copy all"}</span>
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
                           {hashtags.map((tag) => (
-                            <span
+                            <button
                               key={tag}
-                              className="px-2.5 py-1 rounded-full bg-[#f1f3f7] text-slate-700 text-xs font-semibold shadow-2xs"
+                              type="button"
+                              onClick={() => handleCopyTag(tag)}
+                              aria-label={copiedTag === tag ? `${tag} copied` : `Copy ${tag}`}
+                              className={`min-h-8 px-3 py-1 rounded-full text-xs font-semibold shadow-2xs cursor-pointer transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black ${
+                                copiedTag === tag
+                                  ? "bg-emerald-50 text-emerald-700"
+                                  : "bg-[#f1f3f7] text-slate-700 hover:bg-[#e2e2fc] hover:text-slate-950"
+                              }`}
                             >
-                              {tag}
-                            </span>
+                              {copiedTag === tag ? "Copied ✓" : tag}
+                            </button>
                           ))}
                         </div>
                       </div>
