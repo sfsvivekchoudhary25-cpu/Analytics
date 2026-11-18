@@ -1515,34 +1515,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </p>
                 </div>
 
-                {/* Quick Presets: Responsive Wrapping Chips */}
-                {cardButtons.length < 3 && (
-                  <div className="space-y-1.5 pt-2 border-t border-[var(--viz-border)]/60">
-                    <div className="flex items-center justify-between text-[10px] text-[var(--viz-muted)] px-0.5">
-                      <span className="font-bold tracking-wider uppercase text-[9px] text-[var(--viz-ink-2)]">QUICK PRESETS</span>
-                      <span className="text-[10px] text-[var(--viz-muted)]">Tap to add</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {[
-                        { title: "Shop Now", icon: "🛍️", url: cardFileUrl || "https://instagram.com" },
-                        { title: "Download PDF", icon: "📥", url: cardFileUrl || "https://instagram.com" },
-                        { title: "Visit Website", icon: "🌐", url: "https://instagram.com" },
-                        { title: "Claim Offer", icon: "🎁", url: "https://instagram.com" },
-                      ].map((preset, pIdx) => (
-                        <button
-                          key={pIdx}
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, () => addButton({ title: preset.title, url: preset.url }))}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--viz-border)] bg-background hover:bg-[var(--viz-surface)] hover:border-blue-500/40 px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                        >
-                          <span className="text-xs">{preset.icon}</span>
-                          <span>+ {preset.title}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Buttons List */}
                 {cardButtons.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
@@ -1551,7 +1523,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </div>
                     <p className="text-xs font-bold text-[var(--viz-ink)] mt-2.5">No buttons attached</p>
                     <p className="text-[11px] text-[var(--viz-muted)] mt-0.5 max-w-xs mx-auto">
-                      Click &quot;+ Add Button&quot; or tap a preset above to attach clickable CTAs to your Instagram DM.
+                      Click &quot;+ Add Button&quot; to attach clickable links to your Instagram DM.
                     </p>
                   </div>
                 ) : (
