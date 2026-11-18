@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Modal, Tooltip } from "antd";
 import { api } from "@/lib/api";
 import {
@@ -36,6 +36,7 @@ import {
 } from "./icons";
 import { MobilePreview, SupportedDevice } from "./MobilePreview";
 import { CloudinaryImageUploader } from "./CloudinaryImageUploader";
+import { CommentDmFlowPhone, type FlowStep } from "./CommentDmFlowPhone";
 
 export type MessageButton = {
   type: "web_url" | "postback";
@@ -185,6 +186,49 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const [cardFileUrl, setCardFileUrl] = useState("");
   const [cardButtons, setCardButtons] = useState<MessageButton[]>([]);
   const [previewDevice, setPreviewDevice] = useState<SupportedDevice>("iPhone 17");
+  // The one shared phone: which step it follows, whether the small-screen preview is open, and how tall it can be.
+  const [activeStep, setActiveStep] = useState<FlowStep>("trigger");
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [phoneHeight, setPhoneHeight] = useState(650);
+  const stepsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fit = () => setPhoneHeight(Math.max(520, Math.min(650, window.innerHeight - 170)));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  // The phone shows the step being edited: the last step whose top has passed the upper part of the screen, or the
+  // one you click or type into.
+  useEffect(() => {
+    const root = stepsRef.current;
+    if (!root) return;
+    let frame = 0;
+    const order: FlowStep[] = ["trigger", "target", "message", "follow", "reminder"];
+    const update = () => {
+      frame = 0;
+      let current: FlowStep = "trigger";
+      for (const step of order) {
+        const el = root.querySelector<HTMLElement>('[data-step="' + step + '"]');
+        if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) current = step;
+      }
+      setActiveStep(current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const onFocus = (e: FocusEvent) => {
+      const step = (e.target as HTMLElement | null)?.closest?.("[data-step]")?.getAttribute("data-step") as FlowStep | null;
+      if (step) setActiveStep(step);
+    };
+    document.addEventListener("scroll", onScroll, true);
+    root.addEventListener("focusin", onFocus);
+    update();
+    return () => {
+      document.removeEventListener("scroll", onScroll, true);
+      root.removeEventListener("focusin", onFocus);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [!!rule]);
   const [dirty, setDirty] = useState(false);
 
   const [keywordInput, setKeywordInput] = useState("");
@@ -488,6 +532,24 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const previewText = dmText.replaceAll("{username}", "there") || "Your message will appear here.";
   const gatePreviewText = followGateText.replaceAll("{username}", "there") || "Oh no! It seems you're not following me 👀\nVisit my profile and hit that follow button 😁.\nOnce you do, I'll send you what you asked for!";
 
+  const phoneProps = {
+    activeStep,
+    device: previewDevice,
+    onDeviceChange: setPreviewDevice,
+    ruleName: name || rule.name,
+    keywords,
+    templateType,
+    dmText,
+    previewText,
+    gatePreviewText,
+    cardImageUrl,
+    cardTitle,
+    cardSubtitle,
+    cardButtons,
+    requireFollow,
+    recoveryEnabled,
+  };
+
   return (
     <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6 [overflow-anchor:none]">
       {/* Top Navigation Row */}
@@ -663,10 +725,13 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
       </div>
 
+      {/* Two columns on tablets and up: every step scrolls on the left, ONE phone stays on the right */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 items-start w-full min-w-0">
+      <div ref={stepsRef} className="min-w-0 w-full space-y-5 sm:space-y-6">
       {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
+      <div id="step-trigger-target" className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
         {/* Step 1: Trigger Condition */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+        <div data-step="trigger" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
             <div className="flex items-center justify-between gap-2">
@@ -843,7 +908,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* Step 2: Target Post */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+        <div data-step="target" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
             <div className="flex items-center justify-between gap-2">
@@ -1009,7 +1074,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       </div>
 
       {/* ── Step 3: Send this message & Custom Templates ───────────── */}
-      <div className={card}>
+      <div data-step="message" className={card}>
         <div className="mb-4">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
@@ -1125,9 +1190,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* 2-Column Modern Studio: Editor Form + Sticky iPhone Mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
+        <div className="grid grid-cols-1 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
           {/* Left Column: Form Controls */}
-          <div className="space-y-4 lg:col-span-7 w-full min-w-0 [overflow-anchor:none]">
+          <div className="space-y-4 w-full min-w-0 [overflow-anchor:none]">
             {/* Primary message caption card */}
             <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
               {/* Header: Title, Subtitle, & Monospace Character Counter */}
@@ -1634,325 +1699,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             )}
           </div>
 
-          {/* Right Column: Authentic Flagship Device Mockup */}
-          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
-            <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Instagram Direct</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live
-                </span>
-              </div>
-
-              {/* Hardware Device Switcher */}
-              <div className="flex items-center gap-0.5 rounded-lg bg-black/[0.05] p-0.5 dark:bg-white/10 text-[10px] font-medium">
-                {(["iPhone 17", "Galaxy S25", "Pixel 10"] as SupportedDevice[]).map((dev) => (
-                  <button
-                    key={dev}
-                    type="button"
-                    onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
-                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                      previewDevice === dev
-                        ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
-                        : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-                    }`}
-                  >
-                    {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Proper Hardware Device UI using react-mockframe via MobilePreview */}
-            <MobilePreview
-              width={320}
-              height={650}
-              device={previewDevice}
-              showToolbar={false}
-            >
-              <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
-                {/* Instagram Direct Header */}
-                <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 py-2.5 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl text-black dark:text-white font-normal leading-none select-none cursor-pointer">‹</span>
-                    <div className="relative">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[1.5px] shadow-xs">
-                        <div className="h-full w-full rounded-full bg-white dark:bg-black flex items-center justify-center font-bold text-xs text-black dark:text-white">
-                          {rule.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                        </div>
-                      </div>
-                      <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white dark:border-black bg-emerald-500" />
-                    </div>
-                    <div className="truncate min-w-0">
-                      <p className="text-xs font-bold text-black dark:text-white truncate flex items-center gap-1 leading-tight">
-                        <span>fabroniee</span>
-                        <span className="text-[10px] text-[#0095f6]">✓</span>
-                      </p>
-                      <p className="text-[10px] text-black/50 dark:text-white/50 leading-tight">Active now</p>
-                    </div>
-                  </div>
-
-                  {/* Header icons: Phone, Video */}
-                  <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
-                      <PhoneIcon className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
-                      <VideoCameraIcon className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* DM Chat Thread */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {/* Authentic Instagram Profile Info Banner */}
-                  <div className="flex flex-col items-center justify-center pt-3 pb-2 text-center select-none border-b border-black/5 dark:border-white/5 mb-2">
-                    <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[2px] shadow-sm mb-1.5">
-                      <div className="h-full w-full rounded-full bg-white dark:bg-[#1a1a1a] flex items-center justify-center font-black text-lg text-black dark:text-white">
-                        {rule.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                      </div>
-                    </div>
-                    <p className="text-xs font-bold text-black dark:text-white flex items-center gap-1">
-                      <span>fabroniee</span>
-                      <span className="text-[10px] text-[#0095f6]">✓</span>
-                    </p>
-                    <p className="text-[9px] text-black/50 dark:text-white/50 mt-0.5">
-                      Instagram · 14.8K followers · 82 posts
-                    </p>
-                    <p className="text-[9px] text-black/40 dark:text-white/40 mt-0.5">
-                      You follow each other on Instagram
-                    </p>
-                    <div className="mt-2 inline-block rounded-md bg-black/5 dark:bg-white/10 px-3 py-1 text-[10px] font-semibold text-black dark:text-white">
-                      View Profile
-                    </div>
-                  </div>
-
-                  {/* Timestamp separator */}
-                  <div className="flex justify-center my-1.5">
-                    <span className="text-[9px] font-medium text-black/40 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-0.5 rounded-full">
-                      Today 9:41 AM
-                    </span>
-                  </div>
-
-                  {/* User's comment trigger */}
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-xs bg-black/[0.06] dark:bg-white/[0.08] px-3 py-2 shadow-2xs border border-black/5 dark:border-white/5">
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-[var(--viz-muted)]">
-                        User commented on post
-                      </p>
-                      <p className="text-xs font-semibold text-black dark:text-white mt-0.5">
-                        &quot;{keywords.length > 0 ? keywords[0] : "Nice"}&quot;
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Outgoing automated response strictly adhering to templateType */}
-                  <div className="flex justify-end">
-                    {templateType === "product" ? (
-                      /* Product Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
-                              <ShoppingBagIcon className="h-5 w-5" />
-                            </span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Product Showcase</span>
-                            <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-bold text-black dark:text-white truncate">
-                              {cardTitle || "Featured Product"}
-                            </p>
-                            {cardSubtitle && (
-                              <span className="shrink-0 rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-bold text-[10px] text-emerald-600 dark:text-emerald-400">
-                                {cardSubtitle}
-                              </span>
-                            )}
-                          </div>
-                          {dmText && (
-                            <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Shop Now"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "file" ? (
-                      /* Downloadable File / Lead Magnet Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Resource cover" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full items-center gap-3 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-orange-500/10 p-3">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white font-black text-xs shadow-sm">
-                              PDF
-                            </div>
-                            <div className="min-w-0">
-                              <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-                                Instant Resource
-                              </span>
-                              <p className="text-xs font-bold text-black dark:text-white truncate mt-0.5">
-                                {cardTitle || "Free Resource Guide"}
-                              </p>
-                              <p className="text-[10px] text-[var(--viz-muted)] truncate">
-                                {cardSubtitle || "Direct PDF Download"}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          <p className="text-xs font-bold text-black dark:text-white">
-                            {cardTitle || "Free Resource Guide"}
-                          </p>
-                          <p className="text-[10px] text-black/60 dark:text-white/60">
-                            {cardSubtitle || "Instant PDF Download"}
-                          </p>
-                          {dmText && (
-                            <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Download PDF"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "card" ? (
-                      /* Custom Media Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
-                              <MediaCardIcon className="h-5 w-5" />
-                            </span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Header Image</span>
-                            <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          {cardTitle && (
-                            <p className="text-xs font-bold text-black dark:text-white leading-tight">
-                              {cardTitle.replaceAll("{username}", "there")}
-                            </p>
-                          )}
-                          {cardSubtitle && (
-                            <p className="text-[10px] text-black/60 dark:text-white/60 leading-tight">
-                              {cardSubtitle.replaceAll("{username}", "there")}
-                            </p>
-                          )}
-                          {dmText && (
-                            <p className="text-xs text-black/80 dark:text-white/80 pt-1 leading-tight whitespace-pre-line border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Button"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "button" ? (
-                      /* Text + Buttons: Official Instagram Direct button template */
-                      <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        <div className="p-3">
-                          <p className="text-xs leading-relaxed text-black dark:text-white whitespace-pre-line">
-                            {previewText}
-                          </p>
-                        </div>
-                        {cardButtons.length > 0 ? (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10 bg-black/[0.01] dark:bg-white/[0.02]">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || `Button #${idx + 1}`}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="border-t border-black/10 dark:border-white/10 p-2 text-center text-[10px] text-[var(--viz-muted)] italic">
-                            No buttons added
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      /* Simple Text Bubble: Clean Instagram Direct message */
-                      <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#0095f6] px-3.5 py-2.5 text-white shadow-sm">
-                        <p className="text-xs leading-relaxed whitespace-pre-line">{previewText}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end pr-1">
-                    <span className="text-[9px] text-black/40 dark:text-white/40">Sent • Just now</span>
-                  </div>
-                </div>
-
-                {/* Instagram Direct bottom chat bar */}
-                <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
-                    <CameraIcon className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
-                    <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                    <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
-                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
-                        <MicrophoneIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
-                        <PhotoIcon className="h-3.5 w-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
-                    <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
-                  </span>
-                </div>
-              </div>
-            </MobilePreview>
-            <p className="mt-2 text-center text-[10px] text-[var(--viz-muted)]">
-              Interactive Instagram Direct mockup
-            </p>
-          </div>
         </div>
 
         {/* Step 3 Footer / Quick Save */}
@@ -1973,7 +1719,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       </div>
 
       {/* ── Follow Gate Step ─────────────────────────────────────── */}
-      <div className={card}>
+      <div data-step="follow" className={card}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <div className="flex items-start gap-3">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
@@ -2012,9 +1758,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {requireFollow && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
             {/* Left Column: Editor & Workflow Explanation (7 cols) */}
-            <div className="lg:col-span-7 space-y-5 w-full min-w-0 [overflow-anchor:none]">
+            <div className="space-y-5 w-full min-w-0 [overflow-anchor:none]">
               {/* Message Editor Card */}
               <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
                 {/* Header: Title, Subtitle, & Character Counter */}
@@ -2212,340 +1958,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               </div>
             </div>
 
-            {/* Right Column: Authentic Flagship Device Mockup (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
-              <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Follow-Gate Direct</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-semibold text-blue-600 dark:text-blue-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    Active
-                  </span>
-                </div>
-
-                {/* Hardware Device Switcher */}
-                <div className="flex items-center gap-0.5 rounded-lg bg-black/[0.05] p-0.5 dark:bg-white/10 text-[10px] font-medium">
-                  {(["iPhone 17", "Galaxy S25", "Pixel 10"] as SupportedDevice[]).map((dev) => (
-                    <button
-                      key={dev}
-                      type="button"
-                      onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
-                      className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                        previewDevice === dev
-                          ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
-                          : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-                      }`}
-                    >
-                      {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Proper Hardware Device UI using react-mockframe via MobilePreview */}
-              <MobilePreview
-                width={320}
-                height={650}
-                device={previewDevice}
-                showToolbar={false}
-              >
-                <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
-                  {/* Instagram Direct Header */}
-                  <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 py-2.5 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-xl text-black dark:text-white font-normal leading-none select-none cursor-pointer">‹</span>
-                      <div className="relative">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[1.5px] shadow-xs">
-                          <div className="h-full w-full rounded-full bg-white dark:bg-black flex items-center justify-center font-bold text-xs text-black dark:text-white">
-                            {rule?.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                          </div>
-                        </div>
-                        <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white dark:border-black bg-emerald-500" />
-                      </div>
-                      <div className="truncate min-w-0">
-                        <p className="text-xs font-bold text-black dark:text-white truncate flex items-center gap-1 leading-tight">
-                          <span>fabroniee</span>
-                          <span className="text-[10px] text-[#0095f6]">✓</span>
-                        </p>
-                        <p className="text-[10px] text-black/50 dark:text-white/50 leading-tight">Active now</p>
-                      </div>
-                    </div>
-
-                    {/* Header icons: Phone, Video */}
-                    <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
-                        <PhoneIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
-                        <VideoCameraIcon className="h-3.5 w-3.5" />
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* DM Chat Thread */}
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                    {/* Timestamp separator */}
-                    <div className="flex justify-center my-1">
-                      <span className="text-[9px] font-medium text-black/40 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-0.5 rounded-full">
-                        Today 9:41 AM
-                      </span>
-                    </div>
-
-                    {/* 1. Gate Message (sent by your account to commenter who does NOT follow yet) */}
-                    <div className="space-y-1">
-                      <div className="flex justify-end">
-                        <div className="max-w-[88%] rounded-2xl rounded-tr-xs bg-[#0095f6] p-3 text-white shadow-sm space-y-2.5">
-                          <p className="text-xs leading-relaxed whitespace-pre-line font-normal">{gatePreviewText}</p>
-                          <div className="space-y-1.5 pt-1 border-t border-white/20">
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
-                              <UserIcon className="h-3.5 w-3.5" />
-                              <span>Visit Profile</span>
-                            </div>
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
-                              <CheckCircleIcon className="h-3.5 w-3.5" />
-                              <span>I&apos;m following</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-end pr-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">Sent • 9:41 AM</span>
-                      </div>
-                    </div>
-
-                    {/* 2. User's reply after following (commenter replies on the left) */}
-                    <div className="space-y-1">
-                      <div className="flex justify-start">
-                        <div className="max-w-[75%] rounded-2xl rounded-tl-xs bg-black/[0.07] dark:bg-white/[0.09] px-3.5 py-2.5 shadow-2xs border border-black/5 dark:border-white/5">
-                          <p className="text-xs text-black dark:text-white leading-relaxed">Done, I&apos;m following you now :)</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-start pl-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">9:42 AM</span>
-                      </div>
-                    </div>
-
-                    {/* Follow Verified Notice / Indicator */}
-                    <div className="flex justify-center my-1">
-                      <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                        <span>✓</span> Follow verified via Instagram API
-                      </span>
-                    </div>
-
-                    {/* 3. Real DM automatically delivered as the reward */}
-                    <div className="space-y-1">
-                      <div className="flex justify-end">
-                        {templateType === "product" ? (
-                          /* Product Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 p-2 text-center">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-emerald-600 dark:text-emerald-400 shadow-xs">
-                                  <ShoppingBagIcon className="h-5 w-5" />
-                                </span>
-                                <span className="text-xs font-bold text-black dark:text-white mt-1">Product Showcase</span>
-                                <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              <div className="flex items-center justify-between gap-1">
-                                <p className="text-xs font-bold text-black dark:text-white truncate">
-                                  {cardTitle || "Featured Product"}
-                                </p>
-                                {cardSubtitle && (
-                                  <span className="shrink-0 rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-bold text-[10px] text-emerald-600 dark:text-emerald-400">
-                                    {cardSubtitle}
-                                  </span>
-                                )}
-                              </div>
-                              {dmText && (
-                                <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Shop Now"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "file" ? (
-                          /* Downloadable File / Lead Magnet Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Resource cover" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full items-center gap-3 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-orange-500/10 p-3">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white font-black text-xs shadow-sm">
-                                  PDF
-                                </div>
-                                <div className="min-w-0">
-                                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-                                    Instant Resource
-                                  </span>
-                                  <p className="text-xs font-bold text-black dark:text-white truncate mt-0.5">
-                                    {cardTitle || "Free Resource Guide"}
-                                  </p>
-                                  <p className="text-[10px] text-[var(--viz-muted)] truncate">
-                                    {cardSubtitle || "Direct PDF Download"}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              <p className="text-xs font-bold text-black dark:text-white">
-                                {cardTitle || "Free Resource Guide"}
-                              </p>
-                              <p className="text-[10px] text-black/60 dark:text-white/60">
-                                {cardSubtitle || "Instant PDF Download"}
-                              </p>
-                              {dmText && (
-                                <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Download PDF"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "card" ? (
-                          /* Custom Media Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 p-2 text-center">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-indigo-600 dark:text-indigo-400 shadow-xs">
-                                  <MediaCardIcon className="h-5 w-5" />
-                                </span>
-                                <span className="text-xs font-bold text-black dark:text-white mt-1">Header Image</span>
-                                <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              {cardTitle && (
-                                <p className="text-xs font-bold text-black dark:text-white leading-tight">
-                                  {cardTitle.replaceAll("{username}", "there")}
-                                </p>
-                              )}
-                              {cardSubtitle && (
-                                <p className="text-[10px] text-black/60 dark:text-white/60 leading-tight">
-                                  {cardSubtitle.replaceAll("{username}", "there")}
-                                </p>
-                              )}
-                              {dmText && (
-                                <p className="text-xs text-black/80 dark:text-white/80 pt-1 leading-tight whitespace-pre-line border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Button"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "button" ? (
-                          /* Text + Buttons: Official Instagram Direct button template */
-                          <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            <div className="p-3">
-                              <p className="text-xs leading-relaxed text-black dark:text-white whitespace-pre-line">
-                                {previewText}
-                              </p>
-                            </div>
-                            {cardButtons.length > 0 ? (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10 bg-black/[0.01] dark:bg-white/[0.02]">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || `Button #${idx + 1}`}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="border-t border-black/10 dark:border-white/10 p-2 text-center text-[10px] text-[var(--viz-muted)] italic">
-                                No buttons added
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          /* Simple Text Bubble: Clean Instagram Direct message */
-                          <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#0095f6] px-3.5 py-2.5 text-white shadow-sm">
-                            <p className="text-xs leading-relaxed whitespace-pre-line">{previewText}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end pr-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">Sent • Just now</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Instagram Direct bottom chat bar */}
-                  <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
-                      <CameraIcon className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
-                      <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                      <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
-                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
-                          <MicrophoneIcon className="h-3.5 w-3.5" />
-                        </span>
-                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
-                          <PhotoIcon className="h-3.5 w-3.5" />
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
-                      <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
-                    </span>
-                  </div>
-                </div>
-              </MobilePreview>
-              <p className="mt-2 text-center text-[10px] text-[var(--viz-muted)]">
-                Follow-gate conversation preview
-              </p>
-            </div>
           </div>
         )}
       </div>
 
       {/* ── Check-in Reminder ─────────────────────────────────────── */}
-      <div className={card}>
+      <div data-step="reminder" className={card}>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-[var(--viz-ink)]">5. Check-in Reminder</p>
@@ -2912,6 +2330,29 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             })}
           </ol>
         )}
+      </div>
+
+      </div>
+
+      {/* The one phone: stays in view while the steps scroll */}
+      <aside className="hidden lg:block sticky top-4 self-start">
+        <CommentDmFlowPhone {...phoneProps} height={phoneHeight} />
+      </aside>
+      </div>
+
+      {/* Small screens: the same phone opens from a bar at the bottom */}
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setPhoneOpen(true)}
+          className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background shadow-xl active:scale-95"
+        >
+          <PhoneIcon className="h-4 w-4" />
+          Preview
+        </button>
+        <Modal open={phoneOpen} onCancel={() => setPhoneOpen(false)} footer={null} centered width={380} title="Live preview" destroyOnHidden>
+          <CommentDmFlowPhone {...phoneProps} height={Math.min(620, phoneHeight + 40)} />
+        </Modal>
       </div>
 
       {/* Floating Unsaved Changes Bar */}
