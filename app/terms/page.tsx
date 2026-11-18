@@ -1,145 +1,135 @@
-"use client";
+import type { Metadata } from "next";
+import { LegalLayout, LegalLink, LegalList, LegalNote, LegalP, type LegalSection } from "@/components/legal/LegalLayout";
 
-import Link from "next/link";
-import { ArrowLeftOutlined, FileTextOutlined, SafetyCertificateFilled } from "@ant-design/icons";
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "The rules for using InstaVeyra: your account, acceptable use and ending your account.",
+};
+
+const sections: LegalSection[] = [
+  {
+    id: "service",
+    title: "The service",
+    body: (
+      <>
+        <LegalP>
+          InstaVeyra provides creator tools: Comment-to-DM funnels, an inbox for your comments and messages, automatic replies and analytics. They run on the official Meta APIs. By connecting an account, building an automation or otherwise using the service, you agree to these terms.
+        </LegalP>
+      </>
+    ),
+  },
+  {
+    id: "account",
+    title: "Your account",
+    body: (
+      <LegalList
+        items={[
+          "Connect only Instagram accounts that you own or are allowed to manage.",
+          "Keep your login private. You are responsible for what happens under your account.",
+          "Tell us at once if you think someone else has got into your account.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "meta",
+    title: "Meta’s rules also apply",
+    body: (
+      <>
+        <LegalP>You agree to follow:</LegalP>
+        <LegalList
+          items={[
+            "Meta's Community Standards and Platform Terms.",
+            "Instagram's Terms of Use and messaging policies.",
+            "The privacy and consumer laws that apply to you.",
+          ]}
+        />
+        <LegalNote title="Instagram sets limits, and we follow them." tone="butter">
+          For example, a customer must message you before you can reply, replies must go out within Instagram&apos;s time window, and a comment can get one private reply. We cannot send what Instagram does not allow.
+        </LegalNote>
+      </>
+    ),
+  },
+  {
+    id: "use",
+    title: "Acceptable use",
+    body: (
+      <>
+        <LegalP>You may not use InstaVeyra to send:</LegalP>
+        <LegalList
+          items={[
+            "unsolicited spam or bulk messages,",
+            "harassment or threats,",
+            "fraud, scams or phishing links,",
+            "material you do not have the right to use.",
+          ]}
+        />
+        <LegalP>We may suspend or end accounts that do this, with or without notice.</LegalP>
+      </>
+    ),
+  },
+  {
+    id: "messages",
+    title: "Messages you send",
+    body: (
+      <LegalList
+        items={[
+          "Automatic messages are sent in your name, so you are responsible for what they say. Check your rules before you switch them on.",
+          "Honour a customer's request to stop hearing from you.",
+          "Replies written by AI are drafts of what you asked for. Look at how they read, and keep a person ready to take over.",
+        ]}
+      />
+    ),
+  },
+  {
+    id: "data",
+    title: "Your data",
+    body: (
+      <LegalP>
+        What we collect and how we handle it, including your customers&apos; messages, is in our <LegalLink href="/privacy">Privacy Policy</LegalLink>. You can delete your data yourself at any time, as described on the <LegalLink href="/data-deletion">data deletion page</LegalLink>.
+      </LegalP>
+    ),
+  },
+  {
+    id: "changes",
+    title: "Changes and availability",
+    body: (
+      <LegalP>
+        We may change or pause parts of the service, for example because Meta changes its rules. We may also update these terms. If we do, we will change the date at the top, and using the service after that means you accept the new terms.
+      </LegalP>
+    ),
+  },
+  {
+    id: "ending",
+    title: "Ending your account",
+    body: (
+      <>
+        <LegalP>
+          You can end your account at any time from <strong className="font-medium text-slate-900">Settings → Delete account</strong>. When you do, your tokens, automations and other data are permanently deleted. We may end your account if you break these terms.
+        </LegalP>
+      </>
+    ),
+  },
+];
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="group inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors"
-            >
-              <ArrowLeftOutlined className="text-xs transition-transform group-hover:-translate-x-0.5" />
-              <span>Back to Home</span>
-            </Link>
-            <span className="text-slate-300 text-xs">|</span>
-            <Link
-              href="/login"
-              className="text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors"
-            >
-              Login
-            </Link>
-          </div>
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="h-6 w-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-xs">
-              F
-            </div>
-            <span className="text-sm font-bold tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors">Fabroniee</span>
-          </Link>
-          <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 border border-emerald-200/60 flex items-center gap-1">
-            <SafetyCertificateFilled className="text-emerald-500 text-xs" />
-            <span>Meta Platform Compliant</span>
-          </span>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16">
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-6 sm:p-12 shadow-sm space-y-8">
-          {/* Header Title */}
-          <div className="space-y-3 border-b border-slate-100 pb-8">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600 border border-blue-200/50">
-              <FileTextOutlined className="text-xs" />
-              <span>Commercial Terms &amp; Conditions</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900">
-              Terms of Service
-            </h1>
-            <p className="text-sm text-slate-500 font-medium">
-              Last Updated: October 12, 2026 &middot; InstaVeyra (Inrō Studio)
-            </p>
-          </div>
-
-          {/* Body */}
-          <div className="space-y-6 text-sm text-slate-600 leading-relaxed">
-            <p className="text-base text-slate-700 leading-normal">
-              By accessing or using <strong>InstaVeyra</strong>, accessible from{" "}
-              <a href="https://fabroniee.store" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
-                https://fabroniee.store
-              </a>{" "}
-              and{" "}
-              <a href="https://analytics-delta-sage.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-600 font-semibold underline">
-                https://analytics-delta-sage.vercel.app
-              </a>
-              , connecting your Facebook Page or Instagram Business Account, or creating automated messaging workflows, you agree to comply with and be bound by these Terms of Service.
-            </p>
-
-            <section className="space-y-3">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                1. Service Overview &amp; Permitted Use
-              </h2>
-              <p>
-                InstaVeyra provides creator automation tools, specifically Comment-to-DM funnels, audience analytics, and direct messaging workflows via official Meta Graph APIs. You agree to use the service only for legitimate, non-spam business communication.
-              </p>
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                2. Meta Platform Terms Compliance
-              </h2>
-              <p>
-                As a user of our software, you agree to strictly follow:
-              </p>
-              <ul className="list-disc pl-5 space-y-1.5">
-                <li>Meta Community Standards and Platform Terms.</li>
-                <li>Instagram Terms of Use and Messaging Policies.</li>
-                <li>Applicable regional privacy and consumer protection laws.</li>
-              </ul>
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                3. Prohibited Activities
-              </h2>
-              <p>
-                You may not use InstaVeyra to dispatch unsolicited spam messages, harassment, fraudulent claims, deceptive phishing links, or copyrighted material you do not own rights to. We reserve the right to immediately terminate accounts engaging in abusive behavior.
-              </p>
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                4. Account Termination &amp; Data Deletion
-              </h2>
-              <p>
-                You may terminate your account and remove all stored access tokens at any time using the in-app &ldquo;Delete Account &amp; Wipe Data&rdquo; button or by contacting us. Upon termination, all tokens and automation rules are permanently deleted from our active database.
-              </p>
-            </section>
-
-            <section className="space-y-3">
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                5. Contact
-              </h2>
-              <p>
-                For questions regarding these Terms, contact our legal and support team at{" "}
-                <a href="mailto:support@fabroniee.store" className="text-blue-600 font-semibold underline">
-                  support@fabroniee.store
-                </a>
-                .
-              </p>
-            </section>
-          </div>
-
-          {/* Footer Navigation */}
-          <div className="border-t border-slate-100 pt-6 flex flex-wrap gap-4 text-xs font-semibold text-slate-500">
-            <Link href="/privacy" className="hover:text-slate-800">
-              Privacy Policy
-            </Link>
-            <span>&middot;</span>
-            <Link href="/data-deletion" className="hover:text-slate-800">
-              Data Deletion Instructions
-            </Link>
-            <span>&middot;</span>
-            <Link href="/terms" className="text-blue-600">
-              Terms of Service
-            </Link>
-          </div>
-        </div>
-      </main>
-    </div>
+    <LegalLayout
+      page="terms"
+      eyebrow="Terms of Service"
+      title="The rules, kept short."
+      intro={
+        <>
+          By using <strong className="font-medium text-slate-900">InstaVeyra</strong> (Inrō Studio), at fabroniee.store, you agree to what is on this page.
+        </>
+      }
+      highlights={[
+        { title: "Your accounts only", text: "Connect Instagram accounts you own or manage." },
+        { title: "No spam", text: "No unsolicited bulk messages, harassment or scams." },
+        { title: "Meta’s rules apply", text: "Instagram’s messaging limits and policies come first." },
+        { title: "Leave any time", text: "Delete your account in Settings whenever you like." },
+      ]}
+      sections={sections}
+    />
   );
 }
