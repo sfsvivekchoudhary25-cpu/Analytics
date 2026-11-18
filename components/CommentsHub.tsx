@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { CommentOutlined, ThunderboltOutlined } from "@ant-design/icons";
+import { MessageSquareText, Zap, MessageCircle } from "lucide-react";
 import { Comments } from "./Comments";
 import { CommentDmAutomation } from "./CommentDmAutomation";
 import { CommentDmAutomationList } from "./CommentDmAutomationList";
 
 type Tab = "inbox" | "automation";
-const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-  { id: "inbox", label: "Comments Inbox", icon: <CommentOutlined className="text-sm" /> },
-  { id: "automation", label: "DM Automations", icon: <ThunderboltOutlined className="text-sm" /> },
+const TABS: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: "inbox", label: "Comments Inbox", icon: MessageSquareText },
+  { id: "automation", label: "DM Automations", icon: Zap },
 ];
 
 type Props = {
@@ -83,31 +83,50 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-6 sm:space-y-8 animate-page-entrance">
-      {/* ── Modern Ant Design Styled Sub-Navigation Tabs ── */}
-      <div
-        role="tablist"
-        aria-label="Comments"
-        className="flex w-full sm:w-auto sm:inline-flex gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-2xs"
-      >
-        {TABS.map((t) => {
-          const isActive = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => handleTabClick(t.id)}
-              className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                isActive
-                  ? "bg-blue-50 text-blue-600 shadow-2xs ring-1 ring-blue-500/20"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-              }`}
-            >
-              {t.icon}
-              <span>{t.label}</span>
-            </button>
-          );
-        })}
+      {/* ── Soft Pastel Minimal Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#e9e9ee]/60">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
+              <MessageCircle className="w-3.5 h-3.5 text-pink-500" />
+              <span>Engagement Suite</span>
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+            Comments & Automations
+          </h1>
+          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1 max-w-xl">
+            Live comment stream, quick responses, and automated DM funnels to convert engagement into customers.
+          </p>
+        </div>
+
+        {/* ── Soft Pastel Mode Switcher Tabs ── */}
+        <div
+          role="tablist"
+          aria-label="Comments navigation"
+          className="inline-flex items-center gap-1.5 p-1.5 rounded-full bg-white border border-[#e9e9ee] shadow-2xs self-start sm:self-center"
+        >
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const isActive = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => handleTabClick(t.id)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-black text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-950 hover:bg-slate-50"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-500"}`} />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {tab === "inbox" && <Comments />}
