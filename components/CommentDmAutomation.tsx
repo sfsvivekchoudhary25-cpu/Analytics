@@ -1228,42 +1228,59 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         <div className="grid grid-cols-1 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
           {/* Left Column: Form Controls */}
           <div className="space-y-4 w-full min-w-0 [overflow-anchor:none]">
-            {/* Primary message caption card */}
-            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-              {/* Header: Title, Subtitle, & Monospace Character Counter */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <label className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">
-                      Message Text / Caption
-                    </label>
-                    <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                      Primary DM
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
-                    Sent directly to the commenter&apos;s Instagram DM inbox.
-                  </p>
-                </div>
-                <div className="shrink-0 pt-0.5">
-                  <span
-                    className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
-                      dmText.length > 900
-                        ? "text-red-500 bg-red-500/10 border-red-500/25"
-                        : dmText.length > 700
-                        ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
-                        : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
-                    }`}
-                  >
-                    <span>{dmText.length}</span>
-                    <span className="opacity-40">/</span>
-                    <span>1000</span>
+            {/* Message text: label with quick inserts on the same row, one box */}
+            <div className="space-y-2.5 [overflow-anchor:none]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <label className="text-xs font-semibold text-[var(--viz-ink)] tracking-tight">Message Text / Caption</label>
+                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                    Primary DM
                   </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span className="font-mono text-[10px] opacity-75">@</span>
+                  <span>username</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span>👋</span>
+                  <span>Greeting</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span>👇</span>
+                  <span>Call to Action</span>
+                </button>
                 </div>
               </div>
 
-              {/* Textarea Composer */}
-              <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
+              <div className="rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10">
                 <textarea
                   value={dmText}
                   onChange={(e) => {
@@ -1272,63 +1289,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   }}
                   maxLength={1000}
                   rows={3}
+                  aria-label="Message text"
                   placeholder="Hey! 👋 Thanks for your comment. Here is the link you requested:"
-                  className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[5.5rem]"
+                  className="w-full min-h-[5.5rem] resize-none bg-transparent p-3.5 text-xs leading-relaxed text-[var(--viz-ink)] outline-none placeholder:text-[var(--viz-muted)]"
                 />
-              </div>
-
-              {/* Quick Insert Variables: Symmetric 3-Column Grid */}
-              <div className="space-y-1.5 pt-0.5">
-                <div className="flex items-center justify-between px-0.5">
-                  <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
-                    Quick Insert
-                  </span>
-                  <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
-                    Tap to append
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span className="font-mono text-[10px] opacity-75">@</span>
-                    <span className="truncate">username</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span>👋</span>
-                    <span className="truncate">Greeting</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2 py-2 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span>👇</span>
-                    <span className="truncate sm:hidden">CTA</span>
-                    <span className="truncate hidden sm:inline">Call to Action</span>
-                  </button>
-                </div>
+                {dmText.length > 800 && <p className="px-3.5 pb-2 text-right text-[10px] text-amber-600">{dmText.length} / 1000</p>}
               </div>
             </div>
 
@@ -1342,43 +1307,42 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">Product Showcase Settings</p>
                   </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    Instagram Direct Card
-                  </span>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Product Name / Title</label>
-                    <input
-                      value={cardTitle}
-                      onChange={(e) => { setCardTitle(e.target.value.slice(0, 80)); setDirty(true); }}
-                      placeholder="e.g. Premium Oversized Hoodie"
-                      className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 font-medium transition-all"
-                    />
+                <div className="grid items-start gap-4 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Product Name / Title</label>
+                      <input
+                        value={cardTitle}
+                        onChange={(e) => { setCardTitle(e.target.value.slice(0, 80)); setDirty(true); }}
+                        placeholder="e.g. Premium Oversized Hoodie"
+                        className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 font-medium transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Price & Badge Highlights</label>
+                      <input
+                        value={cardSubtitle}
+                        onChange={(e) => { setCardSubtitle(e.target.value.slice(0, 80)); setDirty(true); }}
+                        placeholder="e.g. $49.99 • Special 20% Off"
+                        className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition-all"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Price & Badge Highlights</label>
-                    <input
-                      value={cardSubtitle}
-                      onChange={(e) => { setCardSubtitle(e.target.value.slice(0, 80)); setDirty(true); }}
-                      placeholder="e.g. $49.99 • Special 20% Off"
-                      className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition-all"
-                    />
+                  <CloudinaryImageUploader
+                    label="Product Image"
+                    value={cardImageUrl}
+                    onChange={(url) => {
+                      setCardImageUrl(url);
+                      setDirty(true);
+                    }}
+                    accentColor="emerald"
+                    helperText="Instagram Direct displays this photo prominently at the top of the product card."
+                  />
                   </div>
                 </div>
-
-                {/* Product Image Upload with Cloudinary CDN */}
-                <CloudinaryImageUploader
-                  label="Product Image"
-                  value={cardImageUrl}
-                  onChange={(url) => {
-                    setCardImageUrl(url);
-                    setDirty(true);
-                  }}
-                  accentColor="emerald"
-                  helperText="Instagram Direct displays this photo prominently at the top of the product card."
-                />
 
                 <div>
                   <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Store Product Link</label>
