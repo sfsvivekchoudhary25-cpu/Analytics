@@ -37,7 +37,7 @@ const LAST_USER_KEY = "ighub_last_user";
 // Everything this browser remembers about one user's DATA (not settings like sidebar collapse or cookie consent).
 // It must never be shown to, or uploaded for, the next person who signs in on the same browser.
 const USER_DATA_KEYS = ["fabroniee_saved_reels_vault_v1", "ighub_cloudinary_config", "ig-hub:comment-quick-replies", ACCOUNT_KEY, ONBOARDING_KEY];
-const USER_DATA_PREFIXES = ["collab_outreach_", "post_dwell_", "post_hashtags_", "post_rule_"];
+const USER_DATA_PREFIXES = ["collab_outreach_", "post_dwell_", "post_hashtags_", "post_rule_", "ighub_qc_"];
 
 function clearUserData() {
   USER_DATA_KEYS.forEach((k) => localStorage.removeItem(k));
@@ -93,6 +93,32 @@ export const onboarding = {
   isDone: () => (typeof window === "undefined" ? false : localStorage.getItem(ONBOARDING_KEY) === "1"),
   markDone: () => {
     if (typeof window !== "undefined") localStorage.setItem(ONBOARDING_KEY, "1");
+  },
+};
+
+// The last answer for a screen, kept in this browser so the screen can show it at once and then refresh it.
+// Numbers and lists only (never message text). Stored under the "ighub_qc_" prefix, so signing out or a different
+// user signing in on this browser clears it with the rest of that user's data. Anything older than a day is ignored.
+const QUICK_MAX_AGE_MS = 24 * 3600_000;
+export const quickCache = {
+  read<T>(key: string): T | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("ighub_qc_" + key);
+      if (!raw) return null;
+      const { at, v } = JSON.parse(raw) as { at: number; v: T };
+      return Date.now() - at < QUICK_MAX_AGE_MS ? v : null;
+    } catch {
+      return null;
+    }
+  },
+  write(key: string, value: unknown) {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem("ighub_qc_" + key, JSON.stringify({ at: Date.now(), v: value }));
+    } catch {
+      /* storage full or blocked: the screen just loads normally next time */
+    }
   },
 };
 

@@ -47,7 +47,7 @@ import {
   TeamOutlined,
   CompassOutlined,
 } from "@ant-design/icons";
-import { api } from "@/lib/api";
+import { activeAccount, api, quickCache } from "@/lib/api";
 import { UnifiedChart, Point } from "./UnifiedChart";
 import { EngagementBarChart } from "./EngagementBarChart";
 import { NotificationBell, AccountAvatar } from "./HeaderControls";
@@ -481,20 +481,36 @@ export function Dashboard({
 
   useEffect(() => {
     let cancelled = false;
-    setDashLoading(true);
-    setInsightsLoading(true);
+    // Show what this account saw last time straight away, then refresh it in the background.
+    const acct = activeAccount.get() ?? "";
+    const dashKey = `dash:${acct}:${days}`;
+    const insKey = `insights:${acct}:${days}`;
+    const savedDash = quickCache.read<DashboardOverview>(dashKey);
+    const savedIns = quickCache.read<InsightsOverview>(insKey);
+    if (savedDash) {
+      setData(savedDash);
+      setDashLoading(false);
+    } else setDashLoading(true);
+    if (savedIns) {
+      setInsights(savedIns);
+      setInsightsLoading(false);
+    } else setInsightsLoading(true);
 
-    api<DashboardOverview>(`/dashboard/overview?days=${days}`).then(
+    // The Refresh button (tick > 0) asks the server to skip its own short copy as well.
+    const fresh = tick > 0 ? "&fresh=1" : "";
+    api<DashboardOverview>(`/dashboard/overview?days=${days}${fresh}`).then(
       (d) => {
         if (!cancelled) {
           setData(d);
           setDashError(null);
           setDashLoading(false);
+          quickCache.write(dashKey, d);
         }
       },
       (e: Error) => {
         if (!cancelled) {
-          setDashError(e.message);
+          // Keep showing the saved numbers if there are any; only say so when there is nothing to show.
+          if (!savedDash) setDashError(e.message);
           setDashLoading(false);
         }
       }
@@ -506,11 +522,12 @@ export function Dashboard({
           setInsights(i);
           setInsightsError(null);
           setInsightsLoading(false);
+          quickCache.write(insKey, i);
         }
       },
       (e: Error) => {
         if (!cancelled) {
-          setInsightsError(e.message);
+          if (!savedIns) setInsightsError(e.message);
           setInsightsLoading(false);
         }
       }
