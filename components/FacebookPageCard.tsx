@@ -12,7 +12,6 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [token, setToken] = useState("");
 
   const load = () => api<Status>("/facebook-page").then(setStatus, (e: Error) => setLocalError(e.message));
   useEffect(() => {
@@ -28,21 +27,6 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
       window.location.href = url;
     } catch (err) {
       setLocalError((err as Error).message);
-      setBusy(false);
-    }
-  }
-
-  async function connectWithToken(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setLocalError(null);
-    try {
-      await api("/facebook-page/token", { method: "POST", body: JSON.stringify({ accessToken: token }) });
-      setToken("");
-      await load();
-    } catch (err) {
-      setLocalError((err as Error).message);
-    } finally {
       setBusy(false);
     }
   }

@@ -91,6 +91,8 @@ function SidebarContent({
   isDrawer = false,
 }: SidebarContentProps) {
   const cleanUsername = username.replace(/^@/, "");
+  // Empty when the user skipped connecting Instagram.
+  const handle = cleanUsername ? `@${cleanUsername}` : "No account yet";
 
   // Dropdown menu items for collapsed profile trigger
   const profileMenuItems: MenuProps["items"] = [
@@ -98,10 +100,10 @@ function SidebarContent({
       key: "user-info",
       label: (
         <div className="py-1 px-1">
-          <p className="text-xs font-medium text-slate-800 truncate">@{cleanUsername}</p>
+          <p className="text-xs font-medium text-slate-800 truncate">{handle}</p>
           <p className="text-[11px] text-emerald-600 font-normal flex items-center gap-1.5 mt-0.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            {daysLeft != null ? `${daysLeft} days active` : "Connected"}
+            {daysLeft != null ? `${daysLeft} days active` : cleanUsername ? "Connected" : "Connect Instagram"}
           </p>
         </div>
       ),
@@ -232,8 +234,8 @@ function SidebarContent({
               <Tooltip
                 title={
                   <div className="text-xs">
-                    <p className="font-medium text-slate-900">@{cleanUsername}</p>
-                    <p className="text-emerald-500 text-[11px] font-normal">Instagram Connected</p>
+                    <p className="font-medium text-slate-900">{handle}</p>
+                    <p className="text-emerald-500 text-[11px] font-normal">{cleanUsername ? "Instagram Connected" : "Instagram not connected"}</p>
                   </div>
                 }
                 placement="right"
@@ -242,7 +244,7 @@ function SidebarContent({
                   <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white">
                     <InstagramOutlined className="text-[12px]" />
                   </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                  <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"} ring-2 ring-white`} />
                 </div>
               </Tooltip>
             </div>
@@ -254,13 +256,13 @@ function SidebarContent({
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1">
                   <span className="truncate text-xs font-medium text-slate-800 tracking-tight">
-                    @{cleanUsername}
+                    {handle}
                   </span>
-                  <CheckCircleFilled className="text-[11px] text-blue-500 shrink-0" />
+                  {cleanUsername && <CheckCircleFilled className="text-[11px] text-blue-500 shrink-0" />}
                 </div>
-                <span className="text-[10px] text-emerald-600 font-normal flex items-center gap-1.5 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Connected
+                <span className={`text-[10px] font-normal flex items-center gap-1.5 mt-0.5 ${cleanUsername ? "text-emerald-600" : "text-amber-600"}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${cleanUsername ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+                  {cleanUsername ? "Connected" : "Not connected"}
                 </span>
               </div>
             </div>
@@ -397,7 +399,7 @@ function SidebarContent({
                 >
                   {cleanUsername.charAt(0).toUpperCase() || "F"}
                 </Avatar>
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"} ring-2 ring-white`} />
               </button>
             </Dropdown>
           </div>
@@ -413,15 +415,15 @@ function SidebarContent({
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-xs font-medium text-slate-800 tracking-tight">
-                  @{cleanUsername}
+                  {handle}
                 </div>
                 <div className="mt-0.5 flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"}`} />
                   </span>
-                  <span className="text-[11px] font-normal text-emerald-600">
-                    {daysLeft != null ? `${daysLeft}d left` : "Active"}
+                  <span className={`text-[11px] font-normal ${cleanUsername ? "text-emerald-600" : "text-amber-600"}`}>
+                    {daysLeft != null ? `${daysLeft}d left` : cleanUsername ? "Active" : "Setup pending"}
                   </span>
                 </div>
               </div>

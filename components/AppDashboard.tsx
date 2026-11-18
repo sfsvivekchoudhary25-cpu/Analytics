@@ -30,6 +30,9 @@ export const SECTIONS: Section[] = [
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
 
+// Pages whose data comes from the connected Instagram account. Without one they show a "connect" prompt.
+const INSTAGRAM_SECTIONS: SectionId[] = ["dashboard", "messages", "comments", "photos", "stories", "hashtags"];
+
 export type View = { status: ConnectionStatus; daysLeft: number | null };
 
 export async function fetchView(): Promise<View> {
@@ -59,7 +62,6 @@ export default function AppDashboard({
 } = {}) {
   const router = useRouter();
   const [view, setView] = useState<View | null>(null);
-  const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -238,24 +240,6 @@ export default function AppDashboard({
     }
   }
 
-  async function connect(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await api("/instagram/connection", {
-        method: "POST",
-        body: JSON.stringify({ accessToken: token.trim() }),
-      });
-      setToken("");
-      setView(await fetchView());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   function logout() {
     auth.clear();
     activeAccount.clear();
@@ -265,7 +249,11 @@ export default function AppDashboard({
   const status = view?.status;
   const daysLeft = view?.daysLeft;
   const connected = status?.connected === true;
-  const active: SectionId = connected ? tab : "account";
+  // Someone who finished or skipped setup without connecting Instagram still gets the full app. Pages that need an
+  // Instagram account show a "connect" prompt; the rest (saved reels, voice notes, account) work as normal.
+  const guest = !connected && onboarding.isDone();
+  const active: SectionId = connected || guest ? tab : "account";
+  const needsInstagram = guest && INSTAGRAM_SECTIONS.includes(active);
 
   const accountPanel = (
     <AccountPanel
@@ -273,11 +261,8 @@ export default function AppDashboard({
       daysLeft={daysLeft}
       notice={notice}
       error={error}
-      token={token}
-      setToken={setToken}
       busy={busy}
       onConnectInstagram={connectWithInstagram}
-      onPasteConnect={connect}
       onSignOut={logout}
     />
   );
@@ -305,27 +290,8 @@ export default function AppDashboard({
     );
   }
 
-  // The user finished or skipped setup but has no Instagram account connected yet: show the Account page (the
-  // connect buttons) instead of the "redirecting" screen below, which would spin forever.
-  if (!connected && onboarding.isDone()) {
-    return (
-      <div className="min-h-screen bg-slate-50/50">
-        <header className="flex items-center justify-between border-b border-slate-200/80 bg-white px-4 py-3 sm:px-6">
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Fabroniee" className="h-8 w-8 object-contain" />
-            <span className="text-base font-bold tracking-tight text-slate-900">Fabroniee</span>
-          </div>
-          <button type="button" onClick={logout} className="text-sm font-medium text-slate-500 hover:text-slate-900">
-            Sign out
-          </button>
-        </header>
-        <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">{accountPanel}</main>
-      </div>
-    );
-  }
-
-  if (!connected) {
+  // Not connected AND hasn't done setup yet: the effect above is sending them to /onboarding.
+  if (!connected && !guest) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
         <div className="flex flex-col items-center space-y-4">
@@ -348,6 +314,10 @@ export default function AppDashboard({
     );
   }
 
+  // Empty when no Instagram account is connected (guest). Everything below uses these instead of status.username.
+  const uname = status?.connected ? status.username.replace(/^@/, "") : "";
+  const ownAvatar = status?.connected ? status.profilePictureUrl : undefined;
+
   return (
     <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-slate-50/50`}>
       <Sidebar
@@ -357,7 +327,7 @@ export default function AppDashboard({
           setTab(id);
           setMobileMenuOpen(false);
         }}
-        username={status.username.replace(/^@/, "")}
+        username={uname}
         daysLeft={daysLeft ?? null}
         onSignOut={logout}
         pendingPhotos={pendingPhotos}
@@ -401,10 +371,21 @@ export default function AppDashboard({
 
           {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
           <div className="flex items-center gap-2.5">
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate max-w-[130px]">@{status.username.replace(/^@/, "")}</span>
-            </div>
+            {uname ? (
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="truncate max-w-[130px]">@{uname}</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setTab("account")}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium cursor-pointer"
+              >
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                Instagram not connected
+              </button>
+            )}
 
             {/* Notification Bell with indicator */}
             <button
@@ -429,14 +410,14 @@ export default function AppDashboard({
               className="flex h-11 w-11 items-center justify-center rounded-full font-bold text-base shadow-xs hover:ring-2 hover:ring-[#e13181]/20 active:scale-95 transition-all cursor-pointer"
               aria-label="Account Settings"
             >
-              {status.username.replace(/^@/, "").charAt(0).toUpperCase() || "F"}
+              {uname.charAt(0).toUpperCase() || "F"}
             </button>
           </div>
         </header>
 
         {/* Main Section Content */}
         <div
-          key={`${active}-${status.username}`}
+          key={`${active}-${uname}`}
           className={
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
@@ -445,36 +426,51 @@ export default function AppDashboard({
                 : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6 pb-0 sm:pb-8"
           }
         >
-          {active === "dashboard" && (
+          {guest && !needsInstagram && active !== "account" && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <span>Instagram isn&apos;t connected yet. This page works without it; connect to unlock comments, messages and automations.</span>
+              <button type="button" onClick={() => setTab("account")} className="rounded-xl bg-black px-3 py-1.5 text-xs font-semibold text-white cursor-pointer">
+                Connect Instagram
+              </button>
+            </div>
+          )}
+          {needsInstagram && (
+            <ConnectInstagramPrompt
+              section={SECTIONS.find((s) => s.id === active)?.label ?? "This page"}
+              onConnect={connectWithInstagram}
+              onMore={() => setTab("account")}
+            />
+          )}
+          {!needsInstagram && active === "dashboard" && (
             <DashboardOverview
               onOpenAutomations={openAutomations}
               pendingPhotos={pendingPhotos}
               onOpenPhotos={() => setTab("photos")}
-              username={status.username}
+              username={uname}
               onOpenAccount={() => setTab("account")}
               onOpenMessages={openMessagesWithUser}
             />
           )}
-          {active === "photos" && <Submissions />}
-          {active === "messages" && (
+          {!needsInstagram && active === "photos" && <Submissions />}
+          {!needsInstagram && active === "messages" && (
             <MessagesTab
-              username={status.username}
-              ownAvatar={status.profilePictureUrl}
+              username={uname}
+              ownAvatar={ownAvatar}
               targetUsername={messagesTargetUser}
               initialMessageText={messagesInitialText}
             />
           )}
-          {active === "comments" && (
+          {!needsInstagram && active === "comments" && (
             <CommentsHub
               tab={commentsTab}
               onTabChange={handleCommentsTabChange}
               onOpenDashboard={() => setTab("dashboard")}
             />
           )}
-          {active === "stories" && (
-            <Stories username={status.username} ownAvatar={status.profilePictureUrl} />
+          {!needsInstagram && active === "stories" && (
+            <Stories username={uname} ownAvatar={ownAvatar} />
           )}
-          {active === "hashtags" && <HashtagSearch />}
+          {!needsInstagram && active === "hashtags" && <HashtagSearch />}
           {active === "reels" && <ReelsDownloader />}
           {active === "voice-notes" && <VoiceNotesDashboard />}
           {active === "account" && accountPanel}
@@ -483,6 +479,26 @@ export default function AppDashboard({
         {/* Global Quick Voice Note Launcher */}
         <VoiceNoteGlobalButton />
       </main>
+    </div>
+  );
+}
+
+// Shown instead of a page that needs Instagram, for a user who skipped connecting.
+function ConnectInstagramPrompt({ section, onConnect, onMore }: { section: string; onConnect: () => void; onMore: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center gap-4 rounded-[24px] border border-[#e9e9ee] bg-white p-8 text-center shadow-2xs">
+      <h2 className="text-lg font-bold text-slate-950">{section} needs your Instagram account</h2>
+      <p className="text-sm text-slate-500">
+        Connect your Instagram Professional or Business account to see your {section.toLowerCase()}. Voice notes, saved reels and the account page work without it.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button type="button" onClick={onConnect} className="rounded-2xl bg-black px-5 py-2.5 text-sm font-semibold text-white cursor-pointer">
+          Connect with Instagram
+        </button>
+        <button type="button" onClick={onMore} className="rounded-2xl border border-[#e9e9ee] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 cursor-pointer hover:border-black/30">
+          More ways to connect
+        </button>
+      </div>
     </div>
   );
 }

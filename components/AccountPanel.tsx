@@ -26,7 +26,6 @@ import {
   InfoCircleOutlined,
   InstagramFilled,
   InstagramOutlined,
-  KeyOutlined,
   LineChartOutlined,
   LinkOutlined,
   LockOutlined,
@@ -136,11 +135,8 @@ type Props = {
   daysLeft: number | null | undefined;
   notice: string | null;
   error: string | null;
-  token: string;
-  setToken: (v: string) => void;
   busy: boolean;
   onConnectInstagram: () => void;
-  onPasteConnect: (e: React.FormEvent) => void;
   onSignOut?: () => void;
 };
 
@@ -185,11 +181,8 @@ export function AccountPanel({
   daysLeft,
   notice,
   error: externalError,
-  token,
-  setToken,
   busy,
   onConnectInstagram,
-  onPasteConnect,
   onSignOut,
 }: Props) {
   const { message, modal } = App.useApp();
@@ -197,8 +190,6 @@ export function AccountPanel({
   // Facebook Page State
   const [fbStatus, setFbStatus] = useState<FacebookPageStatus | null>(null);
   const [fbBusy, setFbBusy] = useState(false);
-  const [fbToken, setFbToken] = useState("");
-  const [fbModalOpen, setFbModalOpen] = useState(false);
 
   // Cloudinary State & Health (Powered by backend Cloudinary Service)
   const [cloudinaryConfig, setCloudinaryConfig] = useState<CloudinaryConfig>({
@@ -230,8 +221,6 @@ export function AccountPanel({
   const [savingOpenRouter, setSavingOpenRouter] = useState(false);
   const [allPinging, setAllPinging] = useState(false);
 
-  // Instagram Manual Token Modal
-  const [igTokenModalOpen, setIgTokenModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
 
@@ -514,26 +503,6 @@ export function AccountPanel({
     }
   };
 
-  const handleConnectFacebookWithToken = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fbToken.trim()) return;
-    setFbBusy(true);
-    try {
-      await api("/facebook-page/token", {
-        method: "POST",
-        body: JSON.stringify({ accessToken: fbToken.trim() }),
-      });
-      setFbToken("");
-      setFbModalOpen(false);
-      message.success("Facebook Page access token connected successfully!");
-      await loadFacebookStatus();
-    } catch (err: any) {
-      message.error(err?.message || "Invalid Facebook Page access token");
-    } finally {
-      setFbBusy(false);
-    }
-  };
-
   const handleDisconnectFacebook = () => {
     modal.confirm({
       title: "Disconnect Facebook Page?",
@@ -590,11 +559,6 @@ export function AccountPanel({
         }
       },
     });
-  };
-
-  const handleInstagramTokenSubmit = (e: React.FormEvent) => {
-    onPasteConnect(e);
-    setIgTokenModalOpen(false);
   };
 
   const handleCopyWebhook = () => {
@@ -658,7 +622,7 @@ export function AccountPanel({
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col items-stretch justify-center gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               type="primary"
               size="large"
@@ -678,44 +642,8 @@ export function AccountPanel({
             >
               Connect via Facebook Page
             </Button>
-            <Button
-              size="large"
-              icon={<KeyOutlined />}
-              onClick={() => setIgTokenModalOpen(true)}
-              className="!h-11 !px-4 !rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 text-xs font-semibold"
-            >
-              Manual Token (Advanced)
-            </Button>
           </div>
         </div>
-
-        {/* Modal for manual token */}
-        <Modal
-          title="Manual Instagram Access Token"
-          open={igTokenModalOpen}
-          onCancel={() => setIgTokenModalOpen(false)}
-          footer={null}
-          width={500}
-        >
-          <form onSubmit={handleInstagramTokenSubmit} className="space-y-4 pt-2">
-            <p className="text-xs text-slate-500 leading-relaxed">
-              If your OAuth redirect is offline, paste a long-lived user token generated from the Meta Developer Dashboard with <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">instagram_business_*</code> scopes.
-            </p>
-            <Input.TextArea
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              rows={4}
-              placeholder="EAA..."
-              className="font-mono text-xs !rounded-xl"
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <Button onClick={() => setIgTokenModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={busy} disabled={!token.trim()}>
-                Verify and Save
-              </Button>
-            </div>
-          </form>
-        </Modal>
       </div>
     );
   }
