@@ -31,10 +31,24 @@ export const API_BASE = process.env.NEXT_PUBLIC_API_URL || REMOTE_API_BASE;
 const TOKEN_KEY = "ighub_token";
 const ACCOUNT_KEY = "ighub_account";
 
+const ONBOARDING_KEY = "ighub_onboarding_done";
+
 export const auth = {
   get: () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN_KEY)),
   set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
-  clear: () => localStorage.removeItem(TOKEN_KEY),
+  // Signing out also forgets "I skipped setup", so the next person on this browser starts fresh.
+  clear: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(ONBOARDING_KEY);
+  },
+};
+
+// Set when the user finishes OR skips the setup page, so the dashboard stops sending them back to it.
+export const onboarding = {
+  isDone: () => (typeof window === "undefined" ? false : localStorage.getItem(ONBOARDING_KEY) === "1"),
+  markDone: () => {
+    if (typeof window !== "undefined") localStorage.setItem(ONBOARDING_KEY, "1");
+  },
 };
 
 export const activeAccount = {

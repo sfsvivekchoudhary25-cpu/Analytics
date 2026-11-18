@@ -16,7 +16,7 @@ import {
   UserOutlined,
   SafetyCertificateFilled,
 } from "@ant-design/icons";
-import { activeAccount, auth, getApiBase } from "@/lib/api";
+import { activeAccount, auth, getApiBase, onboarding } from "@/lib/api";
 
 interface SocialStatus {
   facebookConnected: boolean;
@@ -199,6 +199,8 @@ export default function OnboardingPage() {
       if (status.instagramHandle) {
         activeAccount.set(status.instagramHandle);
       }
+      // Remember that setup was finished/skipped; otherwise the dashboard would send an unconnected user straight back here.
+      onboarding.markDone();
       setBusy(false);
       router.push("/dashboard");
     }

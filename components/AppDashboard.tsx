@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { activeAccount, api, ApiError, auth, ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus, onboarding } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
@@ -205,7 +205,9 @@ export default function AppDashboard({
   }, [router, handleLoadError, setTab]);
 
   useEffect(() => {
-    if (view && !view.status.connected) {
+    // Send a brand-new user to setup once. After they finish or skip it they stay here and see the Account page
+    // (with the connect buttons) instead of being bounced back to onboarding in a loop.
+    if (view && !view.status.connected && !onboarding.isDone()) {
       router.replace("/onboarding");
     }
   }, [view, router]);
