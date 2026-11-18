@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   BoltIcon,
   GearIcon,
+  PencilIcon,
   InstagramIcon,
   SendIcon,
   TrashIcon,
@@ -631,7 +632,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                         title="Rename automation"
                                         className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
                                       >
-                                        <GearIcon className="h-3.5 w-3.5" />
+                                        <PencilIcon className="h-3.5 w-3.5" />
                                       </button>
                                     )}
                                   </div>
