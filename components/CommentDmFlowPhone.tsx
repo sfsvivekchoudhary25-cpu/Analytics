@@ -19,10 +19,10 @@ export type FlowStep = "trigger" | "target" | "message" | "follow" | "reminder";
 type Button = { type: "web_url" | "postback"; title: string; url?: string; payload?: string };
 
 export const FLOW_STEP_LABEL: Record<FlowStep, string> = {
-  trigger: "Step 1 · Comment trigger",
-  target: "Step 2 · Target post",
-  message: "Step 3 · Your message",
-  follow: "Step 4 · Follow check",
+  trigger: "Step 2 · Comment trigger",
+  target: "Step 1 · Target post",
+  message: "Step 4 · Your message",
+  follow: "Step 3 · Follow check",
   reminder: "Step 5 · Check-in reminder",
 };
 

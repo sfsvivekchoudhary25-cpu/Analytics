@@ -187,7 +187,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const [cardButtons, setCardButtons] = useState<MessageButton[]>([]);
   const [previewDevice, setPreviewDevice] = useState<SupportedDevice>("iPhone 17");
   // The one shared phone: which step it follows, whether the small-screen preview is open, and how tall it can be.
-  const [activeStep, setActiveStep] = useState<FlowStep>("trigger");
+  const [activeStep, setActiveStep] = useState<FlowStep>("target");
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [phoneHeight, setPhoneHeight] = useState(650);
   const stepsRef = useRef<HTMLDivElement>(null);
@@ -203,10 +203,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     const root = stepsRef.current;
     if (!root) return;
     let frame = 0;
-    const order: FlowStep[] = ["trigger", "target", "message", "follow", "reminder"];
+    const order: FlowStep[] = ["target", "trigger", "follow", "message", "reminder"];
     const update = () => {
       frame = 0;
-      let current: FlowStep = "trigger";
+      let current: FlowStep = order[0];
       for (const step of order) {
         const el = root.querySelector<HTMLElement>('[data-step="' + step + '"]');
         if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) current = step;
@@ -730,7 +730,171 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       <div ref={stepsRef} className="min-w-0 w-full space-y-5 sm:space-y-6">
       {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
       <div id="step-trigger-target" className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
-        {/* Step 1: Trigger Condition */}
+        {/* Step 1: Target Post */}
+        <div data-step="target" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+          <div className="space-y-3">
+            {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                  <InstagramIcon className="h-4 w-4" />
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">1. Target Post</span>
+                  <Tooltip
+                    title={
+                      rule.mediaId
+                        ? "Replies only when someone comments on this specific post or reel."
+                        : "Runs across every post and reel published on your Instagram account."
+                    }
+                  >
+                    <button
+                      type="button"
+                      aria-label="Target post info"
+                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
+                    >
+                      <InfoIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Target Display Card */}
+            {rule.mediaId ? (
+              (() => {
+                const linkedPost = posts?.find((p) => p.mediaId === rule.mediaId);
+                const isReel =
+                  rule.mediaPermalink?.includes("/reel/") ||
+                  linkedPost?.permalink?.includes("/reel/");
+
+                return (
+                  <div className="group relative rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
+                    <div className="flex items-start gap-3.5">
+                      {/* Post / Reel Thumbnail */}
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
+                        {rule.mediaThumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rule.mediaThumb}
+                            alt="Selected post thumbnail"
+                            referrerPolicy="no-referrer"
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-[#f9ed32]/10 via-[#ee2a7b]/10 to-[#002aff]/10 text-[var(--viz-muted)]">
+                            <InstagramIcon className="h-6 w-6 opacity-60" />
+                          </div>
+                        )}
+                        {isReel && (
+                          <span className="absolute bottom-1 left-1 flex items-center gap-0.5 rounded-md bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-xs">
+                            <PlayIcon className="h-2 w-2 fill-white" />
+                            <span>Reel</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Post Info & Metadata (NO ID DISPLAYED) */}
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="text-xs font-bold text-[var(--viz-ink)]">
+                              {isReel ? "Specific Reel Linked" : "Specific Post Linked"}
+                            </span>
+                            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Active
+                            </span>
+                          </div>
+
+                          {rule.mediaPermalink && (
+                            <a
+                              href={rule.mediaPermalink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0095f6] hover:text-[#0077c5] hover:underline transition-colors"
+                              title="Open on Instagram"
+                            >
+                              <span>View on Instagram</span>
+                              <ExternalLinkIcon className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Caption / Contextual description instead of technical ID */}
+                        {linkedPost?.caption ? (
+                          <p className="line-clamp-2 text-xs text-[var(--viz-ink-2)] font-normal leading-relaxed pt-0.5">
+                            &ldquo;{linkedPost.caption}&rdquo;
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[var(--viz-muted)] font-normal leading-relaxed pt-0.5">
+                            Replies exclusively to comments placed on this selected {isReel ? "reel" : "post"}.
+                          </p>
+                        )}
+
+                        {linkedPost?.postedAt && (
+                          <p className="text-[10px] text-[var(--viz-muted)] font-medium">
+                            Published {new Date(linkedPost.postedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action buttons bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => handleButtonClick(e, openPicker)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
+                          <span>Change Post</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleButtonClick(e, clearPost)}
+                          className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                          <span>Reset to All Posts</span>
+                        </button>
+                      </div>
+
+                      <span className="text-[10px] text-[var(--viz-muted)] font-medium">
+                        1 specific target
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                    <InstagramIcon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
+                    <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => handleButtonClick(e, openPicker)}
+                  className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                >
+                  Choose Post
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Step 2: Trigger Condition */}
         <div data-step="trigger" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
@@ -740,7 +904,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <BoltIcon className="h-4 w-4" />
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[var(--viz-ink)]">1. Trigger Condition</span>
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">2. Trigger Condition</span>
                   <Tooltip
                     title={
                       triggerMode === "any"
@@ -907,173 +1071,253 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
         </div>
 
-        {/* Step 2: Target Post */}
-        <div data-step="target" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
-          <div className="space-y-3">
-            {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
-                  <InstagramIcon className="h-4 w-4" />
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[var(--viz-ink)]">2. Target Post</span>
-                  <Tooltip
-                    title={
-                      rule.mediaId
-                        ? "Replies only when someone comments on this specific post or reel."
-                        : "Runs across every post and reel published on your Instagram account."
-                    }
-                  >
-                    <button
-                      type="button"
-                      aria-label="Target post info"
-                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
-                    >
-                      <InfoIcon className="h-3.5 w-3.5" />
-                    </button>
-                  </Tooltip>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Target Display Card */}
-            {rule.mediaId ? (
-              (() => {
-                const linkedPost = posts?.find((p) => p.mediaId === rule.mediaId);
-                const isReel =
-                  rule.mediaPermalink?.includes("/reel/") ||
-                  linkedPost?.permalink?.includes("/reel/");
-
-                return (
-                  <div className="group relative rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
-                    <div className="flex items-start gap-3.5">
-                      {/* Post / Reel Thumbnail */}
-                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
-                        {rule.mediaThumb ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={rule.mediaThumb}
-                            alt="Selected post thumbnail"
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-[#f9ed32]/10 via-[#ee2a7b]/10 to-[#002aff]/10 text-[var(--viz-muted)]">
-                            <InstagramIcon className="h-6 w-6 opacity-60" />
-                          </div>
-                        )}
-                        {isReel && (
-                          <span className="absolute bottom-1 left-1 flex items-center gap-0.5 rounded-md bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-xs">
-                            <PlayIcon className="h-2 w-2 fill-white" />
-                            <span>Reel</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Post Info & Metadata (NO ID DISPLAYED) */}
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex flex-wrap items-center justify-between gap-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="text-xs font-bold text-[var(--viz-ink)]">
-                              {isReel ? "Specific Reel Linked" : "Specific Post Linked"}
-                            </span>
-                            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                              Active
-                            </span>
-                          </div>
-
-                          {rule.mediaPermalink && (
-                            <a
-                              href={rule.mediaPermalink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0095f6] hover:text-[#0077c5] hover:underline transition-colors"
-                              title="Open on Instagram"
-                            >
-                              <span>View on Instagram</span>
-                              <ExternalLinkIcon className="h-3 w-3" />
-                            </a>
-                          )}
-                        </div>
-
-                        {/* Caption / Contextual description instead of technical ID */}
-                        {linkedPost?.caption ? (
-                          <p className="line-clamp-2 text-xs text-[var(--viz-ink-2)] font-normal leading-relaxed pt-0.5">
-                            &ldquo;{linkedPost.caption}&rdquo;
-                          </p>
-                        ) : (
-                          <p className="text-xs text-[var(--viz-muted)] font-normal leading-relaxed pt-0.5">
-                            Replies exclusively to comments placed on this selected {isReel ? "reel" : "post"}.
-                          </p>
-                        )}
-
-                        {linkedPost?.postedAt && (
-                          <p className="text-[10px] text-[var(--viz-muted)] font-medium">
-                            Published {new Date(linkedPost.postedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Action buttons bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, openPicker)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
-                          <span>Change Post</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, clearPost)}
-                          className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <TrashIcon className="h-3 w-3" />
-                          <span>Reset to All Posts</span>
-                        </button>
-                      </div>
-
-                      <span className="text-[10px] text-[var(--viz-muted)] font-medium">
-                        1 specific target
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
-                    <InstagramIcon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
-                    <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => handleButtonClick(e, openPicker)}
-                  className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                >
-                  Choose Post
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* ── Step 3: Send this message & Custom Templates ───────────── */}
+      {/* ── Step 3: Follow Gate ─────────────────────────────────────── */}
+      <div data-step="follow" className={card}>
+        <div className="mb-4 flex items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-sm font-medium text-[var(--viz-ink)]">3. Require Follow</p>
+              <p className="text-xs text-[var(--viz-muted)] mt-0.5">Check if the commenter follows you before sending the DM. If not, send a follow-gate message first.</p>
+            </div>
+          </div>
+          {/* Toggle */}
+          <button
+            id="require-follow-toggle"
+            role="switch"
+            aria-checked={requireFollow}
+            onClick={(e) =>
+              handleButtonClick(e, () => {
+                setRequireFollow((v) => !v);
+                setDirty(true);
+              })
+            }
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+              requireFollow ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                requireFollow ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        {requireFollow && (
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
+            {/* Left Column: Editor & Workflow Explanation (7 cols) */}
+            <div className="space-y-5 w-full min-w-0 [overflow-anchor:none]">
+              {/* Message Editor Card */}
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
+                {/* Header: Title, Subtitle, & Character Counter */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                        <MessageSquareIcon className="h-3.5 w-3.5" />
+                      </span>
+                      <p className="text-xs font-bold text-[var(--viz-ink)]">Follow-Gate Private Message</p>
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
+                      Sent automatically to commenters who do not follow your account yet.
+                    </p>
+                  </div>
+                  <div className="shrink-0 pt-0.5">
+                    <span
+                      className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
+                        followGateText.length > 900
+                          ? "text-red-500 bg-red-500/10 border-red-500/25"
+                          : followGateText.length > 700
+                          ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
+                          : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
+                      }`}
+                    >
+                      <span>{followGateText.length}</span>
+                      <span className="opacity-40">/</span>
+                      <span>1000</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Textarea */}
+                <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
+                  <textarea
+                    value={followGateText}
+                    onChange={(e) => { setFollowGateText(e.target.value.slice(0, 1000)); setDirty(true); }}
+                    rows={4}
+                    placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
+                    className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[6rem]"
+                  />
+                </div>
+
+                {/* Quick Insert Variables: Symmetric 3-Column Grid */}
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="flex items-center justify-between px-0.5">
+                    <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
+                      Quick Insert
+                    </span>
+                    <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
+                      Tap to append
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                          setDirty(true);
+                        })
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span className="font-mono text-[10px] opacity-75">@</span>
+                      <span className="truncate">username</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                          setDirty(true);
+                        })
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span>👋</span>
+                      <span className="truncate">Greeting</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) =>
+                        handleButtonClick(e, () => {
+                          setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
+                          setDirty(true);
+                        })
+                      }
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/8 px-2 py-2 text-[11px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/15 hover:border-blue-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
+                    >
+                      <span>👇</span>
+                      <span className="truncate sm:hidden">Follow CTA</span>
+                      <span className="truncate hidden sm:inline">Hit Follow CTA</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preset Templates */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[var(--viz-border)]">
+                  <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
+                  <button
+                    type="button"
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Oh no! It seems you're not following me 🙈\n\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!");
+                        setDirty(true);
+                      })
+                    }
+                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Gentle & Friendly
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Hey {username}! 🎁 This download is exclusive to our Instagram community.\n\nHit follow on our profile, then tap 'I\\'m following' below to unlock your instant access!");
+                        setDirty(true);
+                      })
+                    }
+                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    VIP Community
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) =>
+                      handleButtonClick(e, () => {
+                        setFollowGateText("Almost there! ✨ Follow our page first, then I\\'ll instantly send your link over!");
+                        setDirty(true);
+                      })
+                    }
+                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                  >
+                    Short & Crisp
+                  </button>
+                </div>
+              </div>
+
+              {/* How it Works Workflow Card */}
+              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      <BoltIcon className="h-3.5 w-3.5" />
+                    </span>
+                    <p className="text-xs font-bold text-[var(--viz-ink)]">How Follow-Gate Automation Works</p>
+                  </div>
+                  <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                    Live Webhook Flow
+                  </span>
+                </div>
+
+                <div className="grid gap-2.5 sm:grid-cols-2 pt-1">
+                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">1</span>
+                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Comment Trigger</span>
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
+                      User writes your trigger keyword. Instagram webhooks instantly check follow status.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">2</span>
+                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Already Following?</span>
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
+                      If commenter already follows you, your full template DM is delivered immediately!
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-[10px] font-bold text-white">3</span>
+                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Gate Message Sent</span>
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
+                      If not following, this follow-gate DM is sent with direct profile and confirmation buttons.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">4</span>
+                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Instant Delivery</span>
+                    </div>
+                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
+                      Once they follow and reply or tap confirmation, the reward is unlocked and sent!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
+
+      {/* ── Step 4: Send this message & Custom Templates ───────────── */}
       <div data-step="message" className={card}>
         <div className="mb-4">
           <div className="flex items-center gap-2">
@@ -1081,7 +1325,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <SendIcon className="h-4 w-4" />
             </span>
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-[var(--viz-ink)]">3. Response &amp; DM Template</h2>
+              <h2 className="text-sm font-bold text-[var(--viz-ink)]">4. Response &amp; DM Template</h2>
               <Tooltip title="Sent as a private Instagram DM to commenters. Customize with interactive buttons, product showcases, or downloadable lead magnets.">
                 <button
                   type="button"
@@ -1701,7 +1945,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
         </div>
 
-        {/* Step 3 Footer / Quick Save */}
+        {/* Step 4 Footer / Quick Save */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--viz-border)] pt-4">
           <div className="flex items-center gap-2 text-xs text-[var(--viz-muted)]">
             <span className={`inline-block h-2 w-2 rounded-full ${dirty ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
@@ -1716,250 +1960,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             {saving ? "Saving…" : "Save Template Changes"}
           </button>
         </div>
-      </div>
-
-      {/* ── Follow Gate Step ─────────────────────────────────────── */}
-      <div data-step="follow" className={card}>
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <div>
-              <p className="text-sm font-medium text-[var(--viz-ink)]">4. Require Follow</p>
-              <p className="text-xs text-[var(--viz-muted)] mt-0.5">Check if the commenter follows you before sending the DM. If not, send a follow-gate message first.</p>
-            </div>
-          </div>
-          {/* Toggle */}
-          <button
-            id="require-follow-toggle"
-            role="switch"
-            aria-checked={requireFollow}
-            onClick={(e) =>
-              handleButtonClick(e, () => {
-                setRequireFollow((v) => !v);
-                setDirty(true);
-              })
-            }
-            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-              requireFollow ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
-            }`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                requireFollow ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
-        </div>
-
-        {requireFollow && (
-          <div className="grid grid-cols-1 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
-            {/* Left Column: Editor & Workflow Explanation (7 cols) */}
-            <div className="space-y-5 w-full min-w-0 [overflow-anchor:none]">
-              {/* Message Editor Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-                {/* Header: Title, Subtitle, & Character Counter */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        <MessageSquareIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <p className="text-xs font-bold text-[var(--viz-ink)]">Follow-Gate Private Message</p>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
-                      Sent automatically to commenters who do not follow your account yet.
-                    </p>
-                  </div>
-                  <div className="shrink-0 pt-0.5">
-                    <span
-                      className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
-                        followGateText.length > 900
-                          ? "text-red-500 bg-red-500/10 border-red-500/25"
-                          : followGateText.length > 700
-                          ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
-                          : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
-                      }`}
-                    >
-                      <span>{followGateText.length}</span>
-                      <span className="opacity-40">/</span>
-                      <span>1000</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Textarea */}
-                <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
-                  <textarea
-                    value={followGateText}
-                    onChange={(e) => { setFollowGateText(e.target.value.slice(0, 1000)); setDirty(true); }}
-                    rows={4}
-                    placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
-                    className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[6rem]"
-                  />
-                </div>
-
-                {/* Quick Insert Variables: Symmetric 3-Column Grid */}
-                <div className="space-y-1.5 pt-0.5">
-                  <div className="flex items-center justify-between px-0.5">
-                    <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
-                      Quick Insert
-                    </span>
-                    <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
-                      Tap to append
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span className="font-mono text-[10px] opacity-75">@</span>
-                      <span className="truncate">username</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span>👋</span>
-                      <span className="truncate">Greeting</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/8 px-2 py-2 text-[11px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/15 hover:border-blue-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span>👇</span>
-                      <span className="truncate sm:hidden">Follow CTA</span>
-                      <span className="truncate hidden sm:inline">Hit Follow CTA</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Preset Templates */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[var(--viz-border)]">
-                  <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Oh no! It seems you're not following me 🙈\n\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Gentle & Friendly
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Hey {username}! 🎁 This download is exclusive to our Instagram community.\n\nHit follow on our profile, then tap 'I\\'m following' below to unlock your instant access!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    VIP Community
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Almost there! ✨ Follow our page first, then I\\'ll instantly send your link over!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Short & Crisp
-                  </button>
-                </div>
-              </div>
-
-              {/* How it Works Workflow Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      <BoltIcon className="h-3.5 w-3.5" />
-                    </span>
-                    <p className="text-xs font-bold text-[var(--viz-ink)]">How Follow-Gate Automation Works</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    Live Webhook Flow
-                  </span>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2 pt-1">
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">1</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Comment Trigger</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      User writes your trigger keyword. Instagram webhooks instantly check follow status.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">2</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Already Following?</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      If commenter already follows you, your full template DM is delivered immediately!
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-[10px] font-bold text-white">3</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Gate Message Sent</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      If not following, this follow-gate DM is sent with direct profile and confirmation buttons.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">4</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Instant Delivery</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      Once they follow and reply or tap confirmation, the reward is unlocked and sent!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        )}
       </div>
 
       {/* ── Check-in Reminder ─────────────────────────────────────── */}
