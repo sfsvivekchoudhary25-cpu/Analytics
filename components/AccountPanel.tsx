@@ -43,7 +43,7 @@ import {
   UserOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { api, API_BASE, auth, type ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, API_BASE, auth, type ConnectionStatus } from "@/lib/api";
 
 const PERMISSIONS = [
   {
@@ -222,6 +222,10 @@ export function AccountPanel({
   const [allPinging, setAllPinging] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
+  // Permanent account deletion (typed confirmation)
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteText, setDeleteText] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
 
 
@@ -527,38 +531,25 @@ export function AccountPanel({
   };
 
   const handleDeleteAccount = () => {
-    modal.confirm({
-      title: "Delete Account & Wipe Meta Data?",
-      icon: <ExclamationCircleOutlined className="text-rose-500" />,
-      content: (
-        <div className="space-y-2 text-xs text-slate-600">
-          <p>
-            This action is <strong>permanent</strong> and compliant with Meta Platform Terms and GDPR data deletion requirements.
-          </p>
-          <p>
-            All stored Meta user and page access tokens, linked Facebook Pages, Instagram business account associations, and comment automation rules will be permanently erased from our database.
-          </p>
-        </div>
-      ),
-      okText: "Yes, Delete Everything",
-      okType: "danger",
-      cancelText: "Cancel",
-      onOk: async () => {
-        try {
-          await Promise.all([
-            api("/instagram/connection/wipe-data", { method: "POST" }).catch(() => null),
-            api("/facebook-page", { method: "DELETE" }).catch(() => null),
-          ]);
-          message.success("Account and Meta access tokens have been completely deleted.");
-          auth.clear();
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 800);
-        } catch (err: any) {
-          message.error(err?.message || "Failed to execute complete account deletion");
-        }
-      },
-    });
+    setDeleteText("");
+    setDeleteOpen(true);
+  };
+
+  // Calls the server to delete everything for the signed-in user. Only signs out if the server says it worked.
+  const confirmDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      await api("/account/delete", { method: "POST", body: JSON.stringify({ confirm: deleteText.trim() }) });
+      message.success("Your account and all its data have been permanently deleted.");
+      auth.clear();
+      activeAccount.clear();
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 800);
+    } catch (err: any) {
+      message.error(err?.message || "Could not delete your account. Nothing was changed.");
+      setDeleting(false);
+    }
   };
 
   const handleCopyWebhook = () => {
@@ -651,6 +642,31 @@ export function AccountPanel({
   // Connected State: Full Enterprise Integrations Hub
   return (
     <div className="space-y-6 pb-12">
+      <Modal
+        open={deleteOpen}
+        title="Permanently delete your account?"
+        onCancel={() => !deleting && setDeleteOpen(false)}
+        okText="Delete everything"
+        okType="danger"
+        okButtonProps={{ disabled: deleteText.trim() !== "DELETE", loading: deleting }}
+        cancelButtonProps={{ disabled: deleting }}
+        onOk={confirmDeleteAccount}
+        maskClosable={false}
+      >
+        <div className="space-y-3 text-sm text-slate-600">
+          <p>This cannot be undone. The following is erased from our database:</p>
+          <ul className="list-disc space-y-1 pl-5 text-xs">
+            <li>Your login and profile</li>
+            <li>Your Instagram and Facebook Page connections and access tokens</li>
+            <li>All comments, conversations and messages</li>
+            <li>All automations, auto-replies, settings and their logs</li>
+            <li>Customer photos, stories, voice notes and saved reels</li>
+          </ul>
+          <p className="text-xs">Posts and messages already on Instagram are not touched.</p>
+          <p className="text-xs font-semibold text-slate-800">Type DELETE to confirm:</p>
+          <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)} placeholder="DELETE" autoComplete="off" />
+        </div>
+      </Modal>
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
         <div className="flex items-center gap-3.5">
