@@ -561,7 +561,7 @@ export function AccountPanel({
     modal.confirm({
       title: "Disconnect Facebook Page?",
       content:
-        "The Comment-to-DM automation will not be able to send private replies to comments until you reconnect a Facebook Page.",
+        "Comment-to-DM keeps working through your Instagram login. The Page is only an optional backup for sending.",
       okText: "Disconnect",
       okType: "danger",
       cancelText: "Keep Connected",
@@ -922,7 +922,7 @@ export function AccountPanel({
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Meta requires Facebook Page permissions to send automated private replies to comments.
+                    Optional. Comment-to-DM already sends through your Instagram login; a connected Page is only used as a backup.
                   </p>
                 </div>
               </div>
@@ -970,7 +970,7 @@ export function AccountPanel({
               ) : (
                 <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-5 sm:p-6 text-center space-y-3.5">
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-                    To deliver instant coupon links when customers comment on your Instagram posts, connect the Facebook Page linked to your Instagram account.
+                    Optional. Comment-to-DM works with just your Instagram login. You can connect the Facebook Page linked to your Instagram account as a backup way to send.
                   </p>
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 max-w-sm mx-auto">
                     <Button
