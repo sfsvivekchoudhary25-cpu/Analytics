@@ -71,7 +71,7 @@ function Skeleton({ className = "" }: { className?: string }) {
 /** Small white pill with the black outline from the design system. */
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-black/80 bg-white px-2.5 py-0.5 text-[11px] font-bold text-slate-950 shadow-2xs">
+    <span className="inline-flex items-center gap-1 rounded-full border border-black/80 bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-950 shadow-2xs">
       {children}
     </span>
   );
@@ -95,15 +95,15 @@ function FunnelCard({
   return (
     <div style={{ backgroundColor: bg }} className="flex flex-col justify-between rounded-[26px] p-4 shadow-xs sm:p-5">
       <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-bold text-slate-950">{label}</span>
+        <span className="text-sm font-semibold text-slate-950">{label}</span>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/80 bg-white text-slate-950 shadow-2xs">
           {icon}
         </div>
       </div>
-      <div className="mt-4 text-3xl font-black tabular-nums text-slate-950 sm:text-4xl">{value}</div>
+      <div className="mt-4 text-3xl font-semibold tabular-nums text-slate-950 sm:text-4xl">{value}</div>
       <div className="mt-2 flex min-h-7 flex-wrap items-center gap-2">
         {chip && <Pill>{chip}</Pill>}
-        <span className="text-xs font-semibold text-slate-600">{note}</span>
+        <span className="text-xs font-medium text-slate-600">{note}</span>
       </div>
     </div>
   );
@@ -207,7 +207,7 @@ export function CommentDmAutomationList({
       {/* ── Header ─────────────────────────────────────────────── */}
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-[28px]">Comment-to-DM Automations</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[28px]">Comment-to-DM Automations</h1>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
             When someone comments a keyword on your post, we reply with a link that opens a DM. Your message is sent as
             soon as they tap it.
@@ -222,13 +222,13 @@ export function CommentDmAutomationList({
             ]}
             value={days}
             onChange={(v) => setDays(v as 7 | 14 | 30)}
-            className="!rounded-xl font-semibold"
+            className="!rounded-xl font-medium"
           />
           <button
             type="button"
             onClick={createNew}
             disabled={creating}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-bold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+            className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
           >
             <PlusOutlined />
             {creating ? "Creating…" : "New automation"}
@@ -241,8 +241,8 @@ export function CommentDmAutomationList({
       {/* ── Funnel: what happened to the comments ───────────────── */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-black tracking-tight text-slate-950">What your comments turned into</h2>
-          <div className="flex items-center gap-3 text-xs font-semibold text-slate-500">
+          <h2 className="text-lg font-semibold tracking-tight text-slate-950">What your comments turned into</h2>
+          <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
             <span>{dateRangeLabel(days)}</span>
             {onOpenDashboard && (
               <button
@@ -303,12 +303,12 @@ export function CommentDmAutomationList({
           <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-5 shadow-2xs transition-all hover:border-black/30">
             <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-sm font-bold text-slate-950">DMs sent per day</h3>
+                <h3 className="text-sm font-semibold text-slate-950">DMs sent per day</h3>
                 <p className="text-xs text-slate-500">Each bar is one day. Hover a bar for the exact count.</p>
               </div>
               {stats && (
                 <div className="text-right">
-                  <div className="text-2xl font-black tabular-nums text-slate-950">{compact(stats.sent)}</div>
+                  <div className="text-2xl font-semibold tabular-nums text-slate-950">{compact(stats.sent)}</div>
                   <div className="text-xs text-slate-500">in {stats.days} days</div>
                 </div>
               )}
@@ -318,7 +318,7 @@ export function CommentDmAutomationList({
                 <UnifiedChart type="bar" data={stats.series} label="DMs sent" color="#000000" height={240} />
               ) : (
                 <div style={{ backgroundColor: PASTEL.memo }} className="flex h-60 flex-col items-center justify-center rounded-[20px] text-center">
-                  <p className="text-sm font-bold text-slate-950">No DMs sent in this period</p>
+                  <p className="text-sm font-semibold text-slate-950">No DMs sent in this period</p>
                   <p className="mt-1 max-w-xs text-xs text-slate-500">Once a comment matches one of your keywords, the day it was sent shows up here.</p>
                 </div>
               )
@@ -328,7 +328,7 @@ export function CommentDmAutomationList({
           </div>
 
           <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-5 shadow-2xs transition-all hover:border-black/30">
-            <h3 className="text-sm font-bold text-slate-950">Delivery</h3>
+            <h3 className="text-sm font-semibold text-slate-950">Delivery</h3>
             <p className="mb-3 text-xs text-slate-500">How many matched comments got a DM.</p>
             {stats ? (
               <>
@@ -360,7 +360,7 @@ export function CommentDmAutomationList({
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-lg font-black tracking-tight text-slate-950">Your automations</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-slate-950">Your automations</h2>
             {rows && rows.length > 0 && <Pill>{counts.all}</Pill>}
           </div>
           {rows && rows.length > 0 && (
@@ -373,7 +373,7 @@ export function CommentDmAutomationList({
                 ]}
                 value={filter}
                 onChange={(v) => setFilter(v as Filter)}
-                className="!rounded-xl text-xs font-semibold"
+                className="!rounded-xl text-xs font-medium"
               />
               <Segmented
                 options={[
@@ -382,7 +382,7 @@ export function CommentDmAutomationList({
                 ]}
                 value={sort}
                 onChange={(v) => setSort(v as Sort)}
-                className="!rounded-xl text-xs font-semibold"
+                className="!rounded-xl text-xs font-medium"
               />
             </div>
           )}
@@ -398,7 +398,7 @@ export function CommentDmAutomationList({
 
         {rows?.length === 0 && (
           <div style={{ backgroundColor: PASTEL.periwinkle }} className="rounded-[28px] p-6 shadow-xs sm:p-10">
-            <h3 className="text-xl font-black text-slate-950">Turn comments into conversations</h3>
+            <h3 className="text-xl font-semibold text-slate-950">Turn comments into conversations</h3>
             <p className="mt-1 max-w-xl text-sm text-slate-600">Set up your first automation in three steps:</p>
             <ol className="mt-5 grid gap-3 sm:grid-cols-3">
               {[
@@ -407,8 +407,8 @@ export function CommentDmAutomationList({
                 ["Write your message", "Add text, buttons or a product card."],
               ].map(([title, body], i) => (
                 <li key={title} className="rounded-2xl bg-white/70 p-4">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-xs font-bold text-white">{i + 1}</div>
-                  <div className="mt-3 text-sm font-bold text-slate-950">{title}</div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black text-xs font-semibold text-white">{i + 1}</div>
+                  <div className="mt-3 text-sm font-semibold text-slate-950">{title}</div>
                   <div className="mt-0.5 text-xs text-slate-600">{body}</div>
                 </li>
               ))}
@@ -417,7 +417,7 @@ export function CommentDmAutomationList({
               type="button"
               onClick={createNew}
               disabled={creating}
-              className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-black px-6 text-sm font-bold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 cursor-pointer"
+              className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-black px-6 text-sm font-semibold text-white transition-transform hover:scale-[1.02] disabled:opacity-60 cursor-pointer"
             >
               <PlusOutlined /> {creating ? "Creating…" : "Create your first automation"}
             </button>
@@ -426,7 +426,7 @@ export function CommentDmAutomationList({
 
         {rows && rows.length > 0 && visible.length === 0 && (
           <div style={{ backgroundColor: PASTEL.memo }} className="rounded-[24px] p-8 text-center text-sm text-slate-600">
-            No {filter} automations. <button type="button" className="font-bold text-slate-950 underline cursor-pointer" onClick={() => setFilter("all")}>Show all</button>
+            No {filter} automations. <button type="button" className="font-semibold text-slate-950 underline cursor-pointer" onClick={() => setFilter("all")}>Show all</button>
           </div>
         )}
 
@@ -454,7 +454,7 @@ export function CommentDmAutomationList({
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-base font-bold text-slate-950">{row.rule.name}</h3>
+                      <h3 className="truncate text-base font-semibold text-slate-950">{row.rule.name}</h3>
                       <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
                         {row.rule.mediaId ? (
                           row.rule.mediaPermalink ? (
@@ -463,22 +463,22 @@ export function CommentDmAutomationList({
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 font-semibold text-slate-700 hover:text-slate-950 hover:underline"
+                              className="inline-flex items-center gap-1 font-medium text-slate-700 hover:text-slate-950 hover:underline"
                             >
                               One post <LinkOutlined />
                             </a>
                           ) : (
-                            <span className="font-semibold text-slate-700">One post</span>
+                            <span className="font-medium text-slate-700">One post</span>
                           )
                         ) : (
-                          <span className="font-semibold text-slate-700">Every post</span>
+                          <span className="font-medium text-slate-700">Every post</span>
                         )}
                         <span>Created {ago(row.rule.createdAt)}</span>
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-col items-end gap-1" onClick={(e) => e.stopPropagation()}>
                       <Switch size="small" checked={row.rule.enabled} loading={busy} onChange={(v) => toggle(row, v)} />
-                      <span className={`text-[11px] font-bold ${row.rule.enabled ? "text-emerald-700" : "text-slate-400"}`}>
+                      <span className={`text-[11px] font-semibold ${row.rule.enabled ? "text-emerald-700" : "text-slate-400"}`}>
                         {row.rule.enabled ? "Active" : "Paused"}
                       </span>
                     </div>
@@ -486,22 +486,22 @@ export function CommentDmAutomationList({
 
                   {/* Keywords */}
                   <div>
-                    <div className="mb-1.5 text-xs font-semibold text-slate-500">{kws.length === 0 ? "Starts on" : "Starts when a comment contains"}</div>
+                    <div className="mb-1.5 text-xs font-medium text-slate-500">{kws.length === 0 ? "Starts on" : "Starts when a comment contains"}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {kws.length === 0 ? (
-                        <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-700">
                           Any comment
                         </span>
                       ) : (
                         <>
                           {kws.slice(0, 4).map((k) => (
-                            <span key={k} style={{ backgroundColor: PASTEL.butter }} className="rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-900">
+                            <span key={k} style={{ backgroundColor: PASTEL.butter }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-900">
                               {k}
                             </span>
                           ))}
                           {kws.length > 4 && (
                             <Tooltip title={kws.slice(4).join(", ")}>
-                              <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-semibold text-slate-600">
+                              <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600">
                                 +{kws.length - 4} more
                               </span>
                             </Tooltip>
@@ -513,7 +513,7 @@ export function CommentDmAutomationList({
 
                   {/* DM preview */}
                   <div>
-                    <div className="mb-1.5 text-xs font-semibold text-slate-500">Then sends this DM</div>
+                    <div className="mb-1.5 text-xs font-medium text-slate-500">Then sends this DM</div>
                     <div
                       style={{ backgroundColor: PASTEL.memo }}
                       className="line-clamp-3 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed text-slate-800"
@@ -528,16 +528,16 @@ export function CommentDmAutomationList({
                     <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-3">
                       <div className="flex items-center gap-4 sm:gap-5">
                         <div>
-                          <div className="text-lg font-black tabular-nums text-slate-950">{compact(row.triggered)}</div>
-                          <div className="text-[11px] font-semibold text-slate-500">matched</div>
+                          <div className="text-lg font-semibold tabular-nums text-slate-950">{compact(row.triggered)}</div>
+                          <div className="text-[11px] font-medium text-slate-500">matched</div>
                         </div>
                         <div>
-                          <div className="text-lg font-black tabular-nums text-slate-950">{compact(row.sent)}</div>
-                          <div className="text-[11px] font-semibold text-slate-500">DMs sent</div>
+                          <div className="text-lg font-semibold tabular-nums text-slate-950">{compact(row.sent)}</div>
+                          <div className="text-[11px] font-medium text-slate-500">DMs sent</div>
                         </div>
                         <div>
-                          <div className="text-lg font-black tabular-nums text-slate-950">{pct(rate)}</div>
-                          <div className="text-[11px] font-semibold text-slate-500">delivered</div>
+                          <div className="text-lg font-semibold tabular-nums text-slate-950">{pct(rate)}</div>
+                          <div className="text-[11px] font-medium text-slate-500">delivered</div>
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
