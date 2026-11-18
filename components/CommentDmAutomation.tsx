@@ -661,31 +661,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </span>
                 </button>
               </div>
-
-              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-[var(--viz-muted)] leading-relaxed">
-                When someone comments your keyword, we send them your message straight away as a private reply.
-              </p>
-
-              {/* Key settings at a glance */}
-              <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                {[
-                  {
-                    label: rule.keywords.trim()
-                      ? `${rule.keywords.split(",").filter((k) => k.trim()).length} keyword${rule.keywords.split(",").filter((k) => k.trim()).length === 1 ? "" : "s"}`
-                      : "Any comment",
-                  },
-                  { label: rule.mediaId ? "One post" : "All posts" },
-                  { label: requireFollow ? "Must follow first" : "No follow needed" },
-                  { label: templateType === "text" ? "Text message" : templateType === "button" ? "Message with buttons" : "Card message" },
-                ].map((chip) => (
-                  <span
-                    key={chip.label}
-                    className="inline-flex items-center rounded-full border border-[var(--viz-border)] bg-black/[0.02] px-2.5 py-0.5 text-[11px] font-medium text-[var(--viz-ink-2)] dark:bg-white/[0.04]"
-                  >
-                    {chip.label}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
 
