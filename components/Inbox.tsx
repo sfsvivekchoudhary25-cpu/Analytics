@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Tooltip, Dropdown, Skeleton } from "antd";
+import { LoadFailed } from "./ui/LoadFailed";
 import {
   SearchOutlined,
   TeamOutlined,
@@ -686,7 +687,12 @@ export function Inbox({
             </div>
 
             {/* Skeleton Loading */}
-            {!list && (
+            {!list && error && (
+              <div className="p-2">
+                <LoadFailed title="Couldn't load your conversations" message={`${error} Trying again every few seconds.`} compact />
+              </div>
+            )}
+            {!list && !error && (
               <div className="space-y-2 p-2">
                 {[0, 1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center gap-2">
@@ -863,7 +869,8 @@ export function Inbox({
           className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-6 md:px-8 py-3 sm:py-5 space-y-3 sm:space-y-3.5"
         >
           {/* Skeleton while thread loading */}
-          {selected && !thread && (
+          {selected && !thread && error && <LoadFailed title="Couldn't load this chat" message={`${error} Trying again every few seconds.`} compact />}
+          {selected && !thread && !error && (
             <div className="space-y-4">
               {[0, 1, 2].map((i) => (
                 <div key={i} className="flex items-start gap-3">

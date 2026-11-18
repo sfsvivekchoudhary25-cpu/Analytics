@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { api } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 import { AutoReplyCard, type RuleTemplate } from "./AutoReplyCard";
 import {
   MessageSquare,
@@ -26,6 +26,7 @@ import {
   Check,
 } from "lucide-react";
 import { InstagramIcon } from "./icons";
+import { LoadFailed } from "./ui/LoadFailed";
 
 type Comment = {
   id: string;
@@ -126,6 +127,12 @@ export function Comments() {
   const [postsTotal, setPostsTotal] = useState(0);
   const [postsLoadingMore, setPostsLoadingMore] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  // Set when the first page could not be loaded, so the screen shows a message instead of a skeleton for ever.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  // Older servers (without paging) are still supported: their full list is paged here instead.
+  const legacyAllRef = useRef<Comment[] | null>(null);
+  const legacyShownRef = useRef(COMMENTS_PAGE);
+  const postsAllRef = useRef<PostWithComments[] | null>(null);
   const itemsRef = useRef<Comment[] | null>(null);
   const cursorRef = useRef<string | null>(null);
   const postsRef = useRef<PostWithComments[] | null>(null);
@@ -175,15 +182,44 @@ export function Comments() {
   useEffect(() => {
     setItems(null);
     setNextCursor(null);
+    setLoadError(null);
+    legacyShownRef.current = COMMENTS_PAGE;
   }, [tab, selectedPostId, debouncedSearch]);
+
+  // What an older server (no paging) would show, worked out here from its full list.
+  const legacyView = (all: Comment[]) => {
+    let list = tab === "unreplied" ? all.filter((c) => !c.repliedAt) : tab === "replied" ? all.filter((c) => !!c.repliedAt) : all;
+    if (selectedPostId) list = list.filter((c) => c.mediaPermalink?.includes(selectedPostId));
+    const q = debouncedSearch.toLowerCase();
+    if (q) list = list.filter((c) => c.username?.toLowerCase().includes(q) || c.text?.toLowerCase().includes(q));
+    const shown = list.slice(0, legacyShownRef.current);
+    return {
+      items: shown,
+      more: list.length > shown.length,
+      counts: { all: all.length, unreplied: all.filter((c) => !c.repliedAt).length, replied: all.filter((c) => !!c.repliedAt).length },
+    };
+  };
+
+  const fetchFirstPage = async (): Promise<CommentsPage> => {
+    try {
+      return await api<CommentsPage>(`/comments/page?${pageQuery()}`);
+    } catch (e) {
+      if (!(e instanceof ApiError && e.status === 404)) throw e;
+      const all = (await api<Comment[]>("/comments?filter=all")).filter((c) => !c.isOwn);
+      legacyAllRef.current = all;
+      const v = legacyView(all);
+      return { items: v.items, nextCursor: v.more ? "legacy" : null, counts: v.counts };
+    }
+  };
 
   // Comments: the first page now, then a fresh look every 15 seconds. Pages you already opened with "Load more" are kept.
   useEffect(() => {
     let cancelled = false;
     const load = (fresh: boolean) =>
-      api<CommentsPage>(`/comments/page?${pageQuery()}`).then(
+      fetchFirstPage().then(
         (r) => {
           if (cancelled) return;
+          setLoadError(null);
           setCounts(r.counts);
           const prev = itemsRef.current;
           if (fresh || !prev || prev.length <= r.items.length) {
@@ -195,7 +231,12 @@ export function Comments() {
             setItems([...r.items, ...prev.filter((c) => !firstIds.has(c.id) && c.commentedAt < lastTime)]);
           }
         },
-        (e: Error) => !cancelled && setError(e.message),
+        (e: Error) => {
+          if (cancelled) return;
+          // Nothing on screen yet: say so (with a retry). Something already shown: keep it, and try again at the next refresh.
+          if (!itemsRef.current) setLoadError(e.message);
+          else setError(e.message);
+        },
       );
     load(true);
     const id = setInterval(() => load(false), 15000);
@@ -211,11 +252,19 @@ export function Comments() {
     let cancelled = false;
     const load = () => {
       const n = Math.max(POSTS_PAGE, postsRef.current?.length ?? 0);
-      return api<PostsPage>(`/comments/posts?limit=${n}&offset=0`).then(
+      return api<PostsPage | PostWithComments[]>(`/comments/posts?limit=${n}&offset=0`).then(
         (r) => {
           if (cancelled) return;
-          setPosts(r.items);
-          setPostsTotal(r.total);
+          if (Array.isArray(r)) {
+            // An older server sends every post at once; show them six at a time here.
+            postsAllRef.current = r;
+            setPosts(r.slice(0, n));
+            setPostsTotal(r.length);
+          } else {
+            postsAllRef.current = null;
+            setPosts(r.items);
+            setPostsTotal(r.total);
+          }
         },
         () => {},
       );
@@ -231,6 +280,13 @@ export function Comments() {
   async function loadMoreComments() {
     const cursor = cursorRef.current;
     if (!cursor || loadingMore) return;
+    if (cursor === "legacy" && legacyAllRef.current) {
+      legacyShownRef.current += COMMENTS_PAGE;
+      const v = legacyView(legacyAllRef.current);
+      setItems(v.items);
+      setNextCursor(v.more ? "legacy" : null);
+      return;
+    }
     setLoadingMore(true);
     try {
       const r = await api<CommentsPage>(`/comments/page?${pageQuery()}&cursor=${encodeURIComponent(cursor)}`);
@@ -250,6 +306,10 @@ export function Comments() {
   async function loadMorePosts() {
     const have = postsRef.current?.length ?? 0;
     if (postsLoadingMore) return;
+    if (postsAllRef.current) {
+      setPosts(postsAllRef.current.slice(0, have + POSTS_PAGE));
+      return;
+    }
     setPostsLoadingMore(true);
     try {
       const r = await api<PostsPage>(`/comments/posts?limit=${POSTS_PAGE}&offset=${have}`);
@@ -644,7 +704,9 @@ export function Comments() {
       </div>
 
       {/* ── 5. COMPACT BENTO GRID COMMENTS STREAM ── */}
-      {items === null ? (
+      {items === null && loadError ? (
+        <LoadFailed message={loadError} onRetry={reload} />
+      ) : items === null ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5" aria-busy="true">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="h-40 animate-pulse rounded-[22px] border border-[#e9e9ee] bg-slate-50" />

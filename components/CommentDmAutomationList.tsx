@@ -18,6 +18,7 @@ import {
 } from "@ant-design/icons";
 import { api, ApiError } from "@/lib/api";
 import { UnifiedChart, Point } from "./UnifiedChart";
+import { LoadFailed } from "./ui/LoadFailed";
 
 type Rule = {
   id: string;
@@ -126,10 +127,20 @@ export function CommentDmAutomationList({
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("newest");
   const [error, setError] = useState<string | null>(null);
+  const [rowsError, setRowsError] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
+  const [statsTick, setStatsTick] = useState(0); // bumped by "Try again"
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const load = () => api<Row[]>("/comment-dm/automations").then(setRows, (e: Error) => setError(e.message));
+  const load = () =>
+    api<Row[]>("/comment-dm/automations").then(
+      (r) => {
+        setRows(r);
+        setRowsError(null);
+      },
+      (e: Error) => setRowsError(e.message),
+    );
 
   useEffect(() => {
     load();
@@ -138,14 +149,15 @@ export function CommentDmAutomationList({
   useEffect(() => {
     let cancelled = false;
     setStats(null);
+    setStatsError(null);
     api<Stats>(`/comment-dm/stats?days=${days}`).then(
       (s) => !cancelled && setStats(s),
-      (e: Error) => !cancelled && setError(e.message),
+      (e: Error) => !cancelled && setStatsError(e.message),
     );
     return () => {
       cancelled = true;
     };
-  }, [days]);
+  }, [days, statsTick]);
 
   async function createNew() {
     setCreating(true);
@@ -278,7 +290,9 @@ export function CommentDmAutomationList({
           </div>
         </div>
 
-        {!stats ? (
+        {!stats && statsError ? (
+          <LoadFailed title="Couldn't load these numbers" message={statsError} onRetry={() => setStatsTick((n) => n + 1)} compact />
+        ) : !stats ? (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} className="h-36" />
@@ -344,7 +358,7 @@ export function CommentDmAutomationList({
                   <p className="mt-1 max-w-xs text-xs text-slate-500">Once a comment matches one of your keywords, the day it was sent shows up here.</p>
                 </div>
               )
-            ) : (
+            ) : statsError ? null : (
               <Skeleton className="h-60 !rounded-[20px]" />
             )}
           </div>
@@ -371,7 +385,7 @@ export function CommentDmAutomationList({
                   </div>
                 )}
               </>
-            ) : (
+            ) : statsError ? null : (
               <Skeleton className="h-52 !rounded-[20px]" />
             )}
           </div>
@@ -410,7 +424,9 @@ export function CommentDmAutomationList({
           )}
         </div>
 
-        {!rows && (
+        {!rows && rowsError && <LoadFailed title="Couldn't load your automations" message={rowsError} onRetry={() => void load()} />}
+
+        {!rows && !rowsError && (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-64" />

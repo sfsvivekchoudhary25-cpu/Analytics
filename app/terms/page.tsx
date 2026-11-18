@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { LegalLayout, LegalLink, LegalList, LegalNote, LegalP, type LegalSection } from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
@@ -11,11 +12,11 @@ const sections: LegalSection[] = [
     id: "service",
     title: "The service",
     body: (
-      <>
+      <Fragment key="f1">
         <LegalP>
           Fabroniee provides creator tools: Comment-to-DM funnels, an inbox for your comments and messages, automatic replies and analytics. They run on the official Meta APIs. By connecting an account, building an automation or otherwise using the service, you agree to these terms.
         </LegalP>
-      </>
+      </Fragment>
     ),
   },
   {
@@ -35,7 +36,7 @@ const sections: LegalSection[] = [
     id: "meta",
     title: "Meta’s rules also apply",
     body: (
-      <>
+      <Fragment key="f2">
         <LegalP>You agree to follow:</LegalP>
         <LegalList
           items={[
@@ -47,14 +48,14 @@ const sections: LegalSection[] = [
         <LegalNote title="Instagram sets limits, and we follow them." tone="butter">
           For example, a customer must message you before you can reply, replies must go out within Instagram&apos;s time window, and a comment can get one private reply. We cannot send what Instagram does not allow.
         </LegalNote>
-      </>
+      </Fragment>
     ),
   },
   {
     id: "use",
     title: "Acceptable use",
     body: (
-      <>
+      <Fragment key="f3">
         <LegalP>You may not use Fabroniee to send:</LegalP>
         <LegalList
           items={[
@@ -65,7 +66,7 @@ const sections: LegalSection[] = [
           ]}
         />
         <LegalP>We may suspend or end accounts that do this, with or without notice.</LegalP>
-      </>
+      </Fragment>
     ),
   },
   {
@@ -103,11 +104,11 @@ const sections: LegalSection[] = [
     id: "ending",
     title: "Ending your account",
     body: (
-      <>
+      <Fragment key="f4">
         <LegalP>
           You can end your account at any time from <strong className="font-medium text-slate-900">Settings → Delete account</strong>. When you do, your tokens, automations and other data are permanently deleted. We may end your account if you break these terms.
         </LegalP>
-      </>
+      </Fragment>
     ),
   },
 ];
@@ -119,9 +120,9 @@ export default function TermsPage() {
       eyebrow="Terms of Service"
       title="The rules, kept short."
       intro={
-        <>
+        <Fragment key="f5">
           By using <strong className="font-medium text-slate-900">Fabroniee</strong>, at fabroniee.store, you agree to what is on this page.
-        </>
+        </Fragment>
       }
       highlights={[
         { title: "Your accounts only", text: "Connect Instagram accounts you own or manage." },
