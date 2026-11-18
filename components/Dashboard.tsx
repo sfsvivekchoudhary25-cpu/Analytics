@@ -172,7 +172,7 @@ function PostMediaThumbnail({ post }: { post: Media }) {
   if (loadFailed || !preferredUrl) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-slate-800 to-slate-900 p-4 text-center text-white">
-        <InstagramOutlined className="text-3xl text-pink-400 mb-2" />
+        <InstagramOutlined className="text-3xl text-slate-900 mb-2" />
         <span className="text-[11px] font-medium text-slate-300 line-clamp-2 px-2 leading-relaxed">
           {post.caption || (post.media_type === "VIDEO" ? "Instagram Video" : "Instagram Post")}
         </span>
@@ -210,7 +210,7 @@ function ProfileHeroSkeleton() {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs space-y-1.5 text-center min-w-0"
+              className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs space-y-1.5 text-center min-w-0"
             >
               <Skeleton.Input active size="small" style={{ width: 36, height: 16 }} />
               <Skeleton.Input active size="small" style={{ width: 48, height: 12 }} />
@@ -224,7 +224,7 @@ function ProfileHeroSkeleton() {
 
 function KpiCardSkeleton() {
   return (
-    <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] bg-white p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between min-h-[108px] sm:min-h-[120px]">
+    <div className="rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between min-h-[108px] sm:min-h-[120px]">
       <div className="flex items-center justify-between">
         <Skeleton.Input active size="large" style={{ width: 60, height: 24 }} />
         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 flex items-center justify-center shrink-0" />
@@ -250,7 +250,7 @@ function AnalyticsChartSkeleton() {
         <Skeleton.Button active size="small" style={{ width: 120, height: 24 }} className="!rounded-lg" />
       </div>
 
-      <div className="relative h-[220px] w-full flex items-end justify-between gap-2.5 px-6 pb-6 pt-4 rounded-xl bg-slate-50/50 border border-dashed border-slate-200">
+      <div className="relative h-[220px] w-full flex items-end justify-between gap-2.5 px-6 pb-6 pt-4 rounded-xl bg-[#F1F3F7] border border-dashed border-[#e9e9ee]">
         {[25, 45, 30, 65, 50, 75, 40, 85, 60, 95, 70, 45, 80, 55, 90].map((h, i) => (
           <div
             key={i}
@@ -272,7 +272,7 @@ function PostsShowcaseSkeleton() {
       {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
-          className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs"
+          className="flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] bg-white shadow-xs"
         >
           <div className="relative aspect-video sm:aspect-square w-full bg-slate-100 skeleton-pulse" />
           <div className="flex flex-1 flex-col p-4 space-y-3">
@@ -326,7 +326,7 @@ function RecentDmsTableSkeleton() {
       {/* Mobile Skeleton */}
       <div className="block md:hidden space-y-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="rounded-2xl border border-slate-100 p-3.5 space-y-2.5">
+          <div key={i} className="rounded-[22px] border border-slate-100 p-3.5 space-y-2.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton.Avatar active size={28} shape="circle" />
@@ -599,7 +599,7 @@ export function Dashboard({
             href={`https://instagram.com/${u}`}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700 hover:underline truncate max-w-[120px]"
+            className="flex items-center gap-1 font-semibold text-slate-900 hover:text-slate-900 hover:underline truncate max-w-[120px]"
           >
             <span className="truncate">@{u || "unknown"}</span>
           </a>
@@ -638,7 +638,7 @@ export function Dashboard({
           return <Badge status="success" text={<span className="text-xs font-medium text-emerald-700">Replied</span>} />;
         }
         if (s === "sent") {
-          return <Badge status="processing" color="#2563eb" text={<span className="text-xs font-medium text-blue-700">Sent</span>} />;
+          return <Badge status="processing" color="#2563eb" text={<span className="text-xs font-medium text-slate-900">Sent</span>} />;
         }
         return <Badge status="error" text={<span className="text-xs font-medium text-rose-700">Failed</span>} />;
       },
@@ -697,7 +697,7 @@ export function Dashboard({
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
       {/* ── Top Hero Card (Soft Pastel Minimal) ───────────── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-2.5 sm:py-3.5 sm:px-5 lg:p-7 shadow-2xs transition-all">
+      <div className="relative overflow-hidden rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-2.5 sm:py-3.5 sm:px-5 lg:p-7 shadow-2xs transition-all">
         {/* Soft pastel accent ambient glow */}
         <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl" />
         <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl" />
@@ -722,7 +722,7 @@ export function Dashboard({
                   icon={isAnyLoading ? <LoadingOutlined className="text-slate-950 text-xs sm:text-sm" /> : <ReloadOutlined className="text-slate-950 text-xs sm:text-sm" />}
                   onClick={() => setTick((n) => n + 1)}
                   disabled={isAnyLoading}
-                  className="!flex !items-center !justify-center !h-8 !w-8 !shrink-0 !rounded-xl !border !border-black/80 !bg-white hover:!bg-slate-50 !shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  className="!flex !items-center !justify-center !h-8 !w-8 !shrink-0 !rounded-xl !border !border-black/80 !bg-white hover:!bg-[#F1F3F7] !shadow-2xs transition-all active:scale-95 cursor-pointer"
                   aria-label="Refresh data"
                 />
               </Tooltip>
@@ -775,7 +775,7 @@ export function Dashboard({
                   icon={isAnyLoading ? <LoadingOutlined className="text-slate-950 text-sm" /> : <ReloadOutlined className="text-slate-950 text-sm" />}
                   onClick={() => setTick((n) => n + 1)}
                   disabled={isAnyLoading}
-                  className="sm:!hidden !flex !items-center !justify-center !h-10 !w-10 !shrink-0 !rounded-2xl !border !border-[#e9e9ee] hover:!border-black/30 !bg-white hover:!bg-slate-50 !shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  className="sm:!hidden !flex !items-center !justify-center !h-10 !w-10 !shrink-0 !rounded-[22px] !border !border-[#e9e9ee] hover:!border-black/30 !bg-white hover:!bg-[#F1F3F7] !shadow-2xs transition-all active:scale-95 cursor-pointer"
                   aria-label="Refresh data"
                 />
               </Tooltip>
@@ -800,7 +800,7 @@ export function Dashboard({
           title="Could not load automations overview"
           description={dashError}
           closable
-          className="rounded-2xl border-red-200 bg-red-50/80"
+          className="rounded-[22px] border-red-200 bg-red-50/80"
         />
       )}
 
@@ -811,7 +811,7 @@ export function Dashboard({
           title="Some Instagram analytics could not be retrieved"
           description={insightsError}
           closable
-          className="rounded-2xl border-amber-200 bg-amber-50/80"
+          className="rounded-[22px] border-amber-200 bg-amber-50/80"
         />
       )}
 
@@ -866,21 +866,21 @@ export function Dashboard({
 
               {/* Account Metric Boxes - 3 Columns with Soft Pastel Minimal White Card Styling */}
               <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-3 shrink-0 pt-1 sm:pt-0">
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
                   <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
                     {compact(profile.followers_count)}
                   </span>
                   <span className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">Followers</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
                   <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
                     {compact(profile.follows_count)}
                   </span>
                   <span className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">Following</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
                   <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
                     {compact(profile.media_count)}
                   </span>
@@ -892,7 +892,7 @@ export function Dashboard({
                     href={profile.website}
                     target="_blank"
                     rel="noreferrer"
-                    className="hidden xl:flex items-center gap-1.5 rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-all"
+                    className="hidden xl:flex items-center gap-1.5 rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-all"
                   >
                     <LinkOutlined />
                     <span>Website</span>
@@ -919,7 +919,7 @@ export function Dashboard({
             ) : (
               <div
                 style={{ backgroundColor: "#e2e2fc" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -949,7 +949,7 @@ export function Dashboard({
             ) : (
               <div
                 style={{ backgroundColor: "#fff9db" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -974,7 +974,7 @@ export function Dashboard({
             ) : (
               <div
                 style={{ backgroundColor: "#fceef4" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -999,7 +999,7 @@ export function Dashboard({
             ) : data ? (
               <div
                 style={{ backgroundColor: "#feece4" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -1029,7 +1029,7 @@ export function Dashboard({
             ) : (
               <div
                 style={{ backgroundColor: "#e0f2fe" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -1057,7 +1057,7 @@ export function Dashboard({
             ) : (
               <div
                 style={{ backgroundColor: "#e8f5e9" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -1135,7 +1135,7 @@ export function Dashboard({
                 <button
                   type="button"
                   aria-label="Chart view options"
-                  className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                  className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                   title="Change chart view"
                 >
                   <EllipsisOutlined className="text-lg text-slate-800" />
@@ -1279,7 +1279,7 @@ export function Dashboard({
                   <button
                     type="button"
                     aria-label="Sort posts options"
-                    className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                     title="Change sort order"
                   >
                     <EllipsisOutlined className="text-lg text-slate-800" />
@@ -1294,9 +1294,9 @@ export function Dashboard({
                   <div
                     key={p.id}
                     onClick={() => handleSelectPost(p)}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
+                    className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
                   >
-                    <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
+                    <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-black">
                       <PostMediaThumbnail post={p} />
                       <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
                         {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
@@ -1304,7 +1304,7 @@ export function Dashboard({
                       </span>
                       {/* Hover overlay */}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                        <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-sm">
+                        <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-2xs">
                           <EyeOutlined />
                           View Analytics
                         </span>
@@ -1320,7 +1320,7 @@ export function Dashboard({
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                            className="flex items-center gap-1 font-bold text-slate-900 hover:text-slate-900 hover:underline"
                           >
                             <span>Instagram</span>
                             <LinkOutlined className="text-[10px]" />
@@ -1342,7 +1342,7 @@ export function Dashboard({
                           <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
                         </span>
                         <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
-                          <CommentOutlined className="text-blue-600" />
+                          <CommentOutlined className="text-slate-900" />
                           <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
                         </span>
                       </div>
@@ -1400,7 +1400,7 @@ export function Dashboard({
               title={
                 <div className="px-6 py-5 border-b border-[#e9e9ee] flex items-center justify-between gap-4 bg-white">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[22px] bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                       <AppstoreOutlined className="text-lg" />
                     </div>
                     <div>
@@ -1495,9 +1495,9 @@ export function Dashboard({
                         setShowAllPostsModal(false);
                         handleSelectPost(p);
                       }}
-                      className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-sm cursor-pointer hover:-translate-y-0.5 transition-all"
+                      className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-2xs cursor-pointer hover:-translate-y-0.5 transition-all"
                     >
-                      <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
+                      <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-black">
                         <PostMediaThumbnail post={p} />
                         <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/80 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
                           {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
@@ -1505,7 +1505,7 @@ export function Dashboard({
                         </span>
                         {/* Hover overlay with Soft Pastel Minimal White Action Button */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 opacity-0 transition-opacity group-hover:opacity-100 gap-2 p-3 text-center backdrop-blur-[2px]">
-                          <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:scale-105 transition-transform">
+                          <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-transform">
                             <EyeOutlined />
                             View Analytics
                           </span>
@@ -1522,7 +1522,7 @@ export function Dashboard({
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                              className="flex items-center gap-1 font-bold text-slate-900 hover:text-slate-900 hover:underline"
                             >
                               <span>Instagram</span>
                               <LinkOutlined className="text-[10px]" />
@@ -1545,7 +1545,7 @@ export function Dashboard({
                             <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
                           </span>
                           <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs font-bold">
-                            <CommentOutlined className="text-blue-600" />
+                            <CommentOutlined className="text-slate-900" />
                             <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
                           </span>
                         </div>
@@ -1670,7 +1670,7 @@ export function Dashboard({
 
                       {/* Message excerpt bubble */}
                       {item.message ? (
-                        <div className="text-xs sm:text-[13px] text-slate-700 bg-slate-50 rounded-xl px-3.5 py-2.5 border border-slate-100/70 leading-relaxed break-words line-clamp-3">
+                        <div className="text-xs sm:text-[13px] text-slate-700 bg-[#F1F3F7] rounded-xl px-3.5 py-2.5 border border-slate-100/70 leading-relaxed break-words line-clamp-3">
                           {item.message}
                         </div>
                       ) : null}
@@ -1695,8 +1695,8 @@ export function Dashboard({
                         </div>
                         <div className="flex items-center">
                           {item.status === "sent" && (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-900">
+                              <span className="h-1.5 w-1.5 rounded-full bg-black" />
                               <span>Sent</span>
                             </div>
                           )}

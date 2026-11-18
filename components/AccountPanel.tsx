@@ -51,7 +51,7 @@ const PERMISSIONS = [
     aliasScopes: ["instagram_manage_messages"],
     label: "Direct Messages",
     hint: "Read & reply to customer DMs in real-time",
-    icon: <MessageOutlined className="text-blue-500" />,
+    icon: <MessageOutlined className="text-slate-900" />,
     required: true,
   },
   {
@@ -59,7 +59,7 @@ const PERMISSIONS = [
     aliasScopes: ["instagram_manage_comments"],
     label: "Comments & Mentions",
     hint: "Monitor comments, auto-reply & moderate spam",
-    icon: <CommentOutlined className="text-purple-500" />,
+    icon: <CommentOutlined className="text-slate-900" />,
     required: true,
   },
   {
@@ -91,7 +91,7 @@ const PERMISSIONS = [
     aliasScopes: [],
     label: "Engagement & Likes",
     hint: "Programmatically like comments & posts to boost algorithm signals",
-    icon: <HeartOutlined className="text-pink-500" />,
+    icon: <HeartOutlined className="text-slate-900" />,
     required: false,
   },
   {
@@ -99,7 +99,7 @@ const PERMISSIONS = [
     aliasScopes: [],
     label: "Page Discovery",
     hint: "Detect Facebook Pages linked to Instagram Business account",
-    icon: <ApartmentOutlined className="text-indigo-500" />,
+    icon: <ApartmentOutlined className="text-slate-900" />,
     required: false,
   },
   {
@@ -115,7 +115,7 @@ const PERMISSIONS = [
     aliasScopes: [],
     label: "Content Cleanup",
     hint: "Delete and moderate published feed content and media",
-    icon: <SafetyCertificateOutlined className="text-violet-500" />,
+    icon: <SafetyCertificateOutlined className="text-slate-900" />,
     required: false,
   },
   {
@@ -536,7 +536,7 @@ export function AccountPanel({
     if (externalError) {
       return (
         <div className="flex h-96 w-full items-center justify-center p-4">
-          <div className="text-center space-y-3 max-w-md mx-auto p-6 rounded-2xl border border-rose-200 bg-rose-50/60 shadow-sm">
+          <div className="text-center space-y-3 max-w-md mx-auto p-6 rounded-[22px] border border-rose-200 bg-rose-50/60 shadow-2xs">
             <CloseCircleOutlined className="text-3xl text-rose-500" />
             <h3 className="text-base font-semibold text-rose-900">Backend Connection Error</h3>
             <p className="text-xs text-rose-700 leading-relaxed">{externalError}</p>
@@ -554,7 +554,7 @@ export function AccountPanel({
     return (
       <div className="flex h-96 w-full items-center justify-center">
         <div className="text-center space-y-3">
-          <ReloadOutlined className="animate-spin text-3xl text-blue-600" />
+          <ReloadOutlined className="animate-spin text-3xl text-slate-900" />
           <p className="text-sm font-medium text-slate-500">Checking Meta connection status...</p>
         </div>
       </div>
@@ -565,8 +565,8 @@ export function AccountPanel({
   if (!connected) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-xl shadow-slate-100 text-center space-y-6">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 border border-slate-200/80 shadow-md">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-8 sm:p-10 shadow-2xs shadow-slate-100 text-center space-y-6">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[26px] bg-[#F1F3F7] border border-[#e9e9ee] shadow-2xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Fabroniee" className="h-14 w-14 object-contain" />
           </div>
@@ -593,7 +593,7 @@ export function AccountPanel({
               icon={<InstagramOutlined />}
               onClick={onConnectInstagram}
               disabled={busy}
-              className="!h-11 !px-6 !rounded-xl !bg-gradient-to-r !from-purple-600 !to-indigo-600 hover:!from-purple-700 hover:!to-indigo-700 !font-bold !shadow-md shadow-purple-600/20"
+              className="!h-11 !px-6 !rounded-xl !bg-black hover:!bg-slate-800 !border-black !font-bold !shadow-2xs"
             >
               Connect with Instagram
             </Button>
@@ -602,7 +602,7 @@ export function AccountPanel({
               icon={<FacebookOutlined />}
               onClick={handleConnectFacebook}
               loading={fbBusy}
-              className="!h-11 !px-6 !rounded-xl !border-blue-200 !bg-blue-50/60 hover:!bg-blue-100/60 !text-blue-700 !font-bold shadow-xs"
+              className="!h-11 !px-6 !rounded-xl !border-[#e9e9ee] !bg-[#E2E2FC] hover:!bg-[#E2E2FC] !text-slate-900 !font-bold shadow-xs"
             >
               Connect via Facebook Page
             </Button>
@@ -616,9 +616,9 @@ export function AccountPanel({
   return (
     <div className="space-y-6 pb-12">
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-[#e9e9ee]">
         <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-16 sm:h-13 sm:w-18 shrink-0 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-2xs p-1">
+          <div className="flex h-12 w-16 sm:h-13 sm:w-18 shrink-0 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs p-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/meta-instagram.png"
@@ -635,7 +635,7 @@ export function AccountPanel({
           <Button
             icon={<ReloadOutlined className={refreshing ? "animate-spin text-slate-500" : "text-slate-500"} />}
             onClick={handleRefresh}
-            className="!w-full sm:!w-auto !rounded-2xl !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !text-xs sm:!text-sm font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
+            className="!w-full sm:!w-auto !rounded-[22px] !border-[#e9e9ee] !bg-white hover:!bg-[#F1F3F7] !text-slate-700 !text-xs sm:!text-sm font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
           >
             Refresh Status
           </Button>
@@ -643,17 +643,17 @@ export function AccountPanel({
             href="https://developers.facebook.com/apps"
             target="_blank"
             rel="noreferrer"
-            className="w-full sm:w-auto rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-blue-600 text-xs sm:text-sm font-semibold h-10 sm:h-10.5 px-4 flex items-center justify-center gap-1.5 shadow-2xs transition-all"
+            className="w-full sm:w-auto rounded-[22px] border border-[#e9e9ee] bg-white hover:bg-[#F1F3F7] text-slate-900 text-xs sm:text-sm font-semibold h-10 sm:h-10.5 px-4 flex items-center justify-center gap-1.5 shadow-2xs transition-all"
           >
             <span>Meta Dev Portal</span>
-            <ExportOutlined className="text-xs text-blue-600" />
+            <ExportOutlined className="text-xs text-slate-900" />
           </a>
         </div>
       </div>
 
       {/* Notice Banner */}
       {notice && (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-xs font-medium text-emerald-800 animate-page-entrance">
+        <div className="flex items-center gap-2.5 rounded-[22px] border border-emerald-200 bg-emerald-50/90 px-4 py-3 text-xs font-medium text-emerald-800 animate-page-entrance">
           <CheckCircleFilled className="text-emerald-500 text-sm shrink-0" />
           <span>{notice}</span>
         </div>
@@ -661,7 +661,7 @@ export function AccountPanel({
 
       {/* External Error Banner */}
       {externalError && (
-        <div className="flex items-center gap-2.5 rounded-2xl border border-rose-200 bg-rose-50/90 px-4 py-3 text-xs font-medium text-rose-800 animate-page-entrance">
+        <div className="flex items-center gap-2.5 rounded-[22px] border border-rose-200 bg-rose-50/90 px-4 py-3 text-xs font-medium text-rose-800 animate-page-entrance">
           <WarningOutlined className="text-rose-500 text-sm shrink-0" />
           <span>{externalError}</span>
         </div>
@@ -672,16 +672,15 @@ export function AccountPanel({
       {/* ── ROW 1: THE TWO CORE INTEGRATIONS (Side by Side: Instagram & Facebook) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left: Instagram Professional Connection */}
-        <div className="relative overflow-hidden rounded-3xl border border-rose-200/70 bg-gradient-to-b from-rose-50/50 via-rose-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+        <div className="relative overflow-hidden rounded-[26px] border border-[#e9e9ee] bg-white p-6 sm:p-7 shadow-2xs hover:shadow-2xs transition-all duration-300 flex flex-col justify-between space-y-6 group">
           {/* Ambient Instagram Gradient Glows */}
-          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-rose-200/40 via-purple-200/30 to-transparent blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-amber-200/25 blur-2xl pointer-events-none" />
 
           <div className="relative space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-rose-100/80">
               <div className="flex items-center gap-3.5 min-w-0">
                 {/* Glowing Story Gradient Ring Avatar */}
-                <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl p-[2.5px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md shadow-rose-500/25 ring-4 ring-rose-50 group-hover:scale-105 transition-transform">
+                <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-[22px] p-[2.5px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-2xs ring-4 ring-rose-50 group-hover:scale-105 transition-transform">
                   <div className="h-full w-full rounded-[13px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase shadow-inner">
                     {cleanUsername.charAt(0)}
                   </div>
@@ -710,7 +709,7 @@ export function AccountPanel({
                       @{cleanUsername}
                     </h3>
                     <Tooltip title="Meta Verified Instagram Business Profile">
-                      <span className="inline-flex items-center justify-center h-4.5 w-4.5 rounded-full bg-blue-500 text-white text-[10px] font-bold shadow-2xs cursor-help">
+                      <span className="inline-flex items-center justify-center h-4.5 w-4.5 rounded-full bg-black text-white text-[10px] font-bold shadow-2xs cursor-help">
                         ✓
                       </span>
                     </Tooltip>
@@ -735,7 +734,7 @@ export function AccountPanel({
                   icon={<ReloadOutlined className={busy ? "animate-spin text-slate-500" : "text-slate-500"} />}
                   onClick={onConnectInstagram}
                   loading={busy}
-                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-rose-300 !bg-white hover:!bg-rose-50/50 !text-slate-700 hover:!text-rose-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-[#e9e9ee] hover:!border-rose-300 !bg-white hover:!bg-rose-50/50 !text-slate-700 hover:!text-rose-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
                 >
                   Reconnect
                 </Button>
@@ -743,10 +742,10 @@ export function AccountPanel({
             </div>
 
             {/* Token Lifetime Meter (Modern Hero Box) */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-slate-50/40 border border-slate-200/80 shadow-2xs space-y-3">
+            <div className="p-4 sm:p-5 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] shadow-2xs space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-800 font-bold flex items-center gap-2">
-                  <ClockCircleOutlined className="text-indigo-600 text-sm" />
+                  <ClockCircleOutlined className="text-slate-900 text-sm" />
                   <span>Access Token Lifecycle</span>
                 </span>
                 <div className="flex items-center gap-2">
@@ -766,7 +765,7 @@ export function AccountPanel({
               <div className="relative h-2.5 w-full rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-700 shadow-xs ${lowToken
-                      ? "bg-gradient-to-r from-amber-500 to-rose-500 shadow-rose-500/20"
+                      ? "bg-gradient-to-r from-amber-500 to-rose-500 "
                       : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500 shadow-emerald-500/20"
                     }`}
                   style={{
@@ -796,14 +795,12 @@ export function AccountPanel({
         </div>
 
         {/* Right: Facebook Page Authorization */}
-        <div className="relative overflow-hidden rounded-3xl border border-blue-200/70 bg-gradient-to-b from-blue-50/50 via-blue-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+        <div className="relative overflow-hidden rounded-[26px] border border-[#e9e9ee] bg-white p-6 sm:p-7 shadow-2xs hover:shadow-2xs transition-all duration-300 flex flex-col justify-between space-y-6 group">
           {/* Ambient Blue Glow */}
-          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-blue-200/40 via-sky-200/30 to-transparent blur-3xl pointer-events-none" />
-
           <div className="relative space-y-5">
-            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-blue-100/80">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-[#e9e9ee]">
               <div className="flex items-start gap-3.5 min-w-0">
-                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 text-white text-3xl shadow-lg shadow-blue-500/25 ring-4 ring-blue-50 group-hover:scale-105 transition-transform mt-0.5">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-[22px] bg-black text-white text-3xl shadow-2xs ring-4 ring-blue-50 group-hover:scale-105 transition-transform mt-0.5">
                   <FacebookOutlined />
                 </div>
                 <div className="min-w-0">
@@ -812,10 +809,10 @@ export function AccountPanel({
                       Facebook Page Authorization
                     </h3>
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-2xs ${fbStatus?.connected
-                        ? "bg-blue-50 border border-blue-200/80 text-blue-700"
-                        : "bg-slate-100 border border-slate-200 text-slate-600"
+                        ? "bg-[#E2E2FC] border border-[#e9e9ee] text-slate-900"
+                        : "bg-slate-100 border border-[#e9e9ee] text-slate-600"
                       }`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${fbStatus?.connected ? "bg-blue-500 animate-pulse" : "bg-slate-400"}`} />
+                      <span className={`h-1.5 w-1.5 rounded-full ${fbStatus?.connected ? "bg-black animate-pulse" : "bg-slate-400"}`} />
                       <span>{fbStatus?.connected ? "Linked" : "Required"}</span>
                     </span>
                   </div>
@@ -829,15 +826,15 @@ export function AccountPanel({
             {/* Status & Actions Box */}
             <div>
               {fbStatus?.connected ? (
-                <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="rounded-[22px] border border-[#e9e9ee] bg-[#E2E2FC] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold text-base shadow-md shadow-blue-600/20">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[22px] bg-black text-white font-bold text-base shadow-2xs">
                       {fbStatus.pageName.charAt(0)}
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
                         <span>{fbStatus.pageName}</span>
-                        <CheckCircleFilled className="text-blue-500 text-xs shrink-0" />
+                        <CheckCircleFilled className="text-slate-900 text-xs shrink-0" />
                       </div>
                       <div className="text-[11px] text-slate-400 truncate">
                         Page ID: {fbStatus.pageId} · Comment-to-DM Engine Ready
@@ -850,7 +847,7 @@ export function AccountPanel({
                       size="small"
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-xl !text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !h-9 px-3.5 shadow-2xs"
+                      className="!rounded-xl !text-xs font-semibold !border-[#e9e9ee] !bg-white hover:!bg-[#F1F3F7] !h-9 px-3.5 shadow-2xs"
                     >
                       Switch Page
                     </Button>
@@ -866,7 +863,7 @@ export function AccountPanel({
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-5 sm:p-6 text-center space-y-3.5">
+                <div className="rounded-[22px] border border-dashed border-[#e9e9ee] bg-[#E2E2FC] p-5 sm:p-6 text-center space-y-3.5">
                   <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
                     Optional. Comment-to-DM works with just your Instagram login. You can connect the Facebook Page linked to your Instagram account as a backup way to send.
                   </p>
@@ -876,7 +873,7 @@ export function AccountPanel({
                       icon={<FacebookOutlined />}
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 !border-0 shadow-md shadow-blue-600/20"
+                      className="!w-full sm:!w-auto !rounded-xl !bg-black hover:!bg-slate-800 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 !border-0 shadow-2xs"
                     >
                       Connect Facebook Page
                     </Button>
@@ -886,10 +883,10 @@ export function AccountPanel({
             </div>
           </div>
 
-          <div className="relative flex items-center justify-between pt-3 border-t border-blue-100/70 text-xs">
+          <div className="relative flex items-center justify-between pt-3 border-t border-[#e9e9ee] text-xs">
             <span className="text-slate-500 font-medium">Required for Comment Automation</span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 font-semibold text-xs shadow-2xs">
-              <CheckCircleFilled className="text-blue-500 text-xs" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E2E2FC] border border-[#e9e9ee] text-slate-900 font-semibold text-xs shadow-2xs">
+              <CheckCircleFilled className="text-slate-900 text-xs" />
               <span>Private Reply API</span>
             </span>
           </div>
@@ -899,11 +896,11 @@ export function AccountPanel({
       {/* ── ROW 2: CAPABILITIES & SYSTEM DIAGNOSTICS (Side by Side) ──────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left: Granted Permissions & API Scopes (7 cols) */}
-        <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-7 rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-4 sm:p-6 shadow-2xs flex flex-col justify-between space-y-4">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
               <div className="flex items-start gap-2.5 min-w-0">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 text-sm mt-0.5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#E2E2FC] text-slate-900 text-sm mt-0.5">
                   <SafetyCertificateOutlined />
                 </div>
                 <div className="min-w-0">
@@ -921,7 +918,7 @@ export function AccountPanel({
                   type="text"
                   icon={<SyncOutlined spin={syncingPerms} />}
                   onClick={handleSyncPermissions}
-                  className="!text-[11px] !text-slate-600 hover:!text-purple-600 !h-6 !px-2.5 !rounded-lg border border-slate-200/80 bg-slate-50 cursor-pointer flex items-center gap-1"
+                  className="!text-[11px] !text-slate-600 hover:!text-slate-900 !h-6 !px-2.5 !rounded-lg border border-[#e9e9ee] bg-[#F1F3F7] cursor-pointer flex items-center gap-1"
                   title="Query Meta directly to auto-sync newly granted permissions without manual database changes"
                 >
                   Live Sync
@@ -941,7 +938,7 @@ export function AccountPanel({
                 return (
                   <div
                     key={p.scope}
-                    className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 hover:bg-slate-50 transition-colors"
+                    className="flex items-start gap-3 rounded-[22px] border border-slate-100 bg-[#F1F3F7] p-3 hover:bg-[#F1F3F7] transition-colors"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white shadow-2xs border border-slate-100 text-sm">
                       {p.icon}
@@ -966,7 +963,7 @@ export function AccountPanel({
               {extraGranted.map((scope) => (
                 <div
                   key={scope}
-                  className="flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50/20 p-3"
+                  className="flex items-start gap-3 rounded-[22px] border border-emerald-100 bg-emerald-50/20 p-3"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 text-sm">
                     <CheckCircleFilled />
@@ -988,8 +985,8 @@ export function AccountPanel({
               ))}
 
               {/* Meta Feature: Human Agent */}
-              <div className="flex items-start gap-3 rounded-2xl border border-indigo-100 bg-indigo-50/30 p-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 text-sm">
+              <div className="flex items-start gap-3 rounded-[22px] border border-[#e9e9ee] bg-[#E2E2FC] p-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#E2E2FC] text-slate-900 text-sm">
                   <CustomerServiceOutlined />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1004,8 +1001,8 @@ export function AccountPanel({
               </div>
 
               {/* Meta Feature: Business Asset User Profile */}
-              <div className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/30 p-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 text-sm">
+              <div className="flex items-start gap-3 rounded-[22px] border border-[#e9e9ee] bg-[#E2E2FC] p-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#E2E2FC] text-slate-900 text-sm">
                   <IdcardOutlined />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1020,8 +1017,8 @@ export function AccountPanel({
               </div>
 
               {/* Automation Engine Status */}
-              <div className="flex items-start gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/30 p-3 sm:col-span-2">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 text-sm">
+              <div className="flex items-start gap-3 rounded-[22px] border border-dashed border-[#e9e9ee] bg-[#F1F3F7] p-3 sm:col-span-2">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#E2E2FC] text-slate-900 text-sm">
                   <ThunderboltOutlined />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -1041,10 +1038,10 @@ export function AccountPanel({
         </div>
 
         {/* Right: Diagnostics, Webhooks & Admin Session (5 cols) */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-5 rounded-[26px] border border-[#e9e9ee] bg-white p-6 shadow-2xs flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <CloudServerOutlined className="text-blue-600 text-base" />
+              <CloudServerOutlined className="text-slate-900 text-base" />
               <h3 className="text-sm font-bold text-slate-900">System Diagnostics & Security</h3>
             </div>
 
@@ -1076,19 +1073,19 @@ export function AccountPanel({
             </div>
 
             {/* Webhook copy box */}
-            <div className="mt-3.5 rounded-2xl border border-slate-200/80 bg-slate-50 p-3 space-y-1.5">
+            <div className="mt-3.5 rounded-[22px] border border-[#e9e9ee] bg-[#F1F3F7] p-3 space-y-1.5">
               <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600">
                 <span>Webhook Inbound Endpoint</span>
                 <button
                   type="button"
                   onClick={handleCopyWebhook}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 cursor-pointer"
+                  className="flex items-center gap-1 text-slate-900 hover:text-slate-900 cursor-pointer"
                 >
                   <CopyOutlined className="text-[10px]" />
                   <span>{copiedWebhook ? "Copied!" : "Copy"}</span>
                 </button>
               </div>
-              <div className="font-mono text-[11px] text-slate-800 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/80 select-all truncate">
+              <div className="font-mono text-[11px] text-slate-800 bg-white px-2.5 py-1.5 rounded-lg border border-[#e9e9ee] select-all truncate">
                 /instagram/webhook
               </div>
             </div>
@@ -1114,16 +1111,13 @@ export function AccountPanel({
       </div>
 
       {/* ── ROW 3: THIRD-PARTY CLOUD SERVICES & CDN INFRASTRUCTURE ──────── */}
-      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-slate-50/60 via-white to-white p-4 sm:p-7 shadow-sm space-y-6">
+      <div className="relative overflow-hidden rounded-[26px] border border-[#e9e9ee] bg-white p-4 sm:p-7 shadow-2xs space-y-6">
         {/* Soft Ambient Mesh Glows */}
-        <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-gradient-to-bl from-blue-100/50 via-purple-100/40 to-transparent blur-3xl pointer-events-none" />
-        <div className="absolute -top-10 left-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-sky-100/40 to-transparent blur-3xl pointer-events-none" />
-
         {/* Header */}
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-5 border-b border-slate-100/90 gap-3.5 sm:gap-4">
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-blue-50/90 border border-blue-100 text-blue-600 shadow-2xs ring-2 sm:ring-4 ring-blue-50/50">
-              <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-[22px] bg-[#E2E2FC] border border-[#e9e9ee] text-slate-900 shadow-2xs ring-2 sm:ring-4 ring-blue-50/50">
+              <svg className="w-5 h-5 text-slate-900" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.9a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
                 <path d="m22 12.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 12.65" />
                 <path d="m22 17.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 17.65" />
@@ -1146,7 +1140,7 @@ export function AccountPanel({
               icon={<ReloadOutlined className={allPinging ? "animate-spin text-slate-500" : "text-slate-500"} />}
               onClick={handlePingAllServices}
               loading={allPinging}
-              className="!w-full sm:!w-auto !rounded-xl font-semibold !text-xs !border-slate-200 hover:!border-slate-300 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-10 px-4 shadow-2xs transition-all flex items-center justify-center gap-2"
+              className="!w-full sm:!w-auto !rounded-xl font-semibold !text-xs !border-[#e9e9ee] hover:!border-slate-300 !bg-white hover:!bg-[#F1F3F7] !text-slate-700 !h-9 sm:!h-10 px-4 shadow-2xs transition-all flex items-center justify-center gap-2"
             >
               Ping All Services
             </Button>
@@ -1156,7 +1150,7 @@ export function AccountPanel({
         {/* 3 Symmetrical Service Cards with Distinct Color Themes (Responsive: Mobile & Tablet Optimized) */}
         <div className="relative grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 items-stretch">
           {/* Card 1: Cloudinary Media CDN (Cyan/Blue Theme) */}
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-4.5 sm:p-6 flex flex-col justify-between shadow-2xs hover:shadow-2xs hover: hover:border-[#e9e9ee] transition-all duration-300 group">
             {/* Ambient Cyan Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-sky-200/35 blur-2xl pointer-events-none" />
 
@@ -1164,7 +1158,7 @@ export function AccountPanel({
               {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white text-xl sm:text-2xl shadow-md shadow-blue-500/30 ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-[22px] bg-black text-white text-xl sm:text-2xl shadow-2xs ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
                     <CloudUploadOutlined />
                   </div>
                   <div className="min-w-0">
@@ -1181,12 +1175,12 @@ export function AccountPanel({
               </div>
 
               {/* Status Box */}
-              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-sky-50/50 border border-sky-100/80 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-[22px] bg-[#E2E2FC] border border-[#e9e9ee] space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                     TARGET CLOUD
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60 font-semibold text-[10px] shrink-0">
+                  <span className="px-2 py-0.5 rounded-md bg-[#E2E2FC] text-slate-900 border border-[#e9e9ee] font-semibold text-[10px] shrink-0">
                     {cloudinaryConfig.isCustom ? "Custom Cloud" : "Demo CDN Edge"}
                   </span>
                 </div>
@@ -1197,13 +1191,13 @@ export function AccountPanel({
             </div>
 
             {/* Actions (Structured 2-Row Layout: Never Clips on Mobile or Tablet) */}
-            <div className="relative pt-3.5 mt-4 border-t border-sky-100/80 flex flex-col gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-[#e9e9ee] flex flex-col gap-2">
               <Button
                 type="primary"
                 icon={<ThunderboltOutlined />}
                 onClick={() => pingCloudinary()}
                 loading={cloudinaryLoading}
-                className="w-full !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-9.5 sm:!h-10 !border-0 !shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5"
+                className="w-full !rounded-xl !text-xs font-semibold !bg-black hover:!bg-slate-800 !border-black !h-9.5 sm:!h-10 !border-0 !shadow-2xs flex items-center justify-center gap-1.5"
               >
                 Ping Health
               </Button>
@@ -1211,7 +1205,7 @@ export function AccountPanel({
                 <Button
                   icon={<SettingOutlined />}
                   onClick={() => setCloudinaryModalOpen(true)}
-                  className="!w-full !rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
+                  className="!w-full !rounded-xl text-xs font-semibold !border-[#e9e9ee] !bg-white hover:!bg-[#F1F3F7] !text-slate-700 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
                 >
                   Configure
                 </Button>
@@ -1227,7 +1221,7 @@ export function AccountPanel({
           </div>
 
           {/* Card 2: OpenRouter AI Engine (Purple Theme) */}
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
+          <div className="relative overflow-hidden rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-4.5 sm:p-6 flex flex-col justify-between shadow-2xs hover:shadow-2xs hover: hover:border-[#e9e9ee] transition-all duration-300 group">
             {/* Ambient Purple Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-200/35 blur-2xl pointer-events-none" />
 
@@ -1235,7 +1229,7 @@ export function AccountPanel({
               {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white text-xl sm:text-2xl shadow-md shadow-purple-500/30 ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-[22px] bg-black text-white text-xl sm:text-2xl shadow-2xs ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect width="16" height="16" x="4" y="4" rx="2" />
                       <rect width="6" height="6" x="9" y="9" rx="1" />
@@ -1264,9 +1258,9 @@ export function AccountPanel({
                   <Button
                     type="text"
                     size="small"
-                    icon={<SettingOutlined className="text-purple-600" />}
+                    icon={<SettingOutlined className="text-slate-900" />}
                     onClick={() => setOpenRouterModalOpen(true)}
-                    className="!h-7 !px-2 !rounded-lg text-[10px] font-semibold text-purple-700 bg-purple-100/60 hover:bg-purple-200/80"
+                    className="!h-7 !px-2 !rounded-lg text-[10px] font-semibold text-slate-900 bg-[#E2E2FC] hover:bg-purple-200/80"
                   >
                     Model
                   </Button>
@@ -1274,12 +1268,12 @@ export function AccountPanel({
               </div>
 
               {/* Status Box */}
-              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-purple-50/50 border border-purple-100/80 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-[22px] bg-[#E2E2FC] border border-[#e9e9ee] space-y-1">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-900">
                     ACTIVE ARCHITECTURE
                   </span>
-                  <span className="px-2 py-0.5 rounded-md bg-purple-100/80 text-purple-800 border border-purple-200/60 font-semibold text-[10px] shrink-0">
+                  <span className="px-2 py-0.5 rounded-md bg-[#E2E2FC] text-purple-800 border border-[#e9e9ee] font-semibold text-[10px] shrink-0">
                     {openRouterHealth?.status === "operational" || openRouterHealth?.healthy ? "Operational" : "Operational"}
                   </span>
                 </div>
@@ -1290,19 +1284,19 @@ export function AccountPanel({
             </div>
 
             {/* Actions */}
-            <div className="relative pt-3.5 mt-4 border-t border-purple-100/80 flex items-center gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-[#e9e9ee] flex items-center gap-2">
               <Button
-                icon={<ThunderboltOutlined className="text-purple-600" />}
+                icon={<ThunderboltOutlined className="text-slate-900" />}
                 onClick={() => pingOpenRouter()}
                 loading={openRouterLoading}
-                className="flex-1 !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
+                className="flex-1 !rounded-xl !text-xs font-semibold !border-[#e9e9ee] !bg-[#E2E2FC] hover:!bg-[#E2E2FC] !text-slate-900 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 Ping AI Gateway
               </Button>
               <Button
-                icon={<SettingOutlined className="text-purple-600" />}
+                icon={<SettingOutlined className="text-slate-900" />}
                 onClick={() => setOpenRouterModalOpen(true)}
-                className="!rounded-xl !text-xs font-semibold !border-purple-200 !bg-white hover:!bg-purple-50 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5 px-3"
+                className="!rounded-xl !text-xs font-semibold !border-[#e9e9ee] !bg-white hover:!bg-[#E2E2FC] !text-slate-900 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5 px-3"
               >
                 Change Model
               </Button>
@@ -1310,7 +1304,7 @@ export function AccountPanel({
           </div>
 
           {/* Card 3: Cloudflare Edge Proxy (Amber/Orange Theme - Spans 2 Cols on Tablet for Balance) */}
-          <div className="md:col-span-2 xl:col-span-1 relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
+          <div className="md:col-span-2 xl:col-span-1 relative overflow-hidden rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-4.5 sm:p-6 flex flex-col justify-between shadow-2xs hover:shadow-2xs hover: hover:border-amber-300 transition-all duration-300 group">
             {/* Ambient Amber Glow */}
             <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-200/35 blur-2xl pointer-events-none" />
 
@@ -1318,7 +1312,7 @@ export function AccountPanel({
               {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-xl sm:text-2xl shadow-md shadow-amber-500/30 ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-[22px] bg-black text-white text-xl sm:text-2xl shadow-2xs ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
                     <GlobalOutlined />
                   </div>
                   <div className="min-w-0">
@@ -1328,14 +1322,14 @@ export function AccountPanel({
                   </div>
                 </div>
                 {/* Status Badge */}
-                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[10px] sm:text-[11px] font-semibold text-blue-700 shrink-0 shadow-2xs">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-[#E2E2FC] border border-[#e9e9ee] text-[10px] sm:text-[11px] font-semibold text-slate-900 shrink-0 shadow-2xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-black animate-pulse" />
                   <span>Tunnel Active</span>
                 </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/50 border border-amber-100/80 space-y-1">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-[22px] bg-amber-50/50 border border-amber-100/80 space-y-1">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
                     PUBLIC GATEWAY
@@ -1370,7 +1364,7 @@ export function AccountPanel({
       <Modal
         title={
           <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <CloudUploadOutlined className="text-sky-600 text-base" />
+            <CloudUploadOutlined className="text-slate-900 text-base" />
             <span className="font-bold text-slate-900">Connect Cloudinary Media CDN</span>
           </div>
         }
@@ -1378,7 +1372,7 @@ export function AccountPanel({
         onCancel={() => setCloudinaryModalOpen(false)}
         footer={null}
         width={520}
-        className="!rounded-2xl"
+        className="!rounded-[22px]"
       >
         <form onSubmit={handleSaveCloudinary} className="space-y-4 pt-3">
           <p className="text-xs text-slate-500 leading-relaxed">
@@ -1425,7 +1419,7 @@ export function AccountPanel({
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-[#F1F3F7] border border-slate-100 flex items-center justify-between">
             <div>
               <div className="text-xs font-bold text-slate-800">Automatic Asset Optimization</div>
               <div className="text-[11px] text-slate-500">Inject f_auto,q_auto into all Instagram published image URLs</div>
@@ -1442,7 +1436,7 @@ export function AccountPanel({
               type="text"
               size="small"
               onClick={handleLoadDemoCloudinary}
-              className="text-xs text-sky-600 hover:text-sky-700 font-semibold"
+              className="text-xs text-slate-900 hover:text-slate-900 font-semibold"
             >
               Use Cloudinary Demo CDN
             </Button>
@@ -1467,7 +1461,7 @@ export function AccountPanel({
       <Modal
         title={
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-white shadow-2xs">
               <SettingOutlined className="text-base" />
             </div>
             <div>
@@ -1480,7 +1474,7 @@ export function AccountPanel({
         onCancel={() => setOpenRouterModalOpen(false)}
         footer={null}
         width={540}
-        className="!rounded-2xl"
+        className="!rounded-[22px]"
       >
         <form onSubmit={handleSaveOpenRouter} className="space-y-4 pt-3">
           <div>
@@ -1558,7 +1552,7 @@ export function AccountPanel({
                 htmlType="submit"
                 loading={savingOpenRouter}
                 disabled={selectedPaid && freeTierOnly === true}
-                className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
+                className="!rounded-xl !bg-black hover:!bg-slate-800 font-semibold"
               >
                 Save Model
               </Button>

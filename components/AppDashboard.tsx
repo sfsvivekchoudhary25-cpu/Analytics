@@ -267,12 +267,12 @@ export default function AppDashboard({
 
   if (!view && !error) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#F1F3F7] p-4">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Fabroniee" className="h-10 w-10 object-contain" />
-            <div className="absolute -inset-1 rounded-2xl border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-1 rounded-[22px] border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
           </div>
           <div className="text-center space-y-1">
             <h2 className="text-base font-bold text-slate-900 tracking-tight font-sans">Fabroniee</h2>
@@ -291,12 +291,12 @@ export default function AppDashboard({
   // Not connected AND hasn't done setup yet: the effect above is sending them to /onboarding.
   if (!connected && !guest) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#F1F3F7] p-4">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Fabroniee" className="h-10 w-10 object-contain" />
-            <div className="absolute -inset-1 rounded-2xl border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-1 rounded-[22px] border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
           </div>
           <div className="text-center space-y-1">
             <h2 className="text-base font-bold text-slate-900 tracking-tight font-sans">Fabroniee</h2>
@@ -317,7 +317,7 @@ export default function AppDashboard({
   const ownAvatar = status?.connected ? status.profilePictureUrl : undefined;
 
   return (
-    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-slate-50/50`}>
+    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-[#F1F3F7]`}>
       <Sidebar
         sections={SECTIONS}
         active={active}
@@ -347,7 +347,7 @@ export default function AppDashboard({
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/70 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-[22px] border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
             >
               <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -370,7 +370,7 @@ export default function AppDashboard({
           {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
           <div className="flex items-center gap-2.5">
             {uname ? (
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-[#e9e9ee] text-xs text-slate-700 font-medium">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="truncate max-w-[130px]">@{uname}</span>
               </div>
@@ -389,7 +389,7 @@ export default function AppDashboard({
             <button
               type="button"
               onClick={() => setTab("photos")}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/90 bg-slate-50/70 text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
               aria-label="Notifications"
             >
               <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -425,7 +425,7 @@ export default function AppDashboard({
           }
         >
           {guest && !needsInstagram && active !== "account" && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
               <span>Instagram isn&apos;t connected yet. This page works without it; connect to unlock comments, messages and automations.</span>
               <button type="button" onClick={() => setTab("account")} className="rounded-xl bg-black px-3 py-1.5 text-xs font-semibold text-white cursor-pointer">
                 Connect Instagram
@@ -491,10 +491,10 @@ function ConnectInstagramPrompt({ section, onConnect, onMore }: { section: strin
         Connect your Instagram Professional or Business account to see your {section.toLowerCase()}. Voice notes, saved reels and the account page work without it.
       </p>
       <div className="flex flex-wrap items-center justify-center gap-2">
-        <button type="button" onClick={onConnect} className="rounded-2xl bg-black px-5 py-2.5 text-sm font-semibold text-white cursor-pointer">
+        <button type="button" onClick={onConnect} className="rounded-[22px] bg-black px-5 py-2.5 text-sm font-semibold text-white cursor-pointer">
           Connect with Instagram
         </button>
-        <button type="button" onClick={onMore} className="rounded-2xl border border-[#e9e9ee] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 cursor-pointer hover:border-black/30">
+        <button type="button" onClick={onMore} className="rounded-[22px] border border-[#e9e9ee] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 cursor-pointer hover:border-black/30">
           More ways to connect
         </button>
       </div>

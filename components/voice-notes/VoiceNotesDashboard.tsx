@@ -312,9 +312,9 @@ export function VoiceNotesDashboard() {
     { key: "all", label: "All Notes" },
     { key: "idea", label: "Ideas", icon: Lightbulb, iconColor: "text-amber-500" },
     { key: "todo", label: "To-Dos", icon: CheckSquare, iconColor: "text-emerald-500" },
-    { key: "instagram_caption", label: "IG Captions", icon: InstagramIcon, iconColor: "text-pink-500" },
+    { key: "instagram_caption", label: "IG Captions", icon: InstagramIcon, iconColor: "text-slate-900" },
     { key: "client_note", label: "Client Notes", icon: Briefcase, iconColor: "text-orange-500" },
-    { key: "reminder", label: "Reminders", icon: Bell, iconColor: "text-purple-500" },
+    { key: "reminder", label: "Reminders", icon: Bell, iconColor: "text-slate-900" },
   ];
 
   return (
@@ -331,7 +331,7 @@ export function VoiceNotesDashboard() {
               <div
                 onClick={() => openCapture("record", "idea")}
                 style={{ backgroundColor: "#e2e2fc" }}
-                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
+                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-2xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -361,7 +361,7 @@ export function VoiceNotesDashboard() {
               <div
                 onClick={() => openCapture("type", "idea")}
                 style={{ backgroundColor: "#fceef4" }}
-                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
+                className="group relative rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-2xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer flex flex-col justify-between min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -393,7 +393,7 @@ export function VoiceNotesDashboard() {
               <div
                 onClick={() => openCapture("record", "idea")}
                 style={{ backgroundColor: "#feece4" }}
-                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
+                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-2xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -452,7 +452,7 @@ export function VoiceNotesDashboard() {
               <div
                 onClick={() => openCapture("type", "todo")}
                 style={{ backgroundColor: "#fff9db" }}
-                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-sm transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
+                className="hidden md:flex flex-col justify-between group rounded-[28px] p-4 sm:p-5 text-slate-950 shadow-xs hover:shadow-2xs transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer min-h-[175px]"
               >
                 <div>
                   <div className="flex items-center justify-between">
@@ -590,7 +590,7 @@ export function VoiceNotesDashboard() {
                     className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
                         ? "bg-black text-white shadow-xs"
-                        : "bg-white hover:bg-slate-50 text-slate-900 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+                        : "bg-white hover:bg-[#F1F3F7] text-slate-900 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
                     }`}
                   >
                     {Icon && (
@@ -610,7 +610,7 @@ export function VoiceNotesDashboard() {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="rounded-2xl border border-slate-100 bg-white p-4 animate-pulse space-y-2 shadow-2xs"
+                    className="rounded-[22px] border border-slate-100 bg-white p-4 animate-pulse space-y-2 shadow-2xs"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
@@ -623,8 +623,8 @@ export function VoiceNotesDashboard() {
                 ))}
               </div>
             ) : notes.length === 0 ? (
-              <div className="rounded-[22px] border border-dashed border-slate-200 bg-white p-8 sm:p-10 text-center space-y-4 shadow-2xs">
-                <div className="w-12 h-12 rounded-2xl bg-[#e2e2fc] text-slate-900 flex items-center justify-center mx-auto shadow-2xs">
+              <div className="rounded-[22px] border border-dashed border-[#e9e9ee] bg-white p-8 sm:p-10 text-center space-y-4 shadow-2xs">
+                <div className="w-12 h-12 rounded-[22px] bg-[#e2e2fc] text-slate-900 flex items-center justify-center mx-auto shadow-2xs">
                   <Mic size={22} />
                 </div>
                 <div>
@@ -643,7 +643,7 @@ export function VoiceNotesDashboard() {
                   <button
                     type="button"
                     onClick={() => openCapture("record", "idea")}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-95"
                   >
                     <Plus size={14} />
                     <span>Record First Note</span>

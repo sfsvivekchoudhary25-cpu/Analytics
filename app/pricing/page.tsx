@@ -71,7 +71,7 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
             {/* Tier 1: Starter Creator */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-sm hover:border-black transition-all">
+            <div className="p-8 sm:p-10 rounded-[26px] bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-2xs hover:border-black transition-all">
               <div className="space-y-4">
                 <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Starter Creator</span>
                 <div className="space-y-1">
@@ -123,8 +123,8 @@ export default function PricingPage() {
             </div>
 
             {/* Tier 2: Growth Brand (Most Popular in Fabulate Pink) */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-[#f7cbdf] border-2 border-[#ed83b3] space-y-6 flex flex-col justify-between shadow-xl relative scale-105 z-10">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#e13181] text-white text-[10px] font-semibold uppercase tracking-wider shadow-sm">
+            <div className="p-8 sm:p-10 rounded-[26px] bg-[#f7cbdf] border-2 border-[#ed83b3] space-y-6 flex flex-col justify-between shadow-2xs relative scale-105 z-10">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-[#e13181] text-white text-[10px] font-semibold uppercase tracking-wider shadow-2xs">
                 Most Popular
               </div>
 
@@ -175,7 +175,7 @@ export default function PricingPage() {
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-3.5 rounded-full text-center block font-semibold text-xs hover:bg-neutral-900 !text-white shadow-md transition-all"
+                  className="w-full py-3.5 rounded-full text-center block font-semibold text-xs hover:bg-neutral-900 !text-white shadow-2xs transition-all"
                 >
                   Start 14-Day Free Trial
                 </Link>
@@ -183,7 +183,7 @@ export default function PricingPage() {
             </div>
 
             {/* Tier 3: Scale & Agency */}
-            <div className="p-8 sm:p-10 rounded-3xl bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-sm hover:border-black transition-all">
+            <div className="p-8 sm:p-10 rounded-[26px] bg-white border-2 border-[#e9e9ee] space-y-6 flex flex-col justify-between shadow-2xs hover:border-black transition-all">
               <div className="space-y-4">
                 <span className="text-xs font-semibold uppercase text-slate-500 tracking-wider">Scale &amp; Agency</span>
                 <div className="space-y-1">
@@ -246,21 +246,21 @@ export default function PricingPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
+            <div className="p-6 rounded-[22px] bg-[#fafaf9] border border-[#e9e9ee] space-y-2">
               <h4 className="text-sm font-semibold text-slate-900">Can I change or cancel my plan at any time?</h4>
               <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 Yes! There are no long-term contracts. You can upgrade, downgrade, or cancel your subscription anytime directly inside your account billing panel.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
+            <div className="p-6 rounded-[22px] bg-[#fafaf9] border border-[#e9e9ee] space-y-2">
               <h4 className="text-sm font-semibold text-slate-900">Are there any hidden Meta or Facebook API fees?</h4>
               <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 No. Connecting via official Meta Graph API v21.0 using Facebook Login for Business is completely free. You only pay for your Fabroniee software subscription.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-[#fafaf9] border border-slate-200 space-y-2">
+            <div className="p-6 rounded-[22px] bg-[#fafaf9] border border-[#e9e9ee] space-y-2">
               <h4 className="text-sm font-semibold text-slate-900">What happens if I exceed my monthly comment limit?</h4>
               <p className="text-xs text-slate-600 font-normal leading-relaxed">
                 We never shut down your funnels abruptly. We will notify you when you reach 85% and 100% of your tier, giving you the choice to upgrade seamlessly without missing a customer.

@@ -283,11 +283,11 @@ function TriggerBadge({ tag }: { tag: TriggerTag }) {
   const map: Record<NonNullable<TriggerTag>, { label: string; cls: string }> = {
     ai: {
       label: "AI Reply",
-      cls: "bg-violet-100 text-violet-800 ring-violet-300/60 dark:bg-violet-400/20 dark:text-violet-200",
+      cls: "bg-[#E2E2FC] text-violet-800 ring-violet-300/60 dark:bg-violet-400/20 dark:text-violet-200",
     },
     auto: {
       label: "Auto Rule",
-      cls: "bg-blue-100 text-blue-800 ring-blue-300/60 dark:bg-blue-400/20 dark:text-blue-200",
+      cls: "bg-[#E2E2FC] text-blue-800 ring-blue-300/60 dark:bg-blue-400/20 dark:text-blue-200",
     },
     manual: {
       label: "Manual",
@@ -432,7 +432,7 @@ function DmStatusBadge({ status }: { status: CommentEntry["dmStatus"] }) {
     );
   if (status === "invited")
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-200 dark:bg-blue-400/10 dark:ring-blue-400/30">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E2E2FC] px-2.5 py-0.5 text-[11px] font-semibold text-slate-900 ring-1 ring-inset ring-blue-200 dark:bg-blue-400/10 dark:ring-blue-400/30">
         <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
         Invited
       </span>
@@ -450,18 +450,18 @@ function AiDoctorSkeleton() {
     <div className="space-y-4 pt-1">
       {/* Top Banner Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
-        <div className="md:col-span-4 lg:col-span-3 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 flex flex-col items-center justify-center text-center gap-2.5 animate-pulse">
+        <div className="md:col-span-4 lg:col-span-3 rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-4 flex flex-col items-center justify-center text-center gap-2.5 animate-pulse">
           <div className="h-2.5 w-24 bg-slate-200 rounded" />
-          <div className="h-20 w-20 rounded-full border-4 border-slate-200 bg-white" />
+          <div className="h-20 w-20 rounded-full border-4 border-[#e9e9ee] bg-white" />
           <div className="h-4 w-28 bg-slate-200 rounded-full" />
         </div>
-        <div className="md:col-span-8 lg:col-span-9 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4.5 flex flex-col justify-between space-y-2.5 animate-pulse">
+        <div className="md:col-span-8 lg:col-span-9 rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-4.5 flex flex-col justify-between space-y-2.5 animate-pulse">
           <div className="space-y-2">
             <div className="h-4 w-3/5 bg-slate-200 rounded" />
             <div className="h-3 w-full bg-slate-200 rounded" />
             <div className="h-3 w-4/5 bg-slate-200 rounded" />
           </div>
-          <div className="pt-2 border-t border-slate-200/60 flex items-center gap-3">
+          <div className="pt-2 border-t border-[#e9e9ee] flex items-center gap-3">
             <div className="h-2.5 w-24 bg-slate-200 rounded" />
             <div className="h-2.5 w-40 bg-slate-200 rounded" />
           </div>
@@ -473,7 +473,7 @@ function AiDoctorSkeleton() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="rounded-xl border border-slate-200/80 bg-white p-4 space-y-3 flex flex-col justify-between animate-pulse"
+            className="rounded-xl border border-[#e9e9ee] bg-white p-4 space-y-3 flex flex-col justify-between animate-pulse"
           >
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -496,7 +496,7 @@ function AiDoctorSkeleton() {
         <div className="h-2.5 w-36 bg-slate-200 rounded animate-pulse" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2 animate-pulse">
+            <div key={i} className="p-3 rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] space-y-2 animate-pulse">
               <div className="flex justify-between items-center">
                 <div className="h-3 w-20 bg-slate-200 rounded" />
                 <div className="h-3 w-12 bg-slate-200 rounded-full" />
@@ -514,8 +514,8 @@ function PostDetailSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       {/* Hero Card Skeleton */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs flex flex-col md:flex-row gap-5 items-start">
-        <div className="h-36 w-36 sm:h-44 sm:w-44 rounded-2xl bg-slate-200 shrink-0" />
+      <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-6 shadow-xs flex flex-col md:flex-row gap-5 items-start">
+        <div className="h-36 w-36 sm:h-44 sm:w-44 rounded-[22px] bg-slate-200 shrink-0" />
         <div className="flex-1 w-full space-y-3.5">
           <div className="h-3 w-32 bg-slate-200 rounded" />
           <div className="h-4 w-3/4 bg-slate-200 rounded" />
@@ -530,17 +530,17 @@ function PostDetailSkeleton() {
 
       {/* KPI Cards Skeleton */}
       <div className="space-y-3.5">
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 flex justify-between items-center">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 flex justify-between items-center">
           <div className="space-y-2">
             <div className="h-3 w-20 bg-slate-200 rounded" />
             <div className="h-8 w-24 bg-slate-200 rounded" />
             <div className="h-2.5 w-28 bg-slate-200 rounded" />
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-slate-200" />
+          <div className="h-12 w-12 rounded-[22px] bg-slate-200" />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-3xl border border-slate-200/80 bg-white p-4 space-y-3">
+            <div key={i} className="rounded-[26px] border border-[#e9e9ee] bg-white p-4 space-y-3">
               <div className="flex justify-between items-center">
                 <div className="h-3 w-16 bg-slate-200 rounded" />
                 <div className="h-8 w-8 bg-slate-200 rounded-xl" />
@@ -554,17 +554,17 @@ function PostDetailSkeleton() {
 
       {/* Graph and Cockpit 2-col Skeleton */}
       <div className="grid gap-6 lg:gap-8 lg:grid-cols-[1fr_24rem]">
-        <div className="h-80 rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between">
+        <div className="h-80 rounded-[22px] border border-[#e9e9ee] bg-white p-5 flex flex-col justify-between">
           <div className="flex justify-between items-center">
             <div className="h-4 w-40 bg-slate-200 rounded" />
             <div className="h-7 w-48 bg-slate-200 rounded-lg" />
           </div>
           <div className="h-52 w-full bg-slate-100 rounded-xl" />
         </div>
-        <div className="h-80 rounded-2xl border border-slate-200/80 bg-white p-5 space-y-4">
+        <div className="h-80 rounded-[22px] border border-[#e9e9ee] bg-white p-5 space-y-4">
           <div className="h-4 w-36 bg-slate-200 rounded" />
           <div className="flex justify-center">
-            <div className="h-24 w-24 rounded-full border-4 border-slate-200 bg-white" />
+            <div className="h-24 w-24 rounded-full border-4 border-[#e9e9ee] bg-white" />
           </div>
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
@@ -1992,7 +1992,7 @@ export function PostDetail({
                   handleOpenCreateRule();
                 }
               }}
-              className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 border border-[#e9e9ee] hover:border-black/40 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-full bg-white hover:bg-[#F1F3F7] text-slate-800 border border-[#e9e9ee] hover:border-black/40 text-xs font-bold shadow-2xs transition-all cursor-pointer active:scale-95"
             >
               <Edit3 size={12} className="text-slate-700 shrink-0" />
               <span>Edit</span>
@@ -2053,7 +2053,7 @@ export function PostDetail({
   return (
     <main className="app-shell !p-0 sm:!p-0 lg:!p-[16px_20px_60px]">
       {/* ── Top Hero Header (Soft Pastel Minimal) ────────────────────── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-[26px] border-0 lg:border lg:border-[#e9e9ee] hover:border-black/30 bg-transparent lg:bg-white p-0 lg:p-6 shadow-none lg:shadow-2xs transition-all mb-4 sm:mb-6">
+      <div className="relative overflow-hidden rounded-[22px] sm:rounded-[26px] border-0 lg:border lg:border-[#e9e9ee] hover:border-black/30 bg-transparent lg:bg-white p-0 lg:p-6 shadow-none lg:shadow-2xs transition-all mb-4 sm:mb-6">
         {/* Soft pastel ambient background glow */}
         <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl hidden lg:block" />
         <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl hidden lg:block" />
@@ -2205,7 +2205,7 @@ export function PostDetail({
                   {/* Top Row: Thumbnail (left) + Posted On & Caption Box (right) */}
                   <div className="flex gap-3 sm:gap-3.5 items-stretch">
                     {/* Left: Media Thumbnail */}
-                    <div className="w-[115px] xs:w-[125px] sm:w-[135px] shrink-0 rounded-2xl bg-[#1e2538] relative overflow-hidden flex items-center justify-center shadow-2xs self-stretch min-h-[125px]">
+                    <div className="w-[115px] xs:w-[125px] sm:w-[135px] shrink-0 rounded-[22px] bg-[#1e2538] relative overflow-hidden flex items-center justify-center shadow-2xs self-stretch min-h-[125px]">
                       {meta.thumb ? (
                         /* eslint-disable-next-line @next/next/no-img-element */
                         <img
@@ -2226,7 +2226,7 @@ export function PostDetail({
                       </div>
 
                       {/* Center Circular Play Button */}
-                      <div className="relative z-10 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-md">
+                      <div className="relative z-10 w-10 h-10 rounded-full bg-white/30 backdrop-blur-md flex items-center justify-center text-white border border-white/50 shadow-2xs">
                         <Play size={16} className="fill-white text-white ml-0.5" />
                       </div>
 
@@ -2310,7 +2310,7 @@ export function PostDetail({
                     {/* 1. Peer Share Velocity */}
                     <div
                       style={{ backgroundColor: "#e2e2fc" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2333,7 +2333,7 @@ export function PostDetail({
                     {/* 2. Conversation & Discussion Depth */}
                     <div
                       style={{ backgroundColor: "#fff9db" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2356,7 +2356,7 @@ export function PostDetail({
                     {/* 3. Bookmark Shelf-Life */}
                     <div
                       style={{ backgroundColor: "#feece4" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2382,7 +2382,7 @@ export function PostDetail({
                     {/* 1. Likes - Soft Rose Pink #fceef4 */}
                     <div
                       style={{ backgroundColor: "#fceef4" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2401,7 +2401,7 @@ export function PostDetail({
                     {/* 2. Comments - Soft Butter Yellow #fff9db */}
                     <div
                       style={{ backgroundColor: "#fff9db" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2420,7 +2420,7 @@ export function PostDetail({
                     {/* 3. Reach - Soft Periwinkle #e2e2fc */}
                     <div
                       style={{ backgroundColor: "#e2e2fc" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2439,7 +2439,7 @@ export function PostDetail({
                     {/* 4. Views - Soft Peach Coral #feece4 */}
                     <div
                       style={{ backgroundColor: "#feece4" }}
-                      className="rounded-2xl p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
+                      className="rounded-[22px] p-2.5 sm:p-3.5 flex flex-col justify-between shadow-xs border-0"
                     >
                       <div className="flex items-start justify-between gap-1">
                         <span className="text-base sm:text-xl font-black text-slate-950 tabular-nums leading-none">
@@ -2496,7 +2496,7 @@ export function PostDetail({
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/30 group-hover:from-black/70 transition-colors" />
 
                           {/* Center Circular Play Button */}
-                          <div className="relative z-10 w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/40 shadow-xl group-hover:scale-110 group-hover:bg-white/30 transition-all">
+                          <div className="relative z-10 w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/40 shadow-2xs group-hover:scale-110 group-hover:bg-white/30 transition-all">
                             <Play size={22} className="fill-white text-white ml-0.5" />
                           </div>
 
@@ -2668,7 +2668,7 @@ export function PostDetail({
                         {/* 1. Peer Share Velocity */}
                         <div
                           style={{ backgroundColor: "#e2e2fc" }}
-                          className="rounded-2xl sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
+                          className="rounded-[22px] sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
                         >
                           <div className="flex items-start justify-between gap-1">
                             <span className="text-xl md:text-2xl lg:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2693,7 +2693,7 @@ export function PostDetail({
                         {/* 2. Conversation & Discussion Depth */}
                         <div
                           style={{ backgroundColor: "#fff9db" }}
-                          className="rounded-2xl sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
+                          className="rounded-[22px] sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
                         >
                           <div className="flex items-start justify-between gap-1">
                             <span className="text-xl md:text-2xl lg:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2717,7 +2717,7 @@ export function PostDetail({
                         {/* 3. Bookmark Shelf-Life */}
                         <div
                           style={{ backgroundColor: "#feece4" }}
-                          className="rounded-2xl sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
+                          className="rounded-[22px] sm:rounded-[26px] p-3 md:p-3.5 lg:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[96px] sm:min-h-[112px] lg:min-h-[126px]"
                         >
                           <div className="flex items-start justify-between gap-1">
                             <span className="text-xl md:text-2xl lg:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2746,7 +2746,7 @@ export function PostDetail({
                       {/* 1. Likes - Soft Rose Pink (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#fceef4" }}
-                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
+                        className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2765,7 +2765,7 @@ export function PostDetail({
                       {/* 2. Comments - Soft Butter Yellow (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#fff9db" }}
-                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
+                        className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2784,7 +2784,7 @@ export function PostDetail({
                       {/* 3. Shares - Soft Periwinkle (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#e2e2fc" }}
-                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
+                        className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2803,7 +2803,7 @@ export function PostDetail({
                       {/* 4. Saves - Soft Peach Coral (BORDERLESS) */}
                       <div
                         style={{ backgroundColor: "#feece4" }}
-                        className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0 min-h-[110px] sm:min-h-[124px]"
+                        className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0 min-h-[110px] sm:min-h-[124px]"
                       >
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -2820,7 +2820,7 @@ export function PostDetail({
                       </div>
 
                       {/* 5. Reach - White Card (SUBTLE BORDER) */}
-                      <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
+                      <div className="rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {(insights.reach ?? 0).toLocaleString()}
@@ -2836,7 +2836,7 @@ export function PostDetail({
                       </div>
 
                       {/* 6. Views - White Card (SUBTLE BORDER) */}
-                      <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all min-h-[110px] sm:min-h-[124px]">
+                      <div className="rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-3.5 sm:p-4.5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all min-h-[110px] sm:min-h-[124px]">
                         <div className="flex items-start justify-between gap-1.5">
                           <span className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
                             {(insights.views ?? 0).toLocaleString()}
@@ -2897,7 +2897,7 @@ export function PostDetail({
                           },
                           {
                             key: "comments",
-                            icon: <CommentOutlined className={chartView === "comments" ? "text-blue-500" : "text-slate-400"} />,
+                            icon: <CommentOutlined className={chartView === "comments" ? "text-slate-900" : "text-slate-400"} />,
                             label: <span className="font-semibold text-xs">Comments</span>,
                             className: chartView === "comments" ? "!font-bold !bg-[#e2e2fc]" : "",
                           },
@@ -2923,7 +2923,7 @@ export function PostDetail({
                       <button
                         type="button"
                         aria-label="Chart view options"
-                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                         title="Change chart view"
                       >
                         <EllipsisOutlined className="text-lg text-slate-800" />
@@ -2992,7 +2992,7 @@ export function PostDetail({
                           },
                           {
                             key: "funnel",
-                            icon: <FilterOutlined className={rightTab === "funnel" ? "text-blue-500" : "text-slate-400"} />,
+                            icon: <FilterOutlined className={rightTab === "funnel" ? "text-slate-900" : "text-slate-400"} />,
                             label: <span className="font-semibold text-xs">Discovery Funnel</span>,
                             className: rightTab === "funnel" ? "!font-bold !bg-[#e2e2fc]" : "",
                           },
@@ -3012,7 +3012,7 @@ export function PostDetail({
                       <button
                         type="button"
                         aria-label="View options"
-                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                        className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                         title="Change view"
                       >
                         <EllipsisOutlined className="text-lg text-slate-800" />
@@ -3351,14 +3351,14 @@ export function PostDetail({
                   name: "Explore & Feed Expansion",
                   tag: "Hours 24–72",
                   desc: "Distribution expands beyond existing followers into Explore & Reels based on save, share, and discussion density.",
-                  badgeCls: "bg-blue-50 text-blue-700 border-blue-200/60",
+                  badgeCls: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
                 };
               } else {
                 lifecyclePhase = {
                   name: "Evergreen & Search Residual",
                   tag: `${Math.round(ageDays)}d Active`,
                   desc: "Steady long-tail discoverability sustained by search queries, profile visits, and bookmark revisits.",
-                  badgeCls: "bg-purple-50 text-purple-700 border-purple-200/60",
+                  badgeCls: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
                 };
               }
 
@@ -3477,8 +3477,8 @@ export function PostDetail({
               const viralTrendStatus = exploreProbability >= 75
                 ? { label: "High Explore Probability", badge: "bg-emerald-50 text-emerald-700 border-emerald-200/80", icon: "🔥", tag: "Accelerating Velocity" }
                 : exploreProbability >= 50
-                  ? { label: "Moderate Discovery Signal", badge: "bg-blue-50 text-blue-700 border-blue-200/80", icon: "⚡", tag: "Steady Expansion" }
-                  : { label: "Follower-Bound Distribution", badge: "bg-slate-100 text-slate-700 border-slate-200/80", icon: "📈", tag: "Niche Following" };
+                  ? { label: "Moderate Discovery Signal", badge: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]", icon: "⚡", tag: "Steady Expansion" }
+                  : { label: "Follower-Bound Distribution", badge: "bg-slate-100 text-slate-700 border-[#e9e9ee]", icon: "📈", tag: "Niche Following" };
 
               // ── AI Natural Language Sentiment Arc ────────────────────
               const praisePercent = totalCommentsCount > 0 ? Math.round((praiseCount / totalCommentsCount) * 100) : 0;
@@ -3789,7 +3789,7 @@ export function PostDetail({
 
                         {/* Error Banner if any */}
                         {aiDiagnosisError && (
-                          <div className="p-3.5 rounded-2xl bg-[#fceef4] border-0 text-xs text-rose-950 flex items-center justify-between gap-2 shadow-2xs">
+                          <div className="p-3.5 rounded-[22px] bg-[#fceef4] border-0 text-xs text-rose-950 flex items-center justify-between gap-2 shadow-2xs">
                             <div className="flex items-center gap-2">
                               <AlertCircle size={15} className="text-rose-600 shrink-0" />
                               <span>{aiDiagnosisError}</span>
@@ -4001,7 +4001,7 @@ export function PostDetail({
                               <button
                                 type="button"
                                 onClick={openCaptionOptimizer}
-                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-900 bg-white hover:bg-slate-50 border border-black/80 px-2.5 py-1 rounded-full shadow-2xs transition-all active:scale-95 cursor-pointer"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-900 bg-white hover:bg-[#F1F3F7] border border-black/80 px-2.5 py-1 rounded-full shadow-2xs transition-all active:scale-95 cursor-pointer"
                               >
                                 <Sparkles size={11} className="text-amber-500 fill-amber-500" />
                                 <span>AI Optimize Hooks</span>
@@ -4009,9 +4009,9 @@ export function PostDetail({
                             </div>
 
                             {/* Caption preview box */}
-                            <div className="mt-4 p-4 rounded-2xl bg-[#f1f3f7] border-0 text-slate-800 text-xs sm:text-sm italic leading-relaxed">
+                            <div className="mt-4 p-4 rounded-[22px] bg-[#f1f3f7] border-0 text-slate-800 text-xs sm:text-sm italic leading-relaxed">
                               {captionText ? `“${captionText}”` : <span className="text-slate-400 not-italic">No caption provided for this post.</span>}
-                              <div className="mt-2.5 pt-2 border-t border-slate-200/60 not-italic text-[11px] text-slate-500 font-semibold flex items-center justify-between gap-2 flex-wrap">
+                              <div className="mt-2.5 pt-2 border-t border-[#e9e9ee] not-italic text-[11px] text-slate-500 font-semibold flex items-center justify-between gap-2 flex-wrap">
                                 <span>{charCount} characters · {wordCount} words · {emojiCount} emoji</span>
                                 <span>Est. ~{readingTimeSec}s read</span>
                               </div>
@@ -4019,26 +4019,26 @@ export function PostDetail({
 
                             {/* 4-Stat Metric Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4">
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Word Count</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{wordCount}</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                   {wordCount >= 70 && wordCount <= 160 ? "Optimal copy" : wordCount < 30 ? "Punchy hook" : "Standard"}
                                 </div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Read Time</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">~{readingTimeSec}s</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{charCount} chars</div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hashtags</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{uniqueHashtags.length}</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                   {uniqueHashtags.length > 0 ? `${uniqueHashtags.length} tags` : "None"}
                                 </div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">CTAs</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{detectedCtas.length}</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
@@ -4086,7 +4086,7 @@ export function PostDetail({
                           {/* Lifecycle callout in Soft Periwinkle */}
                           <div
                             style={{ backgroundColor: "#e2e2fc" }}
-                            className="rounded-2xl p-4 text-slate-950 border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs"
+                            className="rounded-[22px] p-4 text-slate-950 border-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs"
                           >
                             <div>
                               <div className="text-sm font-bold text-slate-950">{lifecyclePhase.name}</div>
@@ -4099,28 +4099,28 @@ export function PostDetail({
 
                           {/* 4-Stat Metric Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Discussion</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{discussionDensity.toFixed(1)}×</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {discussionDensity >= 1.0 ? "High virality" : "Standard"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Public Reply</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{publicReplyRate}%</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {avgReplyLatencyMin ? `~${avgReplyLatencyMin}m speed` : "Logged"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Save Rate</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{saveRateVal.toFixed(1)}%</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {saveRateVal >= 1.2 ? "Strong" : "Benchmark: 1.2%"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Daily Velocity</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dailyVelocity}</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">Interactions/day</div>
@@ -4128,7 +4128,7 @@ export function PostDetail({
                           </div>
 
                           {/* Explore Recommendation Probability Bar */}
-                          <div className="p-4 rounded-2xl bg-[#f1f3f7] border-0 space-y-2">
+                          <div className="p-4 rounded-[22px] bg-[#f1f3f7] border-0 space-y-2">
                             <div className="flex items-center justify-between text-xs font-bold text-slate-950">
                               <span className="flex items-center gap-1.5">
                                 <Zap size={13} className="text-amber-500 fill-amber-500" /> Explore Recommendation Probability
@@ -4151,13 +4151,13 @@ export function PostDetail({
 
                           {/* Catalysts & Bottlenecks */}
                           <div className="space-y-2 pt-1">
-                            <div className="p-3 rounded-2xl bg-[#fff9db] border-0 text-xs text-slate-950 flex items-start gap-2.5">
+                            <div className="p-3 rounded-[22px] bg-[#fff9db] border-0 text-xs text-slate-950 flex items-start gap-2.5">
                               <TrendingUp size={16} className="text-slate-900 shrink-0 mt-0.5" />
                               <p className="leading-relaxed">
                                 <strong className="font-bold">Algorithmic catalyst:</strong> {aiPrimaryCatalyst}
                               </p>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#feece4] border-0 text-xs text-slate-950 flex items-start gap-2.5">
+                            <div className="p-3 rounded-[22px] bg-[#feece4] border-0 text-xs text-slate-950 flex items-start gap-2.5">
                               <Lightbulb size={16} className="text-slate-900 shrink-0 mt-0.5" />
                               <p className="leading-relaxed">
                                 <strong className="font-bold">Algorithmic bottleneck:</strong> {aiPrimaryBottleneck}
@@ -4181,22 +4181,22 @@ export function PostDetail({
 
                         {/* Sentiment Spectrum 4-grid in Soft Pastels */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div style={{ backgroundColor: "#fff9db" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                          <div style={{ backgroundColor: "#fff9db" }} className="p-4 rounded-[22px] border-0 shadow-xs flex flex-col justify-between">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Praise & Love</span>
                             <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{praisePercent}%</div>
                             <span className="text-[11px] font-medium text-slate-600">{praiseCount} comments</span>
                           </div>
-                          <div style={{ backgroundColor: "#fceef4" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                          <div style={{ backgroundColor: "#fceef4" }} className="p-4 rounded-[22px] border-0 shadow-xs flex flex-col justify-between">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Buying Intent</span>
                             <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{buyerPercent}%</div>
                             <span className="text-[11px] font-medium text-slate-600">{buyerCount} purchase signals</span>
                           </div>
-                          <div style={{ backgroundColor: "#e2e2fc" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                          <div style={{ backgroundColor: "#e2e2fc" }} className="p-4 rounded-[22px] border-0 shadow-xs flex flex-col justify-between">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Questions</span>
                             <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{questionPercent}%</div>
                             <span className="text-[11px] font-medium text-slate-600">{questionCount} inquiries</span>
                           </div>
-                          <div style={{ backgroundColor: "#f1f3f7" }} className="p-4 rounded-2xl border-0 shadow-xs flex flex-col justify-between">
+                          <div style={{ backgroundColor: "#f1f3f7" }} className="p-4 rounded-[22px] border-0 shadow-xs flex flex-col justify-between">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700">Neutral</span>
                             <div className="text-2xl sm:text-3xl font-black text-slate-950 tabular-nums my-1">{neutralPercent}%</div>
                             <span className="text-[11px] font-medium text-slate-600">Standard remarks</span>
@@ -4216,7 +4216,7 @@ export function PostDetail({
                                 setPinCommentModalOpen(true);
                                 notify("Pin comment dialog opened");
                               }}
-                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-slate-50 text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-[#F1F3F7] text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
                             >
                               <Target size={14} />
                               <span>Pin best comment</span>
@@ -4233,7 +4233,7 @@ export function PostDetail({
                                 );
                                 notify("Story reshare hook generated");
                               }}
-                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-slate-50 text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-950 border border-black/80 hover:bg-[#F1F3F7] text-xs font-bold shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
                             >
                               <Send size={14} />
                               <span>Story reshare hook</span>
@@ -4295,7 +4295,7 @@ export function PostDetail({
                                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer ${
                                     isActive
                                       ? "!bg-black !text-white shadow-xs"
-                                      : "bg-white text-slate-700 border border-slate-200 hover:border-black/40 hover:bg-slate-50"
+                                      : "bg-white text-slate-700 border border-[#e9e9ee] hover:border-black/40 hover:bg-[#F1F3F7]"
                                   }`}
                                   onClick={() => setEventFilter(key as any)}
                                   data-testid={`history-filter-${key}`}
@@ -4315,9 +4315,9 @@ export function PostDetail({
                           {visibleTimelineEvents.map((event) => (
                             <div
                               key={event.id}
-                              className={`rounded-2xl border transition-all ${
+                              className={`rounded-[22px] border transition-all ${
                                 expandedEvent === event.id
-                                  ? "border-black/60 bg-slate-50/50 shadow-xs"
+                                  ? "border-black/60 bg-[#F1F3F7] shadow-xs"
                                   : "border-[#e9e9ee] hover:border-black/30 bg-white"
                               }`}
                             >
@@ -4363,7 +4363,7 @@ export function PostDetail({
                           ))}
 
                           {visibleTimelineEvents.length === 0 && (
-                            <div className="p-8 text-center text-xs text-slate-400 rounded-2xl bg-[#f1f3f7]" data-testid="history-empty-state">
+                            <div className="p-8 text-center text-xs text-slate-400 rounded-[22px] bg-[#f1f3f7]" data-testid="history-empty-state">
                               No activity in this filter yet.
                             </div>
                           )}
@@ -4384,28 +4384,28 @@ export function PostDetail({
 
                           {/* 4-Stat Metric Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buyer Intent</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{buyerCount}</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {totalCommentsCount > 0 ? `${Math.round((buyerCount / totalCommentsCount) * 100)}%` : "0%"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Questions</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{questionCount}</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {totalCommentsCount > 0 ? `${Math.round((questionCount / totalCommentsCount) * 100)}%` : "0%"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Praise</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{praiseCount}</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
                                 {totalCommentsCount > 0 ? `${Math.round((praiseCount / totalCommentsCount) * 100)}%` : "0%"}
                               </div>
                             </div>
-                            <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                            <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                               <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Peer Tags</div>
                               <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{referralCount}</div>
                               <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">
@@ -4472,22 +4472,22 @@ export function PostDetail({
 
                             {/* 4-Stat Metric Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Triggers</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmTriggered}</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{keywordMatchRate}% match</div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">DM Delivery</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmDeliveryRate}%</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{dmSent}/{dmTriggered} sent</div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">DM Conversions</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{dmConversionRate}%</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{dmReplied} replied</div>
                               </div>
-                              <div className="p-3 rounded-2xl bg-[#f1f3f7] border-0">
+                              <div className="p-3 rounded-[22px] bg-[#f1f3f7] border-0">
                                 <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Follow Gate</div>
                                 <div className="text-lg font-black text-slate-950 tabular-nums mt-0.5">{followGateRate}%</div>
                                 <div className="text-[10px] text-slate-600 font-medium truncate mt-0.5">{followGateConverted} verified</div>
@@ -4495,7 +4495,7 @@ export function PostDetail({
                             </div>
 
                             {/* Active Rule Details Card */}
-                            <div className="p-4 rounded-2xl bg-[#f1f3f7] border-0 space-y-1.5">
+                            <div className="p-4 rounded-[22px] bg-[#f1f3f7] border-0 space-y-1.5">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-xs font-bold text-slate-950 flex items-center gap-1.5">
                                   <Bot size={13} /> {activeDmRules[0]?.name || "No Active Rule"}
@@ -4559,7 +4559,7 @@ export function PostDetail({
         {captionLoading ? (
           <div className="space-y-3 pt-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 space-y-2.5 animate-pulse">
+              <div key={i} className="rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-4 space-y-2.5 animate-pulse">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <div className="h-3.5 w-44 bg-slate-200 rounded" />
@@ -4567,7 +4567,7 @@ export function PostDetail({
                   </div>
                   <div className="h-6 w-16 bg-slate-200 rounded-lg" />
                 </div>
-                <div className="h-20 w-full bg-white rounded-lg border border-slate-200/60 p-3 space-y-1.5">
+                <div className="h-20 w-full bg-white rounded-lg border border-[#e9e9ee] p-3 space-y-1.5">
                   <div className="h-2.5 w-full bg-slate-100 rounded" />
                   <div className="h-2.5 w-5/6 bg-slate-100 rounded" />
                   <div className="h-2.5 w-4/6 bg-slate-100 rounded" />
@@ -4591,7 +4591,7 @@ export function PostDetail({
                 title: "🚀 Viral Explore & High Save Hook",
                 subtitle: "Optimized for Instagram Explore page distribution & bookmarking",
                 badge: "Explore Page",
-                badgeCls: "bg-purple-50 text-purple-700 border-purple-200",
+                badgeCls: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
                 text: optimizedCaptions.viralExplore,
               },
               {
@@ -4599,13 +4599,13 @@ export function PostDetail({
                 title: "💬 Community Conversation Spark",
                 subtitle: "Asks polarising or debate-prompting questions to boost algorithmic comments",
                 badge: "High Comments",
-                badgeCls: "bg-blue-50 text-blue-700 border-blue-200",
+                badgeCls: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
                 text: optimizedCaptions.communitySpark,
               },
             ].map((item) => (
               <div
                 key={item.key}
-                className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-4 space-y-2.5 hover:border-purple-200 transition-all"
+                className="rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-4 space-y-2.5 hover:border-[#e9e9ee] transition-all"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -4626,7 +4626,7 @@ export function PostDetail({
                     {copiedKey === item.key ? "Copied" : "Copy"}
                   </Button>
                 </div>
-                <div className="rounded-lg bg-white p-3 border border-slate-200/60 text-xs text-slate-800 font-mono whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+                <div className="rounded-lg bg-white p-3 border border-[#e9e9ee] text-xs text-slate-800 font-mono whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
                   {item.text}
                 </div>
               </div>
@@ -4661,13 +4661,13 @@ export function PostDetail({
       >
         {triggerLoading ? (
           <div className="space-y-3 pt-3">
-            <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 space-y-2 animate-pulse">
+            <div className="rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-3.5 space-y-2 animate-pulse">
               <div className="h-3 w-36 bg-slate-200 rounded" />
               <div className="h-2.5 w-full bg-slate-200 rounded" />
             </div>
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-white animate-pulse">
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl border border-[#e9e9ee] bg-white animate-pulse">
                   <div className="space-y-1.5">
                     <div className="flex gap-2 items-center">
                       <div className="h-4 w-16 bg-slate-200 rounded-md" />
@@ -4705,7 +4705,7 @@ export function PostDetail({
                   {triggerSuggestions.suggestions.map((s) => (
                     <div
                       key={s.keyword}
-                      className="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-white hover:border-amber-300 transition-all"
+                      className="flex items-center justify-between p-3 rounded-xl border border-[#e9e9ee] bg-white hover:border-amber-300 transition-all"
                     >
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
@@ -4735,12 +4735,12 @@ export function PostDetail({
             </div>
 
             {triggerSuggestions.recommendedDmText && (
-              <div className="rounded-xl border border-blue-200/80 bg-blue-50/30 p-3 space-y-1.5">
+              <div className="rounded-xl border border-[#e9e9ee] bg-[#E2E2FC] p-3 space-y-1.5">
                 <div className="text-xs font-bold text-blue-900 flex items-center gap-1.5">
-                  <SendOutlined className="text-blue-600" />
+                  <SendOutlined className="text-slate-900" />
                   Recommended Follow-up DM Copy
                 </div>
-                <p className="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-blue-100 font-mono">
+                <p className="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-[#e9e9ee] font-mono">
                   {triggerSuggestions.recommendedDmText}
                 </p>
               </div>
@@ -4801,7 +4801,7 @@ export function PostDetail({
                         }}
                         className={`px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-all border ${active
                           ? "bg-amber-500 text-white border-amber-500 shadow-2xs"
-                          : "bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300"
+                          : "bg-[#F1F3F7] text-slate-600 border-[#e9e9ee] hover:border-slate-300"
                           }`}
                       >
                         {tag}
@@ -5071,10 +5071,10 @@ export function PostDetail({
                         }}
                         className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border transition-all ${
                           isUsed
-                            ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed line-through"
+                            ? "bg-slate-100 text-slate-400 border-[#e9e9ee] cursor-not-allowed line-through"
                             : quickRuleTrigger === kw
                             ? "bg-black text-white border-black cursor-pointer"
-                            : "bg-white text-slate-800 border-black/80 hover:bg-slate-50 cursor-pointer"
+                            : "bg-white text-slate-800 border-black/80 hover:bg-[#F1F3F7] cursor-pointer"
                         }`}
                         title={isUsed ? `Trigger "${kw}" already exists on this post` : `Use trigger "${kw}"`}
                       >
@@ -5148,7 +5148,7 @@ export function PostDetail({
                     <button
                       type="button"
                       onClick={() => setQuickRuleDmText((prev) => prev + " {username}")}
-                      className="px-2 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs hover:bg-slate-50 cursor-pointer"
+                      className="px-2 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[10px] font-bold shadow-2xs hover:bg-[#F1F3F7] cursor-pointer"
                       title="Insert recipient @username"
                     >
                       + @username
@@ -5171,7 +5171,7 @@ export function PostDetail({
               </div>
 
               {/* Native Instagram Clickable Action Button */}
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs space-y-2">
+              <div className="p-3 sm:p-3.5 rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#0095f6]" />
@@ -5274,7 +5274,7 @@ export function PostDetail({
                   >
                     <button
                       type="button"
-                      className="px-2.5 py-1.5 sm:py-2 rounded-xl bg-white border border-[#e9e9ee] hover:border-black/40 text-xs font-bold text-slate-800 shadow-2xs flex items-center gap-1 cursor-pointer shrink-0 transition-all hover:bg-slate-50 active:scale-95"
+                      className="px-2.5 py-1.5 sm:py-2 rounded-xl bg-white border border-[#e9e9ee] hover:border-black/40 text-xs font-bold text-slate-800 shadow-2xs flex items-center gap-1 cursor-pointer shrink-0 transition-all hover:bg-[#F1F3F7] active:scale-95"
                       title="Select from pre-defined list"
                     >
                       <span>Presets</span>
@@ -5352,14 +5352,14 @@ export function PostDetail({
                   </div>
 
                   {/* Official Instagram Button Template Card */}
-                  <div className="rounded-2xl border border-black/10 bg-white shadow-xs overflow-hidden">
+                  <div className="rounded-[22px] border border-black/10 bg-white shadow-xs overflow-hidden">
                     <div className="p-3 text-slate-900 text-xs leading-relaxed whitespace-pre-wrap font-sans">
                       {quickRuleDmText
                         .replace(/{username}/g, "@follower")
                         .replace(/{link}/g, "")
                         .trim() || "Hey @follower! Thanks for your comment."}
                     </div>
-                    <div className="border-t border-black/10 bg-slate-50/50 py-2.5 px-3 text-center text-xs font-bold text-[#0095f6] hover:bg-slate-100/80 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                    <div className="border-t border-black/10 bg-[#F1F3F7] py-2.5 px-3 text-center text-xs font-bold text-[#0095f6] hover:bg-slate-100/80 transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
                       <span>{quickRuleButtonTitle.trim() || "Visit Website"}</span>
                       <ExternalLink size={12} className="opacity-70" />
                     </div>
@@ -5427,7 +5427,7 @@ export function PostDetail({
         <div className="pt-3 space-y-4">
           {effectiveRules.length === 0 ? (
             <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-6 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#f1f3f7] flex items-center justify-center mx-auto text-slate-400">
+              <div className="w-12 h-12 rounded-[22px] bg-[#f1f3f7] flex items-center justify-center mx-auto text-slate-400">
                 <TwoColorPaperPlane className="w-6 h-6" color1="#000000" />
               </div>
               <div>
@@ -5569,7 +5569,7 @@ export function PostDetail({
               <button
                 type="button"
                 onClick={handleOpenCreateRule}
-                className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-full border border-dashed border-[#b4b7fc] hover:border-black text-[#2e384d] hover:text-black bg-white hover:bg-slate-50 text-xs font-bold transition-all cursor-pointer shadow-2xs mt-3.5"
+                className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-full border border-dashed border-[#b4b7fc] hover:border-black text-[#2e384d] hover:text-black bg-white hover:bg-[#F1F3F7] text-xs font-bold transition-all cursor-pointer shadow-2xs mt-3.5"
               >
                 <Plus size={14} className="text-[#2e384d]" />
                 <span>Add Another Trigger Keyword for this Post</span>
@@ -5600,7 +5600,7 @@ export function PostDetail({
         }
       >
         <div className="space-y-3.5 pt-3 text-xs">
-          <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100 space-y-2">
+          <div className="p-3 rounded-xl bg-[#E2E2FC] border border-[#e9e9ee] space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-purple-950 text-xs">📲 Template 1: Story Repost Request</span>
               <Button
@@ -5612,12 +5612,12 @@ export function PostDetail({
                 {copiedKey === "story" ? "Copied" : "Copy"}
               </Button>
             </div>
-            <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-purple-200/60 leading-relaxed font-sans">
+            <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-[#e9e9ee] leading-relaxed font-sans">
               &ldquo;Hey Vivek! Loved our collab post! Just published it on the feed. Would you mind sharing it to your Story with a sticker? Excited to push this together! 🙌&rdquo;
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div className="p-3 rounded-xl bg-[#F1F3F7] border border-[#e9e9ee] space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-900 text-xs">💬 Template 2: Early Comment Spark</span>
               <Button
@@ -5629,7 +5629,7 @@ export function PostDetail({
                 {copiedKey === "comment" ? "Copied" : "Copy"}
               </Button>
             </div>
-            <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200 leading-relaxed font-sans">
+            <p className="text-slate-700 bg-white p-2.5 rounded-lg border border-[#e9e9ee] leading-relaxed font-sans">
               &ldquo;Hey Vivek! Could you drop a quick comment or emoji on our new post? Early comments really boost the algorithm! Appreciate you! 💛&rdquo;
             </p>
           </div>
@@ -5667,7 +5667,7 @@ export function PostDetail({
                   message.info(`Head to the Messages tab to chat with @${collabUser}!`);
                 }
               }}
-              className="!rounded-lg !bg-purple-600 hover:!bg-purple-500 text-xs font-semibold"
+              className="!rounded-lg !bg-black hover:!bg-black text-xs font-semibold"
             >
               Go to Inbox DMs with @{detectedCollabUsername} →
             </Button>
@@ -5685,7 +5685,7 @@ export function PostDetail({
         className="!p-0"
         title={
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 text-sm">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E2E2FC] text-slate-900 text-sm">
               <RocketOutlined />
             </span>
             <div>
@@ -5704,7 +5704,7 @@ export function PostDetail({
           ) : (
             <>
               {/* 1. Recommended Screen Text */}
-              <div className="p-3.5 rounded-xl bg-indigo-50/50 border border-indigo-100 space-y-2">
+              <div className="p-3.5 rounded-xl bg-[#E2E2FC] border border-[#e9e9ee] space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-indigo-950 text-xs flex items-center gap-1.5">
                     <span>📲 Recommended Story Overlay Text</span>
@@ -5718,28 +5718,28 @@ export function PostDetail({
                     {copiedKey === "storyHook" ? "Copied" : "Copy Text"}
                   </Button>
                 </div>
-                <p className="text-slate-800 bg-white p-3 rounded-lg border border-indigo-200/60 leading-relaxed font-sans text-xs">
+                <p className="text-slate-800 bg-white p-3 rounded-lg border border-[#e9e9ee] leading-relaxed font-sans text-xs">
                   &ldquo;{storyReshareData?.hookText}&rdquo;
                 </p>
               </div>
 
               {/* 2. Sticker Poll Preview */}
-              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+              <div className="p-3.5 rounded-xl bg-[#F1F3F7] border border-[#e9e9ee] space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                     <span>📊 Interactive Sticker Poll</span>
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">Triggers 3x tap-through</span>
                 </div>
-                <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-2">
+                <div className="p-3 rounded-lg bg-white border border-[#e9e9ee] space-y-2">
                   <div className="font-semibold text-slate-800 text-center">
                     {storyReshareData?.stickerPoll?.question || "Did you see this yet?"}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-center">
-                    <div className="py-2 px-3 rounded-lg bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
+                    <div className="py-2 px-3 rounded-lg bg-[#E2E2FC] text-slate-900 font-semibold border border-[#e9e9ee]">
                       {storyReshareData?.stickerPoll?.optA || "Just seeing it! 🔥"}
                     </div>
-                    <div className="py-2 px-3 rounded-lg bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
+                    <div className="py-2 px-3 rounded-lg bg-[#E2E2FC] text-slate-900 font-semibold border border-[#e9e9ee]">
                       {storyReshareData?.stickerPoll?.optB || "Already saved 📌"}
                     </div>
                   </div>
@@ -5757,7 +5757,7 @@ export function PostDetail({
               </div>
 
               {/* Why it works */}
-              <p className="text-[11px] text-slate-500 italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+              <p className="text-[11px] text-slate-500 italic bg-[#F1F3F7] p-2.5 rounded-lg border border-slate-100">
                 💡 <strong>Why this works:</strong> {storyReshareData?.explanation}
               </p>
 
@@ -5771,7 +5771,7 @@ export function PostDetail({
                     const allText = `${storyReshareData?.hookText}\n\n📊 Poll: ${storyReshareData?.stickerPoll?.question}\nOption A: ${storyReshareData?.stickerPoll?.optA}\nOption B: ${storyReshareData?.stickerPoll?.optB}\n\n👉 ${storyReshareData?.ctaText}`;
                     copyToClipboard(allText, "allStory", "Full Story Kit Copied! ✓");
                   }}
-                  className="!rounded-lg !bg-indigo-600 hover:!bg-indigo-500 text-xs font-semibold"
+                  className="!rounded-lg !bg-black hover:!bg-black text-xs font-semibold"
                 >
                   {copiedKey === "allStory" ? "Copied All! ✓" : "Copy Complete Story Kit"}
                 </Button>
@@ -5791,7 +5791,7 @@ export function PostDetail({
         className="!p-0"
         title={
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 text-sm">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E2E2FC] text-slate-900 text-sm">
               <PushpinOutlined />
             </span>
             <div>
@@ -5802,7 +5802,7 @@ export function PostDetail({
         }
       >
         <div className="space-y-4 pt-3 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+          <div className="p-3.5 rounded-xl bg-[#F1F3F7] border border-[#e9e9ee] space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
                 <span>📌 AI Selected Comment to Pin</span>
@@ -5812,7 +5812,7 @@ export function PostDetail({
               </span>
             </div>
             {candidatePinComment ? (
-              <div className="p-3 rounded-lg bg-white border border-slate-200 space-y-1.5">
+              <div className="p-3 rounded-lg bg-white border border-[#e9e9ee] space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-slate-900">@{candidatePinComment.username}</span>
                   <span className="text-[11px] text-slate-400">❤️ {candidatePinComment.likeCount || 0} likes</span>
@@ -5826,7 +5826,7 @@ export function PostDetail({
             )}
           </div>
 
-          <div className="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100 text-indigo-950 space-y-1">
+          <div className="p-3 rounded-xl bg-[#E2E2FC] border border-[#e9e9ee] text-indigo-950 space-y-1">
             <span className="font-bold text-indigo-900 text-[11px] uppercase tracking-wider block">
               💡 Why Pin This Specific Comment?
             </span>
@@ -5846,7 +5846,7 @@ export function PostDetail({
                   copyToClipboard(candidatePinComment.text, "pinText", "Comment text copied! ✓");
                   message.info("Head to Instagram and tap 'Pin' on this comment!");
                 }}
-                className="!rounded-lg !bg-indigo-600 hover:!bg-indigo-500 text-xs font-semibold"
+                className="!rounded-lg !bg-black hover:!bg-black text-xs font-semibold"
               >
                 {copiedKey === "pinText" ? "Copied! ✓" : "Copy Comment & Open Instagram"}
               </Button>
@@ -5866,7 +5866,7 @@ export function PostDetail({
         className="!p-0"
         title={
           <div className="flex items-center gap-3 pb-1">
-            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-500/10">
+            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-2xs shadow-emerald-500/20 ring-4 ring-emerald-500/10">
               <ShoppingOutlined className="text-lg" />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -5892,7 +5892,7 @@ export function PostDetail({
       >
         <div className="space-y-3.5 pt-3 text-xs">
           {/* Conversion KPI & Health Strip */}
-          <div className="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/40 border border-slate-200/80">
+          <div className="grid grid-cols-3 gap-2.5 p-3 rounded-xl bg-gradient-to-br from-slate-50 to-emerald-50/40 border border-[#e9e9ee]">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-emerald-100/80 text-emerald-700 flex items-center justify-center shrink-0">
                 <ShoppingOutlined className="text-sm" />
@@ -5904,7 +5904,7 @@ export function PostDetail({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 border-x border-slate-200/60 px-2.5">
+            <div className="flex items-center gap-2.5 border-x border-[#e9e9ee] px-2.5">
               <div className="w-8 h-8 rounded-lg bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
                 <ClockCircleOutlined className="text-sm" />
               </div>
@@ -5940,13 +5940,13 @@ export function PostDetail({
               </span>
             </div>
 
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/60 p-2.5 space-y-2 max-h-52 overflow-y-auto">
+            <div className="rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] p-2.5 space-y-2 max-h-52 overflow-y-auto">
               {buyerLeads.length > 0 ? (
                 buyerLeads.map((lead) => {
                   return (
                     <div
                       key={lead.username}
-                      className="p-2.5 rounded-lg bg-white border border-slate-200 hover:border-emerald-300 hover:shadow-xs transition-all space-y-2"
+                      className="p-2.5 rounded-lg bg-white border border-[#e9e9ee] hover:border-emerald-300 hover:shadow-xs transition-all space-y-2"
                     >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
@@ -5957,7 +5957,7 @@ export function PostDetail({
                             @{lead.username}
                           </span>
                           {lead.count > 1 && (
-                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 shrink-0">
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-[#E2E2FC] text-slate-900 border border-[#e9e9ee] shrink-0">
                               {lead.count} Inquiries
                             </span>
                           )}
@@ -5974,7 +5974,7 @@ export function PostDetail({
                               <CheckCircleFilled className="text-[9px]" /> DM Sent
                             </span>
                           ) : lead.myReply ? (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200/80">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#E2E2FC] text-slate-900 border border-[#e9e9ee]">
                               <CheckCircleFilled className="text-[9px]" /> Replied
                             </span>
                           ) : (
@@ -5992,7 +5992,7 @@ export function PostDetail({
                         {lead.allTexts.map((txt, idx) => (
                           <div
                             key={idx}
-                            className="text-xs text-slate-800 bg-slate-50/80 px-2.5 py-1.5 rounded-md border border-slate-100 font-sans italic flex items-start gap-1.5"
+                            className="text-xs text-slate-800 bg-[#F1F3F7] px-2.5 py-1.5 rounded-md border border-slate-100 font-sans italic flex items-start gap-1.5"
                           >
                             <span className="text-slate-400 font-serif text-sm leading-none">&ldquo;</span>
                             <span className="not-italic text-slate-800 font-medium">{txt}</span>
@@ -6126,7 +6126,7 @@ export function PostDetail({
                       prev.includes(chip.text) ? prev : `${prev} ${chip.text}`.trim()
                     )
                   }
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-300 transition-colors cursor-pointer font-medium"
+                  className="text-[10px] px-2 py-0.5 rounded-full bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-[#e9e9ee] hover:border-emerald-300 transition-colors cursor-pointer font-medium"
                 >
                   {chip.label}
                 </button>
@@ -6135,7 +6135,7 @@ export function PostDetail({
           </div>
 
           {/* 24/7 Automation Callout Banner */}
-          <div className="p-3 rounded-xl bg-slate-900 text-white flex items-center justify-between gap-3 shadow-sm">
+          <div className="p-3 rounded-xl bg-black text-white flex items-center justify-between gap-3 shadow-2xs">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
                 <ThunderboltOutlined className="text-sm" />
@@ -6180,7 +6180,7 @@ export function PostDetail({
                   setBuyerConvertModalOpen(false);
                   setQuickRuleModalOpen(true);
                 }}
-                className="!rounded-xl !bg-gradient-to-r !from-emerald-600 !to-teal-600 hover:!from-emerald-500 hover:!to-teal-500 !border-0 text-xs font-semibold shadow-md shadow-emerald-600/25 text-white px-3.5 py-1.5 cursor-pointer"
+                className="!rounded-xl !bg-gradient-to-r !from-emerald-600 !to-teal-600 hover:!from-emerald-500 hover:!to-teal-500 !border-0 text-xs font-semibold shadow-2xs shadow-emerald-600/25 text-white px-3.5 py-1.5 cursor-pointer"
               >
                 Activate 24/7 Auto-DM for Buyer Keywords →
               </Button>

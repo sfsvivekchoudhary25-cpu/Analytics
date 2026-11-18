@@ -91,7 +91,7 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
       </div>
 
       <div className="mt-4">
-        <div className="flex items-center justify-between gap-6 py-4 border-b border-slate-200/70">
+        <div className="flex items-center justify-between gap-6 py-4 border-b border-[#e9e9ee]">
           <div className="min-w-0">
             <div className="text-sm font-medium text-slate-900">Don&apos;t store my messages</div>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">{storeMessages === null ? "Connect an Instagram account in Account to use this." : storeMessages ? "Messages are saved in our database, encrypted. Turn on to keep no message text; chats are read live from Instagram." : "Message text is not saved. Chats are read live from Instagram, so they open a little slower and old messages can&apos;t be searched."}</p>
@@ -106,7 +106,7 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
             />
           </div>
         </div>
-        <div className="flex items-center justify-between gap-6 py-4 border-b border-slate-200/70">
+        <div className="flex items-center justify-between gap-6 py-4 border-b border-[#e9e9ee]">
           <div className="min-w-0">
             <div className="text-sm font-medium text-slate-900">Privacy Policy</div>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">How we handle your data and your customers&apos; messages.</p>
@@ -116,13 +116,13 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
               href="/privacy"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-50"
+              className="inline-flex h-8 items-center rounded-lg border border-[#e9e9ee] bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-[#F1F3F7]"
             >
               View
             </a>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-6 py-4 border-b border-slate-200/70">
+        <div className="flex items-center justify-between gap-6 py-4 border-b border-[#e9e9ee]">
           <div className="min-w-0">
             <div className="text-sm font-medium text-slate-900">Data deletion instructions</div>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">Step by step: how to have your data erased.</p>
@@ -132,13 +132,13 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
               href="/data-deletion"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-50"
+              className="inline-flex h-8 items-center rounded-lg border border-[#e9e9ee] bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-[#F1F3F7]"
             >
               View
             </a>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-6 py-4 border-b border-slate-200/70">
+        <div className="flex items-center justify-between gap-6 py-4 border-b border-[#e9e9ee]">
           <div className="min-w-0">
             <div className="text-sm font-medium text-slate-900">Terms of Service</div>
             <p className="mt-0.5 text-xs leading-relaxed text-slate-500">The rules for using the app.</p>
@@ -148,7 +148,7 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
               href="/terms"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-slate-50"
+              className="inline-flex h-8 items-center rounded-lg border border-[#e9e9ee] bg-white px-3 text-xs font-medium text-slate-800 transition-colors hover:bg-[#F1F3F7]"
             >
               View
             </a>

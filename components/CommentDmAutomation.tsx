@@ -107,7 +107,7 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
     );
   if (status === "invited")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-500/20 dark:text-blue-300">
+      <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-slate-900 ring-1 ring-inset ring-blue-500/20 dark:text-blue-300">
         <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
         Invited
       </span>
@@ -120,7 +120,7 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
   );
 }
 
-const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-sm w-full min-w-0 [overflow-anchor:none]";
+const card = "rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs w-full min-w-0 [overflow-anchor:none]";
 
 /**
  * Captures current scroll position and locks it across consecutive
@@ -604,10 +604,10 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       {error && <p role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs sm:text-sm text-red-600">{error}</p>}
 
       {/* Header Card: icon, editable name, live/paused switch, what it does, key settings at a glance */}
-      <div className="rounded-3xl border border-[var(--viz-border)] bg-[var(--viz-surface)] shadow-2xs [overflow-anchor:none]">
+      <div className="rounded-[26px] border border-[var(--viz-border)] bg-[var(--viz-surface)] shadow-2xs [overflow-anchor:none]">
         <div className="p-4 sm:p-6">
           <div className="flex items-start gap-3.5 sm:gap-4">
-            <span className="flex h-11 w-11 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background shadow-xs ring-4 ring-black/[0.04] dark:ring-white/[0.06]">
+            <span className="flex h-11 w-11 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-[22px] bg-foreground text-background shadow-xs ring-4 ring-black/[0.04] dark:ring-white/[0.06]">
               <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </span>
 
@@ -668,7 +668,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     className={`relative h-5 w-9 rounded-full transition-colors ${rule.enabled ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-600"}`}
                   >
                     <span
-                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${rule.enabled ? "left-[18px]" : "left-0.5"}`}
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-2xs transition-all ${rule.enabled ? "left-[18px]" : "left-0.5"}`}
                     />
                   </span>
                 </button>
@@ -718,7 +718,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
       {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
       <div id="step-trigger-target" className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
         {/* Step 1: Target Post */}
-        <div data-step="target" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+        <div data-step="target" className="rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
             <div className="flex items-center justify-between gap-2">
@@ -757,7 +757,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   linkedPost?.permalink?.includes("/reel/");
 
                 return (
-                  <div className="group relative rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
+                  <div className="group relative rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
                     <div className="flex items-start gap-3.5">
                       {/* Post / Reel Thumbnail */}
                       <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
@@ -860,7 +860,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 );
               })()
             ) : (
-              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
+              <div className="flex items-center justify-between gap-2.5 rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
                     <InstagramIcon className="h-5 w-5" />
@@ -882,7 +882,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
         </div>
         {/* Step 2: Trigger Condition */}
-        <div data-step="trigger" className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+        <div data-step="trigger" className="rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
             <div className="flex items-center justify-between gap-2">
@@ -1149,7 +1149,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 label: "Simple Text",
                 desc: "Clean text message",
                 badge: "Direct DM",
-                accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+                accent: "bg-black/10 text-slate-900 dark:text-slate-900 border-[#e9e9ee]",
               },
               {
                 id: "button",
@@ -1157,7 +1157,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 label: "Text + Buttons",
                 desc: "Message with clickable links",
                 badge: "Up to 3 links",
-                accent: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+                accent: "bg-black/10 text-slate-900 dark:text-slate-900 border-[#e9e9ee]",
               },
               {
                 id: "product",
@@ -1191,11 +1191,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   key={tab.id}
                   type="button"
                   onClick={(e) => handleButtonClick(e, () => selectTemplate(tab.id as any))}
-                  className={`group relative flex flex-col justify-between rounded-2xl p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
+                  className={`group relative flex flex-col justify-between rounded-[22px] p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
                     idx === 4 ? "col-span-2 sm:col-span-1" : ""
                   } ${
                     active
-                      ? "border-neutral-900 bg-neutral-900 text-white shadow-lg shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-neutral-900 dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
+                      ? "border-neutral-900 bg-neutral-900 text-white shadow-2xs shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-neutral-900 dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
                       : "border-[var(--viz-border)] bg-[var(--viz-surface)] text-[var(--viz-ink)] hover:-translate-y-0.5 hover:border-[var(--viz-ink)]/30 hover:shadow-xs"
                   }`}
                 >
@@ -1244,7 +1244,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <label className="text-xs font-semibold text-[var(--viz-ink)] tracking-tight">Message Text / Caption</label>
-                  <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                  <span className="inline-flex items-center rounded-md bg-black/10 px-2 py-0.5 text-[10px] font-medium text-slate-900 dark:text-slate-900 border border-[#e9e9ee]">
                     Primary DM
                   </span>
                 </div>
@@ -1257,7 +1257,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       setDirty(true);
                     })
                   }
-                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#e9e9ee] bg-black/8 text-slate-900 dark:text-purple-300 hover:bg-black/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
                 >
                   <span className="font-mono text-[10px] opacity-75">@</span>
                   <span>username</span>
@@ -1496,7 +1496,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shadow-2xs">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shadow-2xs">
                         <MessageButtonsIcon className="h-4 w-4" />
                       </span>
                       <div className="flex items-center gap-2 min-w-0">
@@ -1504,7 +1504,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           <span className="sm:hidden">Action Buttons</span>
                           <span className="hidden sm:inline">Interactive Action Buttons</span>
                         </h4>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0 shadow-2xs">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shrink-0 shadow-2xs">
                           {cardButtons.length}/3
                         </span>
                       </div>
@@ -1528,8 +1528,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
                 {/* Buttons List */}
                 {cardButtons.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 mx-auto border border-blue-500/20">
+                  <div className="rounded-[22px] border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/10 text-slate-900 dark:text-slate-900 mx-auto border border-[#e9e9ee]">
                       <MessageButtonsIcon className="h-5 w-5" />
                     </div>
                     <p className="text-xs font-bold text-[var(--viz-ink)] mt-2.5">No buttons attached</p>
@@ -1542,7 +1542,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     {cardButtons.map((btn, idx) => (
                       <div
                         key={idx}
-                        className="group relative rounded-2xl border border-[var(--viz-border)] bg-background p-3.5 sm:p-4 text-xs space-y-3.5 transition-all hover:border-[var(--viz-ink)]/25 shadow-2xs"
+                        className="group relative rounded-[22px] border border-[var(--viz-border)] bg-background p-3.5 sm:p-4 text-xs space-y-3.5 transition-all hover:border-[var(--viz-ink)]/25 shadow-2xs"
                       >
                         {/* Top Header Row: Badge, Title & Remove Button */}
                         <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--viz-border)]/60">
@@ -1582,7 +1582,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               maxLength={20}
                               onChange={(e) => updateButton(idx, { title: e.target.value })}
                               placeholder="e.g. Shop Now"
-                              className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--viz-ink)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
+                              className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--viz-ink)] outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                             />
                           </div>
 
@@ -1596,12 +1596,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                                 </span>
                             </div>
                             <div className="relative flex items-center">
-                                <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-blue-500 pointer-events-none" />
+                                <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-slate-900 pointer-events-none" />
                                 <input
                                   value={btn.url || ""}
                                   onChange={(e) => updateButton(idx, { type: "web_url", url: e.target.value })}
                                   placeholder="https://instagram.com"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
+                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                                 />
                               </div>
                           </div>
@@ -1613,8 +1613,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                             <span className="font-medium text-[9px] uppercase tracking-wider">Preview in Instagram DM</span>
                             <span className="text-[9px] opacity-75">Tap action</span>
                           </div>
-                          <div className="w-full rounded-xl border border-blue-500/25 bg-blue-500/[0.04] hover:bg-blue-500/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
-                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1.5">
+                          <div className="w-full rounded-xl border border-[#e9e9ee] bg-black/[0.04] hover:bg-black/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
+                            <span className="text-xs font-bold text-slate-900 dark:text-slate-900 flex items-center justify-center gap-1.5">
                               <span>{btn.title || "Button Label"}</span>
                               <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                   <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
@@ -1700,7 +1700,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           {/* Modal Header */}
           <div className="flex items-center justify-between px-6 py-4.5 border-b border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.02]">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-indigo-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/20 shadow-2xs">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-indigo-500/15 text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shadow-2xs">
                 <InstagramIcon className="h-5 w-5" />
               </div>
               <div>
@@ -1772,8 +1772,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       onClick={() => choosePost(p)}
                       className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-pink-500 ring-2 ring-pink-500/40 shadow-sm bg-pink-500/5"
-                          : "border-[var(--viz-border)] hover:border-[var(--viz-ink)]/50 hover:shadow-md bg-background"
+                          ? "border-[#e9e9ee] ring-2 ring-pink-500/40 shadow-2xs bg-black/5"
+                          : "border-[var(--viz-border)] hover:border-[var(--viz-ink)]/50 hover:shadow-2xs bg-background"
                       }`}
                     >
                       <div className="relative aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5">
@@ -1792,7 +1792,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         )}
 
                         {isSelected && (
-                          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 text-white text-[11px] font-bold shadow-md">
+                          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-black text-white text-[11px] font-bold shadow-2xs">
                             ✓
                           </div>
                         )}
@@ -1903,7 +1903,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 );
               };
               return (
-                <li key={log.id} className="relative flex gap-4 rounded-2xl border border-[var(--viz-border)] bg-gradient-to-b from-transparent to-black/[0.01] p-4 transition-shadow hover:shadow-sm dark:to-white/[0.01]">
+                <li key={log.id} className="relative flex gap-4 rounded-[22px] border border-[var(--viz-border)] bg-gradient-to-b from-transparent to-black/[0.01] p-4 transition-shadow hover:shadow-2xs dark:to-white/[0.01]">
                   {/* Post thumbnail */}
                   <div className="shrink-0">
                     {log.mediaThumb ? (
@@ -1932,7 +1932,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <span className="text-xs text-[var(--viz-muted)]">{when(log.triggeredAt)}</span>
                       <StatusBadge status={log.status} />
                       {log.repliedAt && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] font-semibold text-violet-700 ring-1 ring-inset ring-violet-500/20 dark:text-violet-300">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-slate-900 ring-1 ring-inset ring-violet-500/20 dark:text-violet-300">
                           ↩ Replied back
                         </span>
                       )}
@@ -1944,7 +1944,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         <CommentIcon className="h-3 w-3" />
                         <span>Their comment</span>
                       </p>
-                      <div className="inline-flex max-w-full rounded-2xl rounded-tl-sm bg-slate-100 px-3.5 py-2 dark:bg-white/10">
+                      <div className="inline-flex max-w-full rounded-[22px] rounded-tl-sm bg-slate-100 px-3.5 py-2 dark:bg-white/10">
                         <p className="break-words text-sm text-[var(--viz-ink)]">{highlightComment()}</p>
                       </div>
                     </div>
@@ -1982,7 +1982,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                             </>
                           ) : log.status === "invited" ? (
                             <>
-                              <LinkIcon className="h-3 w-3 text-blue-500" />
+                              <LinkIcon className="h-3 w-3 text-slate-900" />
                               <span>Invite sent</span>
                             </>
                           ) : (
@@ -1995,11 +1995,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         {log.status === "failed" ? (
                           <p className="text-xs text-red-600 dark:text-red-400">{log.note ?? "DM could not be delivered."}</p>
                         ) : log.status === "follow_gate" && log.pendingFollowGate ? (
-                          <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-amber-50 px-3.5 py-2 dark:bg-amber-400/10">
+                          <div className="inline-flex max-w-full rounded-[22px] rounded-tr-sm bg-amber-50 px-3.5 py-2 dark:bg-amber-400/10">
                             <p className="break-words text-sm text-amber-800 dark:text-amber-200">⏳ Waiting for user to follow and confirm…</p>
                           </div>
                         ) : (
-                          <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-[var(--viz-accent)]/10 px-3.5 py-2">
+                          <div className="inline-flex max-w-full rounded-[22px] rounded-tr-sm bg-[var(--viz-accent)]/10 px-3.5 py-2">
                             <p className="break-words text-sm text-[var(--viz-ink)]">{log.dmText.replaceAll("{username}", log.username || "there")}</p>
                           </div>
                         )}
@@ -2034,7 +2034,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         <button
           type="button"
           onClick={() => setPhoneOpen(true)}
-          className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background shadow-xl active:scale-95"
+          className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background shadow-2xs active:scale-95"
         >
           <PhoneIcon className="h-4 w-4" />
           Preview

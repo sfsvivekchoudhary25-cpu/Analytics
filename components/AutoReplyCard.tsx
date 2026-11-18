@@ -293,7 +293,7 @@ export function AutoReplyCard({
         <div className="flex items-center gap-3.5">
           <div
             style={{ backgroundColor: "#e2e2fc" }}
-            className="w-12 h-12 rounded-2xl text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold"
+            className="w-12 h-12 rounded-[22px] text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold"
           >
             <Bot size={22} />
           </div>
@@ -310,19 +310,19 @@ export function AutoReplyCard({
 
         {/* Status Pills */}
         <div className="flex items-center gap-2 flex-wrap">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F1F3F7] border border-[#e9e9ee] text-xs">
             <Bot size={13} className="text-slate-500" />
             <span className="font-semibold text-slate-500">AI:</span>
             <span className="font-bold text-slate-900">{aiBadgeText}</span>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F1F3F7] border border-[#e9e9ee] text-xs">
             <Zap size={13} className="text-slate-500" />
             <span className="font-semibold text-slate-500">Keywords:</span>
             <span className="font-bold text-slate-900">{rulesBadgeText}</span>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F1F3F7] border border-[#e9e9ee] text-xs">
             <ShieldCheck size={13} className="text-slate-500" />
             <span className="font-semibold text-slate-500">Cap:</span>
             <span className="font-bold text-slate-900">{auto ? `${auto.maxPerHour}/hr` : "…"}</span>
@@ -338,7 +338,7 @@ export function AutoReplyCard({
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "ai"
               ? "bg-black text-white shadow-xs"
-              : "bg-white hover:bg-slate-50 text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+              : "bg-white hover:bg-[#F1F3F7] text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
           }`}
         >
           <Bot size={14} />
@@ -352,7 +352,7 @@ export function AutoReplyCard({
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "keywords"
               ? "bg-black text-white shadow-xs"
-              : "bg-white hover:bg-slate-50 text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+              : "bg-white hover:bg-[#F1F3F7] text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
           }`}
         >
           <Zap size={14} />
@@ -368,7 +368,7 @@ export function AutoReplyCard({
           className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "safety"
               ? "bg-black text-white shadow-xs"
-              : "bg-white hover:bg-slate-50 text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+              : "bg-white hover:bg-[#F1F3F7] text-slate-700 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
           }`}
         >
           <ShieldCheck size={14} />
@@ -379,7 +379,7 @@ export function AutoReplyCard({
       {/* ── 3. TAB 1: AI SMART REPLIES ── */}
       {activeTab === "ai" && (
         <div className="space-y-5 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-[#e9e9ee]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee]">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-slate-950">Generative AI Auto-Responder</span>
@@ -407,7 +407,7 @@ export function AutoReplyCard({
               showIcon
               title="AI Engine Key Missing"
               description="To enable AI responses, add OPENROUTER_API_KEY in backend/.env and restart the service."
-              className="!rounded-2xl"
+              className="!rounded-[22px]"
             />
           )}
 
@@ -415,7 +415,7 @@ export function AutoReplyCard({
           <div className="rounded-[22px] border border-[#e9e9ee] bg-gradient-to-b from-[#fafafd] to-white p-5 space-y-4 shadow-2xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles size={15} className="text-purple-600" />
+                <Sparkles size={15} className="text-slate-900" />
                 <span className="text-xs font-bold text-slate-950">Live Response Sandbox</span>
               </div>
               <span className="text-[10px] font-semibold text-slate-400">Simulation • Zero messages sent</span>
@@ -442,7 +442,7 @@ export function AutoReplyCard({
             </div>
 
             {tryResult && (
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 space-y-3 animate-in fade-in duration-200">
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-4 space-y-3 animate-in fade-in duration-200">
                 <div className="flex justify-end">
                   <div className="max-w-[75%] rounded-[18px] bg-black px-4 py-2 text-xs font-medium text-white shadow-2xs">
                     {tryText}
@@ -460,7 +460,7 @@ export function AutoReplyCard({
                         <span>{tryResult.reason || "Safety boundary or low confidence threshold"}</span>
                       </div>
                     ) : (
-                      <div className="rounded-[18px] bg-[#f8f9fc] border border-slate-200/70 p-3.5 text-xs text-slate-900 leading-relaxed font-medium">
+                      <div className="rounded-[18px] bg-[#f8f9fc] border border-[#e9e9ee] p-3.5 text-xs text-slate-900 leading-relaxed font-medium">
                         {tryResult.reply}
                       </div>
                     )}
@@ -488,19 +488,19 @@ export function AutoReplyCard({
                 ),
                 children: (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs text-slate-600">
-                    <div className="p-3 rounded-2xl bg-slate-50 border border-[#e9e9ee] flex items-start gap-2">
+                    <div className="p-3 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] flex items-start gap-2">
                       <Check size={13} className="text-emerald-600 shrink-0 mt-0.5" />
                       <span>Never discloses prices, stock, delivery dates, or payment details.</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-50 border border-[#e9e9ee] flex items-start gap-2">
+                    <div className="p-3 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] flex items-start gap-2">
                       <Check size={13} className="text-emerald-600 shrink-0 mt-0.5" />
                       <span>Stays completely silent when uncertain or encountering complaints.</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-50 border border-[#e9e9ee] flex items-start gap-2">
+                    <div className="p-3 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] flex items-start gap-2">
                       <Check size={13} className="text-emerald-600 shrink-0 mt-0.5" />
                       <span>Never sends the same response twice to the same user in a day.</span>
                     </div>
-                    <div className="p-3 rounded-2xl bg-slate-50 border border-[#e9e9ee] flex items-start gap-2">
+                    <div className="p-3 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] flex items-start gap-2">
                       <Check size={13} className="text-emerald-600 shrink-0 mt-0.5" />
                       <span>Ignores prompt injections and adversarial inputs automatically.</span>
                     </div>
@@ -515,7 +515,7 @@ export function AutoReplyCard({
       {/* ── 4. TAB 2: KEYWORD RULES ── */}
       {activeTab === "keywords" && (
         <div className="space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-[#e9e9ee]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee]">
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-slate-950">Keyword Automation Rules</span>
@@ -553,13 +553,13 @@ export function AutoReplyCard({
                     ).map((k) => (
                       <span
                         key={k}
-                        className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-900 text-xs font-bold border border-slate-200"
+                        className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-900 text-xs font-bold border border-[#e9e9ee]"
                       >
                         {k}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs font-medium text-slate-800 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  <p className="text-xs font-medium text-slate-800 bg-[#F1F3F7] p-2.5 rounded-xl border border-slate-100">
                     &ldquo;{r.replyText}&rdquo;
                   </p>
                 </div>
@@ -649,7 +649,7 @@ export function AutoReplyCard({
                         replyText: (r.replyText.trim() ? r.replyText + " " : "") + "{username}",
                       }))
                     }
-                    className="text-[10px] font-bold text-blue-600 hover:underline cursor-pointer"
+                    className="text-[10px] font-bold text-slate-900 hover:underline cursor-pointer"
                   >
                     + Insert {"{username}"}
                   </button>
@@ -682,7 +682,7 @@ export function AutoReplyCard({
       {/* ── 5. TAB 3: SAFETY & RATE LIMITS ── */}
       {activeTab === "safety" && (
         <div className="space-y-4 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-[22px] bg-slate-50 border border-[#e9e9ee]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee]">
             <div>
               <h3 className="text-sm font-bold text-slate-950">Hourly Rate Limiting</h3>
               <p className="text-xs text-slate-600 mt-0.5">

@@ -47,11 +47,11 @@ export function CloudinaryImageUploader({
       iconText: "text-rose-600 dark:text-rose-400",
     },
     indigo: {
-      borderActive: "border-indigo-500 bg-indigo-500/5",
-      btnPrimary: "bg-indigo-600 hover:bg-indigo-500 text-white",
-      badge: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
-      focusRing: "focus:border-indigo-500 focus:ring-indigo-500/15",
-      iconText: "text-indigo-600 dark:text-indigo-400",
+      borderActive: "border-[#e9e9ee] bg-black/5",
+      btnPrimary: "bg-black hover:bg-black text-white",
+      badge: "bg-black/10 text-slate-900 dark:text-slate-900 border-[#e9e9ee]",
+      focusRing: "focus:border-[#e9e9ee] focus:ring-indigo-500/15",
+      iconText: "text-slate-900 dark:text-slate-900",
     },
   }[accentColor];
 
@@ -175,7 +175,7 @@ export function CloudinaryImageUploader({
       {/* Main Upload / Preview Area */}
       {value ? (
         /* Image Preview State */
-        <div className="relative overflow-hidden rounded-2xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-2.5 transition-all [overflow-anchor:none]">
+        <div className="relative overflow-hidden rounded-[22px] border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] p-2.5 transition-all [overflow-anchor:none]">
           <div className="flex items-center gap-3">
             {/* Thumbnail Preview */}
             <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs group">
@@ -254,8 +254,8 @@ export function CloudinaryImageUploader({
         </div>
       ) : isUploading ? (
         /* Uploading State */
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-sky-400/50 bg-sky-500/5 py-6 px-4 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-600 animate-spin mb-2">
+        <div className="flex flex-col items-center justify-center rounded-[22px] border-2 border-dashed border-[#e9e9ee] bg-sky-500/5 py-6 px-4 text-center">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10 text-slate-900 animate-spin mb-2">
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="12" cy="12" r="10" strokeDasharray="30 60" />
             </svg>
@@ -270,13 +270,13 @@ export function CloudinaryImageUploader({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`cursor-pointer group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-4 text-center transition-all ${
+          className={`cursor-pointer group flex flex-col items-center justify-center rounded-[22px] border-2 border-dashed p-4 text-center transition-all ${
             isDragging
               ? theme.borderActive
               : "border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.015] hover:border-[var(--viz-ink-2)] hover:bg-black/[0.03] dark:hover:bg-white/[0.03]"
           }`}
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 group-hover:scale-110 transition-transform mb-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10 text-slate-900 dark:text-slate-900 group-hover:scale-110 transition-transform mb-2">
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />

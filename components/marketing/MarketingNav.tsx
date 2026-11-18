@@ -179,7 +179,7 @@ export default function MarketingNav() {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-b border-[#e9e9ee] px-6 py-6 space-y-4 animate-page-entrance shadow-xl">
+          <div className="lg:hidden bg-white border-b border-[#e9e9ee] px-6 py-6 space-y-4 animate-page-entrance shadow-2xs">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
@@ -232,7 +232,7 @@ export default function MarketingNav() {
             >
               Case Studies
             </Link>
-            <div className="space-y-1.5 pl-3 border-l-2 border-slate-200 pt-1">
+            <div className="space-y-1.5 pl-3 border-l-2 border-[#e9e9ee] pt-1">
               <span className="text-[10px] font-semibold uppercase text-slate-400">Compliance &amp; Legal</span>
               <Link
                 href="/terms"
@@ -261,7 +261,7 @@ export default function MarketingNav() {
                 <Link
                   href="/dashboard"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full py-2.5 text-center text-sm font-semibold rounded-full !text-white shadow-md"
+                  className="w-full py-2.5 text-center text-sm font-semibold rounded-full !text-white shadow-2xs"
                 >
                   Go to Dashboard &rarr;
                 </Link>
@@ -276,7 +276,7 @@ export default function MarketingNav() {
                   <Link
                     href="/login"
                     style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                    className="w-full py-2.5 text-center text-sm font-bold rounded-full !text-white shadow-md"
+                    className="w-full py-2.5 text-center text-sm font-bold rounded-full !text-white shadow-2xs"
                   >
                     Get Started Free
                   </Link>

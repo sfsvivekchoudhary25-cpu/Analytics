@@ -250,10 +250,10 @@ export function MobilePreview({
             {loading && (
               <div
                 className={`absolute inset-0 z-20 flex flex-col items-center justify-center backdrop-blur-xs gap-2 ${
-                  isDark ? "bg-black/90 text-white/60" : "bg-slate-50/90 text-slate-400"
+                  isDark ? "bg-black/90 text-white/60" : "bg-[#F1F3F7] text-slate-400"
                 }`}
               >
-                <ReloadOutlined className="animate-spin text-xl text-blue-500" />
+                <ReloadOutlined className="animate-spin text-xl text-slate-900" />
                 <span className="text-xs font-medium">Loading live preview...</span>
               </div>
             )}
@@ -432,7 +432,7 @@ export function MobilePreview({
       {showToolbar && (
         <aside
           aria-label="Device controls"
-          className="absolute bottom-2 right-1 sm:bottom-4 sm:right-3 shrink-0 flex flex-col items-center p-1 rounded-2xl bg-white/95 border border-slate-200/90 text-xs shadow-lg shadow-slate-900/10 backdrop-blur-md gap-0.5 z-20"
+          className="absolute bottom-2 right-1 sm:bottom-4 sm:right-3 shrink-0 flex flex-col items-center p-1 rounded-[22px] bg-white/95 border border-[#e9e9ee] text-xs shadow-2xs shadow-slate-900/10 backdrop-blur-md gap-0.5 z-20"
         >
           {SELECTABLE_DEVICES.map((d) => {
             const spec = DEVICE_CONFIGS[d];
@@ -445,7 +445,7 @@ export function MobilePreview({
                 title={`${spec.name} (${spec.shortLabel})`}
                 className={`w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
                   isSelected
-                    ? "bg-slate-900 text-white shadow-xs"
+                    ? "bg-black text-white shadow-xs"
                     : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >

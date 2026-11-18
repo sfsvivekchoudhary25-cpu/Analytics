@@ -118,7 +118,7 @@ function VaultReelThumbnail({
   if (isBroken) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950/80 p-4 text-center">
-        <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center mb-2.5 shadow-sm text-white">
+        <div className="w-10 h-10 rounded-[22px] bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center mb-2.5 shadow-2xs text-white">
           <Film size={20} className="text-[#e2e2fc]" />
         </div>
         <span className="text-[11px] font-bold text-white/90 truncate max-w-[120px]">
@@ -619,7 +619,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
       {/* ── Responsive Header & Mode Switcher ────────────────────────── */}
       <div className="flex items-center justify-between gap-2.5 pt-1">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
+          <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-[22px] bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0 shadow-2xs">
             <Film size={15} className="sm:hidden" />
             <Film size={20} className="hidden sm:block" />
           </div>
@@ -685,7 +685,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 e.preventDefault();
                 handleFetchReel();
               }}
-              className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-2 rounded-full bg-white border border-[#e9e9ee] shadow-xs hover:border-black/40 focus-within:border-black focus-within:shadow-md transition-all"
+              className="flex items-center gap-1.5 sm:gap-2 p-1 sm:p-2 rounded-full bg-white border border-[#e9e9ee] shadow-xs hover:border-black/40 focus-within:border-black focus-within:shadow-2xs transition-all"
             >
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-[#e2e2fc] text-slate-950 flex items-center justify-center shrink-0">
                 <LinkIcon size={13} className="sm:hidden" />
@@ -826,9 +826,9 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   {/* Media Story Frame with Right-Side Quick Actions for Mobile */}
                   <div className="relative flex items-end justify-center gap-2 sm:gap-0 w-full mx-auto">
                     {/* Media Story Frame (Compact, sleek 9:16 smartphone proportions) */}
-                    <div className="relative aspect-[9/16] w-[240px] xs:w-[250px] md:w-full max-h-[490px] rounded-[20px] overflow-hidden bg-black shadow-md border border-[#e9e9ee] flex items-center justify-center group shrink-0">
+                    <div className="relative aspect-[9/16] w-[240px] xs:w-[250px] md:w-full max-h-[490px] rounded-[20px] overflow-hidden bg-black shadow-2xs border border-[#e9e9ee] flex items-center justify-center group shrink-0">
                       {/* 1080p HD Badge on top left */}
-                      <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm">
+                      <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-2xs">
                         <Video size={11} className="text-[#e2e2fc]" />
                         <span>1080p HD</span>
                       </span>
@@ -845,7 +845,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                             });
                             setTimeout(() => setDownloadStatus(null), 3500);
                           }}
-                          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95 !no-underline"
+                          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/70 backdrop-blur-md hover:bg-black text-white text-[10px] sm:text-xs font-bold border border-white/20 flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer active:scale-95 !no-underline"
                           title="Download Cover Poster (.jpg)"
                         >
                           <ImageIcon size={11} />
@@ -894,7 +894,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                             setTimeout(() => setDownloadStatus(null), 3500);
                           }}
                           style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                          className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
+                          className="w-9 h-9 rounded-full !bg-black hover:!bg-neutral-800 !text-white flex items-center justify-center shadow-2xs active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Download Video (.mp4)"
                         >
                           <Download size={15} className="!text-white" />
@@ -913,7 +913,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                             });
                             setTimeout(() => setDownloadStatus(null), 3500);
                           }}
-                          className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer !no-underline"
+                          className="w-9 h-9 rounded-full bg-white text-slate-800 border border-[#e9e9ee] hover:border-black flex items-center justify-center shadow-2xs active:scale-90 transition-transform cursor-pointer !no-underline"
                           title="Save Cover Art (.jpg)"
                         >
                           <ImageIcon size={15} className="!text-slate-900" />
@@ -925,7 +925,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                         type="button"
                         onClick={() => toggleSaveReel(activeReel)}
                         style={isSaved ? { backgroundColor: "#feece4" } : {}}
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-md border transition-all cursor-pointer active:scale-90 ${
+                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-2xs border transition-all cursor-pointer active:scale-90 ${
                           isSaved
                             ? "bg-[#feece4] border-black/80 text-slate-950"
                             : "bg-white border-[#e9e9ee] hover:border-black text-slate-800"
@@ -939,7 +939,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                       <button
                         type="button"
                         onClick={() => handleCopy(activeReel.url)}
-                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-800 flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-800 flex items-center justify-center shadow-2xs active:scale-90 transition-transform cursor-pointer"
                         title="Copy Reel Link"
                       >
                         {copiedUrl === activeReel.url ? <Check size={14} className="text-emerald-600" /> : <LinkIcon size={14} className="!text-slate-900" />}
@@ -949,7 +949,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                       <button
                         type="button"
                         onClick={handleClear}
-                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-md active:scale-90 transition-transform cursor-pointer"
+                        className="w-9 h-9 rounded-full bg-white border border-[#e9e9ee] hover:border-black text-slate-500 hover:text-black flex items-center justify-center shadow-2xs active:scale-90 transition-transform cursor-pointer"
                         title="Close Reel"
                       >
                         <X size={14} className="text-slate-600" />
@@ -1220,7 +1220,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
             /* ── EMPTY STATE: FULL-WIDTH STUDIO SHOWCASE HERO ── */
             <div className="space-y-6 w-full">
               <div className="rounded-[28px] border border-[#e9e9ee] bg-white p-6 sm:p-10 lg:p-12 shadow-2xs text-center space-y-6 w-full">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#e2e2fc] text-slate-950 mx-auto flex items-center justify-center shadow-xs">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-[22px] bg-[#e2e2fc] text-slate-950 mx-auto flex items-center justify-center shadow-xs">
                   <Film size={26} />
                 </div>
 
@@ -1244,7 +1244,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-black text-slate-950">1080p Video</span>
                       <div className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center">
-                        <Video size={15} className="text-indigo-700" />
+                        <Video size={15} className="text-slate-900" />
                       </div>
                     </div>
                     <p className="text-xs text-slate-700 font-medium mt-3 leading-relaxed">
@@ -1513,7 +1513,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 return (
                   <div
                     key={item.shortcode}
-                    className="group relative aspect-[9/15] rounded-[22px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between hover:shadow-md transition-all duration-300"
+                    className="group relative aspect-[9/15] rounded-[22px] overflow-hidden bg-slate-950 shadow-2xs border border-[#e9e9ee] flex flex-col justify-between hover:shadow-2xs transition-all duration-300"
                   >
                     <VaultReelThumbnail
                       thumbnail={item.thumbnail}
@@ -1575,7 +1575,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
             </div>
           ) : (
             <div className="rounded-[26px] border border-dashed border-[#e9e9ee] bg-white p-8 sm:p-12 text-center space-y-3 max-w-xl mx-auto">
-              <div className="w-12 h-12 rounded-2xl bg-[#f1f3f7] text-slate-400 mx-auto flex items-center justify-center">
+              <div className="w-12 h-12 rounded-[22px] bg-[#f1f3f7] text-slate-400 mx-auto flex items-center justify-center">
                 <Bookmark size={22} />
               </div>
               <h4 className="text-sm sm:text-base font-bold text-slate-950">
@@ -1665,7 +1665,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   setTimeout(() => setDownloadStatus(null), 3500);
                 }}
                 style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer !no-underline transition-all active:scale-98"
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] !bg-black hover:!bg-neutral-800 !text-white text-xs sm:text-sm font-bold shadow-xs cursor-pointer !no-underline transition-all active:scale-98"
               >
                 <div className="flex items-center gap-2.5">
                   <Download size={18} className="!text-white shrink-0" />
@@ -1688,7 +1688,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   });
                   setTimeout(() => setDownloadStatus(null), 3500);
                 }}
-                className="w-full flex items-center justify-between p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-[#e9e9ee] !text-slate-950 text-xs sm:text-sm font-bold shadow-2xs cursor-pointer !no-underline transition-all active:scale-98"
+                className="w-full flex items-center justify-between p-3.5 rounded-[22px] bg-white hover:bg-[#F1F3F7] border border-[#e9e9ee] !text-slate-950 text-xs sm:text-sm font-bold shadow-2xs cursor-pointer !no-underline transition-all active:scale-98"
               >
                 <div className="flex items-center gap-2.5">
                   <ImageIcon size={18} className="!text-slate-950 shrink-0" />
@@ -1709,7 +1709,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     handleCopyCaption(selectedReelForMenu.caption);
                     setSelectedReelForMenu(null);
                   }}
-                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 p-3 rounded-[22px] hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
                 >
                   <Copy size={17} className="text-slate-700 shrink-0" />
                   <span className="!text-slate-900">Copy Caption</span>
@@ -1723,7 +1723,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                   handleCopy(selectedReelForMenu.url || `https://www.instagram.com/reel/${selectedReelForMenu.shortcode}/`);
                   setSelectedReelForMenu(null);
                 }}
-                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                className="w-full flex items-center gap-2.5 p-3 rounded-[22px] hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
               >
                 <LinkIcon size={17} className="text-slate-700 shrink-0" />
                 <span className="!text-slate-900">Copy Reel Link</span>
@@ -1735,7 +1735,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setSelectedReelForMenu(null)}
-                className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer !no-underline transition-colors text-left"
+                className="w-full flex items-center gap-2.5 p-3 rounded-[22px] hover:bg-slate-100 !text-slate-900 text-xs sm:text-sm font-semibold cursor-pointer !no-underline transition-colors text-left"
               >
                 <ExternalLink size={17} className="text-slate-700 shrink-0" />
                 <span className="!text-slate-900">Open on Instagram</span>
@@ -1751,7 +1751,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
                     persistSavedReels(savedReels.filter((r) => r.shortcode !== code));
                     api(`/saved-reels/${code}`, { method: "DELETE" }).catch(() => {});
                   }}
-                  className="w-full flex items-center gap-2.5 p-3 rounded-2xl hover:bg-rose-50 !text-rose-600 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 p-3 rounded-[22px] hover:bg-rose-50 !text-rose-600 text-xs sm:text-sm font-semibold cursor-pointer transition-colors text-left"
                 >
                   <Trash2 size={17} className="text-rose-600 shrink-0" />
                   <span className="!text-rose-600">Remove from Vault</span>
@@ -1763,7 +1763,7 @@ export function ReelsDownloader({ initialUrl }: { initialUrl?: string }) {
             <button
               type="button"
               onClick={() => setSelectedReelForMenu(null)}
-              className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition-colors cursor-pointer mt-1"
+              className="w-full py-3.5 rounded-[22px] bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold transition-colors cursor-pointer mt-1"
             >
               Cancel
             </button>

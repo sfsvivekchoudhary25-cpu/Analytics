@@ -22,7 +22,7 @@ export function NotificationBell({
               ? `${pendingPhotos} photo${pendingPhotos === 1 ? "" : "s"} awaiting approval`
               : "No photos awaiting approval"
           }
-          className="!flex !h-9 !w-9 !items-center !justify-center !border-slate-200 !bg-white hover:!border-blue-400 hover:!bg-blue-50/50 shadow-xs transition-all"
+          className="!flex !h-9 !w-9 !items-center !justify-center !border-[#e9e9ee] !bg-white hover:!border-[#e9e9ee] hover:!bg-[#E2E2FC] shadow-xs transition-all"
         />
       </Badge>
     </Tooltip>

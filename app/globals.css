@@ -124,6 +124,17 @@ a {
   animation: skeletonPulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Skeleton bars: antd gives them a 160px minimum width, which made them spill out of small cards.
+   The wrapper keeps the width set in code; the bar fills it. */
+.ant-skeleton.ant-skeleton-element {
+  max-width: 100%;
+}
+.ant-skeleton.ant-skeleton-element .ant-skeleton-input,
+.ant-skeleton.ant-skeleton-element .ant-skeleton-button {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
 /* ── Modern Premium Segmented Control & Tab Pills ────────────────────────── */
 
 /* Remove browser and Ant Design harsh focus outlines globally on segmented controls */
@@ -294,4 +305,3 @@ svg.recharts-surface:focus-visible,
     pointer-events: none !important;
   }
 }
-

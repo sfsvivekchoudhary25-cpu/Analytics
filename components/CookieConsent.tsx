@@ -162,7 +162,7 @@ export default function CookieConsent() {
         <aside
           role="region"
           aria-label="Privacy and cookies banner"
-          className="fixed bottom-4 right-4 max-w-[340px] w-[calc(100vw-32px)] rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/90 p-4 shadow-xl text-xs space-y-2.5 z-50 animate-page-entrance select-none"
+          className="fixed bottom-4 right-4 max-w-[340px] w-[calc(100vw-32px)] rounded-[22px] bg-white/95 backdrop-blur-md border border-[#e9e9ee] p-4 shadow-2xs text-xs space-y-2.5 z-50 animate-page-entrance select-none"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -196,7 +196,7 @@ export default function CookieConsent() {
             <button
               type="button"
               onClick={handleAcceptAll}
-              className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-black text-[11px] font-semibold text-white shadow-2xs active:scale-[0.98] transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-lg bg-black hover:bg-black text-[11px] font-semibold text-white shadow-2xs active:scale-[0.98] transition-all cursor-pointer"
             >
               Accept
             </button>
@@ -212,11 +212,11 @@ export default function CookieConsent() {
           aria-labelledby="cookie-preferences-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-page-entrance"
         >
-          <div className="relative w-full max-w-lg rounded-3xl bg-white border border-slate-200 shadow-2xl p-6 sm:p-7 space-y-6 max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-[26px] bg-white border border-[#e9e9ee] shadow-2xl p-6 sm:p-7 space-y-6 max-h-[90vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div className="space-y-1 pr-6">
-                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 border border-blue-200/60 px-2.5 py-0.5 rounded-full">
+                <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 bg-[#E2E2FC] border border-[#e9e9ee] px-2.5 py-0.5 rounded-full">
                   <SettingOutlined className="text-xs" />
                   <span>Cookie Governance</span>
                 </div>
@@ -240,7 +240,7 @@ export default function CookieConsent() {
             {/* Cookie Categories */}
             <div className="space-y-4">
               {/* Category 1: Essential Cookies (Locked) */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 space-y-2">
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-[#F1F3F7] p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs text-slate-800">
@@ -251,7 +251,7 @@ export default function CookieConsent() {
                     </span>
                   </div>
                   {/* Visual locked toggle */}
-                  <div className="w-10 h-6 bg-slate-900 rounded-full flex items-center justify-end px-1 cursor-not-allowed opacity-90">
+                  <div className="w-10 h-6 bg-black rounded-full flex items-center justify-end px-1 cursor-not-allowed opacity-90">
                     <div className="w-4 h-4 bg-white rounded-full shadow-xs" />
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export default function CookieConsent() {
               </div>
 
               {/* Category 2: Performance & Analytics (Toggleable) */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-4 space-y-2 hover:border-slate-300 transition-colors">
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-4 space-y-2 hover:border-slate-300 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs text-slate-800">
@@ -281,7 +281,7 @@ export default function CookieConsent() {
                     aria-checked={analyticsEnabled}
                     onClick={() => setAnalyticsEnabled(!analyticsEnabled)}
                     className={`relative w-10 h-6 rounded-full transition-colors cursor-pointer p-0.5 ${
-                      analyticsEnabled ? "bg-blue-600" : "bg-slate-300"
+                      analyticsEnabled ? "bg-black" : "bg-slate-300"
                     }`}
                   >
                     <span
@@ -300,7 +300,7 @@ export default function CookieConsent() {
               </div>
 
               {/* Category 3: Marketing & Conversion Funnels (Toggleable) */}
-              <div className="rounded-2xl border border-slate-200/80 bg-white p-4 space-y-2 hover:border-slate-300 transition-colors">
+              <div className="rounded-[22px] border border-[#e9e9ee] bg-white p-4 space-y-2 hover:border-slate-300 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs text-slate-800">
@@ -317,7 +317,7 @@ export default function CookieConsent() {
                     aria-checked={marketingEnabled}
                     onClick={() => setMarketingEnabled(!marketingEnabled)}
                     className={`relative w-10 h-6 rounded-full transition-colors cursor-pointer p-0.5 ${
-                      marketingEnabled ? "bg-blue-600" : "bg-slate-300"
+                      marketingEnabled ? "bg-black" : "bg-slate-300"
                     }`}
                   >
                     <span
@@ -339,15 +339,15 @@ export default function CookieConsent() {
             {/* Legal Notice Footer */}
             <div className="text-[11px] text-slate-500 leading-relaxed pt-1">
               For complete transparency, please review our{" "}
-              <Link href="/privacy" className="text-blue-600 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
+              <Link href="/privacy" className="text-slate-900 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
                 Privacy Policy
               </Link>
               ,{" "}
-              <Link href="/terms" className="text-blue-600 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
+              <Link href="/terms" className="text-slate-900 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
                 Terms of Service
               </Link>
               , and{" "}
-              <Link href="/data-deletion" className="text-blue-600 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
+              <Link href="/data-deletion" className="text-slate-900 hover:underline font-semibold" onClick={() => setIsPreferencesOpen(false)}>
                 Data Deletion Instructions
               </Link>
               .
@@ -374,7 +374,7 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={handleAcceptAll}
-                  className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-black transition-colors cursor-pointer shadow-xs"
+                  className="w-full sm:w-auto px-5 py-2 rounded-xl text-xs font-semibold text-white bg-black hover:bg-black transition-colors cursor-pointer shadow-xs"
                 >
                   Accept All
                 </button>
@@ -389,7 +389,7 @@ export default function CookieConsent() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-900 text-white text-xs font-medium shadow-2xl animate-page-entrance"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-black text-white text-xs font-medium shadow-2xl animate-page-entrance"
         >
           <CheckCircleFilled className="text-emerald-400 text-sm" />
           <span>Cookie preferences saved</span>

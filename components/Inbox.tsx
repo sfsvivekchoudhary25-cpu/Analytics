@@ -462,11 +462,11 @@ export function Inbox({
   return (
     <div className="flex h-full w-full overflow-hidden bg-white select-none">
       {/* ---------------- LEFT SIDEBAR (CHANNELS & REAL INSTAGRAM DMs) ---------------- */}
-      <aside className={`h-full shrink-0 flex-col border-r border-slate-200/80 bg-[#f9fafc] ${
+      <aside className={`h-full shrink-0 flex-col border-r border-[#e9e9ee] bg-[#f9fafc] ${
         mobileView === "list" ? "flex w-full" : "hidden"
       } md:flex md:w-64 lg:w-72`}>
         {/* Workspace / Account Header */}
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/70 px-4">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#e9e9ee] px-4">
           <div className="flex items-center gap-2.5 min-w-0">
             <ContactAvatar id={cleanOwnUsername} src={ownAvatar} size="h-7 w-7" />
             <span className="truncate text-sm font-bold tracking-tight text-slate-900">
@@ -532,7 +532,7 @@ export function Inbox({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search direct messages..."
-                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800 placeholder:text-slate-400 focus:border-[#e9e9ee] focus:outline-none"
                     autoFocus
                   />
                 </li>
@@ -561,7 +561,7 @@ export function Inbox({
                   <div className="flex items-center gap-2.5">
                     <BellOutlined
                       className={`text-sm ${
-                        syncing ? "animate-spin text-blue-600" : "text-slate-400 group-hover:text-slate-600 transition-colors"
+                        syncing ? "animate-spin text-slate-900" : "text-slate-400 group-hover:text-slate-600 transition-colors"
                       }`}
                     />
                     <span>Sync with Instagram</span>
@@ -605,7 +605,7 @@ export function Inbox({
                   onClick={() => setActiveChannel("all")}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-colors ${
                     activeChannel === "all"
-                      ? "bg-blue-600 text-white font-semibold shadow-xs"
+                      ? "bg-black text-white font-semibold shadow-xs"
                       : "text-slate-700 hover:bg-slate-200/50"
                   }`}
                 >
@@ -630,7 +630,7 @@ export function Inbox({
                   onClick={() => setActiveChannel("unread")}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-colors ${
                     activeChannel === "unread"
-                      ? "bg-blue-600 text-white font-semibold shadow-xs"
+                      ? "bg-black text-white font-semibold shadow-xs"
                       : "text-slate-700 hover:bg-slate-200/50"
                   }`}
                 >
@@ -649,7 +649,7 @@ export function Inbox({
                   onClick={() => setActiveChannel("active24")}
                   className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-colors ${
                     activeChannel === "active24"
-                      ? "bg-blue-600 text-white font-semibold shadow-xs"
+                      ? "bg-black text-white font-semibold shadow-xs"
                       : "text-slate-700 hover:bg-slate-200/50"
                   }`}
                 >
@@ -726,7 +726,7 @@ export function Inbox({
                       }}
                       className={`flex w-full items-center justify-between rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
                         isSelected
-                          ? "bg-blue-50 text-blue-700 font-semibold ring-1 ring-blue-500/20"
+                          ? "bg-[#E2E2FC] text-slate-900 font-semibold ring-1 ring-blue-500/20"
                           : "text-slate-700 hover:bg-slate-200/50"
                       }`}
                     >
@@ -765,7 +765,7 @@ export function Inbox({
 
         {/* Sync notification note */}
         {syncNote && (
-          <div className="border-t border-slate-200 bg-blue-50 px-4 py-2 text-center text-xs font-semibold text-blue-600">
+          <div className="border-t border-[#e9e9ee] bg-[#E2E2FC] px-4 py-2 text-center text-xs font-semibold text-slate-900">
             {syncNote}
           </div>
         )}
@@ -776,13 +776,13 @@ export function Inbox({
         mobileView === "chat" ? "flex w-full flex-1" : "hidden"
       } md:flex md:flex-1`}>
         {/* Top Header Bar */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 px-3 sm:px-6 bg-white gap-2">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#e9e9ee] px-3 sm:px-6 bg-white gap-2">
           {/* Left Title & Status + Mobile Back Button */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setMobileView("list")}
-              className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+              className="flex md:hidden h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
               aria-label="Back to conversations"
             >
               <ArrowLeftOutlined className="text-xs" />
@@ -836,7 +836,7 @@ export function Inbox({
                 onClick={syncNow}
                 className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 hover:text-slate-700 transition-colors"
               >
-                <ReloadOutlined className={`text-sm sm:text-base ${syncing ? "animate-spin text-blue-600" : ""}`} />
+                <ReloadOutlined className={`text-sm sm:text-base ${syncing ? "animate-spin text-slate-900" : ""}`} />
               </button>
             </Tooltip>
             {thread?.conversation && (
@@ -925,7 +925,7 @@ export function Inbox({
 
                 {isFollowUp ? (
                   /* Compact follow-up message row (Slack/Discord style) with identical alignment to avatar row */
-                  <div className="group flex items-start gap-2.5 sm:gap-3.5 -mt-0.5 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-0.5 rounded-lg transition-colors">
+                  <div className="group flex items-start gap-2.5 sm:gap-3.5 -mt-0.5 hover:bg-[#F1F3F7] -mx-2 sm:-mx-4 px-2 sm:px-4 py-0.5 rounded-lg transition-colors">
                     {/* Placeholder spacer matching ContactAvatar width */}
                     <div className="w-8 sm:w-9 shrink-0 flex items-center justify-end select-none">
                       <span className="text-[9px] text-slate-400 font-normal opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">
@@ -947,7 +947,7 @@ export function Inbox({
 
                         {/* Image attachment if any */}
                         {m.attachmentUrl && m.attachmentType === "image" && (
-                          <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
+                          <div className="mt-2 overflow-hidden rounded-xl border border-[#e9e9ee] max-w-[240px] sm:max-w-sm">
                             <img
                               src={m.attachmentUrl}
                               alt="Attachment"
@@ -965,7 +965,7 @@ export function Inbox({
                   </div>
                 ) : (
                   /* Standard message row with Avatar, Name and Time */
-                  <div className="group flex items-start gap-2.5 sm:gap-3.5 hover:bg-slate-50/60 -mx-2 sm:-mx-4 px-2 sm:px-4 py-1.5 rounded-lg transition-colors">
+                  <div className="group flex items-start gap-2.5 sm:gap-3.5 hover:bg-[#F1F3F7] -mx-2 sm:-mx-4 px-2 sm:px-4 py-1.5 rounded-lg transition-colors">
                     <ContactAvatar id={senderAvatarId} src={senderAvatarSrc} size="h-8 w-8 sm:h-9 sm:w-9" />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between">
@@ -995,7 +995,7 @@ export function Inbox({
 
                       {/* Image attachment if any */}
                       {m.attachmentUrl && m.attachmentType === "image" && (
-                        <div className="mt-2 overflow-hidden rounded-xl border border-slate-200 max-w-[240px] sm:max-w-sm">
+                        <div className="mt-2 overflow-hidden rounded-xl border border-[#e9e9ee] max-w-[240px] sm:max-w-sm">
                           <img
                             src={m.attachmentUrl}
                             alt="Attachment"
@@ -1030,7 +1030,7 @@ export function Inbox({
         <div className="shrink-0 px-2.5 sm:px-6 pb-2.5 sm:pb-4 pt-1 bg-white border-t border-slate-100 sm:border-t-0">
           <form
             onSubmit={handleSend}
-            className="rounded-xl sm:rounded-2xl border border-slate-200/90 bg-white p-2.5 sm:p-3 shadow-xs focus-within:border-slate-300 focus-within:shadow-sm transition-all"
+            className="rounded-xl sm:rounded-[22px] border border-[#e9e9ee] bg-white p-2.5 sm:p-3 shadow-xs focus-within:border-slate-300 focus-within:shadow-2xs transition-all"
           >
             {error && (
               <p role="alert" className="mb-2 text-xs font-medium text-rose-500">
@@ -1116,7 +1116,7 @@ export function Inbox({
                   !inputText.trim() ||
                   (thread ? !thread.conversation.canReply : !selected)
                 }
-                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-xs hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-full bg-black text-white shadow-xs hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <SendOutlined className="text-xs sm:text-sm" />
               </button>

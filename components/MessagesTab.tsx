@@ -59,13 +59,13 @@ export function MessagesTab({
 
   if (view === "auto") {
     return (
-      <div className="h-full w-full flex flex-col bg-slate-50/50 overflow-hidden">
-        <div className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white px-3 sm:px-6 shadow-2xs gap-3">
+      <div className="h-full w-full flex flex-col bg-[#F1F3F7] overflow-hidden">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#e9e9ee] bg-white px-3 sm:px-6 shadow-2xs gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               type="button"
               onClick={handleBackToInbox}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
               aria-label="Back to Messages"
             >
               <ArrowLeftOutlined className="text-xs" />

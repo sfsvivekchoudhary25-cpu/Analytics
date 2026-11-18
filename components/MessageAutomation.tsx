@@ -55,7 +55,7 @@ const OUTCOME_CONFIG = {
     color: "default",
     label: "Skipped",
     icon: <MinusCircleOutlined />,
-    badgeClass: "!bg-slate-100 !border-slate-200 !text-slate-600",
+    badgeClass: "!bg-slate-100 !border-[#e9e9ee] !text-slate-600",
   },
   failed: {
     color: "error",
@@ -67,7 +67,7 @@ const OUTCOME_CONFIG = {
     color: "processing",
     label: "Evaluating",
     icon: <SyncOutlined spin />,
-    badgeClass: "!bg-blue-50 !border-blue-200 !text-blue-700",
+    badgeClass: "!bg-[#E2E2FC] !border-[#e9e9ee] !text-slate-900",
   },
 };
 
@@ -167,11 +167,11 @@ export function MessageAutomation() {
       {ai?.enabled && (
         <Card
           variant="outlined"
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
+          className="!rounded-[22px] !border-[#e9e9ee] !bg-white !shadow-2xs hover:!shadow-2xs transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             <div className="lg:col-span-5 flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-[#e9e9ee]">
                 <ClockCircleOutlined className="text-lg" />
               </div>
               <div className="space-y-1.5">
@@ -179,7 +179,7 @@ export function MessageAutomation() {
                   <h3 className="text-base font-semibold text-slate-900">
                     Holding reply fallback
                   </h3>
-                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-700 !font-medium">
+                  <Tag className="!rounded-md !px-2 !py-0.2 !text-[11px] !bg-slate-100 !border-[#e9e9ee] !text-slate-700 !font-medium">
                     When AI is silent
                   </Tag>
                 </div>
@@ -218,7 +218,7 @@ export function MessageAutomation() {
                   rows={3}
                   showCount
                   placeholder="e.g. Thanks for reaching out! We've received your message and someone from our team will get back to you shortly."
-                  className="!rounded-xl resize-none !border-slate-200 text-xs sm:text-sm"
+                  className="!rounded-xl resize-none !border-[#e9e9ee] text-xs sm:text-sm"
                 />
               </div>
               <div className="pt-3 sm:pt-2 flex justify-end">
@@ -241,17 +241,17 @@ export function MessageAutomation() {
       {/* ── Recent Decisions Audit Log ── */}
       <Card
         variant="outlined"
-        className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-sm hover:!shadow-md transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
+        className="!rounded-[22px] !border-[#e9e9ee] !bg-white !shadow-2xs hover:!shadow-2xs transition-shadow w-full [&>.ant-card-body]:!p-4 sm:[&>.ant-card-body]:!p-6 lg:[&>.ant-card-body]:!p-7"
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-slate-200/80">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-800 border border-[#e9e9ee]">
               <HistoryOutlined className="text-lg" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base font-bold text-slate-900 leading-tight">Recent Decisions</h3>
-                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-slate-100 !border-slate-200 !text-slate-600 !font-medium !m-0 shrink-0">
+                <Tag className="!rounded-md !px-2 !py-0.5 !text-[11px] !bg-slate-100 !border-[#e9e9ee] !text-slate-600 !font-medium !m-0 shrink-0">
                   Live Audit Log
                 </Tag>
               </div>
@@ -266,7 +266,7 @@ export function MessageAutomation() {
               size="middle"
               icon={<ReloadOutlined spin={refreshing} />}
               onClick={handleManualRefresh}
-              className="!rounded-xl !border-slate-200 self-start sm:self-auto shrink-0 text-xs font-semibold"
+              className="!rounded-xl !border-[#e9e9ee] self-start sm:self-auto shrink-0 text-xs font-semibold"
             >
               Refresh Log
             </Button>
@@ -279,7 +279,7 @@ export function MessageAutomation() {
               <Spin description="Loading activity stream…" />
             </div>
           ) : log.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center bg-slate-50/40">
+            <div className="rounded-xl border border-dashed border-[#e9e9ee] p-8 text-center bg-[#F1F3F7]">
               <Empty
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
                 description={
@@ -290,13 +290,13 @@ export function MessageAutomation() {
               />
             </div>
           ) : (
-            <div className="max-h-[440px] overflow-y-auto divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-white shadow-2xs overscroll-contain">
+            <div className="max-h-[440px] overflow-y-auto divide-y divide-slate-100 rounded-xl border border-[#e9e9ee] bg-white shadow-2xs overscroll-contain">
               {log.map((r) => {
                 const conf = OUTCOME_CONFIG[r.outcome] || OUTCOME_CONFIG.skipped;
                 return (
                   <div
                     key={r.id}
-                    className="flex flex-col gap-2 p-3 sm:p-4 hover:bg-slate-50/70 transition-colors"
+                    className="flex flex-col gap-2 p-3 sm:p-4 hover:bg-[#F1F3F7] transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">

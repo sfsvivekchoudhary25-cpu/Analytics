@@ -93,7 +93,7 @@ export function RetentionAutopsy({
       return {
         type: "Bold Claim / Pattern Interrupt",
         verdict: "Elite Hook",
-        badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+        badgeColor: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
         advice: "Pattern interrupts stop autopilot thumbs in under 0.8 seconds.",
         optimal: true,
       };
@@ -101,7 +101,7 @@ export function RetentionAutopsy({
     return {
       type: "Visual Action / Title Hook",
       verdict: "Solid Hook",
-      badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+      badgeColor: "bg-[#E2E2FC] text-slate-900 border-[#e9e9ee]",
       advice: "Pairs title text with motion to establish immediate topic context.",
       optimal: true,
     };
@@ -236,9 +236,9 @@ export function RetentionAutopsy({
   return (
     <div className="space-y-4 my-6">
       {/* ── SECTION HEADER: THE RETENTION CURVE AUTOPSY ─────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-4 sm:p-5 rounded-3xl text-white shadow-md border border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-4 sm:p-5 rounded-[26px] text-white shadow-2xs border border-slate-800">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 flex items-center justify-center shrink-0 shadow-inner">
+          <div className="w-10 h-10 rounded-[22px] bg-black/20 border border-[#e9e9ee] text-indigo-300 flex items-center justify-center shrink-0 shadow-inner">
             <Flame size={20} className="text-amber-400 animate-pulse" />
           </div>
           <div>
@@ -272,11 +272,11 @@ export function RetentionAutopsy({
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
 
         {/* ── CARD 1: 🎣 THE 3-SECOND HOOK AUTOPSY (Scroll-Stop Power) ─ */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-indigo-300 hover:shadow-md transition-all">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 shadow-xs flex flex-col justify-between hover:border-[#e9e9ee] hover:shadow-2xs transition-all">
           <div>
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
-                <Target size={14} className="text-indigo-600" />
+                <Target size={14} className="text-slate-900" />
                 HOOK AUTOPSY (0–3s)
               </span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${hookClassification.badgeColor}`}>
@@ -286,12 +286,12 @@ export function RetentionAutopsy({
 
             {/* Circular Ring Gauge */}
             <div className="my-4 flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-tr from-indigo-50 to-indigo-100/60 border-2 border-indigo-200/80 shadow-inner">
+              <div className="relative w-20 h-20 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-tr from-indigo-50 to-indigo-100/60 border-2 border-[#e9e9ee] shadow-inner">
                 <div className="text-center">
                   <div className="text-xl font-black text-slate-900 leading-tight tabular-nums">
                     {hookRetentionRate}%
                   </div>
-                  <span className="text-[10px] font-bold text-indigo-600 block -mt-0.5">
+                  <span className="text-[10px] font-bold text-slate-900 block -mt-0.5">
                     RETAINED
                   </span>
                 </div>
@@ -313,7 +313,7 @@ export function RetentionAutopsy({
             </div>
 
             {/* Hook Type Tag */}
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3 space-y-1">
+            <div className="rounded-[22px] border border-slate-100 bg-[#F1F3F7] p-3 space-y-1">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 DETECTED HOOK PATTERN
               </div>
@@ -329,14 +329,14 @@ export function RetentionAutopsy({
 
           <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Benchmark: &gt;65%</span>
-            <span className="text-indigo-600 font-bold">
+            <span className="text-slate-900 font-bold">
               {hookRetentionRate >= 65 ? "✓ Target Met" : "⚠️ Needs Tighter Hook"}
             </span>
           </div>
         </div>
 
         {/* ── CARD 2: 📉 VISUAL RETENTION CURVE & DROP-OFF MOMENT ──────── */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-rose-300 hover:shadow-md transition-all">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 shadow-xs flex flex-col justify-between hover:border-rose-300 hover:shadow-2xs transition-all">
           <div>
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -350,7 +350,7 @@ export function RetentionAutopsy({
             </div>
 
             {/* Interactive SVG Retention Curve Graph */}
-            <div className="my-3 relative bg-slate-50/60 rounded-2xl p-2 border border-slate-100">
+            <div className="my-3 relative bg-[#F1F3F7] rounded-[22px] p-2 border border-slate-100">
               <svg
                 viewBox={`0 0 ${svgWidth} ${svgHeight}`}
                 className="w-full h-28 overflow-visible"
@@ -401,7 +401,7 @@ export function RetentionAutopsy({
             </div>
 
             {/* Tagged Drop Cause Analysis */}
-            <div className="rounded-2xl border border-rose-100/80 bg-rose-50/50 p-2.5 space-y-1">
+            <div className="rounded-[22px] border border-rose-100/80 bg-rose-50/50 p-2.5 space-y-1">
               <div className="flex items-center justify-between text-[10px] font-bold text-rose-800">
                 <span>STEEPEST DROP CAUSE</span>
                 <span className="tabular-nums">-{dropSeverityPct}% lost</span>
@@ -422,7 +422,7 @@ export function RetentionAutopsy({
         </div>
 
         {/* ── CARD 3: ⚖️ THE 4 GOLDEN AUTOPSY RATIOS ─────────────────── */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-amber-300 hover:shadow-md transition-all">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 shadow-xs flex flex-col justify-between hover:border-amber-300 hover:shadow-2xs transition-all">
           <div>
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -436,10 +436,10 @@ export function RetentionAutopsy({
 
             <div className="space-y-2.5 mt-3.5">
               {/* Ratio 1: Completion Estimate */}
-              <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition-colors">
+              <div className="p-2.5 rounded-xl border border-slate-100 bg-[#F1F3F7] hover:bg-[#F1F3F7] transition-colors">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <Clock size={13} className="text-indigo-500 shrink-0" />
+                    <Clock size={13} className="text-slate-900 shrink-0" />
                     <span>Completion Rate</span>
                   </div>
                   <span className="font-bold text-slate-900 tabular-nums">
@@ -448,21 +448,21 @@ export function RetentionAutopsy({
                 </div>
                 <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1.5">
                   <div
-                    className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                    className="bg-black h-full rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, completionEstimate * 1.5)}%` }}
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                   <span>Watch time ÷ length</span>
-                  <span className="text-indigo-600 font-semibold">&gt;40% target</span>
+                  <span className="text-slate-900 font-semibold">&gt;40% target</span>
                 </div>
               </div>
 
               {/* Ratio 2: Share Rate */}
-              <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition-colors">
+              <div className="p-2.5 rounded-xl border border-slate-100 bg-[#F1F3F7] hover:bg-[#F1F3F7] transition-colors">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                    <Share2 size={13} className="text-blue-500 shrink-0" />
+                    <Share2 size={13} className="text-slate-900 shrink-0" />
                     <span>Share Rate</span>
                   </div>
                   <span className="font-bold text-slate-900 tabular-nums">
@@ -471,18 +471,18 @@ export function RetentionAutopsy({
                 </div>
                 <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1.5">
                   <div
-                    className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                    className="bg-black h-full rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, (shareRate / 2.0) * 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between text-[10px] text-slate-400 mt-1">
                   <span>Shares ÷ reach</span>
-                  <span className="text-blue-600 font-semibold">&gt;1.5% viral</span>
+                  <span className="text-slate-900 font-semibold">&gt;1.5% viral</span>
                 </div>
               </div>
 
               {/* Ratio 3: Save Rate */}
-              <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition-colors">
+              <div className="p-2.5 rounded-xl border border-slate-100 bg-[#F1F3F7] hover:bg-[#F1F3F7] transition-colors">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-slate-700">
                     <Bookmark size={13} className="text-amber-500 shrink-0" />
@@ -505,7 +505,7 @@ export function RetentionAutopsy({
               </div>
 
               {/* Ratio 4: Follower Conversion */}
-              <div className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 hover:bg-slate-50 transition-colors">
+              <div className="p-2.5 rounded-xl border border-slate-100 bg-[#F1F3F7] hover:bg-[#F1F3F7] transition-colors">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-1.5 font-medium text-slate-700">
                     <ShieldCheck size={13} className="text-emerald-500 shrink-0" />
@@ -535,7 +535,7 @@ export function RetentionAutopsy({
         </div>
 
         {/* ── CARD 4: 📋 DYNAMIC CREATOR PLAYBOOK RULES ───────────────── */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between hover:border-emerald-300 hover:shadow-md transition-all">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 shadow-xs flex flex-col justify-between hover:border-emerald-300 hover:shadow-2xs transition-all">
           <div>
             <div className="flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-500">
@@ -554,10 +554,10 @@ export function RetentionAutopsy({
                   <div
                     key={rule.id}
                     onClick={() => setTestedRules((prev) => ({ ...prev, [rule.id]: !prev[rule.id] }))}
-                    className={`rounded-2xl border p-3 cursor-pointer transition-all ${
+                    className={`rounded-[22px] border p-3 cursor-pointer transition-all ${
                       isChecked
                         ? "border-emerald-200 bg-emerald-50/50"
-                        : "border-slate-100 bg-slate-50/60 hover:bg-slate-50"
+                        : "border-slate-100 bg-[#F1F3F7] hover:bg-[#F1F3F7]"
                     }`}
                   >
                     <div className="flex items-start gap-2">
@@ -570,7 +570,7 @@ export function RetentionAutopsy({
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-[9px] font-black tracking-wider uppercase px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-700">
+                          <span className="text-[9px] font-black tracking-wider uppercase px-1.5 py-0.2 rounded bg-[#E2E2FC] text-slate-900">
                             {rule.tag}
                           </span>
                         </div>
@@ -590,7 +590,7 @@ export function RetentionAutopsy({
 
           <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
             <span className="text-slate-400">Apply to next Reel</span>
-            <span className="font-bold text-indigo-600 flex items-center gap-1 cursor-pointer" onClick={handleCopyPlaybook}>
+            <span className="font-bold text-slate-900 flex items-center gap-1 cursor-pointer" onClick={handleCopyPlaybook}>
               <span>{copiedPlaybook ? "Copied" : "Copy Rules"}</span>
               <ArrowRight size={12} />
             </span>

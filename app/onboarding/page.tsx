@@ -209,9 +209,9 @@ export default function OnboardingPage() {
   const anyConnected = status.facebookConnected || status.instagramConnected;
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased flex flex-col selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-[#fafaf9] text-slate-900 font-sans antialiased flex flex-col selection:bg-[#E2E2FC] selection:text-blue-900">
       {/* ── TOP HEADER (Fabroniee Logo + Help + Sign Out) ────────────────── */}
-      <header className="w-full bg-white border-b border-slate-200/80 sticky top-0 z-30">
+      <header className="w-full bg-white border-b border-[#e9e9ee] sticky top-0 z-30">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -232,7 +232,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-black px-3.5 py-1.5 rounded-full transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-black hover:bg-black px-3.5 py-1.5 rounded-full transition-all cursor-pointer shadow-xs"
               >
                 <span>Go to Studio</span>
                 <ArrowRightOutlined className="text-[10px]" />
@@ -242,9 +242,9 @@ export default function OnboardingPage() {
             <button
               type="button"
               onClick={() => setHelpModalOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-[#F1F3F7] hover:bg-slate-100 border border-[#e9e9ee] px-3 py-1.5 rounded-full transition-colors cursor-pointer"
             >
-              <QuestionCircleOutlined className="text-xs text-blue-600" />
+              <QuestionCircleOutlined className="text-xs text-slate-900" />
               <span>How Fabroniee Works</span>
             </button>
 
@@ -281,7 +281,7 @@ export default function OnboardingPage() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
                   currentStep === 1
-                    ? "bg-blue-600 text-white shadow-xs"
+                    ? "bg-black text-white shadow-xs"
                     : "bg-emerald-500 text-white"
                 }`}
               >
@@ -291,7 +291,7 @@ export default function OnboardingPage() {
               {/* Connecting Bar */}
               <div
                 className={`flex-1 h-0.5 mx-3 transition-colors ${
-                  currentStep === 2 || anyConnected ? "bg-blue-600" : "bg-slate-200"
+                  currentStep === 2 || anyConnected ? "bg-black" : "bg-slate-200"
                 }`}
               />
 
@@ -299,8 +299,8 @@ export default function OnboardingPage() {
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-colors shrink-0 ${
                   currentStep === 2
-                    ? "bg-blue-600 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-400 border border-slate-200"
+                    ? "bg-black text-white shadow-xs"
+                    : "bg-slate-100 text-slate-400 border border-[#e9e9ee]"
                 }`}
               >
                 2
@@ -310,7 +310,7 @@ export default function OnboardingPage() {
 
           {/* ── STEP 1: CONNECT SOCIAL MEDIA ACCOUNTS (Exact Replica of Image 3) ── */}
           {currentStep === 1 && (
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-9 space-y-7">
+            <div className="bg-white rounded-[26px] border border-[#e9e9ee] shadow-2xs p-6 sm:p-9 space-y-7">
               {/* Card Header */}
               <div className="text-center space-y-1">
                 <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
@@ -325,10 +325,10 @@ export default function OnboardingPage() {
               <div className="space-y-3 pt-1">
                 {/* 1. Facebook */}
                 <div
-                  className={`w-full rounded-2xl border transition-all p-3.5 sm:p-4 flex items-center justify-between ${
+                  className={`w-full rounded-[22px] border transition-all p-3.5 sm:p-4 flex items-center justify-between ${
                     status.facebookConnected
                       ? "border-emerald-200 bg-emerald-50/40"
-                      : "border-slate-200 hover:border-slate-300 hover:shadow-2xs bg-white"
+                      : "border-[#e9e9ee] hover:border-slate-300 hover:shadow-2xs bg-white"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -361,7 +361,7 @@ export default function OnboardingPage() {
                       type="button"
                       onClick={() => setFbModalOpen(true)}
                       disabled={busy}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-[#F1F3F7] hover:bg-slate-100 border border-[#e9e9ee] transition-colors cursor-pointer"
                     >
                       Connect
                     </button>
@@ -370,10 +370,10 @@ export default function OnboardingPage() {
 
                 {/* 2. Instagram */}
                 <div
-                  className={`w-full rounded-2xl border transition-all p-3.5 sm:p-4 flex items-center justify-between ${
+                  className={`w-full rounded-[22px] border transition-all p-3.5 sm:p-4 flex items-center justify-between ${
                     status.instagramConnected
                       ? "border-emerald-200 bg-emerald-50/40"
-                      : "border-slate-200 hover:border-slate-300 hover:shadow-2xs bg-white"
+                      : "border-[#e9e9ee] hover:border-slate-300 hover:shadow-2xs bg-white"
                   }`}
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -422,7 +422,7 @@ export default function OnboardingPage() {
                       type="button"
                       onClick={() => setIgModalOpen(true)}
                       disabled={busy}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-[#F1F3F7] hover:bg-slate-100 border border-[#e9e9ee] transition-colors cursor-pointer"
                     >
                       Connect
                     </button>
@@ -436,7 +436,7 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
-                  className="w-full h-12 rounded-2xl text-white font-semibold text-sm transition-all shadow-md active:scale-[0.99] cursor-pointer bg-[#5046e5] hover:bg-[#4338ca]"
+                  className="w-full h-12 rounded-[22px] text-white font-semibold text-sm transition-all shadow-2xs active:scale-[0.99] cursor-pointer bg-[#5046e5] hover:bg-[#4338ca]"
                 >
                   Continue setup
                 </button>
@@ -457,7 +457,7 @@ export default function OnboardingPage() {
 
           {/* ── STEP 2: CREATOR DETAILS & FINALIZE ────────────────────────── */}
           {currentStep === 2 && (
-            <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 sm:p-9 space-y-6">
+            <div className="bg-white rounded-[26px] border border-[#e9e9ee] shadow-2xs p-6 sm:p-9 space-y-6">
               <div className="text-center space-y-1">
                 <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
                   Creator Profile &amp; Preferences
@@ -475,7 +475,7 @@ export default function OnboardingPage() {
                   <select
                     value={creatorNiche}
                     onChange={(e) => setCreatorNiche(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 font-medium focus:outline-none focus:border-blue-500"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] text-xs text-slate-800 font-medium focus:outline-none focus:border-[#e9e9ee]"
                   >
                     <option value="E-Commerce & Retail">E-Commerce &amp; Retail</option>
                     <option value="Fashion & Lifestyle">Fashion &amp; Lifestyle</option>
@@ -493,7 +493,7 @@ export default function OnboardingPage() {
                   <select
                     value={monthlyVolume}
                     onChange={(e) => setMonthlyVolume(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-slate-800 font-medium focus:outline-none focus:border-blue-500"
+                    className="w-full h-11 px-3.5 rounded-xl border border-[#e9e9ee] bg-[#F1F3F7] text-xs text-slate-800 font-medium focus:outline-none focus:border-[#e9e9ee]"
                   >
                     <option value="Under 1,000 / month">Under 1,000 / month</option>
                     <option value="1,000 - 10,000 comments/mo">1,000 - 10,000 comments/mo</option>
@@ -516,7 +516,7 @@ export default function OnboardingPage() {
                   type="button"
                   onClick={handleFinishOnboarding}
                   disabled={busy}
-                  className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 shadow-md active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-black hover:bg-slate-800 shadow-2xs active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                 >
                   {busy ? <LoadingOutlined className="animate-spin" /> : null}
                   <span>Finish &amp; Launch Dashboard &rarr;</span>
@@ -534,7 +534,7 @@ export default function OnboardingPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-page-entrance"
         >
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
+          <div className="relative w-full max-w-lg rounded-[26px] bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
             {/* Close button */}
             <button
               type="button"
@@ -546,14 +546,14 @@ export default function OnboardingPage() {
             </button>
 
             {/* Circular Facebook Logo Icon */}
-            <div className="mx-auto w-14 h-14 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-md">
+            <div className="mx-auto w-14 h-14 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-2xs">
               <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </div>
 
             {/* Card Content with Border */}
-            <div className="rounded-2xl border border-slate-200/90 p-5 sm:p-6 text-center space-y-3 bg-white">
+            <div className="rounded-[22px] border border-[#e9e9ee] p-5 sm:p-6 text-center space-y-3 bg-white">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                 You&apos;ll be redirected to Facebook to authorize the connection.
               </h3>
@@ -571,7 +571,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setFbModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl border border-[#e9e9ee] text-xs font-semibold text-slate-700 hover:bg-[#F1F3F7] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -579,7 +579,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleProceedFacebookOAuth}
                 disabled={busy}
-                className="px-6 py-2.5 rounded-xl bg-[#4353ff] hover:bg-[#3442ea] text-xs font-semibold text-white shadow-md active:scale-[0.99] transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#4353ff] hover:bg-[#3442ea] text-xs font-semibold text-white shadow-2xs active:scale-[0.99] transition-all cursor-pointer flex items-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs" />}
                 <span>Log In with Facebook</span>
@@ -596,7 +596,7 @@ export default function OnboardingPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-page-entrance"
         >
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
+          <div className="relative w-full max-w-lg rounded-[26px] bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
             {/* Close button */}
             <button
               type="button"
@@ -610,7 +610,7 @@ export default function OnboardingPage() {
             {/* Combined Instagram & Facebook Linked Icons */}
             <div className="flex items-center justify-center gap-1.5">
               <div
-                className="w-12 h-12 rounded-full text-white flex items-center justify-center shadow-md shrink-0"
+                className="w-12 h-12 rounded-full text-white flex items-center justify-center shadow-2xs shrink-0"
                 style={{
                   background:
                     "linear-gradient(115deg, #7928ca 0%, #d6249f 30%, #e1306c 60%, #fd1d1d 85%, #f77737 100%)",
@@ -635,7 +635,7 @@ export default function OnboardingPage() {
                 <LinkOutlined />
               </div>
 
-              <div className="w-12 h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-md shrink-0">
+              <div className="w-12 h-12 rounded-full bg-[#1877F2] text-white flex items-center justify-center shadow-2xs shrink-0">
                 <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                 </svg>
@@ -643,7 +643,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Card Content with Border */}
-            <div className="rounded-2xl border border-slate-200/90 p-5 sm:p-6 text-center space-y-3 bg-white">
+            <div className="rounded-[22px] border border-[#e9e9ee] p-5 sm:p-6 text-center space-y-3 bg-white">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                 You&apos;ll be redirected to Facebook to authorize the connection.
               </h3>
@@ -662,7 +662,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setIgModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-xl border border-[#e9e9ee] text-xs font-semibold text-slate-700 hover:bg-[#F1F3F7] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -670,7 +670,7 @@ export default function OnboardingPage() {
                 type="button"
                 onClick={handleProceedInstagramOAuth}
                 disabled={busy}
-                className="px-6 py-2.5 rounded-xl bg-[#4353ff] hover:bg-[#3442ea] text-xs font-semibold text-white shadow-md active:scale-[0.99] transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl bg-[#4353ff] hover:bg-[#3442ea] text-xs font-semibold text-white shadow-2xs active:scale-[0.99] transition-all cursor-pointer flex items-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs" />}
                 <span>Log In with Facebook</span>
@@ -687,7 +687,7 @@ export default function OnboardingPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-page-entrance"
         >
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
+          <div className="relative w-full max-w-lg rounded-[26px] bg-white p-7 sm:p-9 shadow-2xl space-y-6 text-center">
             {/* Close button */}
             <button
               type="button"
@@ -743,7 +743,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* Gray Callout Box with Reasons */}
-            <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-5 text-left space-y-2.5">
+            <div className="rounded-[22px] bg-[#F1F3F7] border border-[#e9e9ee] p-5 text-left space-y-2.5">
               <span className="font-bold text-xs text-slate-900 block">
                 Possible reasons:
               </span>
@@ -767,7 +767,7 @@ export default function OnboardingPage() {
                   setErrorModalOpen(false);
                   setFbModalOpen(true);
                 }}
-                className="px-8 py-2.5 rounded-xl bg-[#5046e5] hover:bg-[#4338ca] text-xs font-semibold text-white shadow-md active:scale-[0.99] transition-all cursor-pointer"
+                className="px-8 py-2.5 rounded-xl bg-[#5046e5] hover:bg-[#4338ca] text-xs font-semibold text-white shadow-2xs active:scale-[0.99] transition-all cursor-pointer"
               >
                 Try Again
               </button>
@@ -785,7 +785,7 @@ export default function OnboardingPage() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-page-entrance"
         >
-          <div className="relative w-full max-w-lg rounded-3xl bg-white p-7 sm:p-9 shadow-2xl space-y-5 text-left">
+          <div className="relative w-full max-w-lg rounded-[26px] bg-white p-7 sm:p-9 shadow-2xl space-y-5 text-left">
             <button
               type="button"
               onClick={() => setHelpModalOpen(false)}
@@ -795,8 +795,8 @@ export default function OnboardingPage() {
             </button>
 
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
-                <SafetyCertificateFilled className="text-blue-600" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#E2E2FC] border border-[#e9e9ee] text-slate-900 text-[11px] font-semibold">
+                <SafetyCertificateFilled className="text-slate-900" />
                 <span>Meta Graph API v21.0 Certified</span>
               </div>
               <h3 className="text-lg font-bold text-slate-900 pt-1">
@@ -820,7 +820,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setHelpModalOpen(false)}
-                className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-black transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-black text-white text-xs font-semibold hover:bg-black transition-colors"
               >
                 Got it
               </button>

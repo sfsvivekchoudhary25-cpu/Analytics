@@ -163,7 +163,7 @@ function SidebarContent({
           {isCollapsed ? (
             /* Collapsed Mode: Logo & Dedicated Expand Toggle */
             <div className="flex flex-col items-center gap-2 w-full">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs p-1 shrink-0">
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs p-1 shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/logo.png"
@@ -187,7 +187,7 @@ function SidebarContent({
             /* Expanded Mode: Full Logo, Title, Subtitle, and Collapse Button */
             <>
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs shrink-0 p-1">
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs shrink-0 p-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/logo.png"
@@ -243,7 +243,7 @@ function SidebarContent({
                 }
                 placement="right"
               >
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 transition-all cursor-default">
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 transition-all cursor-default">
                   <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white">
                     <InstagramOutlined className="text-[12px]" />
                   </div>
@@ -252,7 +252,7 @@ function SidebarContent({
               </Tooltip>
             </div>
           ) : (
-            <div className="flex w-full items-center gap-2.5 rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white/80 backdrop-blur-md p-2.5 text-left shadow-2xs transition-all group">
+            <div className="flex w-full items-center gap-2.5 rounded-[22px] border border-[#e9e9ee] hover:border-black/20 bg-white/80 backdrop-blur-md p-2.5 text-left shadow-2xs transition-all group">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white shadow-xs group-hover:scale-105 transition-transform">
                 <InstagramOutlined className="text-sm" />
               </div>
@@ -261,7 +261,7 @@ function SidebarContent({
                   <span className="truncate text-xs font-medium text-slate-800 tracking-tight">
                     {handle}
                   </span>
-                  {cleanUsername && <CheckCircleFilled className="text-[11px] text-blue-500 shrink-0" />}
+                  {cleanUsername && <CheckCircleFilled className="text-[11px] text-slate-900 shrink-0" />}
                 </div>
                 <span className={`text-[10px] font-normal flex items-center gap-1.5 mt-0.5 ${cleanUsername ? "text-emerald-600" : "text-amber-600"}`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${cleanUsername ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
@@ -319,7 +319,7 @@ function SidebarContent({
                       }}
                       aria-label={s.label}
                       aria-current={isSelected ? "page" : undefined}
-                      className={`group relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-200 cursor-pointer ${
+                      className={`group relative flex h-10 w-10 items-center justify-center rounded-[22px] transition-all duration-200 cursor-pointer ${
                         isSelected
                           ? "bg-[#e2e2fc] text-slate-950 font-medium shadow-xs scale-105"
                           : "text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-2xs active:scale-95"
@@ -350,7 +350,7 @@ function SidebarContent({
                     if (isDrawer) onClose?.();
                   }}
                   aria-current={isSelected ? "page" : undefined}
-                  className={`group relative flex w-full items-center justify-between rounded-2xl px-3 py-2 text-xs sm:text-[13px] font-normal transition-all duration-200 cursor-pointer ${
+                  className={`group relative flex w-full items-center justify-between rounded-[22px] px-3 py-2 text-xs sm:text-[13px] font-normal transition-all duration-200 cursor-pointer ${
                     isSelected
                       ? "bg-[#e2e2fc] text-slate-950 font-medium shadow-2xs"
                       : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-2xs active:scale-[0.98]"
@@ -393,7 +393,7 @@ function SidebarContent({
             >
               <button
                 type="button"
-                className="group relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 active:scale-95 transition-all cursor-pointer"
+                className="group relative flex h-10 w-10 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 active:scale-95 transition-all cursor-pointer"
                 aria-label="User settings & profile"
               >
                 <Avatar
@@ -408,7 +408,7 @@ function SidebarContent({
           </div>
         ) : (
           /* Expanded User Profile Card */
-          <div className="rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all">
+          <div className="rounded-[22px] border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all">
             <div className="flex items-center gap-2.5">
               <Avatar
                 size={34}

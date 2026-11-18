@@ -213,7 +213,7 @@ export default function HomePage() {
                 <Link
                   href="/login"
                   style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-800 !text-white font-semibold text-sm shadow-xl active:scale-[0.99] transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-800 !text-white font-semibold text-sm shadow-2xs active:scale-[0.99] transition-all"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/meta-logo.png" alt="Meta" className="h-4 w-auto object-contain shrink-0 brightness-0 invert" />
@@ -224,7 +224,7 @@ export default function HomePage() {
                 <Link
                   href="/pricing"
                   style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-slate-50 text-sm font-semibold transition-all shadow-2xs !text-black"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full hover:bg-[#F1F3F7] text-sm font-semibold transition-all shadow-2xs !text-black"
                 >
                   <span className="!text-black">Explore Pricing &amp; Plans &rarr;</span>
                 </Link>
@@ -249,7 +249,7 @@ export default function HomePage() {
 
             {/* Right Live Production Automation Architecture Card (5 cols) */}
             <div className="lg:col-span-5 relative">
-              <div className="rounded-3xl border border-[#e9e9ee] bg-white p-5 sm:p-6 shadow-2xl relative overflow-hidden space-y-5">
+              <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-5 sm:p-6 shadow-2xl relative overflow-hidden space-y-5">
                 {/* Header Row */}
                 <div className="flex items-center justify-between pb-3 border-b border-[#e9e9ee]">
                   <div className="flex items-center gap-2">
@@ -264,7 +264,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Active Funnel Trigger Config Info */}
-                <div className="p-3 rounded-2xl bg-[#fafaf9] border border-[#e9e9ee] flex items-center justify-between">
+                <div className="p-3 rounded-[22px] bg-[#fafaf9] border border-[#e9e9ee] flex items-center justify-between">
                   <div className="space-y-0.5">
                     <span className="text-[10px] font-semibold uppercase text-slate-400">Trigger Keyword Rule</span>
                     <div className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
@@ -278,10 +278,10 @@ export default function HomePage() {
                 </div>
 
                 {/* 1. Public Instagram Comment */}
-                <div className="p-4 rounded-2xl bg-[#fafaf9] border border-[#e9e9ee] space-y-2.5">
+                <div className="p-4 rounded-[22px] bg-[#fafaf9] border border-[#e9e9ee] space-y-2.5">
                   <div className="flex items-center justify-between text-[11px] text-slate-500">
                     <span className="flex items-center gap-1.5 font-medium text-slate-800">
-                      <InstagramOutlined className="text-pink-500 text-sm" />
+                      <InstagramOutlined className="text-slate-900 text-sm" />
                       <span>Public Instagram Reel Comment</span>
                     </span>
                     <span className="text-[10px] text-slate-400">Verified</span>
@@ -314,7 +314,7 @@ export default function HomePage() {
                 </div>
 
                 {/* 2. Instant Private DM Card Delivered */}
-                <div className="p-4 rounded-2xl bg-[#f7cbdf] border border-[#ed83b3] space-y-2.5">
+                <div className="p-4 rounded-[22px] bg-[#f7cbdf] border border-[#ed83b3] space-y-2.5">
                   <div className="flex items-center justify-between text-[11px] text-[#871d4d] font-semibold">
                     <span className="flex items-center gap-1.5">
                       <MessageOutlined /> Instant Direct Message (DM)
@@ -333,7 +333,7 @@ export default function HomePage() {
                     {/* Rich Action Button inside DM */}
                     <div
                       style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                      className="w-full py-2.5 px-3 rounded-full text-white text-xs font-semibold flex items-center justify-between shadow-md"
+                      className="w-full py-2.5 px-3 rounded-full text-white text-xs font-semibold flex items-center justify-between shadow-2xs"
                     >
                       <span className="text-white">Shop Vintage Jacket ($68.00)</span>
                       <ArrowRightOutlined className="text-[10px] text-white" />
@@ -439,7 +439,7 @@ export default function HomePage() {
           </div>
 
           {/* Integrated Kinetic Engine Display Card */}
-          <div className="rounded-3xl border-2 border-slate-900 bg-[#0c0d14] p-4 sm:p-7 shadow-2xl relative overflow-hidden">
+          <div className="rounded-[26px] border-2 border-slate-900 bg-[#0c0d14] p-4 sm:p-7 shadow-2xl relative overflow-hidden">
             {/* Top Engine Status Ribbon */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-white/10 text-xs">
               <div className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function HomePage() {
             </div>
 
             {/* Kinetic Typography Canvas Viewport */}
-            <div className="w-full h-[240px] sm:h-[280px] relative rounded-2xl overflow-hidden bg-black/70 border border-white/10 flex items-center justify-center">
+            <div className="w-full h-[240px] sm:h-[280px] relative rounded-[22px] overflow-hidden bg-black/70 border border-white/10 flex items-center justify-center">
               <TechText
                 text={currentEngine.keyword}
                 fontWeight={700}
@@ -502,7 +502,7 @@ export default function HomePage() {
                   color: "#000000",
                   border: "2px solid #000000",
                 }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-xs !text-black hover:brightness-105 transition-all shrink-0 shadow-md"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full font-semibold text-xs !text-black hover:brightness-105 transition-all shrink-0 shadow-2xs"
               >
                 <span className="!text-black font-semibold">Explore Engine Blueprint</span>
                 <ArrowRightOutlined className="text-[10px] !text-black font-bold" />
@@ -610,7 +610,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto rounded-3xl border border-[#e9e9ee] bg-[#fafaf9] p-6 sm:p-10 shadow-xl space-y-8">
+          <div className="max-w-4xl mx-auto rounded-[26px] border border-[#e9e9ee] bg-[#fafaf9] p-6 sm:p-10 shadow-2xs space-y-8">
             {/* Slider Control */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -641,7 +641,7 @@ export default function HomePage() {
 
             {/* Calculated Impact Metrics */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-[#e9e9ee]">
-              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+              <div className="p-5 rounded-[22px] bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
                 <div className="text-xs text-slate-500 font-medium">Manual Hours Saved</div>
                 <div className="text-2xl sm:text-3xl font-bold text-slate-900 font-mono flex items-center justify-center gap-1.5">
                   <ClockCircleOutlined className="text-[#e3622b] text-xl" />
@@ -650,7 +650,7 @@ export default function HomePage() {
                 <div className="text-[11px] text-slate-400 font-normal">No copy-pasting DMs by hand</div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+              <div className="p-5 rounded-[22px] bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
                 <div className="text-xs text-slate-500 font-medium">Qualified Leads Captured</div>
                 <div className="text-2xl sm:text-3xl font-bold text-[#0000e9] font-mono flex items-center justify-center gap-1.5">
                   <CheckCircleFilled className="text-[#0000e9] text-xl" />
@@ -659,7 +659,7 @@ export default function HomePage() {
                 <div className="text-[11px] text-slate-400 font-normal">Directly into chat inbox</div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
+              <div className="p-5 rounded-[22px] bg-white border border-[#e9e9ee] text-center space-y-1 shadow-xs">
                 <div className="text-xs text-slate-500 font-medium">Projected Extra Sales</div>
                 <div className="text-2xl sm:text-3xl font-bold text-[#e13181] font-mono">
                   ${estimatedRevenue.toLocaleString()}
@@ -669,14 +669,14 @@ export default function HomePage() {
             </div>
 
             {/* Bottom CTA within Calculator */}
-            <div className="p-4 rounded-2xl bg-[#f7cbdf] border border-[#ed83b3] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="p-4 rounded-[22px] bg-[#f7cbdf] border border-[#ed83b3] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs font-medium text-[#871d4d]">
                 Ready to automate your comments and reclaim <strong className="text-[#e13181] font-bold">{hoursSaved} hours</strong> this month?
               </div>
               <Link
                 href="/login"
                 style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                className="px-6 py-3 rounded-full hover:bg-neutral-800 !text-white font-semibold text-xs shadow-md transition-all shrink-0"
+                className="px-6 py-3 rounded-full hover:bg-neutral-800 !text-white font-semibold text-xs shadow-2xs transition-all shrink-0"
               >
                 <span className="!text-white">Start Free Trial &rarr;</span>
               </Link>
@@ -703,8 +703,8 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-[#bfbff9] text-[#00008b] flex items-center justify-center text-xl font-bold">
+            <div className="p-7 rounded-[22px] border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-[22px] bg-[#bfbff9] text-[#00008b] flex items-center justify-center text-xl font-bold">
                 <LockOutlined />
               </div>
               <h4 className="text-lg font-bold text-slate-900">Direct Meta OAuth 2.0</h4>
@@ -713,8 +713,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-[#f7cbdf] text-[#871d4d] flex items-center justify-center text-xl font-bold">
+            <div className="p-7 rounded-[22px] border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-[22px] bg-[#f7cbdf] text-[#871d4d] flex items-center justify-center text-xl font-bold">
                 <SafetyCertificateFilled />
               </div>
               <h4 className="text-lg font-bold text-slate-900">AES-256 Encrypted Tokens</h4>
@@ -723,8 +723,8 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="p-7 rounded-2xl border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
-              <div className="w-12 h-12 rounded-2xl bg-[#ffefb2] text-[#997a00] flex items-center justify-center text-xl font-bold">
+            <div className="p-7 rounded-[22px] border border-[#e9e9ee] bg-white space-y-3 shadow-xs">
+              <div className="w-12 h-12 rounded-[22px] bg-[#ffefb2] text-[#997a00] flex items-center justify-center text-xl font-bold">
                 <CheckCircleFilled />
               </div>
               <h4 className="text-lg font-bold text-slate-900">Automated Data Deletion</h4>
@@ -754,7 +754,7 @@ export default function HomePage() {
               return (
                 <div
                   key={item.q}
-                  className="rounded-2xl border border-[#e9e9ee] bg-[#fafaf9] overflow-hidden transition-all shadow-2xs"
+                  className="rounded-[22px] border border-[#e9e9ee] bg-[#fafaf9] overflow-hidden transition-all shadow-2xs"
                 >
                   <button
                     type="button"
@@ -781,7 +781,7 @@ export default function HomePage() {
       {/* ── 10. FINAL HIGH-CONVERSION CTA (Fabulate Soft Radiant Card) ─────────── */}
       <section className="py-20 relative overflow-hidden bg-[#fafaf9]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="rounded-3xl border border-[#ed83b3] bg-gradient-to-br from-[#f7cbdf] via-[#ffefb2] to-[#f8d7ca] p-10 sm:p-14 space-y-6 shadow-xl">
+          <div className="rounded-[26px] border border-[#ed83b3] bg-gradient-to-br from-[#f7cbdf] via-[#ffefb2] to-[#f8d7ca] p-10 sm:p-14 space-y-6 shadow-2xs">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-[#ed83b3] text-xs font-medium text-[#871d4d] shadow-2xs">
               <StarFilled className="text-amber-400" /> Start Converting Today
             </div>
@@ -798,7 +798,7 @@ export default function HomePage() {
               <Link
                 href="/login"
                 style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                className="w-full sm:w-auto px-8 py-4 rounded-full hover:bg-neutral-800 !text-white font-semibold text-sm shadow-xl active:scale-[0.99] transition-all"
+                className="w-full sm:w-auto px-8 py-4 rounded-full hover:bg-neutral-800 !text-white font-semibold text-sm shadow-2xs active:scale-[0.99] transition-all"
               >
                 <span className="!text-white">Get Started with Meta Login &rarr;</span>
               </Link>
@@ -806,7 +806,7 @@ export default function HomePage() {
               <Link
                 href="/pricing"
                 style={{ backgroundColor: "#ffffff", color: "#000000", border: "2px solid #000000" }}
-                className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-slate-50 font-semibold text-sm transition-all shadow-xs !text-black"
+                className="w-full sm:w-auto px-6 py-4 rounded-full hover:bg-[#F1F3F7] font-semibold text-sm transition-all shadow-xs !text-black"
               >
                 <span className="!text-black">View Plans &amp; Pricing</span>
               </Link>
