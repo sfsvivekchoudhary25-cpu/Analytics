@@ -701,7 +701,7 @@ export function AccountPanel({
         okButtonProps={{ disabled: deleteText.trim() !== "DELETE", loading: deleting }}
         cancelButtonProps={{ disabled: deleting }}
         onOk={confirmDeleteAccount}
-        maskClosable={false}
+        mask={{ closable: false }}
       >
         <div className="space-y-3 text-sm text-slate-600">
           <p>This cannot be undone. The following is erased from our database:</p>
