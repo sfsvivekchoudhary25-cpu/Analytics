@@ -132,7 +132,7 @@ export default function OnboardingPage() {
     try {
       const apiBase = getApiBase();
       const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await fetch(`${apiBase}/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
+      const res = await fetch(`${apiBase}/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`, { headers: auth.get() ? { Authorization: `Bearer ${auth.get()}` } : {} });
       const data = await res.json();
       if (!res.ok || !data.url) {
         throw new Error(data.message || "Failed to generate Facebook OAuth login URL.");
@@ -153,7 +153,7 @@ export default function OnboardingPage() {
     try {
       const apiBase = getApiBase();
       const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await fetch(`${apiBase}/instagram/oauth/url?origin=${encodeURIComponent(origin)}`);
+      const res = await fetch(`${apiBase}/instagram/oauth/url?origin=${encodeURIComponent(origin)}`, { headers: auth.get() ? { Authorization: `Bearer ${auth.get()}` } : {} });
       const data = await res.json();
       if (!res.ok || !data.url) {
         // Fallback to Facebook page OAuth which connects Instagram business account automatically
