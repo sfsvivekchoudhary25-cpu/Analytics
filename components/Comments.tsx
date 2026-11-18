@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { api } from "@/lib/api";
 import { AutoReplyCard, type RuleTemplate } from "./AutoReplyCard";
 import {
@@ -52,6 +52,11 @@ type PostWithComments = {
   reported: number;
   visible: number;
 };
+
+type CommentsPage = { items: Comment[]; nextCursor: string | null; counts: { all: number; unreplied: number; replied: number } };
+type PostsPage = { items: PostWithComments[]; total: number; nextOffset: number | null };
+const COMMENTS_PAGE = 6;
+const POSTS_PAGE = 6;
 
 function formatRelativeTime(iso: string) {
   try {
@@ -115,7 +120,18 @@ export function Comments() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [postsExpanded, setPostsExpanded] = useState(false);
+  const [counts, setCounts] = useState({ all: 0, unreplied: 0, replied: 0 });
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [postsTotal, setPostsTotal] = useState(0);
+  const [postsLoadingMore, setPostsLoadingMore] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const itemsRef = useRef<Comment[] | null>(null);
+  const cursorRef = useRef<string | null>(null);
+  const postsRef = useRef<PostWithComments[] | null>(null);
+  itemsRef.current = items;
+  cursorRef.current = nextCursor;
+  postsRef.current = posts;
   const [showAutoReplySettings, setShowAutoReplySettings] = useState(false);
   const [quickRepliesFor, setQuickRepliesFor] = useState<string | null>(null);
   const [customTemplates, setCustomTemplates] = useState<string[]>([]);
@@ -144,21 +160,66 @@ export function Comments() {
     localStorage.setItem(CUSTOM_TEMPLATES_KEY, JSON.stringify(next));
   }
 
-  // Load comments and posts
+  // Wait for a pause in typing before searching on the server.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 350);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
+  const pageQuery = () =>
+    `tab=${tab}&limit=${COMMENTS_PAGE}` +
+    (selectedPostId ? `&post=${encodeURIComponent(selectedPostId)}` : "") +
+    (debouncedSearch ? `&q=${encodeURIComponent(debouncedSearch)}` : "");
+
+  // A different tab, post or search starts again from the first page.
+  useEffect(() => {
+    setItems(null);
+    setNextCursor(null);
+  }, [tab, selectedPostId, debouncedSearch]);
+
+  // Comments: the first page now, then a fresh look every 15 seconds. Pages you already opened with "Load more" are kept.
   useEffect(() => {
     let cancelled = false;
-    const load = () =>
-      Promise.all([
-        api<Comment[]>("/comments?filter=all"),
-        api<PostWithComments[]>("/comments/posts").catch(() => null),
-      ]).then(
-        ([c, p]) => {
+    const load = (fresh: boolean) =>
+      api<CommentsPage>(`/comments/page?${pageQuery()}`).then(
+        (r) => {
           if (cancelled) return;
-          setItems(c);
-          if (p) setPosts(p);
+          setCounts(r.counts);
+          const prev = itemsRef.current;
+          if (fresh || !prev || prev.length <= r.items.length) {
+            setItems(r.items);
+            setNextCursor(r.nextCursor);
+          } else {
+            const firstIds = new Set(r.items.map((c) => c.id));
+            const lastTime = r.items.length ? r.items[r.items.length - 1].commentedAt : "";
+            setItems([...r.items, ...prev.filter((c) => !firstIds.has(c.id) && c.commentedAt < lastTime)]);
+          }
         },
-        (e: Error) => !cancelled && setError(e.message)
+        (e: Error) => !cancelled && setError(e.message),
       );
+    load(true);
+    const id = setInterval(() => load(false), 15000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tick, tab, selectedPostId, debouncedSearch]);
+
+  // Posts with comments: six at first; the posts you have opened are refreshed together.
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      const n = Math.max(POSTS_PAGE, postsRef.current?.length ?? 0);
+      return api<PostsPage>(`/comments/posts?limit=${n}&offset=0`).then(
+        (r) => {
+          if (cancelled) return;
+          setPosts(r.items);
+          setPostsTotal(r.total);
+        },
+        () => {},
+      );
+    };
     load();
     const id = setInterval(load, 15000);
     return () => {
@@ -166,6 +227,43 @@ export function Comments() {
       clearInterval(id);
     };
   }, [tick]);
+
+  async function loadMoreComments() {
+    const cursor = cursorRef.current;
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const r = await api<CommentsPage>(`/comments/page?${pageQuery()}&cursor=${encodeURIComponent(cursor)}`);
+      setItems((prev) => {
+        const seen = new Set((prev ?? []).map((c) => c.id));
+        return [...(prev ?? []), ...r.items.filter((c) => !seen.has(c.id))];
+      });
+      setNextCursor(r.nextCursor);
+      setCounts(r.counts);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  async function loadMorePosts() {
+    const have = postsRef.current?.length ?? 0;
+    if (postsLoadingMore) return;
+    setPostsLoadingMore(true);
+    try {
+      const r = await api<PostsPage>(`/comments/posts?limit=${POSTS_PAGE}&offset=${have}`);
+      setPosts((prev) => {
+        const seen = new Set((prev ?? []).map((x) => x.mediaId));
+        return [...(prev ?? []), ...r.items.filter((x) => !seen.has(x.mediaId))];
+      });
+      setPostsTotal(r.total);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setPostsLoadingMore(false);
+    }
+  }
 
   const reload = () => setTick((n) => n + 1);
 
@@ -207,28 +305,11 @@ export function Comments() {
       setQuickRepliesFor(null);
     });
 
-  // Filter calculations
-  const allComments = useMemo(() => items?.filter((c) => !c.isOwn) ?? [], [items]);
-  const needsReplyComments = useMemo(() => allComments.filter((c) => !c.repliedAt), [allComments]);
-  const repliedComments = useMemo(() => allComments.filter((c) => !!c.repliedAt), [allComments]);
-
-  const displayedComments = useMemo(() => {
-    let list =
-      tab === "unreplied" ? needsReplyComments : tab === "replied" ? repliedComments : allComments;
-
-    if (selectedPostId) {
-      list = list.filter((c) => c.mediaPermalink?.includes(selectedPostId));
-    }
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim();
-      list = list.filter(
-        (c) => c.username?.toLowerCase().includes(q) || c.text?.toLowerCase().includes(q)
-      );
-    }
-
-    return list;
-  }, [tab, needsReplyComments, repliedComments, allComments, selectedPostId, searchQuery]);
+  // The server already filtered by tab, post and search; these are the comments loaded so far.
+  const displayedComments = items ?? [];
+  const tabTotal = tab === "unreplied" ? counts.unreplied : tab === "replied" ? counts.replied : counts.all;
+  const canLoadMore = !!nextCursor;
+  const remaining = !selectedPostId && !debouncedSearch ? Math.max(0, tabTotal - displayedComments.length) : 0;
 
   return (
     <div className="space-y-6 pb-12">
@@ -248,7 +329,7 @@ export function Comments() {
         >
           <div className="flex items-start justify-between">
             <span className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums">
-              {allComments.length}
+              {counts.all}
             </span>
             <div className="w-9 h-9 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
               <MessageSquare size={17} />
@@ -267,7 +348,7 @@ export function Comments() {
         >
           <div className="flex items-start justify-between">
             <span className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums">
-              {needsReplyComments.length}
+              {counts.unreplied}
             </span>
             <div className="w-9 h-9 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
               <Clock size={17} className="text-amber-700" />
@@ -278,7 +359,7 @@ export function Comments() {
               <div className="text-sm font-bold text-slate-950">Needs Reply</div>
               <div className="text-xs font-semibold text-amber-800/80 mt-0.5">Unanswered audience</div>
             </div>
-            {needsReplyComments.length > 0 && (
+            {counts.unreplied > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-amber-200/60 text-amber-900 text-[10px] font-bold">
                 Action needed
               </span>
@@ -293,7 +374,7 @@ export function Comments() {
         >
           <div className="flex items-start justify-between">
             <span className="text-3xl sm:text-4xl font-black text-slate-950 tabular-nums">
-              {repliedComments.length}
+              {counts.replied}
             </span>
             <div className="w-9 h-9 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
               <CheckCircle2 size={17} className="text-rose-600" />
@@ -366,7 +447,7 @@ export function Comments() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-950">Posts with Comments</h3>
-                <p className="text-xs text-slate-500">{posts.length} posts actively discussed</p>
+                <p className="text-xs text-slate-500">{postsTotal || posts.length} posts actively discussed</p>
               </div>
             </div>
 
@@ -383,7 +464,7 @@ export function Comments() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {(postsExpanded ? posts : posts.slice(0, 6)).map((p) => {
+            {posts.map((p) => {
               const isSelected = selectedPostId && p.permalink?.includes(selectedPostId);
               return (
                 <div
@@ -441,15 +522,27 @@ export function Comments() {
             })}
           </div>
 
-          {posts.length > 6 && (
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => setPostsExpanded(!postsExpanded)}
-                className="text-xs font-bold text-slate-700 hover:text-black underline underline-offset-4 cursor-pointer"
-              >
-                {postsExpanded ? "Show fewer posts" : `Show all ${posts.length} posts`}
-              </button>
+          {(posts.length < postsTotal || posts.length > POSTS_PAGE) && (
+            <div className="flex items-center justify-center gap-5 pt-2">
+              {posts.length < postsTotal && (
+                <button
+                  type="button"
+                  onClick={loadMorePosts}
+                  disabled={postsLoadingMore}
+                  className="text-xs font-bold text-slate-700 hover:text-black underline underline-offset-4 cursor-pointer disabled:opacity-50"
+                >
+                  {postsLoadingMore ? "Loading…" : `Load more posts (${postsTotal - posts.length} left)`}
+                </button>
+              )}
+              {posts.length > POSTS_PAGE && (
+                <button
+                  type="button"
+                  onClick={() => setPosts((prev) => (prev ? prev.slice(0, POSTS_PAGE) : prev))}
+                  className="text-xs font-medium text-slate-500 hover:text-black cursor-pointer"
+                >
+                  Show fewer
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -474,7 +567,7 @@ export function Comments() {
                 tab === "unreplied" ? "bg-white/20 text-white" : "bg-[#fff9db] text-amber-900"
               }`}
             >
-              {needsReplyComments.length}
+              {counts.unreplied}
             </span>
           </button>
 
@@ -493,7 +586,7 @@ export function Comments() {
                 tab === "replied" ? "bg-white/20 text-white" : "bg-[#e2e2fc] text-slate-900"
               }`}
             >
-              {repliedComments.length}
+              {counts.replied}
             </span>
           </button>
 
@@ -512,7 +605,7 @@ export function Comments() {
                 tab === "all" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
-              {allComments.length}
+              {counts.all}
             </span>
           </button>
         </div>
@@ -552,7 +645,13 @@ export function Comments() {
       </div>
 
       {/* ── 5. COMPACT BENTO GRID COMMENTS STREAM ── */}
-      {displayedComments.length === 0 ? (
+      {items === null ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5" aria-busy="true">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-40 animate-pulse rounded-[22px] border border-[#e9e9ee] bg-slate-50" />
+          ))}
+        </div>
+      ) : displayedComments.length === 0 ? (
         <div className="rounded-[24px] border border-[#e9e9ee] bg-white p-12 text-center shadow-2xs space-y-3">
           <div
             style={{ backgroundColor: "#e2e2fc" }}
@@ -800,6 +899,20 @@ export function Comments() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {canLoadMore && displayedComments.length > 0 && (
+        <div className="pt-1 text-center">
+          <button
+            type="button"
+            onClick={loadMoreComments}
+            disabled={loadingMore}
+            className="inline-flex items-center gap-2 rounded-full border border-[#e9e9ee] bg-white px-6 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-black/40 disabled:opacity-60 cursor-pointer"
+          >
+            {loadingMore ? <RefreshCw size={12} className="animate-spin" /> : null}
+            <span>{loadingMore ? "Loading…" : remaining > 0 ? `Load more (${remaining} left)` : "Load more"}</span>
+          </button>
         </div>
       )}
     </div>

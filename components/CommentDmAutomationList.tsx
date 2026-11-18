@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Alert, Popconfirm, Segmented, Switch, Tooltip } from "antd";
 import {
   ArrowRightOutlined,
@@ -112,9 +113,12 @@ function FunnelCard({
 export function CommentDmAutomationList({
   onOpen,
   onOpenDashboard,
+  toolbarSlot,
 }: {
   onOpen: (id: string) => void;
   onOpenDashboard?: () => void;
+  // Where the period switch and "New automation" go (the top row next to the tabs). Without one they stay in the page.
+  toolbarSlot?: HTMLElement | null;
 }) {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -204,36 +208,55 @@ export function CommentDmAutomationList({
 
   return (
     <div className="flex w-full flex-col gap-8 animate-page-entrance">
-      {/* ── Header ─────────────────────────────────────────────── */}
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[28px]">Comment-to-DM Automations</h1>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            When someone comments a keyword on your post, we send them your message straight away as a private reply.
-          </p>
+      {/* ── Period switch + New automation: in the top row next to the tabs ── */}
+      {toolbarSlot ? (
+        createPortal(
+          <>
+  <Segmented
+    options={[
+      { label: "7 days", value: 7 },
+      { label: "14 days", value: 14 },
+      { label: "30 days", value: 30 },
+    ]}
+    value={days}
+    onChange={(v) => setDays(v as 7 | 14 | 30)}
+    className="!rounded-xl font-medium"
+  />
+  <button
+    type="button"
+    onClick={createNew}
+    disabled={creating}
+    className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+  >
+    <PlusOutlined />
+    {creating ? "Creating…" : "New automation"}
+  </button>
+          </>,
+          toolbarSlot,
+        )
+      ) : (
+        <div className="flex flex-wrap items-center justify-end gap-3">
+  <Segmented
+    options={[
+      { label: "7 days", value: 7 },
+      { label: "14 days", value: 14 },
+      { label: "30 days", value: 30 },
+    ]}
+    value={days}
+    onChange={(v) => setDays(v as 7 | 14 | 30)}
+    className="!rounded-xl font-medium"
+  />
+  <button
+    type="button"
+    onClick={createNew}
+    disabled={creating}
+    className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
+  >
+    <PlusOutlined />
+    {creating ? "Creating…" : "New automation"}
+  </button>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <Segmented
-            options={[
-              { label: "7 days", value: 7 },
-              { label: "14 days", value: 14 },
-              { label: "30 days", value: 30 },
-            ]}
-            value={days}
-            onChange={(v) => setDays(v as 7 | 14 | 30)}
-            className="!rounded-xl font-medium"
-          />
-          <button
-            type="button"
-            onClick={createNew}
-            disabled={creating}
-            className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-          >
-            <PlusOutlined />
-            {creating ? "Creating…" : "New automation"}
-          </button>
-        </div>
-      </header>
+      )}
 
       {error && <Alert type="error" showIcon title="Something went wrong" description={error} className="!rounded-2xl" />}
 

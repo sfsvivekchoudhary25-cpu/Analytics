@@ -27,6 +27,8 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
   const tab = controlledTab ?? uncontrolledTab;
   const setTab = onTabChange ?? setUncontrolledTab;
   const [openAutomationId, setOpenAutomationId] = useState<string | null>(null);
+  // The right end of the top row: the active page puts its own controls here.
+  const [toolbarSlot, setToolbarSlot] = useState<HTMLDivElement | null>(null);
 
   // Sync openAutomationId from URL on mount
   useEffect(() => {
@@ -82,29 +84,14 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
   };
 
   return (
-    <div className="w-full max-w-full min-w-0 space-y-6 sm:space-y-8 animate-page-entrance">
-      {/* ── Soft Pastel Minimal Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-[#e9e9ee]/60">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
-              <MessageCircle className="w-3.5 h-3.5 text-pink-500" />
-              <span>Engagement Suite</span>
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-            Comments & Automations
-          </h1>
-          <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1 max-w-xl">
-            Live comment stream, quick responses, and automated DM funnels to convert engagement into customers.
-          </p>
-        </div>
-
+    <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6 animate-page-entrance">
+      {/* Top row: the tab switch on the left; the page's own controls (period, new automation) on the right */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {/* ── Soft Pastel Mode Switcher Tabs ── */}
         <div
           role="tablist"
           aria-label="Comments navigation"
-          className="inline-flex items-center gap-1.5 p-1.5 rounded-full bg-white border border-[#e9e9ee] shadow-2xs self-start sm:self-center"
+          className="inline-flex items-center gap-1.5 p-1.5 rounded-full bg-white border border-[#e9e9ee] shadow-2xs self-start"
         >
           {TABS.map((t) => {
             const Icon = t.icon;
@@ -127,6 +114,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
             );
           })}
         </div>
+        <div ref={setToolbarSlot} className="flex flex-wrap items-center gap-3" />
       </div>
 
       {tab === "inbox" && <Comments />}
@@ -138,7 +126,7 @@ export function CommentsHub({ onOpenDashboard, tab: controlledTab, onTabChange }
             onDeleted={handleCloseAutomation}
           />
         ) : (
-          <CommentDmAutomationList onOpen={handleOpenAutomation} onOpenDashboard={onOpenDashboard} />
+          <CommentDmAutomationList onOpen={handleOpenAutomation} onOpenDashboard={onOpenDashboard} toolbarSlot={toolbarSlot} />
         ))}
     </div>
   );
