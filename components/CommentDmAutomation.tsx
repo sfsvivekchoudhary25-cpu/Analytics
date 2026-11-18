@@ -529,106 +529,137 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
       {error && <p role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs sm:text-sm text-red-600">{error}</p>}
 
-      {/* Header Card: Icon, editable name, status pill, mobile action bar */}
-      <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs [overflow-anchor:none]">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-foreground text-background shadow-xs">
-            <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </span>
+      {/* Header Card: icon, editable name, live/paused switch, what it does, key settings at a glance */}
+      <div className="rounded-3xl border border-[var(--viz-border)] bg-[var(--viz-surface)] shadow-2xs [overflow-anchor:none]">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <span className="flex h-11 w-11 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-foreground text-background shadow-xs ring-4 ring-black/[0.04] dark:ring-white/[0.06]">
+              <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            </span>
 
-          <div className="flex-1 min-w-0">
-            {/* Top row: Title and Status Badge */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
-                {editingName ? (
-                  <input
-                    autoFocus
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      setDirty(true);
-                    }}
-                    onBlur={() => setEditingName(false)}
-                    onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
-                    maxLength={100}
-                    className="w-full sm:w-auto rounded-lg border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-base sm:text-xl font-bold text-[var(--viz-ink)] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                ) : (
-                  <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--viz-ink)] truncate max-w-full">
-                    {name}
-                  </h1>
-                )}
-                {!editingName && (
-                  <button
-                    type="button"
-                    onClick={(e) => handleButtonClick(e, () => setEditingName(true))}
-                    aria-label="Rename automation"
-                    title="Rename automation"
-                    className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
-                  >
-                    <GearIcon className="h-3.5 w-3.5" />
-                  </button>
-                )}
-              </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:justify-between sm:gap-3">
+                <div className="min-w-0 w-full flex-1">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--viz-muted)]">Comment-to-DM</p>
+                  <div className="mt-0.5">
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                                    {editingName ? (
+                                      <input
+                                        autoFocus
+                                        value={name}
+                                        onChange={(e) => {
+                                          setName(e.target.value);
+                                          setDirty(true);
+                                        }}
+                                        onBlur={() => setEditingName(false)}
+                                        onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
+                                        maxLength={100}
+                                        className="w-full sm:w-auto rounded-lg border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-base sm:text-xl font-bold text-[var(--viz-ink)] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                                      />
+                                    ) : (
+                                      <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--viz-ink)] truncate max-w-full">
+                                        {name}
+                                      </h1>
+                                    )}
+                                    {!editingName && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => handleButtonClick(e, () => setEditingName(true))}
+                                        aria-label="Rename automation"
+                                        title="Rename automation"
+                                        className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+                                      >
+                                        <GearIcon className="h-3.5 w-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                  </div>
+                </div>
 
-              {/* Status Toggle Badge */}
-              <button
-                type="button"
-                onClick={(e) => handleButtonClick(e, toggleActive)}
-                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
-                  rule.enabled
-                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
-                    : "bg-black/[0.06] text-[var(--viz-ink-2)] dark:bg-white/10 border border-black/5 dark:border-white/10"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    rule.enabled ? "bg-emerald-500 animate-pulse" : "bg-neutral-400"
+                {/* Live / Paused switch */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={rule.enabled}
+                  aria-label={rule.enabled ? "Pause this automation" : "Turn this automation on"}
+                  onClick={(e) => handleButtonClick(e, toggleActive)}
+                  className={`group shrink-0 inline-flex items-center gap-2 rounded-full border py-1 pl-3 pr-1 text-xs font-medium transition-colors active:scale-95 ${
+                    rule.enabled
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                      : "border-[var(--viz-border)] bg-black/[0.03] text-[var(--viz-ink-2)] dark:bg-white/[0.05]"
                   }`}
-                />
-                {rule.enabled ? "Active" : "Paused"}
-              </button>
-            </div>
-
-            {/* Description Subtitle */}
-            <p className="mt-1 text-xs sm:text-sm text-[var(--viz-muted)] leading-relaxed">
-              When someone comments a keyword, reply with a link that opens a DM — then send the real message once they tap it.
-            </p>
-
-            {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
-            <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
-              <button
-                type="button"
-                onClick={(e) => handleButtonClick(e, save)}
-                disabled={saving || !dirty}
-                className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
-                  dirty
-                    ? "bg-foreground text-background active:scale-98"
-                    : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
-                }`}
-              >
-                {saving ? "Saving…" : dirty ? "Save Changes" : "Saved"}
-              </button>
-
-              <button
-                type="button"
-                onClick={removeAutomation}
-                disabled={deleting}
-                title="Delete this automation"
-                aria-label="Delete this automation"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 active:scale-95 transition-all"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-
-            {savedNote && (
-              <div className="sm:hidden mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                <span>✓</span>
-                <span>{savedNote}</span>
+                >
+                  <span>{rule.enabled ? "Live" : "Paused"}</span>
+                  <span
+                    className={`relative h-5 w-9 rounded-full transition-colors ${rule.enabled ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-600"}`}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${rule.enabled ? "left-[18px]" : "left-0.5"}`}
+                    />
+                  </span>
+                </button>
               </div>
-            )}
+
+              <p className="mt-1.5 max-w-2xl text-xs sm:text-sm text-[var(--viz-muted)] leading-relaxed">
+                When someone comments your keyword, we send them your message straight away as a private reply.
+              </p>
+
+              {/* Key settings at a glance */}
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                {[
+                  {
+                    label: rule.keywords.trim()
+                      ? `${rule.keywords.split(",").filter((k) => k.trim()).length} keyword${rule.keywords.split(",").filter((k) => k.trim()).length === 1 ? "" : "s"}`
+                      : "Any comment",
+                  },
+                  { label: rule.mediaId ? "One post" : "All posts" },
+                  { label: requireFollow ? "Must follow first" : "No follow needed" },
+                  { label: templateType === "text" ? "Text message" : templateType === "button" ? "Message with buttons" : "Card message" },
+                ].map((chip) => (
+                  <span
+                    key={chip.label}
+                    className="inline-flex items-center rounded-full border border-[var(--viz-border)] bg-black/[0.02] px-2.5 py-0.5 text-[11px] font-medium text-[var(--viz-ink-2)] dark:bg-white/[0.04]"
+                  >
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
+          <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+            <button
+              type="button"
+              onClick={(e) => handleButtonClick(e, save)}
+              disabled={saving || !dirty}
+              className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
+                dirty
+                  ? "bg-foreground text-background active:scale-98"
+                  : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
+              }`}
+            >
+              {saving ? "Saving…" : dirty ? "Save Changes" : "Saved"}
+            </button>
+
+            <button
+              type="button"
+              onClick={removeAutomation}
+              disabled={deleting}
+              title="Delete this automation"
+              aria-label="Delete this automation"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 active:scale-95 transition-all"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          </div>
+
+          {savedNote && (
+            <div className="sm:hidden mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              <span>✓</span>
+              <span>{savedNote}</span>
+            </div>
+          )}
         </div>
       </div>
 

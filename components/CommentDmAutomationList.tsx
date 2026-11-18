@@ -209,8 +209,7 @@ export function CommentDmAutomationList({
         <div className="max-w-2xl">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-[28px]">Comment-to-DM Automations</h1>
           <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
-            When someone comments a keyword on your post, we reply with a link that opens a DM. Your message is sent as
-            soon as they tap it.
+            When someone comments a keyword on your post, we send them your message straight away as a private reply.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
