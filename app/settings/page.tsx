@@ -3,5 +3,5 @@
 import AppDashboard from "@/components/AppDashboard";
 
 export default function SettingsRoute() {
-  return <AppDashboard initialTab="account" />;
+  return <AppDashboard initialTab="settings" />;
 }

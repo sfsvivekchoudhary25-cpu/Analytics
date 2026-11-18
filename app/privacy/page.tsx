@@ -143,8 +143,8 @@ export default function PrivacyPolicyPage() {
                 <span className="font-semibold text-slate-900">Instant In-App Deletion:</span>
                 <p className="text-xs text-slate-600">
                   Navigate to your{" "}
-                  <Link href="/account" className="text-blue-600 font-semibold underline">
-                    Account Settings (/account)
+                  <Link href="/settings" className="text-blue-600 font-semibold underline">
+                    Settings (/settings)
                   </Link>{" "}
                   panel and click <strong>&ldquo;Delete Account &amp; Wipe Data&rdquo;</strong>. Upon execution, all stored Meta access tokens, linked Page records, and cached comment logs are immediately and permanently wiped from our active databases.
                 </p>

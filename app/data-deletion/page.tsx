@@ -94,7 +94,7 @@ export default function DataDeletionPage() {
                   </li>
                   <li>
                     Navigate directly to{" "}
-                    <Link href="/account" className="text-blue-600 font-semibold underline">
+                    <Link href="/settings" className="text-blue-600 font-semibold underline">
                       Account Settings (/account)
                     </Link>{" "}
                     or click your profile avatar in the navigation bar.

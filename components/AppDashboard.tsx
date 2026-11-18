@@ -9,6 +9,7 @@ import { MessagesTab } from "@/components/MessagesTab";
 import { Stories } from "@/components/Stories";
 import { CommentsHub } from "@/components/CommentsHub";
 import { AccountPanel } from "@/components/AccountPanel";
+import { SettingsPanel } from "@/components/SettingsPanel";
 import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
@@ -27,6 +28,7 @@ export const SECTIONS: Section[] = [
   { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
   { id: "reels", label: "Reels Downloader", icon: <Film size={18} /> },
   { id: "voice-notes", label: "Voice Notes", icon: <AudioOutlined /> },
+  { id: "settings", label: "Settings", icon: <GearIcon /> },
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
 
@@ -141,8 +143,6 @@ export default function AppDashboard({
         if (q.get("tab") !== "automation") {
           setCommentsTab("inbox");
         }
-      } else if (path === "settings") {
-        setTabState("account");
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path && !initialTab) {
@@ -163,8 +163,6 @@ export default function AppDashboard({
       } else if (path === "comments") {
         setTabState("comments");
         setCommentsTab(q.get("tab") === "automation" ? "automation" : "inbox");
-      } else if (path === "settings") {
-        setTabState("account");
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path) {
@@ -473,6 +471,7 @@ export default function AppDashboard({
           {!needsInstagram && active === "hashtags" && <HashtagSearch />}
           {active === "reels" && <ReelsDownloader />}
           {active === "voice-notes" && <VoiceNotesDashboard />}
+          {active === "settings" && <SettingsPanel status={status} />}
           {active === "account" && accountPanel}
         </div>
 

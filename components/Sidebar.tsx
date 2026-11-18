@@ -16,6 +16,7 @@ import {
   Hash,
   Mic,
   Settings,
+  User,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -32,6 +33,7 @@ export type SectionId =
   | "hashtags"
   | "reels"
   | "voice-notes"
+  | "settings"
   | "account";
 
 export type Section = { id: SectionId; label: string; icon: ReactNode };
@@ -46,7 +48,8 @@ const ICON_MAP: Record<SectionId, ReactNode> = {
   hashtags: <Hash size={18} strokeWidth={1.75} />,
   reels: <Film size={18} strokeWidth={1.75} />,
   "voice-notes": <Mic size={18} strokeWidth={1.75} />,
-  account: <Settings size={18} strokeWidth={1.75} />,
+  settings: <Settings size={18} strokeWidth={1.75} />,
+  account: <User size={18} strokeWidth={1.75} />,
 };
 
 type Props = {

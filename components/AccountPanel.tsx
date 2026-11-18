@@ -222,62 +222,7 @@ export function AccountPanel({
   const [allPinging, setAllPinging] = useState(false);
 
   const [refreshing, setRefreshing] = useState(false);
-  // Permanent account deletion (typed confirmation)
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteText, setDeleteText] = useState("");
-  const [deleting, setDeleting] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
-  // "Don't store my messages" switch (null = not loaded yet / not connected)
-  const [storeMessages, setStoreMessages] = useState<boolean | null>(null);
-  const [privacySaving, setPrivacySaving] = useState(false);
-
-  useEffect(() => {
-    if (!status?.connected) {
-      setStoreMessages(null);
-      return;
-    }
-    let live = true;
-    api<{ connected: boolean; storeMessages: boolean }>("/messages/privacy")
-      .then((r) => live && setStoreMessages(r.connected ? r.storeMessages : null))
-      .catch(() => live && setStoreMessages(null));
-    return () => {
-      live = false;
-    };
-  }, [status?.connected, status?.connected ? status.username : ""]);
-
-  const savePrivacy = async (store: boolean) => {
-    setPrivacySaving(true);
-    try {
-      const r = await api<{ storeMessages: boolean; scrubbed: number }>("/messages/privacy", {
-        method: "POST",
-        body: JSON.stringify({ storeMessages: store }),
-      });
-      setStoreMessages(r.storeMessages);
-      message.success(
-        store
-          ? "Messages will be stored again (encrypted)."
-          : `Message text is no longer stored.${r.scrubbed ? ` Erased the text of ${r.scrubbed} saved message(s).` : ""}`,
-      );
-    } catch (err: any) {
-      message.error(err?.message || "Could not change this setting.");
-    } finally {
-      setPrivacySaving(false);
-    }
-  };
-
-  const onTogglePrivacy = (store: boolean) => {
-    if (store) return void savePrivacy(true);
-    modal.confirm({
-      title: "Stop storing message text?",
-      content:
-        "Customer messages will be read live from Instagram instead of our database, and the message text already saved for your account will be erased. Chats may open a little slower, and you can't search old messages. Automatic replies keep working.",
-      okText: "Stop storing",
-      okButtonProps: { danger: true },
-      cancelText: "Keep storing",
-      onOk: () => savePrivacy(false),
-    });
-  };
-
 
   const connected = status?.connected === true;
   const granted = connected && Array.isArray(status.permissions) ? status.permissions : null;
@@ -580,28 +525,6 @@ export function AccountPanel({
     });
   };
 
-  const handleDeleteAccount = () => {
-    setDeleteText("");
-    setDeleteOpen(true);
-  };
-
-  // Calls the server to delete everything for the signed-in user. Only signs out if the server says it worked.
-  const confirmDeleteAccount = async () => {
-    setDeleting(true);
-    try {
-      await api("/account/delete", { method: "POST", body: JSON.stringify({ confirm: deleteText.trim() }) });
-      message.success("Your account and all its data have been permanently deleted.");
-      auth.clear();
-      activeAccount.clear();
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 800);
-    } catch (err: any) {
-      message.error(err?.message || "Could not delete your account. Nothing was changed.");
-      setDeleting(false);
-    }
-  };
-
   const handleCopyWebhook = () => {
     navigator.clipboard.writeText("/instagram/webhook");
     setCopiedWebhook(true);
@@ -692,31 +615,6 @@ export function AccountPanel({
   // Connected State: Full Enterprise Integrations Hub
   return (
     <div className="space-y-6 pb-12">
-      <Modal
-        open={deleteOpen}
-        title="Permanently delete your account?"
-        onCancel={() => !deleting && setDeleteOpen(false)}
-        okText="Delete everything"
-        okType="danger"
-        okButtonProps={{ disabled: deleteText.trim() !== "DELETE", loading: deleting }}
-        cancelButtonProps={{ disabled: deleting }}
-        onOk={confirmDeleteAccount}
-        mask={{ closable: false }}
-      >
-        <div className="space-y-3 text-sm text-slate-600">
-          <p>This cannot be undone. The following is erased from our database:</p>
-          <ul className="list-disc space-y-1 pl-5 text-xs">
-            <li>Your login and profile</li>
-            <li>Your Instagram and Facebook Page connections and access tokens</li>
-            <li>All comments, conversations and messages</li>
-            <li>All automations, auto-replies, settings and their logs</li>
-            <li>Customer photos, stories, voice notes and saved reels</li>
-          </ul>
-          <p className="text-xs">Posts and messages already on Instagram are not touched.</p>
-          <p className="text-xs font-semibold text-slate-800">Type DELETE to confirm:</p>
-          <Input value={deleteText} onChange={(e) => setDeleteText(e.target.value)} placeholder="DELETE" autoComplete="off" />
-        </div>
-      </Modal>
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
         <div className="flex items-center gap-3.5">
@@ -1465,80 +1363,6 @@ export function AccountPanel({
           </div>
         </div>
 
-        {/* ── CARD 6: Meta Compliance & Data Deletion ──────────────────────── */}
-        <div className="relative overflow-hidden rounded-2xl border border-rose-200/90 bg-white p-5 sm:p-6 shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-start justify-between pb-4 border-b border-rose-100">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600 border border-rose-200/70 shadow-2xs">
-                <DeleteOutlined className="text-lg" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                  Data Privacy &amp; Account Deletion
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Meta Platform Terms and GDPR-compliant data removal tools
-                </p>
-              </div>
-            </div>
-            <Tag color="error" className="!rounded-full !px-2.5 !py-0.5 !text-[10px] !font-bold !m-0">
-              Danger Zone
-            </Tag>
-          </div>
-
-          <div className="mt-4 space-y-4">
-            {storeMessages !== null && (
-              <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3.5">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-slate-900">Don&apos;t store my messages</div>
-                  <p className="mt-1 text-xs text-slate-500 leading-relaxed">
-                    {storeMessages
-                      ? "Right now your customers' messages are saved in our database, encrypted. Turn this on to keep no message text at all: chats are read live from Instagram, and automatic replies keep working."
-                      : "Message text is not saved in our database. Chats are read live from Instagram, so they open a little slower and old messages can't be searched."}
-                  </p>
-                </div>
-                <Switch
-                  checked={!storeMessages}
-                  loading={privacySaving}
-                  onChange={(on) => onTogglePrivacy(!on)}
-                  aria-label="Don't store my messages"
-                />
-              </div>
-            )}
-            <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-3.5 text-xs text-rose-900/90 leading-relaxed">
-              <p>
-                <strong>Permanent Wipe:</strong> You can completely erase your account and all associated Meta access tokens at any time. When triggered, our backend will permanently delete your stored Meta User Tokens, Facebook Page tokens, and comment automation rules from our active database.
-              </p>
-            </div>
-
-            {/* Legal documentation links */}
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600 pt-1">
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
-                Privacy Policy
-              </a>
-              <span>&middot;</span>
-              <a href="/data-deletion" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
-                Data Deletion Instructions
-              </a>
-              <span>&middot;</span>
-              <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">
-                Terms of Service
-              </a>
-            </div>
-
-            <div className="pt-2">
-              <Button
-                danger
-                type="primary"
-                icon={<DeleteOutlined />}
-                onClick={handleDeleteAccount}
-                className="!rounded-xl !h-10 !text-xs font-bold shadow-xs hover:!brightness-105"
-              >
-                Delete Account &amp; Wipe All Meta Data
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
 
 
