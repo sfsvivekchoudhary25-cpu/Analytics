@@ -136,6 +136,9 @@ export function UnifiedChart({
   className = "",
 }: UnifiedChartProps) {
   const chartId = useId().replace(/:/g, "");
+  // An explicit height is required: recharts measures its parent, and a parent sized only by flex/min-height measures 0
+  // (that is what left the "DMs sent" chart blank).
+  const chartH = typeof height === "number" ? `${height}px` : height ?? "260px";
 
   // Auto-detect chart type if not explicitly set
   const effectiveType: ChartType = useMemo(() => {
@@ -289,8 +292,8 @@ export function UnifiedChart({
     );
 
     return (
-      <div className={`flex-1 flex flex-col justify-between w-full h-full min-h-[300px] ${className}`}>
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[240px] max-h-none">
+      <div className={`flex-1 flex flex-col justify-between w-full ${className}`}>
+        <ChartContainer config={chartConfig} className="w-full" style={{ height: chartH }}>
           <BarChart
             data={chartData}
             accessibilityLayer={false}
@@ -376,7 +379,7 @@ export function UnifiedChart({
   };
 
   return (
-    <div className={`flex-1 flex flex-col justify-between w-full h-full min-h-[300px] ${className}`}>
+    <div className={`flex-1 flex flex-col justify-between w-full ${className}`}>
       {/* Optional Top Stat Pills */}
       {showStats && (
         <div className="flex items-center gap-2 mb-3 flex-wrap">
@@ -393,7 +396,7 @@ export function UnifiedChart({
       )}
 
       {effectiveType === "area" ? (
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
+        <ChartContainer config={chartConfig} className="w-full" style={{ height: chartH }}>
           <AreaChart
             data={chartData}
             accessibilityLayer={false}
@@ -437,7 +440,7 @@ export function UnifiedChart({
           </AreaChart>
         </ChartContainer>
       ) : (
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
+        <ChartContainer config={chartConfig} className="w-full" style={{ height: chartH }}>
           <BarChart
             data={chartData}
             accessibilityLayer={false}
