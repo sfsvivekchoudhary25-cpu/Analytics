@@ -254,23 +254,23 @@ export function HashtagSearch() {
   return (
     <div className="space-y-6 w-full">
       {/* ── 1. Header Card (Search & Quota) ─────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-xs relative overflow-hidden">
+      <div className="bg-white rounded-[26px] border border-[#e9e9ee] p-6 md:p-8 shadow-2xs relative overflow-hidden">
         {/* Subtle background ambient purple glow */}
-        <div className="absolute top-0 right-0 w-96 h-48 bg-gradient-to-l from-purple-100/30 via-indigo-50/20 to-transparent pointer-events-none" />
+        
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-              Hashtag Search
+            <h1 className="text-xl font-black tracking-tight text-slate-950">
+              Hashtag search
             </h1>
             <p className="text-xs md:text-sm text-slate-500 mt-1 font-normal">
-              Discover top viral media, analyze engagement benchmarks, and search public Instagram hashtags.
+              Look up any public hashtag to see how it performs and which posts do best.
             </p>
           </div>
 
           {/* Quota Badge */}
-          <div className="inline-flex items-center gap-1.5 self-start md:self-auto bg-slate-50/90 border border-slate-200/80 px-3 py-1.5 rounded-full text-xs text-slate-600 shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+          <div className="inline-flex items-center gap-1.5 self-start md:self-auto bg-[#F1F3F7] px-3 py-1.5 rounded-full text-xs text-slate-600">
+            <span className="w-2 h-2 rounded-full bg-black shrink-0" />
             <span className="font-semibold text-slate-900">{remainingCount} of {quotaLimit}</span>
             <span className="text-slate-500 font-normal">searches left this week</span>
             <Tooltip title="Meta enforces a limit of 30 unique hashtags searched per Instagram account within any rolling 7-day period. Repeated queries on the same hashtag within 7 days do not count against your limit.">
@@ -297,13 +297,13 @@ export function HashtagSearch() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search any hashtag..."
-                className="w-full pl-9 pr-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 text-sm placeholder-slate-400 shadow-2xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-normal"
+                className="w-full pl-9 pr-4 py-3 rounded-full bg-white border border-[#e9e9ee] text-slate-900 text-sm placeholder-slate-400 shadow-2xs focus:outline-none focus:border-black/60 transition-all font-normal"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 rounded-xl bg-[#0F172A] hover:bg-slate-800 text-white font-medium text-sm transition-all shadow-xs flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+              className="px-6 py-3 rounded-full bg-black hover:bg-slate-800 text-white font-medium text-sm transition-all flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
             >
               <SearchOutlined className="text-sm" />
               <span>Search</span>
@@ -318,7 +318,7 @@ export function HashtagSearch() {
                 key={tag}
                 type="button"
                 onClick={() => handleSearch(tag)}
-                className="px-3 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 font-normal transition-colors border border-slate-200/70 text-xs cursor-pointer"
+                className="px-3 py-1 rounded-full bg-[#F1F3F7] hover:bg-slate-200 text-slate-700 hover:text-slate-950 font-normal transition-colors text-xs cursor-pointer"
               >
                 #{tag}
               </button>
@@ -329,29 +329,29 @@ export function HashtagSearch() {
 
       {/* ── 2. Active Hashtag Card (Topic Overview & 5 KPI Cards) ──── */}
       {loading ? (
-        <div className="py-24 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <div className="py-24 text-center bg-white rounded-[26px] border border-[#e9e9ee] shadow-2xs">
           <Spin size="large" />
           <p className="mt-3 text-sm text-slate-500 font-normal">
             Fetching hashtag insights and media...
           </p>
         </div>
       ) : hashtag ? (
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 md:p-8 shadow-xs space-y-6">
+        <div className="bg-white rounded-[26px] border border-[#e9e9ee] p-6 md:p-8 shadow-2xs space-y-6">
           {/* Header Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               {/* Soft purple/indigo # squircle */}
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50/80 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-2xs">
+              <div className="w-12 h-12 rounded-[18px] bg-white border border-black/80 flex items-center justify-center text-slate-950 font-black text-2xl shadow-2xs">
                 #
               </div>
               <div>
                 <div className="flex items-center gap-2.5">
-                  <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
+                  <h2 className="text-2xl font-black text-slate-950 tracking-tight">
                     #{cleanTag(hashtag.name)}
                   </h2>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Meta Verified
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#E2E2FC] text-slate-950">
+                    <span className="w-1.5 h-1.5 rounded-full bg-black" />
+                    Verified
                   </span>
                 </div>
               </div>
@@ -361,18 +361,18 @@ export function HashtagSearch() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={() => handleCopyTag(hashtag.name)}
-                className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-full border border-[#e9e9ee] bg-white hover:border-black/40 text-slate-900 font-medium text-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 {copiedTag === hashtag.name ? (
                   <CheckOutlined className="text-emerald-600" />
                 ) : (
-                  <CopyOutlined className="text-slate-400" />
+                  <CopyOutlined className="text-slate-500" />
                 )}
                 <span>{copiedTag === hashtag.name ? "Copied" : "Copy Tag"}</span>
               </button>
               <button
                 onClick={() => handleSearch(hashtag.name)}
-                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs shadow-2xs transition-all cursor-pointer"
+                className="p-2.5 rounded-full border border-[#e9e9ee] bg-white hover:border-black/40 text-slate-700 text-xs transition-all cursor-pointer"
                 title="Refresh"
               >
                 <ReloadOutlined />
@@ -381,9 +381,9 @@ export function HashtagSearch() {
                 href={`https://www.instagram.com/explore/tags/${cleanTag(hashtag.name)}/`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-50 text-indigo-600 font-medium text-xs shadow-2xs transition-all flex items-center gap-1.5"
+                className="px-4 py-2 rounded-full bg-black hover:bg-slate-800 text-white font-medium text-xs transition-all flex items-center gap-1.5"
               >
-                <InstagramOutlined className="text-sm text-indigo-600" />
+                <InstagramOutlined className="text-sm" />
                 <span>Open on Instagram</span>
                 <ExportOutlined className="text-[10px]" />
               </a>
@@ -394,22 +394,14 @@ export function HashtagSearch() {
           {hashtag.analytics && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* 1. Global Volume */}
-              <div className="bg-gradient-to-br from-blue-50/50 via-white to-blue-50/70 rounded-2xl p-4.5 border border-blue-100/80 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
-                <svg
-                  className="absolute -bottom-1 -right-1 w-28 h-16 text-blue-100/70 pointer-events-none"
-                  viewBox="0 0 100 50"
-                  fill="currentColor"
-                >
-                  <path d="M0 50 Q 30 20, 60 35 T 100 15 L 100 50 Z" opacity="0.6" />
-                  <path d="M20 50 Q 50 30, 80 40 T 100 25 L 100 50 Z" opacity="0.4" />
-                </svg>
+              <div className="bg-[#E2E2FC] rounded-[26px] p-4.5 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-blue-100/70 text-blue-600 flex items-center justify-center text-sm">
+                    <span className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center text-sm">
                       <BarChartOutlined />
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-semibold text-slate-700">
                       Global Volume
                     </span>
                   </div>
@@ -418,29 +410,21 @@ export function HashtagSearch() {
                   </div>
                 </div>
                 <div className="relative z-10 mt-2">
-                  <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">
+                  <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
                     <RiseOutlined /> {hashtag.analytics.estimatedPosts > 1_000_000 ? "High Activity" : hashtag.analytics.estimatedPosts > 150_000 ? "Moderate Activity" : "Steady Activity"}
                   </span>
                 </div>
               </div>
 
               {/* 2. Competition */}
-              <div className="bg-gradient-to-br from-amber-50/50 via-white to-amber-50/70 rounded-2xl p-4.5 border border-amber-100/80 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
-                <svg
-                  className="absolute -bottom-1 -right-1 w-28 h-16 text-amber-100/70 pointer-events-none"
-                  viewBox="0 0 100 50"
-                  fill="currentColor"
-                >
-                  <path d="M0 50 Q 40 15, 70 30 T 100 10 L 100 50 Z" opacity="0.6" />
-                  <path d="M15 50 Q 45 25, 75 35 T 100 20 L 100 50 Z" opacity="0.4" />
-                </svg>
+              <div className="bg-[#FFF9DB] rounded-[26px] p-4.5 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
 
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center text-sm">
+                    <span className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center text-sm">
                       <TrophyOutlined />
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-semibold text-slate-700">
                       Competition
                     </span>
                   </div>
@@ -449,7 +433,7 @@ export function HashtagSearch() {
                   </div>
                 </div>
                 <div className="relative z-10 mt-2">
-                  <span className="text-xs font-normal text-slate-500">
+                  <span className="text-xs font-medium text-slate-600">
                     {hashtag.analytics.competitionLevel === "High"
                       ? "Optimal for 10k–100k"
                       : hashtag.analytics.competitionLevel === "Medium"
@@ -460,13 +444,13 @@ export function HashtagSearch() {
               </div>
 
               {/* 3. Virality Score */}
-              <div className="bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/60 rounded-2xl p-4.5 border border-indigo-100/80 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
+              <div className="bg-[#FCEEF4] rounded-[26px] p-4.5 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-indigo-100/70 text-indigo-600 flex items-center justify-center text-sm">
+                    <span className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center text-sm">
                       <HeartOutlined />
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-semibold text-slate-700">
                       Virality Score
                     </span>
                   </div>
@@ -479,20 +463,20 @@ export function HashtagSearch() {
                     percent={hashtag.analytics.viralityScore}
                     showInfo={false}
                     size="small"
-                    strokeColor="#3b82f6"
-                    railColor="#e2e8f0"
+                    strokeColor="#000000"
+                    railColor="#ffffff"
                   />
                 </div>
               </div>
 
               {/* 4. Avg Likes / Post */}
-              <div className="bg-gradient-to-br from-emerald-50/40 via-white to-emerald-50/60 rounded-2xl p-4.5 border border-emerald-100/80 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
+              <div className="bg-[#F1F3F7] rounded-[26px] p-4.5 shadow-2xs relative overflow-hidden flex flex-col justify-between min-h-[135px]">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-emerald-100/70 text-emerald-600 flex items-center justify-center text-sm">
+                    <span className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center text-sm">
                       <MessageOutlined />
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-semibold text-slate-700">
                       Avg Likes / Post
                     </span>
                   </div>
@@ -501,20 +485,20 @@ export function HashtagSearch() {
                   </div>
                 </div>
                 <div className="relative z-10 mt-2">
-                  <span className="text-xs font-normal text-slate-500">
+                  <span className="text-xs font-medium text-slate-600">
                     ~{hashtag.analytics.avgComments} comments/post
                   </span>
                 </div>
               </div>
 
               {/* 5. Peak Posting Slot */}
-              <div className="bg-gradient-to-br from-rose-50/40 via-white to-rose-50/60 rounded-2xl p-4.5 border border-rose-100/80 shadow-2xs relative overflow-hidden sm:col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[135px]">
+              <div className="bg-[#FEECE4] rounded-[26px] p-4.5 shadow-2xs relative overflow-hidden sm:col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[135px]">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-xl bg-rose-100/70 text-rose-600 flex items-center justify-center text-sm">
+                    <span className="w-8 h-8 rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center text-sm">
                       <ClockCircleOutlined />
                     </span>
-                    <span className="text-xs font-medium text-slate-500">
+                    <span className="text-xs font-semibold text-slate-700">
                       Peak Posting Slot
                     </span>
                   </div>
@@ -523,7 +507,7 @@ export function HashtagSearch() {
                   </div>
                 </div>
                 <div className="relative z-10 mt-2">
-                  <span className="text-xs font-normal text-slate-500">
+                  <span className="text-xs font-medium text-slate-600">
                     Optimal audience activity
                   </span>
                 </div>
@@ -542,7 +526,7 @@ export function HashtagSearch() {
                     <button
                       key={tagItem}
                       onClick={() => handleSearch(tagItem)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-normal transition-colors border border-slate-200/60 cursor-pointer"
+                      className="px-3 py-1.5 rounded-full bg-[#F1F3F7] hover:bg-slate-200 text-slate-800 text-xs font-normal transition-colors cursor-pointer"
                     >
                       #{tagItem}
                     </button>
@@ -551,7 +535,7 @@ export function HashtagSearch() {
               </div>
               <button
                 onClick={handleCopyAllRelated}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full border border-[#e9e9ee] bg-white hover:border-black/40 text-slate-900 font-medium text-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 {copiedAll ? <CheckOutlined className="text-emerald-600" /> : <CopyOutlined className="text-slate-400" />}
                 <span>{copiedAll ? "Copied" : `Copy All (${hashtag.analytics.relatedTags.length})`}</span>
@@ -564,41 +548,41 @@ export function HashtagSearch() {
       {/* ── 3. Bottom Media Explorer ─────────────────────────────────── */}
       <div className="space-y-4">
         {/* Navigation / Tabs & Sorter Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-3.5 px-5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-6 overflow-x-auto scrollbar-none">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none rounded-full bg-[#F1F3F7] p-1">
             {/* Top Media (Viral) - Active tab */}
             <button
               onClick={() => handleTabChange("top")}
-              className={`flex items-center gap-1.5 text-xs font-semibold transition-all py-1 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-1.5 text-xs font-semibold transition-all px-3.5 py-1.5 rounded-full cursor-pointer whitespace-nowrap ${
                 activeTab === "top"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 pb-1"
-                  : "text-slate-500 hover:text-slate-900 font-normal"
+                  ? "bg-black text-white"
+                  : "text-slate-600 hover:text-slate-950 font-normal"
               }`}
             >
-              <FireOutlined className="text-amber-500" />
+              <FireOutlined />
               <span>Top Media (Viral)</span>
             </button>
 
             {/* Recent Media */}
             <button
               onClick={() => handleTabChange("recent")}
-              className={`flex items-center gap-1.5 text-xs transition-all py-1 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-1.5 text-xs transition-all px-3.5 py-1.5 rounded-full cursor-pointer whitespace-nowrap ${
                 activeTab === "recent"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 pb-1 font-semibold"
-                  : "text-slate-500 hover:text-slate-900 font-normal"
+                  ? "bg-black text-white font-semibold"
+                  : "text-slate-600 hover:text-slate-950 font-normal"
               }`}
             >
-              <ClockCircleOutlined className="text-blue-500" />
+              <ClockCircleOutlined />
               <span>Recent Media</span>
             </button>
 
             {/* All */}
             <button
               onClick={() => handleTabChange("all")}
-              className={`flex items-center gap-1 text-xs transition-all py-1 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-1 text-xs transition-all px-3.5 py-1.5 rounded-full cursor-pointer whitespace-nowrap ${
                 activeTab === "all"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 pb-1 font-semibold"
-                  : "text-slate-500 hover:text-slate-900 font-normal"
+                  ? "bg-black text-white font-semibold"
+                  : "text-slate-600 hover:text-slate-950 font-normal"
               }`}
             >
               <AppstoreOutlined />
@@ -608,10 +592,10 @@ export function HashtagSearch() {
             {/* Photos */}
             <button
               onClick={() => handleTabChange("photos")}
-              className={`flex items-center gap-1 text-xs transition-all py-1 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-1 text-xs transition-all px-3.5 py-1.5 rounded-full cursor-pointer whitespace-nowrap ${
                 activeTab === "photos"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 pb-1 font-semibold"
-                  : "text-slate-500 hover:text-slate-900 font-normal"
+                  ? "bg-black text-white font-semibold"
+                  : "text-slate-600 hover:text-slate-950 font-normal"
               }`}
             >
               <PictureOutlined />
@@ -621,10 +605,10 @@ export function HashtagSearch() {
             {/* Reels */}
             <button
               onClick={() => handleTabChange("reels")}
-              className={`flex items-center gap-1 text-xs transition-all py-1 cursor-pointer whitespace-nowrap ${
+              className={`flex items-center gap-1 text-xs transition-all px-3.5 py-1.5 rounded-full cursor-pointer whitespace-nowrap ${
                 activeTab === "reels"
-                  ? "text-indigo-600 border-b-2 border-indigo-600 pb-1 font-semibold"
-                  : "text-slate-500 hover:text-slate-900 font-normal"
+                  ? "bg-black text-white font-semibold"
+                  : "text-slate-600 hover:text-slate-950 font-normal"
               }`}
             >
               <VideoCameraOutlined />
@@ -638,7 +622,7 @@ export function HashtagSearch() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="bg-white border border-slate-200 text-slate-700 rounded-lg px-2.5 py-1 text-xs font-normal focus:outline-none cursor-pointer"
+              className="bg-white border border-[#e9e9ee] text-slate-800 rounded-full px-3 py-1.5 text-xs font-normal focus:outline-none cursor-pointer"
             >
               <option value="likes">Most Likes</option>
               <option value="comments">Most Comments</option>
@@ -649,12 +633,12 @@ export function HashtagSearch() {
 
         {/* 4-Column Media Grid (Landscape Ratio Cards) */}
         {loadingMedia ? (
-          <div className="py-24 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="py-24 text-center bg-white rounded-[26px] border border-[#e9e9ee] shadow-2xs">
             <Spin size="large" />
             <p className="mt-3 text-sm text-slate-500 font-normal">Loading media...</p>
           </div>
         ) : processedMedia.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="py-20 text-center bg-white rounded-[26px] border border-[#e9e9ee] shadow-2xs">
             <Empty description="No media found for this view." />
           </div>
         ) : (
@@ -663,7 +647,7 @@ export function HashtagSearch() {
               <div
                 key={item.id}
                 onClick={() => setSelectedPost(item)}
-                className="group relative aspect-[16/11] rounded-2xl overflow-hidden bg-slate-900 shadow-xs hover:shadow-lg transition-all duration-300 cursor-pointer"
+                className="group relative aspect-[16/11] rounded-[24px] overflow-hidden bg-slate-900 shadow-2xs hover:shadow-lg transition-all duration-300 cursor-pointer"
               >
                 {/* Media Image */}
                 <img
@@ -679,14 +663,14 @@ export function HashtagSearch() {
 
                 {/* Top-Left Badge (Photo / Carousel / Reel) */}
                 <div className="absolute top-3 left-3 z-10">
-                  <span className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-md text-white text-[11px] font-normal flex items-center gap-1.5 shadow-xs">
+                  <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-normal flex items-center gap-1.5 shadow-2xs">
                     {item.media_type === "CAROUSEL_ALBUM" ? (
                       <>
                         <AppstoreOutlined className="text-white text-xs" /> Carousel
                       </>
                     ) : item.media_type === "VIDEO" ? (
                       <>
-                        <VideoCameraOutlined className="text-pink-400 text-xs" /> Reel
+                        <VideoCameraOutlined className="text-white text-xs" /> Reel
                       </>
                     ) : (
                       <>
@@ -740,7 +724,7 @@ export function HashtagSearch() {
       >
         {selectedPost && (
           <div className="flex flex-col md:flex-row gap-6 p-2">
-            <div className="w-full md:w-1/2 aspect-[4/5] bg-black rounded-xl overflow-hidden relative shadow-md">
+            <div className="w-full md:w-1/2 aspect-[4/5] bg-black rounded-[22px] overflow-hidden relative shadow-md">
               <img
                 src={selectedPost.media_url}
                 alt="Post preview"
@@ -761,8 +745,8 @@ export function HashtagSearch() {
               <div>
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
-                    <InstagramOutlined className="text-base text-pink-500" />
-                    <span>Instagram Discovery Post</span>
+                    <InstagramOutlined className="text-base" />
+                    <span>Post details</span>
                   </div>
                   <span className="text-xs text-slate-400 font-normal">
                     {new Date(selectedPost.timestamp).toLocaleString(undefined, {
@@ -773,17 +757,17 @@ export function HashtagSearch() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 my-4">
-                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
-                    <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                  <div className="bg-[#FCEEF4] rounded-[18px] p-3">
+                    <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1">
                       <HeartFilled className="text-rose-500" /> Likes
                     </div>
                     <div className="text-xl font-bold text-slate-900 mt-1">
                       {(selectedPost.like_count ?? 0).toLocaleString()}
                     </div>
                   </div>
-                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
-                    <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                      <MessageFilled className="text-blue-500" /> Comments
+                  <div className="bg-[#E2E2FC] rounded-[18px] p-3">
+                    <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1">
+                      <MessageFilled /> Comments
                     </div>
                     <div className="text-xl font-bold text-slate-900 mt-1">
                       {(selectedPost.comments_count ?? 0).toLocaleString()}
@@ -795,7 +779,7 @@ export function HashtagSearch() {
                   <div className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">
                     Caption
                   </div>
-                  <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-700 leading-relaxed max-h-48 overflow-y-auto border border-slate-200/80 font-normal">
+                  <div className="bg-[#F1F3F7] rounded-[18px] p-3 text-xs text-slate-800 leading-relaxed max-h-48 overflow-y-auto font-normal">
                     {selectedPost.caption || "No caption available."}
                   </div>
                 </div>
@@ -804,7 +788,7 @@ export function HashtagSearch() {
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <button
                   onClick={() => handleCopyPostCaption(selectedPost.caption)}
-                  className="w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 rounded-full border border-[#e9e9ee] hover:border-black/40 text-slate-900 font-medium text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {copiedCaption ? <CheckOutlined className="text-emerald-600" /> : <CopyOutlined />}
                   <span>{copiedCaption ? "Copied" : "Copy Caption"}</span>
@@ -814,9 +798,9 @@ export function HashtagSearch() {
                     href={selectedPost.permalink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                    className="w-full py-2.5 rounded-full bg-black hover:bg-slate-800 text-white font-medium text-xs transition-all flex items-center justify-center gap-1.5"
                   >
-                    <InstagramOutlined className="text-pink-400" />
+                    <InstagramOutlined />
                     <span>View on Instagram</span>
                     <ExportOutlined className="text-[10px]" />
                   </a>

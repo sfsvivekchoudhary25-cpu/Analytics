@@ -520,262 +520,121 @@ export function Submissions() {
 
   return (
     <div className="w-full space-y-6 animate-page-entrance">
-      {/* ── Top Header Toolbar ─────────────────────────────────────────── */}
-      <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 lg:-mx-8 lg:-mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 bg-white px-6 py-4.5 shadow-2xs">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 border border-blue-100 text-blue-600 shadow-2xs">
-            <PictureOutlined className="text-xl" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-lg font-bold text-slate-900 tracking-tight">Customer Photos & UGC Hub</h1>
-              <Tag className="!rounded-full !bg-blue-50 !text-blue-700 !border-blue-200/80 !font-semibold !px-2.5 !m-0">
-                Live Intake Queue
-              </Tag>
-              {metrics.pending > 0 && (
-                <Tag className="!rounded-full !bg-amber-50 !text-amber-700 !border-amber-200/80 !font-semibold !px-2.5 !m-0 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  <span>{metrics.pending} Needs Review</span>
-                </Tag>
-              )}
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Review customer photos from your website, curate content, and publish directly to Instagram with auto-tagging.
-            </p>
-          </div>
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-black tracking-tight text-slate-950">Customer photos</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Review photos from your website, then publish them to Instagram with the customer tagged.
+          </p>
         </div>
-
-        {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            icon={<ReloadOutlined className={refreshing ? "animate-spin text-blue-600" : "text-slate-600"} />}
+            icon={<ReloadOutlined className={refreshing ? "animate-spin" : ""} />}
             onClick={() => load(true)}
             disabled={loading || refreshing}
-            className="!flex !items-center !gap-1.5 !h-9 !rounded-xl !border-slate-200 hover:!border-blue-400 hover:!text-blue-600 transition-all text-xs font-medium text-slate-700 shadow-2xs"
+            className="!flex !items-center !gap-1.5 !h-9 !rounded-full !border-[#e9e9ee] !bg-white !text-slate-900 !text-xs !font-medium hover:!border-black/40 !shadow-none transition-colors"
           >
             Refresh
           </Button>
-
-          <Button
-            icon={<CodeOutlined className="text-slate-600" />}
-            onClick={() => setApiModalOpen(true)}
-            className="!flex !items-center !gap-1.5 !h-9 !rounded-xl !border-slate-200 hover:!border-blue-400 hover:!text-blue-600 transition-all text-xs font-medium text-slate-700 shadow-2xs"
-          >
-            Website API Setup
+          <Button icon={<CodeOutlined />} onClick={() => setApiModalOpen(true)} className="!flex !items-center !gap-1.5 !h-9 !rounded-full !border-[#e9e9ee] !bg-white !text-slate-900 !text-xs !font-medium hover:!border-black/40 !shadow-none transition-colors">
+            Website API
           </Button>
-
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setUploadModalOpen(true)}
-            className="!flex !items-center !gap-1.5 !h-9 !rounded-xl !bg-blue-600 hover:!bg-blue-700 !border-blue-600 font-semibold text-xs shadow-xs transition-all cursor-pointer"
+            className="!flex !items-center !gap-1.5 !h-9 !rounded-full !bg-black hover:!bg-slate-800 !border-black !text-white !text-xs !font-semibold !shadow-none cursor-pointer"
           >
-            Upload Customer Photo
+            Upload photo
           </Button>
         </div>
       </div>
 
-      {/* ── 4 Top KPI Metric Summary Cards ─────────────────────────────── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Pending Approval */}
-        <Card
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-amber-300 hover:!shadow-md transition-all group"
-          styles={{ body: { padding: "16px 18px" } }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-600">Pending Review</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600 group-hover:scale-105 transition-transform">
-              <ClockCircleOutlined className="text-sm" />
-            </span>
+      {/* ── Summary ────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div style={{ backgroundColor: "#FFF9DB" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[128px]">
+          <div className="flex items-start justify-between">
+            <span className="text-3xl font-black text-slate-950 tabular-nums">{loading ? "--" : metrics.pending.toLocaleString()}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><ClockCircleOutlined /></span>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 tabular-nums">
-              {loading ? "--" : metrics.pending.toLocaleString()}
-            </span>
-            {metrics.pending > 0 && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
-                Action required
-              </span>
-            )}
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Pending review</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">{metrics.pending > 0 ? "Needs your review" : "All caught up"}</div>
           </div>
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-            <span>Awaiting one-click publish & tag</span>
+        </div>
+        <div style={{ backgroundColor: "#E2E2FC" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[128px]">
+          <div className="flex items-start justify-between">
+            <span className="text-3xl font-black text-slate-950 tabular-nums">{loading ? "--" : metrics.published.toLocaleString()}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><CheckCircleOutlined /></span>
           </div>
-        </Card>
-
-        {/* Metric 2: Published to Feed */}
-        <Card
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-emerald-300 hover:!shadow-md transition-all group"
-          styles={{ body: { padding: "16px 18px" } }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-600">Published to Feed</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-105 transition-transform">
-              <CheckCircleOutlined className="text-sm" />
-            </span>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Published</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">Live on your feed</div>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 tabular-nums">
-              {loading ? "--" : metrics.published.toLocaleString()}
-            </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-              Live on feed
-            </span>
+        </div>
+        <div style={{ backgroundColor: "#F1F3F7" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[128px]">
+          <div className="flex items-start justify-between">
+            <span className="text-3xl font-black text-slate-950 tabular-nums">{loading ? "--" : metrics.total.toLocaleString()}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><PictureOutlined /></span>
           </div>
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-            <span>Customer tagged & credited</span>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Total photos</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">Website and manual uploads</div>
           </div>
-        </Card>
-
-        {/* Metric 3: Total Submissions */}
-        <Card
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-blue-300 hover:!shadow-md transition-all group"
-          styles={{ body: { padding: "16px 18px" } }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-600">Total Submissions</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform">
-              <PictureOutlined className="text-sm" />
-            </span>
+        </div>
+        <div style={{ backgroundColor: "#FCEEF4" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[128px]">
+          <div className="flex items-start justify-between">
+            <span className="text-3xl font-black text-slate-950 tabular-nums">{loading ? "--" : metrics.dmSent.toLocaleString()}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><SendOutlined /></span>
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 tabular-nums">
-              {loading ? "--" : metrics.total.toLocaleString()}
-            </span>
-            <span className="text-xs text-slate-400 font-normal">photos</span>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Thank-you DMs</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">{metrics.dmWaiting} waiting to send</div>
           </div>
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-            <span>Website intake + manual entries</span>
-          </div>
-        </Card>
-
-        {/* Metric 4: Customer DM Outreach */}
-        <Card
-          className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!border-indigo-300 hover:!shadow-md transition-all group"
-          styles={{ body: { padding: "16px 18px" } }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-600">Thank-You DM Loop</span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 group-hover:scale-105 transition-transform">
-              <SendOutlined className="text-sm" />
-            </span>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 tabular-nums">
-              {loading ? "--" : metrics.dmSent.toLocaleString()}
-            </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60">
-              {metrics.dmWaiting} in queue
-            </span>
-          </div>
-          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
-            <span>Automated customer gratitude CRM</span>
-          </div>
-        </Card>
+        </div>
       </div>
 
-      {/* ── Filter, Search & View Controls Bar ─────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs">
-        {/* Segmented Filter */}
-        <div className="flex-1 min-w-[280px]">
-          <Segmented
-            value={statusFilter}
-            onChange={(val) => setStatusFilter(val as any)}
-            options={[
-              {
-                label: (
-                  <span className="flex items-center gap-1.5 px-1 py-0.5">
-                    <span>All Photos</span>
-                    <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-200/70 font-bold tabular-nums">
-                      {metrics.total}
-                    </span>
-                  </span>
-                ),
-                value: "all",
-              },
-              {
-                label: (
-                  <span className="flex items-center gap-1.5 px-1 py-0.5">
-                    <ClockCircleOutlined className="text-amber-500 text-xs" />
-                    <span>Pending Review</span>
-                    {metrics.pending > 0 && (
-                      <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-700 font-bold tabular-nums">
-                        {metrics.pending}
-                      </span>
-                    )}
-                  </span>
-                ),
-                value: "pending",
-              },
-              {
-                label: (
-                  <span className="flex items-center gap-1.5 px-1 py-0.5">
-                    <CheckCircleOutlined className="text-emerald-500 text-xs" />
-                    <span>Published</span>
-                    <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 font-bold tabular-nums">
-                      {metrics.published}
-                    </span>
-                  </span>
-                ),
-                value: "published",
-              },
-              ...(metrics.failed > 0
-                ? [
-                    {
-                      label: (
-                        <span className="flex items-center gap-1.5 px-1 py-0.5">
-                          <CloseCircleOutlined className="text-rose-500 text-xs" />
-                          <span>Failed</span>
-                          <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 font-bold tabular-nums">
-                            {metrics.failed}
-                          </span>
-                        </span>
-                      ),
-                      value: "failed",
-                    },
-                  ]
-                : []),
-            ]}
-            className="!rounded-xl !bg-slate-100/80 !p-1 text-xs"
-          />
-        </div>
+      {/* ── Filter, search and view ────────────────────────────────────── */}
+      <div className="flex flex-col gap-3 rounded-[22px] border border-[#e9e9ee] bg-white p-3 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+        <Segmented
+          value={statusFilter}
+          onChange={(val) => setStatusFilter(val as any)}
+          options={[
+            { label: <span className="px-1 text-xs font-medium">All {metrics.total}</span>, value: "all" },
+            { label: <span className="px-1 text-xs font-medium">Pending{metrics.pending > 0 ? ` ${metrics.pending}` : ""}</span>, value: "pending" },
+            { label: <span className="px-1 text-xs font-medium">Published {metrics.published}</span>, value: "published" },
+            ...(metrics.failed > 0
+              ? [{ label: <span className="px-1 text-xs font-medium text-rose-600">Failed {metrics.failed}</span>, value: "failed" }]
+              : []),
+          ]}
+          className="!rounded-full !bg-[#F1F3F7] !p-1"
+        />
 
-        {/* Search & Layout toggle */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
           <Input
-            placeholder="Search by @username or caption..."
+            placeholder="Search by @username or caption"
             prefix={<SearchOutlined className="text-slate-400 text-xs" />}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             allowClear
-            className="!h-9 !w-full sm:!w-64 !rounded-xl !border-slate-200 text-xs"
+            className="!h-9 !w-full sm:!w-64 !rounded-full !border-[#e9e9ee] text-xs"
           />
-
-          <div className="flex items-center border border-slate-200 rounded-xl p-0.5 bg-slate-50 shrink-0">
-            <button
-              type="button"
-              onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                viewMode === "grid"
-                  ? "bg-white text-blue-600 shadow-2xs font-bold"
-                  : "text-slate-400 hover:text-slate-700"
-              }`}
-              title="Grid View"
-            >
-              <AppstoreOutlined />
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                viewMode === "list"
-                  ? "bg-white text-blue-600 shadow-2xs font-bold"
-                  : "text-slate-400 hover:text-slate-700"
-              }`}
-              title="List View"
-            >
-              <BarsOutlined />
-            </button>
+          <div className="flex shrink-0 items-center rounded-full border border-[#e9e9ee] bg-[#F1F3F7] p-0.5">
+            {([["grid", <AppstoreOutlined key="g" />, "Grid view"], ["list", <BarsOutlined key="l" />, "List view"]] as const).map(([mode, icon, title]) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setViewMode(mode)}
+                title={title}
+                aria-label={title}
+                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs transition-colors cursor-pointer ${
+                  viewMode === mode ? "bg-black text-white" : "text-slate-500 hover:text-slate-900"
+                }`}
+              >
+                {icon}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -784,7 +643,7 @@ export function Submissions() {
       {loading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs">
+            <div key={i} className="rounded-[24px] border border-[#e9e9ee] bg-white overflow-hidden shadow-2xs">
               <div className="aspect-square bg-slate-100 skeleton-pulse" />
               <div className="p-4 space-y-3">
                 <Skeleton.Input active size="small" style={{ width: 120 }} />
@@ -800,11 +659,11 @@ export function Submissions() {
 
       {/* ── Empty State: When no items exist in DB ─────────────────────── */}
       {!loading && items && items.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-gradient-to-b from-slate-50/70 to-white p-12 text-center shadow-xs">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 shadow-xs mb-4">
+        <div className="rounded-[26px] border border-dashed border-[#d9d9e3] bg-[#F1F3F7] p-12 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-white border border-black/80 text-slate-950 shadow-2xs mb-4">
             <CameraOutlined className="text-3xl" />
           </div>
-          <h3 className="text-base font-bold text-slate-900">No Customer Photos Yet</h3>
+          <h3 className="text-base font-black text-slate-950">No customer photos yet</h3>
           <p className="mx-auto mt-1.5 max-w-md text-xs text-slate-500 leading-relaxed">
             Photos sent from your website customer intake form will appear here for review and one-click publishing to Instagram. You can also upload test photos manually.
           </p>
@@ -813,16 +672,16 @@ export function Submissions() {
               type="primary"
               icon={<PlusOutlined />}
               onClick={() => setUploadModalOpen(true)}
-              className="!h-9.5 !rounded-xl !bg-blue-600 hover:!bg-blue-700 !px-5 font-semibold text-xs shadow-xs"
+              className="!h-9 !rounded-full !bg-black hover:!bg-slate-800 !border-black !px-5 font-semibold text-xs !shadow-none"
             >
-              Upload First Photo Manually
+              Upload a photo
             </Button>
             <Button
               icon={<CodeOutlined />}
               onClick={() => setApiModalOpen(true)}
-              className="!h-9.5 !rounded-xl !border-slate-200 hover:!border-blue-400 !px-4 text-xs font-medium text-slate-700"
+              className="!h-9 !rounded-full !border-[#e9e9ee] hover:!border-black/40 !px-4 text-xs font-medium text-slate-900"
             >
-              View Website API Setup
+              Website API setup
             </Button>
           </div>
         </div>
@@ -830,7 +689,7 @@ export function Submissions() {
 
       {/* ── Empty Filter State: Filter / Search returned 0 ─────────────── */}
       {!loading && items && items.length > 0 && filteredItems.length === 0 && (
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-10 text-center shadow-xs">
+        <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-10 text-center shadow-2xs">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400 mb-3">
             <SearchOutlined className="text-xl" />
           </div>
@@ -844,9 +703,9 @@ export function Submissions() {
               setStatusFilter("all");
               setSearchQuery("");
             }}
-            className="!mt-4 !rounded-xl !text-xs !border-slate-200 text-slate-700"
+            className="!mt-4 !rounded-full !text-xs !border-[#e9e9ee] text-slate-900"
           >
-            Clear Filters
+            Clear filters
           </Button>
         </div>
       )}
@@ -857,7 +716,7 @@ export function Submissions() {
           {filteredItems.map((s) => (
             <Card
               key={s.id}
-              className="!rounded-2xl !border-slate-200/80 !bg-white !shadow-xs hover:!shadow-md hover:!border-blue-200 transition-all flex flex-col overflow-hidden group"
+              className="!rounded-[24px] !border-[#e9e9ee] !bg-white !shadow-2xs hover:!border-black/30 transition-all flex flex-col overflow-hidden group"
               styles={{ body: { padding: "0", flex: 1, display: "flex", flexDirection: "column" } }}
             >
               {/* Photo Media Container */}
@@ -873,45 +732,29 @@ export function Submissions() {
                 {/* Overlaid Status Badge (Top Left) */}
                 <div className="absolute top-3 left-3 z-10">
                   {s.status === "pending" && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/90 text-white backdrop-blur-md shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-950 shadow-2xs bg-[#FFF9DB]">
                       <ClockCircleOutlined className="text-xs" />
-                      <span>Pending Review</span>
+                      <span>Pending</span>
                     </span>
                   )}
                   {s.status === "published" && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/90 text-white backdrop-blur-md shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-950 shadow-2xs bg-[#E2E2FC]">
                       <CheckCircleOutlined className="text-xs" />
                       <span>Live on Feed</span>
                     </span>
                   )}
                   {s.status === "publishing" && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-500/90 text-white backdrop-blur-md shadow-xs animate-pulse">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-950 shadow-2xs bg-[#F1F3F7] animate-pulse">
                       <ReloadOutlined className="text-xs animate-spin" />
                       <span>Publishing...</span>
                     </span>
                   )}
                   {s.status === "failed" && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/90 text-white backdrop-blur-md shadow-xs">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-950 shadow-2xs bg-[#FEECE4]">
                       <CloseCircleOutlined className="text-xs" />
                       <span>Publish Failed</span>
                     </span>
                   )}
-                </div>
-
-                {/* Overlaid Username Pill (Top Right) */}
-                <div className="absolute top-3 right-3 z-10">
-                  <a
-                    href={`https://instagram.com/${s.igUsername}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="group/tag inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold !text-white bg-slate-900/85 hover:bg-black backdrop-blur-md border border-white/25 shadow-md transition-all duration-150 hover:scale-105"
-                  >
-                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-gradient-to-tr from-amber-400 via-rose-500 to-purple-600 text-white shadow-2xs shrink-0">
-                      <InstagramOutlined className="!text-white text-[9px]" />
-                    </span>
-                    <span className="!text-white font-medium tracking-tight">@{s.igUsername}</span>
-                  </a>
                 </div>
 
                 {/* Overlaid Quick Zoom icon (Bottom Right) */}
@@ -949,15 +792,15 @@ export function Submissions() {
 
                   {/* Caption quote */}
                   {s.caption ? (
-                    <div className="rounded-xl bg-slate-50 border border-slate-100 p-2.5">
+                    <div className="rounded-[16px] bg-[#F1F3F7] p-2.5">
                       <p className="text-xs text-slate-700 line-clamp-2 italic leading-relaxed">
                         &ldquo;{s.caption}&rdquo;
                       </p>
                     </div>
                   ) : (
-                    <div className="rounded-xl bg-slate-50/50 border border-dashed border-slate-200/80 p-2">
+                    <div className="rounded-[16px] bg-[#F1F3F7] p-2.5">
                       <p className="text-[11px] text-slate-400 italic">
-                        No custom caption (standard brand shoutout will be used).
+                        No caption. A standard thank-you will be used.
                       </p>
                     </div>
                   )}
@@ -967,7 +810,7 @@ export function Submissions() {
                     <div className="space-y-1.5 pt-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-slate-500 font-medium flex items-center gap-1">
-                          <SendOutlined className="text-indigo-500 text-[11px]" />
+                          <SendOutlined className="text-slate-500 text-[11px]" />
                           <span>DM Status:</span>
                         </span>
                         {s.dmStatus === "sent" ? (
@@ -988,10 +831,10 @@ export function Submissions() {
                           href={s.permalink}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg bg-pink-50/60 border border-pink-100 text-pink-700 hover:bg-pink-100/70 text-xs font-semibold transition-colors"
+                          className="flex items-center justify-center gap-1.5 w-full py-2 rounded-full bg-[#FCEEF4] text-slate-950 hover:bg-[#f8e0ea] text-xs font-semibold transition-colors"
                         >
-                          <InstagramOutlined className="text-pink-600" />
-                          <span>View Live Post on Instagram ↗</span>
+                          <InstagramOutlined />
+                          <span>View post on Instagram ↗</span>
                         </a>
                       )}
                     </div>
@@ -1012,29 +855,29 @@ export function Submissions() {
                 </div>
 
                 {/* Card Action Buttons */}
-                <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+                <div className="pt-3 border-t border-[#e9e9ee] flex items-center gap-2">
                   {(s.status === "pending" || s.status === "failed") && (
                     <Button
                       type="primary"
                       icon={<InstagramOutlined className="text-white" />}
                       loading={busyId === s.id}
                       onClick={() => openPublishReview(s)}
-                      className="!flex-1 !h-8.5 !rounded-xl !bg-gradient-to-r !from-pink-600 !to-purple-600 hover:!opacity-95 font-semibold text-xs cursor-pointer !text-white shadow-2xs"
+                      className="!flex-1 !h-9 !rounded-full !bg-black hover:!bg-slate-800 !border-black font-semibold text-xs cursor-pointer !text-white !shadow-none"
                     >
                       {busyId === s.id
                         ? "Publishing..."
                         : s.status === "failed"
-                        ? "Retry / Review & Publish"
-                        : "Review & Publish"}
+                        ? "Retry & publish"
+                        : "Review & publish"}
                     </Button>
                   )}
 
                   {s.status === "published" && s.permalink && (
                     <Button
-                      icon={<InstagramOutlined className="text-pink-600" />}
+                      icon={<InstagramOutlined />}
                       href={s.permalink}
                       target="_blank"
-                      className="!flex-1 !h-8.5 !rounded-xl text-xs font-medium border-slate-200"
+                      className="!flex-1 !h-9 !rounded-full text-xs font-medium !border-[#e9e9ee]"
                     >
                       Open Post
                     </Button>
@@ -1054,7 +897,7 @@ export function Submissions() {
                         danger
                         icon={<DeleteOutlined />}
                         disabled={busyId === s.id}
-                        className="!h-8.5 !w-8.5 !rounded-xl !border-slate-200 hover:!border-rose-300 text-xs shrink-0 cursor-pointer"
+                        className="!h-9 !w-9 !rounded-full !border-[#e9e9ee] hover:!border-rose-300 text-xs shrink-0 cursor-pointer"
                         title="Delete submission"
                       />
                     </Popconfirm>
@@ -1068,7 +911,7 @@ export function Submissions() {
 
       {/* ── LIST / TABLE VIEW ──────────────────────────────────────────── */}
       {!loading && viewMode === "list" && filteredItems.length > 0 && (
-        <div className="rounded-2xl border border-slate-200/80 bg-white overflow-hidden shadow-xs divide-y divide-slate-100">
+        <div className="rounded-[24px] border border-[#e9e9ee] bg-white overflow-hidden shadow-2xs divide-y divide-[#e9e9ee]">
           {filteredItems.map((s) => (
             <div
               key={s.id}
@@ -1097,9 +940,9 @@ export function Submissions() {
                       href={`https://instagram.com/${s.igUsername}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-bold text-sm text-slate-900 hover:text-blue-600 transition-colors flex items-center gap-1"
+                      className="font-bold text-sm text-slate-900 hover:underline transition-colors flex items-center gap-1"
                     >
-                      <InstagramOutlined className="text-pink-500" />
+                      <InstagramOutlined />
                       <span>@{s.igUsername}</span>
                     </a>
                     {s.status === "pending" && (
@@ -1141,7 +984,7 @@ export function Submissions() {
                         href={s.permalink}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-blue-600 hover:underline font-medium flex items-center gap-1"
+                        className="text-slate-950 underline font-medium flex items-center gap-1"
                       >
                         <InstagramOutlined className="text-xs" />
                         <span>View post</span>
@@ -1168,9 +1011,9 @@ export function Submissions() {
                     icon={<InstagramOutlined />}
                     loading={busyId === s.id}
                     onClick={() => openPublishReview(s)}
-                    className="!h-8.5 !rounded-xl !bg-gradient-to-r !from-pink-600 !to-purple-600 hover:!opacity-95 font-semibold text-xs !text-white shadow-2xs"
+                    className="!h-9 !rounded-full !bg-black hover:!bg-slate-800 !border-black font-semibold text-xs !text-white !shadow-none"
                   >
-                    {s.status === "failed" ? "Retry / Review" : "Review & Publish"}
+                    {s.status === "failed" ? "Retry / Review" : "Review & publish"}
                   </Button>
                 )}
 
@@ -1188,7 +1031,7 @@ export function Submissions() {
                       danger
                       icon={<DeleteOutlined />}
                       disabled={busyId === s.id}
-                      className="!h-8.5 !rounded-xl text-xs"
+                      className="!h-9 !rounded-full text-xs"
                     >
                       Delete
                     </Button>
@@ -1203,16 +1046,11 @@ export function Submissions() {
       {/* ── MODAL 1: Upload Customer Photo Manually ────────────────────── */}
       <Modal
         title={
-          <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <UploadOutlined className="text-base" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-900 leading-none">Upload Customer Photo</h3>
-              <p className="text-xs text-slate-500 mt-1 font-normal">
-                Add user-generated content to the review queue for one-click publishing and customer tagging.
-              </p>
-            </div>
+          <div>
+            <h3 className="text-base font-black text-slate-950 leading-none">Upload customer photo</h3>
+            <p className="text-xs text-slate-500 mt-1.5 font-normal">
+              Add a photo to the review queue. You can publish it and tag the customer from there.
+            </p>
           </div>
         }
         open={uploadModalOpen}
@@ -1223,12 +1061,13 @@ export function Submissions() {
           }
         }}
         footer={null}
-        width={540}
-        className="!rounded-2xl"
+        width={880}
+        centered
+        className="!rounded-[26px]"
       >
-        <form onSubmit={handleManualSubmit} className="space-y-4 pt-3">
+        <form onSubmit={handleManualSubmit} className="grid gap-4 pt-3 md:grid-cols-2 md:gap-x-6">
           {/* Instagram Handle & Verified Profile Search */}
-          <div ref={suggestionsRef} className="relative">
+          <div ref={suggestionsRef} className="relative md:col-start-1">
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold text-slate-700">
                 Customer Instagram Username <span className="text-rose-500">*</span>
@@ -1241,7 +1080,7 @@ export function Submissions() {
             </div>
 
             <Space.Compact block className="w-full">
-              <Button disabled className="!bg-slate-100 !text-slate-600 !border-slate-200 !font-bold !cursor-default select-none !rounded-l-xl">
+              <Button disabled className="!bg-[#F1F3F7] !text-slate-600 !border-[#e9e9ee] !font-bold !cursor-default select-none !rounded-l-full">
                 @
               </Button>
               <Input
@@ -1256,7 +1095,7 @@ export function Submissions() {
                   if (cleanUsername) setShowSuggestions(true);
                 }}
                 required
-                className="!rounded-r-xl"
+                className="!rounded-r-full"
               />
             </Space.Compact>
 
@@ -1365,10 +1204,10 @@ export function Submissions() {
 
             {/* Verified Profile Card / Confirmation Box */}
             {cleanUsername && (
-              <div className="mt-2.5 rounded-xl border border-slate-200/80 bg-slate-50/80 p-3">
+              <div className="mt-2.5 rounded-[18px] bg-[#F1F3F7] p-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="relative h-9 w-9 shrink-0 rounded-full overflow-hidden ring-2 ring-blue-500/20 shadow-xs">
+                    <div className="relative h-9 w-9 shrink-0 rounded-full overflow-hidden ring-2 ring-black/10 shadow-xs">
                       <div
                         className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${getAvatarGradient(
                           cleanUsername
@@ -1430,7 +1269,7 @@ export function Submissions() {
                       href={`https://instagram.com/${cleanUsername}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-white hover:bg-blue-50 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 shadow-2xs transition-all shrink-0 cursor-pointer"
+                      className="flex items-center gap-1 text-[11px] font-semibold text-slate-900 bg-white px-2.5 py-1.5 rounded-full border border-[#e9e9ee] hover:border-black/40 shadow-2xs transition-all shrink-0 cursor-pointer"
                       title="Open and verify their Instagram profile in a new tab"
                     >
                       <EyeOutlined className="text-xs" />
@@ -1449,7 +1288,7 @@ export function Submissions() {
           </div>
 
           {/* Photo Dropzone / Selector */}
-          <div>
+          <div className="flex flex-col md:col-start-2 md:row-start-1 md:row-span-2">
             <label className="block text-xs font-semibold text-slate-700 mb-1">
               Photo File <span className="text-rose-500">*</span>
             </label>
@@ -1466,9 +1305,9 @@ export function Submissions() {
             {!filePreview ? (
               <label
                 htmlFor="submission-photo-input"
-                className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-6 bg-slate-50/70 hover:bg-blue-50/30 transition-all cursor-pointer text-center group"
+                className="flex flex-1 min-h-[240px] flex-col items-center justify-center border-2 border-dashed border-[#d9d9e3] hover:border-black/60 rounded-[22px] p-6 bg-[#F1F3F7] transition-all cursor-pointer text-center group"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-400 group-hover:text-blue-600 shadow-xs mb-2 transition-colors">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-400 group-hover:text-black shadow-xs mb-2 transition-colors">
                   <CameraOutlined className="text-2xl" />
                 </div>
                 <span className="text-xs font-bold text-slate-800">
@@ -1479,13 +1318,13 @@ export function Submissions() {
                 </span>
               </label>
             ) : (
-              <div className="relative rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 group">
-                <div className="aspect-[4/3] w-full flex items-center justify-center bg-slate-950">
+              <div className="relative flex-1 rounded-[22px] border border-[#e9e9ee] overflow-hidden bg-slate-900 group flex flex-col">
+                <div className="flex-1 min-h-[240px] max-h-[340px] w-full flex items-center justify-center bg-slate-950">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={filePreview}
                     alt="Preview"
-                    className="max-h-full max-w-full object-contain"
+                    className="max-h-[340px] max-w-full object-contain"
                   />
                 </div>
                 <div className="absolute top-2 right-2 flex items-center gap-1.5">
@@ -1507,7 +1346,7 @@ export function Submissions() {
           </div>
 
           {/* Optional Caption */}
-          <div>
+          <div className="md:col-start-1">
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold text-slate-700">
                 Customer Caption / Testimonial (Optional)
@@ -1522,26 +1361,26 @@ export function Submissions() {
               value={captionInput}
               onChange={(e) => setCaptionInput(e.target.value)}
               maxLength={1500}
-              className="!rounded-xl text-xs"
+              className="!rounded-[18px] text-xs"
             />
-            <div className="mt-2 rounded-xl bg-slate-50 border border-slate-200/70 p-2.5 text-[11px] text-slate-500 leading-relaxed">
+            <div className="mt-2 rounded-[18px] bg-[#FCEEF4] p-2.5 text-[11px] text-slate-500 leading-relaxed">
               <span className="font-semibold text-slate-700">Post Caption Preview: </span>
               {captionInput.trim() ? `"${captionInput.trim()}" ` : ""}
-              <span className="text-blue-600 font-medium">
+              <span className="text-slate-950 font-semibold">
                 Thank you @{usernameInput.trim() || "username"} for sharing this with us! 💛
               </span>
             </div>
           </div>
 
           {/* Modal Buttons */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#e9e9ee] md:col-span-2">
             <Button
               onClick={() => {
                 resetUploadForm();
                 setUploadModalOpen(false);
               }}
               disabled={uploading}
-              className="!rounded-xl text-xs"
+              className="!rounded-full !border-[#e9e9ee] text-xs"
             >
               Cancel
             </Button>
@@ -1551,10 +1390,10 @@ export function Submissions() {
               icon={<UploadOutlined />}
               loading={uploading}
               disabled={!selectedFile || !usernameInput.trim()}
-              className={`!rounded-xl font-semibold text-xs ${
+              className={`!rounded-full font-semibold text-xs ${
                 !selectedFile || !usernameInput.trim()
-                  ? "!bg-slate-100 !text-slate-400 !border-slate-200 !cursor-not-allowed"
-                  : "!bg-blue-600 !text-white hover:!bg-blue-700 !border-blue-600"
+                  ? "!bg-[#F1F3F7] !text-slate-400 !border-[#e9e9ee] !cursor-not-allowed"
+                  : "!bg-black !text-white hover:!bg-slate-800 !border-black"
               }`}
             >
               {uploading ? "Uploading..." : "Add to Review Queue"}
@@ -1993,50 +1832,33 @@ console.log("Customer photo submitted:", data);`}
         footer={null}
         width={920}
         centered
-        className="!p-0 overflow-hidden"
+        className="!rounded-[26px] overflow-hidden"
       >
         {reviewSubmission && (
           <div className="p-5 sm:p-6 space-y-4">
             {/* Studio Header Bar */}
-            <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-xs">
-                  <InstagramOutlined className="text-base text-pink-400" />
-                </span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
-                      Instagram Publishing Studio
-                    </h3>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                      <RobotOutlined className="text-[10px]" /> AI Growth Copilot
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    Live Instagram feed simulation & growth copy engine
-                  </p>
-                </div>
+            <div className="flex items-center justify-between gap-3 pr-8">
+              <div className="min-w-0">
+                <h3 className="text-base font-black tracking-tight text-slate-950 leading-tight">Publish to Instagram</h3>
+                <p className="mt-0.5 text-xs text-slate-500">Check the preview, edit the caption, then publish.</p>
               </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-100">
-                  {growthAudit.score}% Growth Ready
-                </span>
-              </div>
+              <span className="shrink-0 rounded-full bg-[#E2E2FC] px-3 py-1 text-[11px] font-bold text-slate-950">
+                {growthAudit.score}% ready
+              </span>
             </div>
 
             {/* 2-Column Studio Grid: Left Live Preview + Right Growth Composer */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
               {/* LEFT COLUMN (5 Cols): Live Instagram Feed Post Mockup */}
-              <div className="lg:col-span-5 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3.5 shadow-2xs space-y-3">
+              <div className="lg:col-span-5 rounded-[26px] bg-[#F1F3F7] p-3.5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-1">
-                  <span>Live Feed Simulation</span>
-                  <span className="text-slate-400 font-normal">Real-time</span>
+                  <span>Preview</span>
+                  <span className="text-slate-400 font-normal">Updates as you type</span>
                 </div>
 
                 {/* Instagram Native Feed Post Card Mockup */}
-                <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+                <div className="rounded-[20px] border border-[#e9e9ee] bg-white overflow-hidden shadow-2xs">
                   {/* Post Header */}
                   <div className="p-3 flex items-center justify-between border-b border-slate-50">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -2058,7 +1880,7 @@ console.log("Customer photo submitted:", data);`}
                           {brandProfile.username || "fabroniee"}
                         </span>
                         <span className="text-[10px] text-slate-400 block truncate">
-                          Customer Spotlight • Original Audio
+                          Customer spotlight
                         </span>
                       </div>
                     </div>
@@ -2103,7 +1925,7 @@ console.log("Customer photo submitted:", data);`}
                         </span>
                       </p>
                       <span className="text-[10px] text-slate-400 block pt-0.5">
-                        Just now • Live Instagram Sync
+                        Just now
                       </span>
                     </div>
                   </div>
@@ -2131,8 +1953,8 @@ console.log("Customer photo submitted:", data);`}
                       size="small"
                       loading={aiGeneratingCaption}
                       onClick={generateAiCaptions}
-                      icon={<ThunderboltOutlined className="text-indigo-600 text-xs" />}
-                      className="!text-xs !font-semibold !text-indigo-600 hover:!text-indigo-700 !h-6 !px-1.5 cursor-pointer"
+                      icon={<ThunderboltOutlined className="text-slate-950 text-xs" />}
+                      className="!text-xs !font-semibold !text-slate-950 !h-6 !px-1.5 cursor-pointer"
                     >
                       {aiCaptionSuggestions ? "Regenerate AI" : "Generate 3 AI Angles"}
                     </Button>
@@ -2175,16 +1997,16 @@ console.log("Customer photo submitted:", data);`}
                           value: "communitySpark",
                         },
                       ]}
-                      className="!bg-slate-100 !p-1 !rounded-xl"
+                      className="!bg-[#F1F3F7] !p-1 !rounded-full"
                     />
                   ) : (
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>⚡ Generate tailored hooks for comment-to-DM triggers and Explore saves.</span>
+                    <div className="px-3.5 py-2.5 rounded-[18px] bg-[#FFF9DB] flex items-center justify-between gap-3 text-xs text-slate-700">
+                      <span>Get three caption ideas written for you.</span>
                       <button
                         type="button"
                         onClick={generateAiCaptions}
                         disabled={aiGeneratingCaption}
-                        className="text-indigo-600 hover:text-indigo-700 font-semibold cursor-pointer shrink-0 ml-2"
+                        className="text-slate-950 font-bold cursor-pointer shrink-0"
                       >
                         Generate →
                       </button>
@@ -2193,8 +2015,8 @@ console.log("Customer photo submitted:", data);`}
                 </div>
 
                 {/* Unified Modern Caption Composer Card */}
-                <div className="rounded-xl border border-slate-200 bg-white shadow-2xs overflow-hidden focus-within:border-slate-400 transition-colors">
-                  <div className="flex items-center justify-between px-3.5 py-2 border-b border-slate-100 bg-slate-50/50">
+                <div className="rounded-[22px] border border-[#e9e9ee] bg-white shadow-2xs overflow-hidden focus-within:border-black/40 transition-colors">
+                  <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#e9e9ee]">
                     <span className="text-xs font-bold text-slate-700">
                       Post Caption
                     </span>
@@ -2214,7 +2036,7 @@ console.log("Customer photo submitted:", data);`}
                   />
 
                   {/* Levers & Quick Actions Toolbar */}
-                  <div className="px-3.5 py-2 border-t border-slate-100 bg-slate-50/40 flex flex-wrap items-center justify-between gap-1.5">
+                  <div className="px-3.5 py-2.5 border-t border-[#e9e9ee] flex flex-wrap items-center justify-between gap-1.5">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <button
                         type="button"
@@ -2224,7 +2046,7 @@ console.log("Customer photo submitted:", data);`}
                             setReviewCaption((prev) => (prev ? `${prev.trim()}${trigger}` : trigger.trim()));
                           }
                         }}
-                        className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors cursor-pointer"
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#F1F3F7] hover:bg-slate-200 text-slate-800 transition-colors cursor-pointer"
                       >
                         + "LINK" Trigger
                       </button>
@@ -2237,7 +2059,7 @@ console.log("Customer photo submitted:", data);`}
                             setReviewCaption((prev) => (prev ? `${prev.trim()}${save}` : save.trim()));
                           }
                         }}
-                        className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors cursor-pointer"
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#F1F3F7] hover:bg-slate-200 text-slate-800 transition-colors cursor-pointer"
                       >
                         + Save Hook
                       </button>
@@ -2250,7 +2072,7 @@ console.log("Customer photo submitted:", data);`}
                             setReviewCaption((prev) => (prev ? `${prev.trim()}${ask}` : ask.trim()));
                           }
                         }}
-                        className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition-colors cursor-pointer"
+                        className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#F1F3F7] hover:bg-slate-200 text-slate-800 transition-colors cursor-pointer"
                       >
                         + Question
                       </button>
@@ -2285,14 +2107,12 @@ console.log("Customer photo submitted:", data);`}
                       <span className="font-medium text-slate-600">Save Hook</span>
                     </span>
                   </div>
-                  <span className="text-slate-400 text-[10px]">Meta Content API</span>
+                  
                 </div>
 
                 {/* Actions Footer */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                  <span className="text-[11px] text-slate-400 truncate">
-                    Post publishes live to connected Instagram account.
-                  </span>
+                <div className="pt-3 border-t border-[#e9e9ee] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <span className="text-xs text-slate-500">Goes live on your connected Instagram account.</span>
 
                   <div className="flex items-center gap-2 shrink-0">
                     <Button
@@ -2302,7 +2122,7 @@ console.log("Customer photo submitted:", data);`}
                         setReviewSubmission(null);
                         setAiCaptionSuggestions(null);
                       }}
-                      className="!rounded-xl !h-8.5 text-xs !border-slate-200 text-slate-600 hover:text-slate-900 cursor-pointer"
+                      className="!rounded-full !h-9 text-xs !border-[#e9e9ee] text-slate-700 hover:!border-black/40 cursor-pointer"
                     >
                       Cancel
                     </Button>
@@ -2313,9 +2133,9 @@ console.log("Customer photo submitted:", data);`}
                       disabled={growthAudit.length > 2200}
                       onClick={confirmPublish}
                       icon={<InstagramOutlined />}
-                      className="!rounded-xl !h-8.5 !px-4.5 !bg-slate-900 hover:!bg-slate-800 !text-white text-xs font-semibold cursor-pointer shadow-xs"
+                      className="!rounded-full !h-9 !px-5 !bg-black hover:!bg-slate-800 !text-white text-xs font-semibold cursor-pointer !shadow-none"
                     >
-                      {publishingLive ? "Publishing..." : "Publish Live to Instagram"}
+                      {publishingLive ? "Publishing..." : "Publish to Instagram"}
                     </Button>
                   </div>
                 </div>
