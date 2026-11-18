@@ -75,7 +75,7 @@ export function CommentDmFlowPhone({
   }, [seg, requireFollow, recoveryEnabled, templateType]);
 
   const hi = (name: string) =>
-    `rounded-2xl transition-all duration-300 ${seg === name ? "bg-emerald-500/[0.08] ring-2 ring-emerald-500/40 p-1.5 -m-1.5" : ""}`;
+    `-mx-2 rounded-2xl border-l-2 px-2 py-1.5 transition-colors duration-300 ${seg === name ? "border-emerald-500 bg-emerald-500/[0.07]" : "border-transparent"}`;
 
   return (
     <div className="flex w-full flex-col items-center">
@@ -104,7 +104,7 @@ export function CommentDmFlowPhone({
       <MobilePreview width={Math.round(height * (320 / 650))} height={height} device={device} showToolbar={false}>
         <div className="flex h-full flex-col justify-between bg-[#f8f9fa] dark:bg-[#121212]">
           {/* Instagram Direct Header */}
-                  <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 py-2.5 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
+                  <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 pb-2.5 pt-8 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <span className="text-xl text-black dark:text-white font-normal leading-none select-none cursor-pointer">‹</span>
                       <div className="relative">
@@ -136,7 +136,7 @@ export function CommentDmFlowPhone({
                   </div>
 
           {/* Whole conversation: scrolls to the part for the step being edited */}
-          <div ref={scrollRef} className="relative flex-1 space-y-4 overflow-y-auto p-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div ref={scrollRef} className="relative flex-1 space-y-2.5 overflow-y-auto px-3.5 py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {/* Authentic Instagram Profile Info Banner */}
                     <div className="flex flex-col items-center justify-center pt-3 pb-2 text-center select-none border-b border-black/5 dark:border-white/5 mb-2">
                       <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[2px] shadow-sm mb-1.5">
@@ -212,7 +212,7 @@ export function CommentDmFlowPhone({
                     <div className="flex justify-end">
                       {templateType === "product" ? (
                         /* Product Card */
-                        <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
+                        <div className="max-w-[88%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
                           {cardImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
@@ -257,7 +257,7 @@ export function CommentDmFlowPhone({
                         </div>
                       ) : templateType === "file" ? (
                         /* Downloadable File / Lead Magnet Card */
-                        <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
+                        <div className="max-w-[88%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
                           {cardImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={cardImageUrl} alt="Resource cover" className="aspect-[1.91/1] w-full object-cover" />
@@ -307,7 +307,7 @@ export function CommentDmFlowPhone({
                         </div>
                       ) : templateType === "card" ? (
                         /* Custom Media Card */
-                        <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
+                        <div className="max-w-[88%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
                           {cardImageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
@@ -352,7 +352,7 @@ export function CommentDmFlowPhone({
                         </div>
                       ) : templateType === "button" ? (
                         /* Text + Buttons: Official Instagram Direct button template */
-                        <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
+                        <div className="max-w-[88%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
                           <div className="p-3">
                             <p className="text-xs leading-relaxed text-black dark:text-white whitespace-pre-line">
                               {previewText}
@@ -396,7 +396,7 @@ export function CommentDmFlowPhone({
                     <span className="rounded-full bg-black/[0.04] px-2.5 py-0.5 text-[9px] font-medium text-black/40 dark:bg-white/[0.06] dark:text-white/40">About 20 hours later</span>
                   </div>
                   <div className="flex justify-end">
-                    <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
+                    <div className="max-w-[88%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
                       <div className="p-3">
                         <p className="text-xs leading-relaxed text-black dark:text-white">Hey there! 👋 Just wanted to check in quickly before our chat window closes — did you get a chance to check out what I sent earlier?</p>
                       </div>
