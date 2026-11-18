@@ -466,9 +466,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   async function toggleActive() {
     if (!rule) return;
     const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
+    const before = rule;
     setError(null);
+    setRule({ ...rule, enabled: !rule.enabled }); // the switch moves at once; the save follows
     try {
-      const updated = await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ enabled: !rule.enabled }) });
+      const updated = await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ enabled: !before.enabled }) });
       setRule(updated);
       if (typeof window !== "undefined") {
         requestAnimationFrame(() => {
@@ -476,6 +478,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         });
       }
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
@@ -490,27 +493,35 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     }
   }
 
+  // The post shows as chosen and the window closes straight away; saving happens in the background and is undone
+  // (with an error message) if it fails.
   async function choosePost(p: Post) {
     if (!rule) return;
+    const before = rule;
     setError(null);
+    setRule({ ...rule, mediaId: p.mediaId, mediaPermalink: p.permalink, mediaThumb: p.thumb });
+    setPickerOpen(false);
     try {
       const updated = await api<Rule>(basePath, {
         method: "PUT",
         body: JSON.stringify({ mediaId: p.mediaId, mediaPermalink: p.permalink, mediaThumb: p.thumb }),
       });
       setRule(updated);
-      setPickerOpen(false);
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
 
   async function clearPost() {
     if (!rule) return;
+    const before = rule;
+    setRule({ ...rule, mediaId: null, mediaPermalink: null, mediaThumb: null });
+    setPickerOpen(false);
     try {
       setRule(await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ mediaId: null, mediaPermalink: null, mediaThumb: null }) }));
-      setPickerOpen(false);
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
