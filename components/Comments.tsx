@@ -307,9 +307,7 @@ export function Comments() {
 
   // The server already filtered by tab, post and search; these are the comments loaded so far.
   const displayedComments = items ?? [];
-  const tabTotal = tab === "unreplied" ? counts.unreplied : tab === "replied" ? counts.replied : counts.all;
   const canLoadMore = !!nextCursor;
-  const remaining = !selectedPostId && !debouncedSearch ? Math.max(0, tabTotal - displayedComments.length) : 0;
 
   return (
     <div className="space-y-6 pb-12">
@@ -529,9 +527,10 @@ export function Comments() {
                   type="button"
                   onClick={loadMorePosts}
                   disabled={postsLoadingMore}
-                  className="text-xs font-bold text-slate-700 hover:text-black underline underline-offset-4 cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#e9e9ee] bg-white px-6 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-black/40 disabled:opacity-60 cursor-pointer"
                 >
-                  {postsLoadingMore ? "Loading…" : `Load more posts (${postsTotal - posts.length} left)`}
+                  {postsLoadingMore ? <RefreshCw size={12} className="animate-spin" /> : null}
+                  <span>{postsLoadingMore ? "Loading…" : "Load more"}</span>
                 </button>
               )}
               {posts.length > POSTS_PAGE && (
@@ -911,7 +910,7 @@ export function Comments() {
             className="inline-flex items-center gap-2 rounded-full border border-[#e9e9ee] bg-white px-6 py-2.5 text-xs font-bold text-slate-900 shadow-2xs transition-all hover:border-black/40 disabled:opacity-60 cursor-pointer"
           >
             {loadingMore ? <RefreshCw size={12} className="animate-spin" /> : null}
-            <span>{loadingMore ? "Loading…" : remaining > 0 ? `Load more (${remaining} left)` : "Load more"}</span>
+            <span>{loadingMore ? "Loading…" : "Load more"}</span>
           </button>
         </div>
       )}
