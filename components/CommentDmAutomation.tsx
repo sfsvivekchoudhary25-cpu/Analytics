@@ -1299,7 +1299,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Product Card Details */}
             {templateType === "product" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -1364,7 +1364,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Downloadable File Details */}
             {templateType === "file" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
@@ -1430,7 +1430,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Custom Media Card Details */}
             {templateType === "card" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
@@ -1480,7 +1480,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Interactive Action Buttons Builder */}
             {templateType !== "text" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/90 backdrop-blur-xs p-4 sm:p-5 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 {/* Header: Title, Inline Counter Badge & Add Button */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
@@ -1555,7 +1555,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3 pt-1">
+                  <div className="grid gap-4 pt-1 sm:grid-cols-2 2xl:grid-cols-3">
                     {cardButtons.map((btn, idx) => (
                       <div
                         key={idx}
