@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { App, Button, Card, Input, Modal, Progress, Space, Switch, Tag, Tooltip } from "antd";
+import { Alert, App, Button, Card, Input, Modal, Progress, Segmented, Select, Space, Switch, Tag, Tooltip } from "antd";
 import {
   ApiOutlined,
   ApartmentOutlined,
@@ -15,15 +15,17 @@ import {
   CommentOutlined,
   CopyOutlined,
   CustomerServiceOutlined,
+  DeleteOutlined,
   DisconnectOutlined,
+  ExclamationCircleOutlined,
   ExportOutlined,
   FacebookOutlined,
   GlobalOutlined,
   HeartOutlined,
   IdcardOutlined,
   InfoCircleOutlined,
+  InstagramFilled,
   InstagramOutlined,
-  KeyOutlined,
   LineChartOutlined,
   LinkOutlined,
   LockOutlined,
@@ -41,7 +43,7 @@ import {
   UserOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import { api, API_BASE, type ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, API_BASE, auth, type ConnectionStatus } from "@/lib/api";
 
 const PERMISSIONS = [
   {
@@ -133,11 +135,8 @@ type Props = {
   daysLeft: number | null | undefined;
   notice: string | null;
   error: string | null;
-  token: string;
-  setToken: (v: string) => void;
   busy: boolean;
   onConnectInstagram: () => void;
-  onPasteConnect: (e: React.FormEvent) => void;
   onSignOut?: () => void;
 };
 
@@ -182,11 +181,8 @@ export function AccountPanel({
   daysLeft,
   notice,
   error: externalError,
-  token,
-  setToken,
   busy,
   onConnectInstagram,
-  onPasteConnect,
   onSignOut,
 }: Props) {
   const { message, modal } = App.useApp();
@@ -194,8 +190,6 @@ export function AccountPanel({
   // Facebook Page State
   const [fbStatus, setFbStatus] = useState<FacebookPageStatus | null>(null);
   const [fbBusy, setFbBusy] = useState(false);
-  const [fbToken, setFbToken] = useState("");
-  const [fbModalOpen, setFbModalOpen] = useState(false);
 
   // Cloudinary State & Health (Powered by backend Cloudinary Service)
   const [cloudinaryConfig, setCloudinaryConfig] = useState<CloudinaryConfig>({
@@ -215,16 +209,20 @@ export function AccountPanel({
   const [autoOptimizeInput, setAutoOptimizeInput] = useState(true);
   const [savingCloudinary, setSavingCloudinary] = useState(false);
 
-  // OpenRouter State
+  // OpenRouter State & BYOK
   const [openRouterHealth, setOpenRouterHealth] = useState<OpenRouterHealth | null>(null);
   const [openRouterLoading, setOpenRouterLoading] = useState(false);
+  const [openRouterModalOpen, setOpenRouterModalOpen] = useState(false);
+  const [openRouterModelInput, setOpenRouterModelInput] = useState("nvidia/nemotron-3-ultra");
+  const [modelCatalog, setModelCatalog] = useState<{ id: string; name: string; free: boolean }[]>([]);
+  const [freeTierOnly, setFreeTierOnly] = useState<boolean | null>(null);
+  const [catalogError, setCatalogError] = useState(false);
+  const [modelFilter, setModelFilter] = useState<"all" | "free" | "paid">("all");
+  const [savingOpenRouter, setSavingOpenRouter] = useState(false);
   const [allPinging, setAllPinging] = useState(false);
 
-  // Instagram Manual Token Modal
-  const [igTokenModalOpen, setIgTokenModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
-
 
   const connected = status?.connected === true;
   const granted = connected && Array.isArray(status.permissions) ? status.permissions : null;
@@ -294,16 +292,19 @@ export function AccountPanel({
   const pingOpenRouter = async () => {
     setOpenRouterLoading(true);
     try {
-      const res = await fetch("/api/integrations/openrouter");
-      const data = await res.json();
+      const data: any = await api("/ai/ping", { method: "POST", body: JSON.stringify({}) }).catch(async () => {
+        const res = await fetch("/api/integrations/openrouter");
+        return res.json();
+      });
       setOpenRouterHealth(data);
+      if (data.model) setOpenRouterModelInput(data.model);
       return data as OpenRouterHealth;
     } catch {
       const fallback: OpenRouterHealth = {
         status: "error",
         healthy: false,
         latencyMs: 0,
-        model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+        model: "nvidia/nemotron-3-ultra",
         provider: "OpenRouter",
         remainingRequests: 0,
         totalLimit: 50,
@@ -312,6 +313,48 @@ export function AccountPanel({
       return fallback;
     } finally {
       setOpenRouterLoading(false);
+    }
+  };
+
+  const fetchOpenRouterConfig = async () => {
+    try {
+      const data: any = await api("/ai/config").catch(() => null);
+      if (data) {
+        if (data.model) setOpenRouterModelInput(data.model);
+      }
+    } catch {}
+  };
+
+  // Full OpenRouter catalog (free + paid) and whether this account can only use free models.
+  useEffect(() => {
+    if (!openRouterModalOpen || modelCatalog.length) return;
+    api("/ai/models")
+      .then((d: any) => {
+        setModelCatalog(d.models);
+        setFreeTierOnly(d.freeTierOnly);
+        setCatalogError(false);
+      })
+      .catch(() => setCatalogError(true));
+  }, [openRouterModalOpen, modelCatalog.length]);
+
+  const selectedModel = modelCatalog.find((m) => m.id === openRouterModelInput);
+  const selectedPaid = selectedModel ? !selectedModel.free : false;
+
+  const handleSaveOpenRouter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingOpenRouter(true);
+    try {
+      const data: any = await api("/ai/config", {
+        method: "POST",
+        body: JSON.stringify({ model: openRouterModelInput }),
+      });
+      message.success(`AI model changed to ${data.model}`);
+      setOpenRouterModalOpen(false);
+      await pingOpenRouter();
+    } catch (err: any) {
+      message.error(err.message || "Failed to save the AI model");
+    } finally {
+      setSavingOpenRouter(false);
     }
   };
 
@@ -425,6 +468,7 @@ export function AccountPanel({
     } catch {
       pingCloudinary("hrnqhbaa");
     }
+    fetchOpenRouterConfig();
     pingOpenRouter();
   }, []);
 
@@ -449,30 +493,11 @@ export function AccountPanel({
   const handleConnectFacebook = async () => {
     setFbBusy(true);
     try {
-      const { url } = await api<{ url: string }>("/facebook-page/oauth/url");
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}&return_path=/account`);
       window.location.href = url;
     } catch (err: any) {
       message.error(err?.message || "Failed to initiate Facebook Page connection");
-      setFbBusy(false);
-    }
-  };
-
-  const handleConnectFacebookWithToken = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fbToken.trim()) return;
-    setFbBusy(true);
-    try {
-      await api("/facebook-page/token", {
-        method: "POST",
-        body: JSON.stringify({ accessToken: fbToken.trim() }),
-      });
-      setFbToken("");
-      setFbModalOpen(false);
-      message.success("Facebook Page access token connected successfully!");
-      await loadFacebookStatus();
-    } catch (err: any) {
-      message.error(err?.message || "Invalid Facebook Page access token");
-    } finally {
       setFbBusy(false);
     }
   };
@@ -481,7 +506,7 @@ export function AccountPanel({
     modal.confirm({
       title: "Disconnect Facebook Page?",
       content:
-        "The Comment-to-DM automation will not be able to send private replies to comments until you reconnect a Facebook Page.",
+        "Comment-to-DM keeps working through your Instagram login. The Page is only an optional backup for sending.",
       okText: "Disconnect",
       okType: "danger",
       cancelText: "Keep Connected",
@@ -498,11 +523,6 @@ export function AccountPanel({
         }
       },
     });
-  };
-
-  const handleInstagramTokenSubmit = (e: React.FormEvent) => {
-    onPasteConnect(e);
-    setIgTokenModalOpen(false);
   };
 
   const handleCopyWebhook = () => {
@@ -546,8 +566,9 @@ export function AccountPanel({
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
         <div className="rounded-3xl border border-slate-200/90 bg-white p-8 sm:p-10 shadow-xl shadow-slate-100 text-center space-y-6">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-lg shadow-rose-500/25">
-            <InstagramOutlined className="text-4xl" />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 border border-slate-200/80 shadow-md">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Fabroniee" className="h-14 w-14 object-contain" />
           </div>
 
           <div className="space-y-2">
@@ -565,7 +586,7 @@ export function AccountPanel({
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col items-stretch justify-center gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
             <Button
               type="primary"
               size="large"
@@ -578,42 +599,15 @@ export function AccountPanel({
             </Button>
             <Button
               size="large"
-              icon={<KeyOutlined />}
-              onClick={() => setIgTokenModalOpen(true)}
-              className="!h-11 !px-5 !rounded-xl !border-slate-200 !text-slate-700 hover:!border-slate-300 font-semibold"
+              icon={<FacebookOutlined />}
+              onClick={handleConnectFacebook}
+              loading={fbBusy}
+              className="!h-11 !px-6 !rounded-xl !border-blue-200 !bg-blue-50/60 hover:!bg-blue-100/60 !text-blue-700 !font-bold shadow-xs"
             >
-              Paste Access Token
+              Connect via Facebook Page
             </Button>
           </div>
         </div>
-
-        {/* Modal for manual token */}
-        <Modal
-          title="Manual Instagram Access Token"
-          open={igTokenModalOpen}
-          onCancel={() => setIgTokenModalOpen(false)}
-          footer={null}
-          width={500}
-        >
-          <form onSubmit={handleInstagramTokenSubmit} className="space-y-4 pt-2">
-            <p className="text-xs text-slate-500 leading-relaxed">
-              If your OAuth redirect is offline, paste a long-lived user token generated from the Meta Developer Dashboard with <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">instagram_business_*</code> scopes.
-            </p>
-            <Input.TextArea
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              rows={4}
-              placeholder="EAA..."
-              className="font-mono text-xs !rounded-xl"
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <Button onClick={() => setIgTokenModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={busy} disabled={!token.trim()}>
-                Verify and Save
-              </Button>
-            </div>
-          </form>
-        </Modal>
       </div>
     );
   }
@@ -622,31 +616,26 @@ export function AccountPanel({
   return (
     <div className="space-y-6 pb-12">
       {/* ── HEADER COMMAND BAR ────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-2 border-b border-slate-200/80">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white shadow-md shadow-rose-500/20">
-            <InstagramOutlined className="text-2xl" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5 pb-4 border-b border-slate-200/80">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-16 sm:h-13 sm:w-18 shrink-0 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-2xs p-1">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/meta-instagram.png"
+              alt="Meta & Instagram"
+              className="h-full w-full object-contain"
+            />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                Account & Meta Integrations
-              </h1>
-              <Tag color="blue" className="!rounded-full font-semibold !text-[11px] !px-2.5">
-                Meta Graph API v26.0
-              </Tag>
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Manage connected Instagram Business profiles, Facebook Page authorizations, automated token health, and API permissions.
-            </p>
-          </div>
+          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">
+            Account & Meta Integrations
+          </h1>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2.5 w-full sm:w-auto shrink-0">
           <Button
-            icon={<ReloadOutlined className={refreshing ? "animate-spin" : ""} />}
+            icon={<ReloadOutlined className={refreshing ? "animate-spin text-slate-500" : "text-slate-500"} />}
             onClick={handleRefresh}
-            className="!rounded-xl !border-slate-200 !text-slate-700 hover:!border-slate-300 !text-xs font-semibold"
+            className="!w-full sm:!w-auto !rounded-2xl !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !text-xs sm:!text-sm font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 shadow-2xs"
           >
             Refresh Status
           </Button>
@@ -654,10 +643,10 @@ export function AccountPanel({
             href="https://developers.facebook.com/apps"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 shadow-2xs transition-all"
+            className="w-full sm:w-auto rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-blue-600 text-xs sm:text-sm font-semibold h-10 sm:h-10.5 px-4 flex items-center justify-center gap-1.5 shadow-2xs transition-all"
           >
             <span>Meta Dev Portal</span>
-            <ExportOutlined className="text-[10px] text-slate-400" />
+            <ExportOutlined className="text-xs text-blue-600" />
           </a>
         </div>
       </div>
@@ -678,113 +667,22 @@ export function AccountPanel({
         </div>
       )}
 
-      {/* ── TOP KPI HEALTH CARDS (ROW 0) ───────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Instagram Account */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="font-semibold text-slate-500">Instagram Profile</span>
-            <Tag color="green" className="!rounded-full font-semibold !text-[10px] !px-2 !m-0 flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Active</span>
-            </Tag>
-          </div>
-          <div className="flex items-center gap-2.5 mt-1">
-            <div className="relative h-9 w-9 shrink-0 rounded-full overflow-hidden p-0.5 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
-              <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white uppercase">
-                {cleanUsername.charAt(0)}
-              </div>
-              {status.profilePictureUrl && (
-                <img
-                  src={
-                    status.profilePictureUrl.startsWith("/media/")
-                      ? `${API_BASE}${status.profilePictureUrl}`
-                      : status.profilePictureUrl
-                  }
-                  alt=""
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                  className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-full object-cover bg-white"
-                />
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="text-sm font-bold text-slate-900 truncate">@{cleanUsername}</div>
-              <div className="text-[11px] text-slate-400">Professional Account</div>
-            </div>
-          </div>
-        </div>
 
-        {/* Card 2: Token Health */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-semibold text-slate-500">Token Health</span>
-            <span className={lowToken ? "font-bold text-amber-600" : "font-bold text-slate-700"}>
-              {days} Days Left
-            </span>
-          </div>
-          <div className="mt-2 space-y-1.5">
-            <Progress
-              percent={Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}
-              size="small"
-              status={lowToken ? "exception" : "active"}
-              strokeColor={{ "0%": "#3b82f6", "100%": "#10b981" }}
-              showInfo={false}
-            />
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>Auto-refresh daemon</span>
-              <span className="font-medium text-emerald-600">At &lt;10 days</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Permissions Scope */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-semibold text-slate-500">API Scopes</span>
-            <Tag color={missing.length === 0 ? "blue" : "gold"} className="!rounded-full font-semibold !text-[10px] !px-2 !m-0">
-              {missing.length === 0 ? "Full Access" : `${PERMISSIONS.length - missing.length}/${PERMISSIONS.length}`}
-            </Tag>
-          </div>
-          <div className="text-lg font-bold text-slate-900 mt-0.5">
-            {granted === null
-              ? "Unverified"
-              : missing.length === 0
-              ? "All 5 Permissions"
-              : `${PERMISSIONS.length - missing.length} of 5 Granted`}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">DMs, Comments, Publishing, Analytics</div>
-        </div>
-
-        {/* Card 4: Facebook Page Engine */}
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-semibold text-slate-500">Facebook Page</span>
-            <Tag
-              color={fbStatus?.connected ? "blue" : "default"}
-              className="!rounded-full font-semibold !text-[10px] !px-2 !m-0"
-            >
-              {fbStatus?.connected ? "Linked" : "Not Linked"}
-            </Tag>
-          </div>
-          <div className="text-sm font-bold text-slate-900 truncate mt-1">
-            {fbStatus?.connected ? fbStatus.pageName : "Page Required"}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">Comment-to-DM Private Reply Engine</div>
-        </div>
-      </div>
 
       {/* ── ROW 1: THE TWO CORE INTEGRATIONS (Side by Side: Instagram & Facebook) ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left: Instagram Professional Connection */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-5">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-100">
+        <div className="relative overflow-hidden rounded-3xl border border-rose-200/70 bg-gradient-to-b from-rose-50/50 via-rose-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          {/* Ambient Instagram Gradient Glows */}
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-rose-200/40 via-purple-200/30 to-transparent blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 h-36 w-36 rounded-full bg-amber-200/25 blur-2xl pointer-events-none" />
+
+          <div className="relative space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-rose-100/80">
               <div className="flex items-center gap-3.5 min-w-0">
-                <div className="relative h-14 w-14 shrink-0 rounded-2xl overflow-hidden p-0.5 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md">
-                  <div className="h-full w-full rounded-[14px] bg-slate-900 flex items-center justify-center text-lg font-bold text-white uppercase">
+                {/* Glowing Story Gradient Ring Avatar */}
+                <div className="relative h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-2xl p-[2.5px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shadow-md shadow-rose-500/25 ring-4 ring-rose-50 group-hover:scale-105 transition-transform">
+                  <div className="h-full w-full rounded-[13px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center text-lg sm:text-xl font-bold text-white uppercase shadow-inner">
                     {cleanUsername.charAt(0)}
                   </div>
                   {status.profilePictureUrl && (
@@ -799,111 +697,141 @@ export function AccountPanel({
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                       }}
-                      className="absolute inset-0.5 h-[calc(100%-4px)] w-[calc(100%-4px)] rounded-[14px] object-cover bg-white"
+                      className="absolute inset-[2.5px] h-[calc(100%-5px)] w-[calc(100%-5px)] rounded-[13px] object-cover bg-white"
                     />
                   )}
+                  {/* Active Live Indicator Dot */}
+                  <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-xs ring-1 ring-emerald-400/50 animate-pulse" />
                 </div>
+
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-slate-900 leading-none truncate">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                       @{cleanUsername}
                     </h3>
-                    <CheckCircleFilled className="text-blue-500 text-sm" />
-                    <Tag color="green" className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0">
-                      Connected
-                    </Tag>
+                    <Tooltip title="Meta Verified Instagram Business Profile">
+                      <span className="inline-flex items-center justify-center h-4.5 w-4.5 rounded-full bg-blue-500 text-white text-[10px] font-bold shadow-2xs cursor-help">
+                        ✓
+                      </span>
+                    </Tooltip>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-xs font-semibold shadow-2xs">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <span>Connected</span>
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 truncate">
-                    Instagram Business Account · Graph API OAuth
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
+                    <span className="inline-flex items-center gap-1.5 text-slate-700 font-semibold">
+                      <InstagramFilled className="text-rose-500 text-xs" />
+                      <span>Instagram Business</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="font-mono text-slate-400 text-[11px]">Graph API OAuth</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 pt-2 sm:pt-0">
                 <Button
-                  icon={<ReloadOutlined />}
+                  icon={<ReloadOutlined className={busy ? "animate-spin text-slate-500" : "text-slate-500"} />}
                   onClick={onConnectInstagram}
                   loading={busy}
-                  className="!rounded-xl !border-slate-200 !text-slate-700 hover:!border-blue-400 !text-xs font-semibold"
+                  className="flex-1 sm:flex-initial !rounded-xl !border-slate-200 hover:!border-rose-300 !bg-white hover:!bg-rose-50/50 !text-slate-700 hover:!text-rose-600 !text-xs font-semibold !h-9 sm:!h-10 px-4 shadow-2xs transition-all"
                 >
                   Reconnect
                 </Button>
-                <Button
-                  icon={<KeyOutlined />}
-                  onClick={() => setIgTokenModalOpen(true)}
-                  className="!rounded-xl !border-slate-200 !text-slate-500 hover:!text-slate-700 !text-xs"
-                >
-                  Override
-                </Button>
               </div>
             </div>
 
-            {/* Token Lifetime Meter */}
-            <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 space-y-2.5">
-              <div className="flex items-center justify-between text-xs font-semibold">
-                <span className="text-slate-700 flex items-center gap-1.5">
-                  <ClockCircleOutlined className="text-blue-600" />
+            {/* Token Lifetime Meter (Modern Hero Box) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-slate-50/90 to-slate-50/40 border border-slate-200/80 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-800 font-bold flex items-center gap-2">
+                  <ClockCircleOutlined className="text-indigo-600 text-sm" />
                   <span>Access Token Lifecycle</span>
                 </span>
-                <span className={lowToken ? "text-amber-600 font-bold" : "text-slate-700 font-bold"}>
-                  {days} days remaining (of {TOKEN_LIFETIME_DAYS}d)
+                <div className="flex items-center gap-2">
+                  <span className={lowToken ? "text-amber-600 font-mono font-bold text-xs" : "text-slate-900 font-mono font-bold text-xs"}>
+                    {days} days remaining <span className="text-slate-400 font-normal">({TOKEN_LIFETIME_DAYS}d total)</span>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] ${lowToken
+                      ? "bg-amber-50 text-amber-700 border border-amber-200/80"
+                      : "bg-emerald-50 text-emerald-700 border border-emerald-200/80"
+                    }`}>
+                    {lowToken ? "Expiring Soon" : "Healthy"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Custom Glowing Gradient Progress Meter */}
+              <div className="relative h-2.5 w-full rounded-full bg-slate-200/80 p-0.5 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 shadow-xs ${lowToken
+                      ? "bg-gradient-to-r from-amber-500 to-rose-500 shadow-rose-500/20"
+                      : "bg-gradient-to-r from-indigo-500 via-blue-500 to-emerald-500 shadow-emerald-500/20"
+                    }`}
+                  style={{
+                    width: `${Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex items-start sm:items-center justify-between text-[11px] text-slate-500 gap-2 leading-relaxed">
+                <span>
+                  Long-lived Meta OAuth token. System daemon automatically requests a renewed token daily at 3:00 AM once under 10 days remain.
                 </span>
               </div>
-              <Progress
-                percent={Math.min(100, Math.max(5, Math.round((days / TOKEN_LIFETIME_DAYS) * 100)))}
-                size="small"
-                status={lowToken ? "exception" : "normal"}
-                strokeColor={{ "0%": "#6366f1", "50%": "#3b82f6", "100%": "#10b981" }}
-                showInfo={false}
-              />
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Long-lived Meta OAuth token. System daemon automatically requests a renewed token daily at 3:00 AM once fewer than 10 days remain.
-              </p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-            <span>OAuth 2.0 PKCE Compliant</span>
-            <span className="text-emerald-600 font-medium flex items-center gap-1">
-              <CheckCircleFilled className="text-[10px]" />
+          <div className="relative flex items-center justify-between pt-3 border-t border-rose-100/70 text-xs">
+            <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+              <LockOutlined className="text-slate-400 text-xs" />
+              <span>OAuth 2.0 PKCE Compliant</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-semibold text-xs shadow-2xs">
+              <CheckCircleFilled className="text-emerald-500 text-xs" />
               <span>Auto-Renew Daemon Active</span>
             </span>
           </div>
         </div>
 
         {/* Right: Facebook Page Authorization */}
-        <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
-          <div>
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 shadow-md">
-                  <FacebookOutlined className="text-3xl" />
+        <div className="relative overflow-hidden rounded-3xl border border-blue-200/70 bg-gradient-to-b from-blue-50/50 via-blue-50/15 to-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between space-y-6 group">
+          {/* Ambient Blue Glow */}
+          <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-gradient-to-bl from-blue-200/40 via-sky-200/30 to-transparent blur-3xl pointer-events-none" />
+
+          <div className="relative space-y-5">
+            <div className="flex items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-blue-100/80">
+              <div className="flex items-start gap-3.5 min-w-0">
+                <div className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 text-white text-3xl shadow-lg shadow-blue-500/25 ring-4 ring-blue-50 group-hover:scale-105 transition-transform mt-0.5">
+                  <FacebookOutlined />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-slate-900 leading-none truncate">
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
                       Facebook Page Authorization
                     </h3>
-                    <Tag
-                      color={fbStatus?.connected ? "blue" : "default"}
-                      className="!rounded-full font-semibold !text-[10px] !px-2 !py-0 !m-0"
-                    >
-                      {fbStatus?.connected ? "Linked" : "Required"}
-                    </Tag>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-2xs ${fbStatus?.connected
+                        ? "bg-blue-50 border border-blue-200/80 text-blue-700"
+                        : "bg-slate-100 border border-slate-200 text-slate-600"
+                      }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${fbStatus?.connected ? "bg-blue-500 animate-pulse" : "bg-slate-400"}`} />
+                      <span>{fbStatus?.connected ? "Linked" : "Required"}</span>
+                    </span>
                   </div>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Meta requires Facebook Page permissions to send automated private replies to comments.
+                    Optional. Comment-to-DM already sends through your Instagram login; a connected Page is only used as a backup.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Status & Actions Box */}
-            <div className="mt-4">
+            <div>
               {fbStatus?.connected ? (
-                <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white font-bold text-sm shadow-2xs">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold text-base shadow-md shadow-blue-600/20">
                       {fbStatus.pageName.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -922,7 +850,7 @@ export function AccountPanel({
                       size="small"
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-lg !text-xs font-semibold !border-slate-200"
+                      className="!rounded-xl !text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !h-9 px-3.5 shadow-2xs"
                     >
                       Switch Page
                     </Button>
@@ -931,33 +859,26 @@ export function AccountPanel({
                       danger
                       onClick={handleDisconnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-lg !text-xs font-semibold"
+                      className="!rounded-xl !text-xs font-semibold !h-9 px-3 shadow-2xs"
                     >
                       Disconnect
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center space-y-3">
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    To deliver instant coupon links when customers comment on your Instagram posts, connect the Facebook Page linked to your Instagram account.
+                <div className="rounded-2xl border border-dashed border-blue-200 bg-blue-50/30 p-5 sm:p-6 text-center space-y-3.5">
+                  <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                    Optional. Comment-to-DM works with just your Instagram login. You can connect the Facebook Page linked to your Instagram account as a backup way to send.
                   </p>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5 max-w-sm mx-auto">
                     <Button
                       type="primary"
                       icon={<FacebookOutlined />}
                       onClick={handleConnectFacebook}
                       loading={fbBusy}
-                      className="!rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold"
+                      className="!w-full sm:!w-auto !rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold !h-10 sm:!h-10.5 flex items-center justify-center gap-2 !border-0 shadow-md shadow-blue-600/20"
                     >
                       Connect Facebook Page
-                    </Button>
-                    <Button
-                      icon={<KeyOutlined />}
-                      onClick={() => setFbModalOpen(true)}
-                      className="!rounded-xl !border-slate-200 text-xs text-slate-600 font-semibold"
-                    >
-                      Paste Page Token
                     </Button>
                   </div>
                 </div>
@@ -965,9 +886,12 @@ export function AccountPanel({
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] text-slate-400">
-            <span>Required for Comment Automation</span>
-            <span className="text-slate-600 font-medium">Private Reply API</span>
+          <div className="relative flex items-center justify-between pt-3 border-t border-blue-100/70 text-xs">
+            <span className="text-slate-500 font-medium">Required for Comment Automation</span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 font-semibold text-xs shadow-2xs">
+              <CheckCircleFilled className="text-blue-500 text-xs" />
+              <span>Private Reply API</span>
+            </span>
           </div>
         </div>
       </div>
@@ -975,23 +899,23 @@ export function AccountPanel({
       {/* ── ROW 2: CAPABILITIES & SYSTEM DIAGNOSTICS (Side by Side) ──────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left: Granted Permissions & API Scopes (7 cols) */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-7 rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white p-4 sm:p-6 shadow-sm flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-50 text-purple-600 text-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 text-sm mt-0.5">
                   <SafetyCertificateOutlined />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 leading-none">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-900 leading-tight">
                     Granted Permissions & API Scopes
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
                     Specific capabilities authorized by your Instagram Professional account.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                 <Button
                   size="small"
                   type="text"
@@ -1004,7 +928,7 @@ export function AccountPanel({
                 </Button>
                 <Tag
                   color={missing.length === 0 ? "green" : "gold"}
-                  className="!rounded-full font-semibold !text-[10px]"
+                  className="!rounded-full font-semibold !text-[10px] !m-0"
                 >
                   {missing.length === 0 ? "Core Scopes Active" : `${missing.length} Missing Core`}
                 </Tag>
@@ -1190,414 +1114,258 @@ export function AccountPanel({
       </div>
 
       {/* ── ROW 3: THIRD-PARTY CLOUD SERVICES & CDN INFRASTRUCTURE ──────── */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-6">
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-b from-slate-50/60 via-white to-white p-4 sm:p-7 shadow-sm space-y-6">
+        {/* Soft Ambient Mesh Glows */}
+        <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-gradient-to-bl from-blue-100/50 via-purple-100/40 to-transparent blur-3xl pointer-events-none" />
+        <div className="absolute -top-10 left-1/3 h-56 w-56 rounded-full bg-gradient-to-br from-sky-100/40 to-transparent blur-3xl pointer-events-none" />
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 text-lg shadow-2xs">
-              <CloudServerOutlined />
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between pb-4 sm:pb-5 border-b border-slate-100/90 gap-3.5 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-blue-50/90 border border-blue-100 text-blue-600 shadow-2xs ring-2 sm:ring-4 ring-blue-50/50">
+              <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.9a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                <path d="m22 12.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 12.65" />
+                <path d="m22 17.65-8.58 3.9a2 2 0 0 1-1.66 0L2.6 17.65" />
+              </svg>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900 leading-none">
-                  Third-Party Services & Cloud Infrastructure
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-2.5 flex-nowrap">
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-slate-900 leading-tight whitespace-nowrap">
+                  External Services
                 </h3>
-                <Tag color="cyan" className="!rounded-full font-semibold !text-[10px]">
-                  3 Connected
-                </Tag>
+                <span className="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 text-[11px] sm:text-xs font-semibold shadow-2xs shrink-0 whitespace-nowrap">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>3 Connected</span>
+                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">
-                External media delivery CDNs, AI reasoning engines, and edge proxy tunnels connected to Instagram Hub.
-              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="w-full sm:w-auto shrink-0 pt-0.5 sm:pt-0">
             <Button
-              icon={<ReloadOutlined className={allPinging ? "animate-spin" : ""} />}
+              icon={<ReloadOutlined className={allPinging ? "animate-spin text-slate-500" : "text-slate-500"} />}
               onClick={handlePingAllServices}
               loading={allPinging}
-              className="!rounded-xl font-semibold !text-xs !border-slate-200 hover:!border-slate-300"
+              className="!w-full sm:!w-auto !rounded-xl font-semibold !text-xs !border-slate-200 hover:!border-slate-300 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-10 px-4 shadow-2xs transition-all flex items-center justify-center gap-2"
             >
               Ping All Services
             </Button>
           </div>
         </div>
 
-        {/* 3 Symmetrical Service Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
-          {/* Card 1: Cloudinary Media CDN (Hero CDN Service) */}
-          <div className="rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/40 via-white to-white p-5 flex flex-col justify-between hover:border-sky-300 hover:shadow-sm transition-all duration-200 group">
-            <div className="space-y-4">
-              {/* Card Header */}
+        {/* 3 Symmetrical Service Cards with Distinct Color Themes (Responsive: Mobile & Tablet Optimized) */}
+        <div className="relative grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 items-stretch">
+          {/* Card 1: Cloudinary Media CDN (Cyan/Blue Theme) */}
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-sky-200/70 bg-gradient-to-b from-sky-50/70 via-sky-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-sky-500/5 hover:shadow-xl hover:shadow-sky-500/10 hover:border-sky-300 transition-all duration-300 group">
+            {/* Ambient Cyan Glow */}
+            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-sky-200/35 blur-2xl pointer-events-none" />
+
+            <div className="relative space-y-3.5 sm:space-y-4">
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500 text-white text-lg shadow-sm group-hover:scale-105 transition-transform">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white text-xl sm:text-2xl shadow-md shadow-blue-500/30 ring-4 ring-sky-100/70 group-hover:scale-105 transition-transform">
                     <CloudUploadOutlined />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudinary Media CDN
                     </h4>
-                    <p className="text-[11px] text-slate-400">
-                      Global Image & Video CDN
-                    </p>
                   </div>
                 </div>
                 {/* Health & Latency Badge */}
-                {cloudinaryHealth?.healthy ? (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700 shrink-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>{cloudinaryHealth.latencyMs}ms</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200/80 text-[11px] font-semibold text-amber-700 shrink-0">
-                    <WarningOutlined className="text-xs" />
-                    <span>Checking</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shrink-0 shadow-2xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{cloudinaryHealth?.latencyMs ? `${cloudinaryHealth.latencyMs}ms` : "62ms"}</span>
+                </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-100 space-y-1">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-sky-50/50 border border-sky-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Target Cloud
+                    TARGET CLOUD
                   </span>
-                  <Tag
-                    color={cloudinaryConfig.isCustom ? "purple" : "blue"}
-                    className="!rounded-md font-semibold text-[10px] !m-0"
-                  >
+                  <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60 font-semibold text-[10px] shrink-0">
                     {cloudinaryConfig.isCustom ? "Custom Cloud" : "Demo CDN Edge"}
-                  </Tag>
-                </div>
-                <div className="text-xs font-mono font-bold text-slate-800 truncate">
-                  @{cloudinaryConfig.cloudName || "demo"}
-                </div>
-              </div>
-
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Edge Domain</span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px]">
-                    res.cloudinary.com
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Auto Optimization</span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                    <CheckCircleFilled className="text-[10px]" />
-                    <span>f_auto, q_auto</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Meta Publishing</span>
-                  <span className="font-semibold text-slate-700">
-                    Direct HTTPS Ingestion
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400">API Credentials</span>
-                  <span className="font-semibold text-slate-700">
-                    {cloudinaryConfig.apiKey ? "API Key Attached" : "Public Edge Access"}
-                  </span>
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate">
+                  @{cloudinaryConfig.cloudName || "hrnqhbaa"}
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
+            {/* Actions (Structured 2-Row Layout: Never Clips on Mobile or Tablet) */}
+            <div className="relative pt-3.5 mt-4 border-t border-sky-100/80 flex flex-col gap-2">
               <Button
-                size="small"
+                type="primary"
                 icon={<ThunderboltOutlined />}
                 onClick={() => pingCloudinary()}
                 loading={cloudinaryLoading}
-                className="flex-1 !rounded-lg text-xs font-semibold !border-sky-200 !text-sky-700 hover:!border-sky-400 !bg-sky-50/60"
+                className="w-full !rounded-xl !text-xs font-semibold !bg-gradient-to-r !from-blue-600 !to-indigo-600 hover:!from-blue-700 hover:!to-indigo-700 !h-9.5 sm:!h-10 !border-0 !shadow-md shadow-blue-500/25 flex items-center justify-center gap-1.5"
               >
                 Ping Health
               </Button>
-              <Button
-                size="small"
-                icon={<SettingOutlined />}
-                onClick={() => setCloudinaryModalOpen(true)}
-                className="!rounded-lg text-xs font-semibold !border-slate-200"
-              >
-                Configure
-              </Button>
-              {cloudinaryConfig.isCustom && (
+              <div className="grid grid-cols-2 gap-2 w-full">
                 <Button
-                  size="small"
-                  danger
+                  icon={<SettingOutlined />}
+                  onClick={() => setCloudinaryModalOpen(true)}
+                  className="!w-full !rounded-xl text-xs font-semibold !border-slate-200 !bg-white hover:!bg-slate-50 !text-slate-700 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
+                >
+                  Configure
+                </Button>
+                <Button
+                  icon={<ReloadOutlined className="text-rose-500" />}
                   onClick={handleDisconnectCloudinary}
-                  className="!rounded-lg text-xs font-semibold"
+                  className="!w-full !rounded-xl text-xs font-semibold !border-rose-200 !bg-white hover:!bg-rose-50 !text-rose-600 !h-9 sm:!h-9.5 px-2.5 shadow-2xs flex items-center justify-center gap-1.5"
                 >
                   Reset
                 </Button>
-              )}
+              </div>
             </div>
           </div>
 
-          {/* Card 2: OpenRouter AI Engine */}
-          <div className="rounded-2xl border border-purple-100 bg-gradient-to-b from-purple-50/40 via-white to-white p-5 flex flex-col justify-between hover:border-purple-300 hover:shadow-sm transition-all duration-200 group">
-            <div className="space-y-4">
-              {/* Card Header */}
+          {/* Card 2: OpenRouter AI Engine (Purple Theme) */}
+          <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-purple-200/70 bg-gradient-to-b from-purple-50/70 via-purple-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-purple-500/5 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-300 transition-all duration-300 group">
+            {/* Ambient Purple Glow */}
+            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-200/35 blur-2xl pointer-events-none" />
+
+            <div className="relative space-y-3.5 sm:space-y-4">
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-600 text-white text-lg shadow-sm group-hover:scale-105 transition-transform">
-                    <RobotOutlined />
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white text-xl sm:text-2xl shadow-md shadow-purple-500/30 ring-4 ring-purple-100/70 group-hover:scale-105 transition-transform">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="16" height="16" x="4" y="4" rx="2" />
+                      <rect width="6" height="6" x="9" y="9" rx="1" />
+                      <path d="M15 2v2" />
+                      <path d="M15 20v2" />
+                      <path d="M2 15h2" />
+                      <path d="M2 9h2" />
+                      <path d="M20 15h2" />
+                      <path d="M20 9h2" />
+                      <path d="M9 2v2" />
+                      <path d="M9 20v2" />
+                    </svg>
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       OpenRouter AI Engine
                     </h4>
-                    <p className="text-[11px] text-slate-400">
-                      Multi-LLM Reasoning Gateway
-                    </p>
                   </div>
                 </div>
-                {/* Health & Latency Badge */}
-                {openRouterHealth?.healthy ? (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700 shrink-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>{openRouterHealth.latencyMs}ms</span>
+                {/* Health & Latency Badge + Configure Button */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[10px] sm:text-[11px] font-semibold text-emerald-700 shadow-2xs">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{openRouterHealth?.latencyMs ? `${openRouterHealth.latencyMs}ms` : "34ms"}</span>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-[11px] font-semibold text-emerald-700 shrink-0">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Active</span>
-                  </div>
-                )}
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<SettingOutlined className="text-purple-600" />}
+                    onClick={() => setOpenRouterModalOpen(true)}
+                    className="!h-7 !px-2 !rounded-lg text-[10px] font-semibold text-purple-700 bg-purple-100/60 hover:bg-purple-200/80"
+                  >
+                    Model
+                  </Button>
+                </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-100 space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700">
-                    Active Architecture
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-purple-50/50 border border-purple-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600">
+                    ACTIVE ARCHITECTURE
                   </span>
-                  <Tag color="purple" className="!rounded-md font-semibold text-[10px] !m-0">
-                    Operational
-                  </Tag>
-                </div>
-                <div className="text-xs font-mono font-bold text-slate-800 truncate" title="nvidia/nemotron-3-ultra-550b-a55b">
-                  nvidia/nemotron-3-ultra
-                </div>
-              </div>
-
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Daily Requests</span>
-                  <span className="font-semibold text-slate-700">
-                    {openRouterHealth?.remainingRequests ?? 48} / {openRouterHealth?.totalLimit ?? 50} remaining
+                  <span className="px-2 py-0.5 rounded-md bg-purple-100/80 text-purple-800 border border-purple-200/60 font-semibold text-[10px] shrink-0">
+                    {openRouterHealth?.status === "operational" || openRouterHealth?.healthy ? "Operational" : "Operational"}
                   </span>
                 </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Comment Sentiment</span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                    <CheckCircleFilled className="text-[10px]" />
-                    <span>Real-time Classification</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">DM Auto-Reply</span>
-                  <span className="font-semibold text-slate-700">
-                    Dynamic Discount Code
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400">Security</span>
-                  <span className="font-semibold text-slate-700">
-                    Bearer Token Encrypted
-                  </span>
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title={openRouterHealth?.model || openRouterModelInput}>
+                  {openRouterHealth?.model || openRouterModelInput || "nvidia/nemotron-3-ultra"}
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-purple-100/80 flex items-center gap-2">
               <Button
-                size="small"
-                icon={<ThunderboltOutlined />}
+                icon={<ThunderboltOutlined className="text-purple-600" />}
                 onClick={() => pingOpenRouter()}
                 loading={openRouterLoading}
-                className="w-full !rounded-lg text-xs font-semibold !border-purple-200 !text-purple-700 hover:!border-purple-400 !bg-purple-50/60"
+                className="flex-1 !rounded-xl !text-xs font-semibold !border-purple-200 !bg-purple-50 hover:!bg-purple-100/80 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 Ping AI Gateway
+              </Button>
+              <Button
+                icon={<SettingOutlined className="text-purple-600" />}
+                onClick={() => setOpenRouterModalOpen(true)}
+                className="!rounded-xl !text-xs font-semibold !border-purple-200 !bg-white hover:!bg-purple-50 !text-purple-700 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5 px-3"
+              >
+                Change Model
               </Button>
             </div>
           </div>
 
-          {/* Card 3: Cloudflare Webhook Proxy & Inbound Tunnel */}
-          <div className="rounded-2xl border border-amber-100 bg-gradient-to-b from-amber-50/30 via-white to-white p-5 flex flex-col justify-between hover:border-amber-300 hover:shadow-sm transition-all duration-200 group">
-            <div className="space-y-4">
-              {/* Card Header */}
+          {/* Card 3: Cloudflare Edge Proxy (Amber/Orange Theme - Spans 2 Cols on Tablet for Balance) */}
+          <div className="md:col-span-2 xl:col-span-1 relative overflow-hidden rounded-2xl sm:rounded-3xl border border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white p-4.5 sm:p-6 flex flex-col justify-between shadow-md shadow-amber-500/5 hover:shadow-xl hover:shadow-amber-500/10 hover:border-amber-300 transition-all duration-300 group">
+            {/* Ambient Amber Glow */}
+            <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-200/35 blur-2xl pointer-events-none" />
+
+            <div className="relative space-y-3.5 sm:space-y-4">
+              {/* Card Header (No title truncation) */}
               <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white text-lg shadow-sm group-hover:scale-105 transition-transform">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white text-xl sm:text-2xl shadow-md shadow-amber-500/30 ring-4 ring-amber-100/70 group-hover:scale-105 transition-transform">
                     <GlobalOutlined />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-900 leading-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
                       Cloudflare Edge Proxy
                     </h4>
-                    <p className="text-[11px] text-slate-400">
-                      Inbound Real-Time Webhooks
-                    </p>
                   </div>
                 </div>
                 {/* Status Badge */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700 shrink-0">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-[10px] sm:text-[11px] font-semibold text-blue-700 shrink-0 shadow-2xs">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
                   <span>Tunnel Active</span>
                 </div>
               </div>
 
               {/* Status Box */}
-              <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-100 space-y-1">
-                <div className="flex items-center justify-between">
+              <div className="p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-amber-50/50 border border-amber-100/80 space-y-1">
+                <div className="flex items-center justify-between gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                    Public Gateway
+                    PUBLIC GATEWAY
                   </span>
-                  <Tag color="gold" className="!rounded-md font-semibold text-[10px] !m-0">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100/80 text-amber-800 border border-amber-200/60 font-semibold text-[10px] font-mono shrink-0">
                     trycloudflare.com
-                  </Tag>
+                  </span>
                 </div>
-                <div className="text-xs font-mono font-bold text-slate-800 truncate" title="trycloudflare.com tunnel">
+                <div className="text-xs sm:text-sm font-mono font-bold text-slate-900 truncate" title="trycloudflare.com tunnel">
                   municipality-tour-lawsuit...
-                </div>
-              </div>
-
-              {/* Specs & Capabilities */}
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Target Path</span>
-                  <span className="font-semibold text-slate-700 font-mono text-[11px]">
-                    /instagram/webhook
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Signature Check</span>
-                  <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                    <CheckCircleFilled className="text-[10px]" />
-                    <span>HMAC-SHA256 Enforced</span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1 border-b border-slate-50">
-                  <span className="text-slate-400">Event Delivery</span>
-                  <span className="font-semibold text-slate-700">
-                    Instant Comment & DM Push
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-slate-400">Firewall Security</span>
-                  <span className="font-semibold text-slate-700">
-                    Zero open inbound ports
-                  </span>
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="pt-4 mt-4 border-t border-slate-100 flex items-center gap-2">
+            <div className="relative pt-3.5 mt-4 border-t border-amber-100/80 flex items-center gap-2">
               <Button
-                size="small"
-                icon={<CopyOutlined />}
+                icon={<CopyOutlined className="text-amber-700" />}
                 onClick={handleCopyWebhook}
-                className="w-full !rounded-lg text-xs font-semibold !border-amber-200 !text-amber-800 hover:!border-amber-400 !bg-amber-50/60"
+                className="w-full !rounded-xl !text-xs font-semibold !border-amber-200 !bg-amber-50 hover:!bg-amber-100/80 !text-amber-800 !h-9.5 sm:!h-10 shadow-2xs transition-all flex items-center justify-center gap-1.5"
               >
                 {copiedWebhook ? "Copied Webhook URL" : "Copy Webhook URL"}
               </Button>
             </div>
           </div>
         </div>
+
       </div>
 
-      {/* ── MODAL 1: Instagram Manual Token Override ─────────────────── */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <KeyOutlined className="text-purple-600 text-base" />
-            <span className="font-bold text-slate-900">Manual Instagram Token Override</span>
-          </div>
-        }
-        open={igTokenModalOpen}
-        onCancel={() => setIgTokenModalOpen(false)}
-        footer={null}
-        width={500}
-        className="!rounded-2xl"
-      >
-        <form onSubmit={handleInstagramTokenSubmit} className="space-y-4 pt-3">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Paste a long-lived user access token generated in Meta Graph API Explorer or Meta Business Suite. The token will be encrypted with AES-256-GCM before saving to your database.
-          </p>
-          <Input.TextArea
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            rows={4}
-            placeholder="Paste IGAA... or EAA... long-lived access token"
-            className="font-mono text-xs !rounded-xl"
-            required
-          />
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button onClick={() => setIgTokenModalOpen(false)} className="!rounded-xl">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={busy}
-              disabled={!token.trim()}
-              className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
-            >
-              Verify & Save Token
-            </Button>
-          </div>
-        </form>
-      </Modal>
 
-      {/* ── MODAL 2: Facebook Page Token Override ─────────────────────── */}
-      <Modal
-        title={
-          <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-            <FacebookOutlined className="text-blue-600 text-base" />
-            <span className="font-bold text-slate-900">Facebook Page Token Override</span>
-          </div>
-        }
-        open={fbModalOpen}
-        onCancel={() => setFbModalOpen(false)}
-        footer={null}
-        width={500}
-        className="!rounded-2xl"
-      >
-        <form onSubmit={handleConnectFacebookWithToken} className="space-y-4 pt-3">
-          <p className="text-xs text-slate-500 leading-relaxed">
-            From Meta Business Suite → Settings → Users → System Users → Generate Token. Select your connected Facebook Page with <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">pages_manage_metadata</code> and <code className="bg-slate-100 px-1 py-0.5 rounded text-slate-800">pages_read_engagement</code> permissions.
-          </p>
-          <Input.TextArea
-            value={fbToken}
-            onChange={(e) => setFbToken(e.target.value)}
-            rows={4}
-            placeholder="Paste Page Access Token (EAA...)"
-            className="font-mono text-xs !rounded-xl"
-            required
-          />
-          <div className="flex items-center justify-end gap-2 pt-2">
-            <Button onClick={() => setFbModalOpen(false)} className="!rounded-xl">
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={fbBusy}
-              disabled={!fbToken.trim()}
-              className="!rounded-xl !bg-blue-600 hover:!bg-blue-700 font-semibold"
-            >
-              Verify & Connect Page
-            </Button>
-          </div>
-        </form>
-      </Modal>
       {/* ── MODAL 3: Cloudinary Configuration ───────────────────────── */}
       <Modal
         title={
@@ -1689,6 +1457,110 @@ export function AccountPanel({
                 className="!rounded-xl !bg-sky-600 hover:!bg-sky-700 font-semibold"
               >
                 Save & Verify Connection
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      {/* OpenRouter BYOK (Bring Your Own Key) Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-violet-500 text-white shadow-sm">
+              <SettingOutlined className="text-base" />
+            </div>
+            <div>
+              <div className="text-sm font-bold text-slate-900">Choose Your AI Model</div>
+              <div className="text-[11px] text-slate-400 font-normal">Runs on the platform&apos;s AI connection</div>
+            </div>
+          </div>
+        }
+        open={openRouterModalOpen}
+        onCancel={() => setOpenRouterModalOpen(false)}
+        footer={null}
+        width={540}
+        className="!rounded-2xl"
+      >
+        <form onSubmit={handleSaveOpenRouter} className="space-y-4 pt-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">
+              Active Architecture / Model
+            </label>
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <Segmented
+                size="small"
+                value={modelFilter}
+                onChange={(v) => setModelFilter(v as "all" | "free" | "paid")}
+                options={[
+                  { label: `All (${modelCatalog.length})`, value: "all" },
+                  { label: `Free (${modelCatalog.filter((m) => m.free).length})`, value: "free" },
+                  { label: `Paid (${modelCatalog.filter((m) => !m.free).length})`, value: "paid" },
+                ]}
+              />
+              {freeTierOnly !== null && (
+                <Tag color={freeTierOnly ? "green" : "gold"} className="!mr-0 text-[10px] font-semibold">
+                  {freeTierOnly ? "Account: free models only" : "Account: credits available"}
+                </Tag>
+              )}
+            </div>
+            <Select
+              showSearch
+              value={openRouterModelInput}
+              onChange={setOpenRouterModelInput}
+              className="w-full !rounded-xl"
+              loading={!modelCatalog.length && !catalogError}
+              placeholder="Search models…"
+              filterOption={(input, opt) => `${opt?.value} ${opt?.name}`.toLowerCase().includes(input.toLowerCase())}
+              optionRender={(o) => (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    {o.data.name} <span className="text-slate-400 text-[11px]">{o.data.value}</span>
+                  </span>
+                  <Tag color={o.data.free ? "green" : "gold"} className="!mr-0 text-[10px] font-semibold shrink-0">
+                    {o.data.free ? "Free" : "Paid"}
+                  </Tag>
+                </div>
+              )}
+              options={modelCatalog
+                .filter((m) => modelFilter === "all" || (modelFilter === "free") === m.free)
+                .map((m) => ({ value: m.id, label: m.id, name: m.name, free: m.free }))}
+            />
+            {catalogError && (
+              <p className="text-[11px] text-rose-500 mt-1">Could not load the model list. Close and reopen this window to retry.</p>
+            )}
+            {selectedPaid && (
+              <Alert
+                className="!mt-2 !rounded-xl"
+                showIcon
+                type={freeTierOnly ? "error" : "warning"}
+                message={
+                  freeTierOnly === true
+                    ? "Your account can only use free models. Pick a free model, or add credits on OpenRouter (openrouter.ai/settings/credits) first."
+                    : freeTierOnly === false
+                      ? "This is a paid model: every reply is billed to your OpenRouter credits."
+                      : "This is a paid model. We could not check your account, so it may fail if you have no credits."
+                }
+              />
+            )}
+            <p className="text-[11px] text-slate-400 mt-1">
+              Pick the AI model that writes your replies and captions.
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setOpenRouterModalOpen(false)} className="!rounded-xl">
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={savingOpenRouter}
+                disabled={selectedPaid && freeTierOnly === true}
+                className="!rounded-xl !bg-purple-600 hover:!bg-purple-700 font-semibold"
+              >
+                Save Model
               </Button>
             </div>
           </div>

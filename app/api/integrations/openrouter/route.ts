@@ -1,10 +1,35 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const t0 = Date.now();
+  const authHeader = request.headers.get("authorization") || "";
+
+  // 1. Try querying the NestJS backend
+  try {
+    const backendRes = await fetch("http://localhost:4000/ai/ping", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
+      },
+      body: JSON.stringify({}),
+      cache: "no-store",
+    });
+
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return NextResponse.json({
+        ...data,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } catch (err) {
+    // Backend offline fallback
+  }
+
+  // 2. Direct fallback using environment variables
   const apiKey = process.env.OPENROUTER_API_KEY || "";
-  const model =
-    process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra-550b-a55b:free";
+  const model = process.env.OPENROUTER_MODEL || "nvidia/nemotron-3-ultra";
 
   try {
     const res = await fetch("https://openrouter.ai/api/v1/auth/key", {
@@ -27,7 +52,7 @@ export async function GET() {
         remainingRequests: dailyReqs?.remaining ?? 49,
         totalLimit: dailyReqs?.limit ?? 50,
         isFreeTier: body.data?.is_free_tier ?? true,
-        label: body.data?.label ?? "Primary Production Key",
+        label: body.data?.label ?? "System Key",
         timestamp: new Date().toISOString(),
       });
     }

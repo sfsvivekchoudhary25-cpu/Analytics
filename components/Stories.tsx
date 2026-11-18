@@ -297,96 +297,75 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* ── TOP BANNER & COCKPIT ───────────────────────────────────────── */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white text-xl shadow-md shadow-pink-500/20">
-              <InstagramOutlined />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-tight">
-                  Instagram Stories Studio
-                </h1>
-                <Tag color="purple" className="!rounded-full font-semibold !text-[11px] !border-0 bg-purple-50 text-purple-700">
-                  Meta Graph API v26.0
-                </Tag>
-                <Tag color="green" className="!rounded-full font-semibold !text-[11px] !border-0 bg-emerald-50 text-emerald-700">
-                  24h Ephemeral Feed
-                </Tag>
-              </div>
-              <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-                Create and publish full-screen vertical stories to your followers in real-time. Photos are automatically adapted to 9:16 portrait ratio with high-resolution background blur.
-              </p>
-            </div>
-          </div>
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl font-black tracking-tight text-slate-950">Stories</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Publish photos and videos as full-screen stories. Photos are fitted to 9:16 with a soft blurred background.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            icon={<InfoCircleOutlined />}
+            onClick={() => setGuidelinesModalOpen(true)}
+            className="!rounded-full !h-9 !border-[#e9e9ee] !text-xs !font-medium !text-slate-900 hover:!border-black/40 !shadow-none"
+          >
+            Guidelines
+          </Button>
+          <Button
+            icon={<ReloadOutlined className={busy ? "animate-spin" : ""} />}
+            onClick={() => {
+              setTick((n) => n + 1);
+              message.info("Refreshing stories feed...");
+            }}
+            className="!rounded-full !h-9 !border-[#e9e9ee] !text-xs !font-medium !text-slate-900 hover:!border-black/40 !shadow-none"
+          >
+            Refresh
+          </Button>
+        </div>
+      </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
-            <Button
-              icon={<InfoCircleOutlined />}
-              onClick={() => setGuidelinesModalOpen(true)}
-              className="!rounded-xl font-semibold text-xs !border-slate-200"
-            >
-              Story Guidelines
-            </Button>
-            <Button
-              icon={<ReloadOutlined className={busy ? "animate-spin" : ""} />}
-              onClick={() => {
-                setTick((n) => n + 1);
-                message.info("Refreshing stories feed...");
-              }}
-              className="!rounded-xl font-semibold text-xs !border-slate-200 hover:!border-slate-300"
-            >
-              Refresh
-            </Button>
+      {/* ── Summary ────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div style={{ backgroundColor: "#E2E2FC" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[112px]">
+          <div className="flex items-start justify-between">
+            <span className="text-2xl font-black text-slate-950 tabular-nums">{stats.published}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><CheckCircleFilled /></span>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Published</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">Live to followers</div>
           </div>
         </div>
-
-        {/* ── METRICS STRIP (4 Symmetrical Cards) ────────────────────────── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
-          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Published Stories</div>
-              <div className="text-lg font-extrabold text-slate-900 mt-0.5">{stats.published}</div>
-              <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">Live to followers</div>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
-              <CheckCircleFilled />
-            </div>
+        <div style={{ backgroundColor: "#FFF9DB" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[112px]">
+          <div className="flex items-start justify-between">
+            <span className="text-2xl font-black text-slate-950 tabular-nums">{stats.publishing}</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><ClockCircleOutlined /></span>
           </div>
-
-          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">In Progress / Queue</div>
-              <div className="text-lg font-extrabold text-slate-900 mt-0.5">{stats.publishing}</div>
-              <div className="text-[10px] text-blue-600 font-semibold mt-0.5">Meta processing</div>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">
-              <ClockCircleOutlined />
-            </div>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Publishing</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">Being processed</div>
           </div>
-
-          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Aspect Ratio</div>
-              <div className="text-lg font-extrabold text-slate-900 mt-0.5">9:16 Portrait</div>
-              <div className="text-[10px] text-purple-600 font-semibold mt-0.5">AI Background Blur</div>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">
-              <MobileOutlined />
-            </div>
+        </div>
+        <div style={{ backgroundColor: "#FCEEF4" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[112px]">
+          <div className="flex items-start justify-between">
+            <span className="text-2xl font-black text-slate-950 tabular-nums">9:16</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><MobileOutlined /></span>
           </div>
-
-          <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-100 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Video Capability</div>
-              <div className="text-lg font-extrabold text-slate-900 mt-0.5">Up to 60s</div>
-              <div className="text-[10px] text-rose-600 font-semibold mt-0.5">H.264 &bull; AAC Audio</div>
-            </div>
-            <div className="h-9 w-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base">
-              <VideoCameraOutlined />
-            </div>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Format</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">Portrait, auto-fitted</div>
+          </div>
+        </div>
+        <div style={{ backgroundColor: "#FEECE4" }} className="rounded-[26px] p-4 flex flex-col justify-between shadow-2xs min-h-[112px]">
+          <div className="flex items-start justify-between">
+            <span className="text-2xl font-black text-slate-950 tabular-nums">60s</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs"><VideoCameraOutlined /></span>
+          </div>
+          <div className="mt-3">
+            <div className="text-sm font-bold text-slate-950">Video</div>
+            <div className="mt-0.5 text-xs font-semibold text-slate-600">H.264 with AAC audio</div>
           </div>
         </div>
       </div>
@@ -394,29 +373,29 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
       {/* ── MAIN STUDIO: COMPOSER (LEFT) + LIVE PHONE MOCKUP (RIGHT) ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Column: Creator & Upload Controls (7 cols) */}
-        <div className="lg:col-span-7 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-7 rounded-[26px] border border-[#e9e9ee] bg-white p-6 shadow-2xs flex flex-col justify-between space-y-6">
           <div className="space-y-5">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e9e9ee]">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-50 text-pink-600 text-sm">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white border border-black/80 text-slate-950 text-sm shadow-2xs">
                   <CameraOutlined />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 leading-none">
-                    Upload & Compose Story
+                    Create a story
                   </h3>
                   <p className="text-[11px] text-slate-400 mt-0.5">
-                    Drag and drop your creative asset or pick from your computer.
+                    Drop a photo or video, or pick one from your computer.
                   </p>
                 </div>
               </div>
               <Button
                 type="text"
                 size="small"
-                icon={<FireOutlined className="text-amber-500" />}
+                icon={<FireOutlined />}
                 onClick={handleLoadSampleMedia}
-                className="text-xs text-slate-600 hover:text-slate-900 font-semibold bg-slate-50 hover:bg-slate-100 !rounded-lg"
+                className="text-xs text-slate-900 font-medium bg-[#F1F3F7] hover:!bg-slate-200 !rounded-full"
               >
                 Load Sample Story
               </Button>
@@ -437,18 +416,17 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`rounded-2xl border-2 border-dashed p-6 text-center cursor-pointer transition-all duration-200 ${
-                isDragging
-                  ? "border-purple-500 bg-purple-50/50 scale-[0.99]"
+              className={`rounded-[22px] border-2 border-dashed p-6 text-center cursor-pointer transition-all duration-200 ${isDragging
+                  ? "border-black bg-[#E2E2FC] scale-[0.99]"
                   : file
-                  ? "border-emerald-300 bg-emerald-50/20"
-                  : "border-slate-200 hover:border-purple-300 hover:bg-slate-50/60"
-              }`}
+                    ? "border-[#d9d9e3] bg-[#F1F3F7]"
+                    : "border-[#d9d9e3] bg-[#F1F3F7] hover:border-black/50"
+                }`}
             >
               {file ? (
                 <div className="flex items-center justify-between gap-4 text-left">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-12 w-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shrink-0">
+                    <div className="h-12 w-12 rounded-xl bg-white border border-black/80 text-slate-950 flex items-center justify-center text-xl shrink-0">
                       {file.type.startsWith("video/") ? <VideoCameraOutlined /> : <PictureOutlined />}
                     </div>
                     <div className="min-w-0">
@@ -460,7 +438,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                         <span>&bull;</span>
                         <span className="capitalize">{file.type.split("/")[0]}</span>
                         <span>&bull;</span>
-                        <span className="text-emerald-600 font-semibold">Ready to Publish</span>
+                        <span className="text-slate-950 font-semibold">Ready to publish</span>
                       </div>
                     </div>
                   </div>
@@ -472,7 +450,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                         e.stopPropagation();
                         fileInputRef.current?.click();
                       }}
-                      className="!rounded-lg text-xs font-semibold !border-slate-200"
+                      className="!rounded-full text-xs font-medium !border-[#e9e9ee]"
                     >
                       Change
                     </Button>
@@ -483,7 +461,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                         e.stopPropagation();
                         handleClearSelected();
                       }}
-                      className="!rounded-lg text-xs font-semibold"
+                      className="!rounded-full text-xs font-medium"
                     >
                       Remove
                     </Button>
@@ -491,7 +469,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                 </div>
               ) : (
                 <div className="space-y-3 py-4">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-purple-100 to-pink-100 text-purple-600 text-2xl shadow-xs">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-white border border-black/80 text-slate-950 text-2xl shadow-2xs">
                     <CloudUploadOutlined />
                   </div>
                   <div>
@@ -499,17 +477,17 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
                       Drop your photo or video here
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      or click to browse from device (JPG, PNG, WebP, MP4, MOV)
+                      or click to browse (JPG, PNG, WebP, MP4, MOV)
                     </p>
                   </div>
                   <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-white text-slate-700">
                       Max 100MB
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-white text-slate-700">
                       Ideal 9:16 (1080×1920)
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                    <span className="text-[11px] px-2.5 py-1 rounded-full bg-white text-slate-700">
                       Video &lt;60s
                     </span>
                   </div>
@@ -518,24 +496,24 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
             </div>
 
             {/* Publishing Engine Checklist */}
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 space-y-2 text-xs">
+            <div className="rounded-[22px] bg-[#FFF9DB] p-4 space-y-2 text-xs">
               <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2">
-                Instagram Stories Optimization Engine
+                How your story is prepared
               </div>
               <div className="flex items-start gap-2">
-                <CheckCircleFilled className="text-emerald-500 mt-0.5 text-xs shrink-0" />
+                <CheckCircleFilled className="text-slate-950 mt-0.5 text-xs shrink-0" />
                 <span className="text-slate-600 leading-snug">
                   <strong>Automatic 9:16 Canvas Adaptation:</strong> Landscape & square images are intelligently centered over a high-resolution blurred background copy.
                 </span>
               </div>
               <div className="flex items-start gap-2">
-                <CheckCircleFilled className="text-emerald-500 mt-0.5 text-xs shrink-0" />
+                <CheckCircleFilled className="text-slate-950 mt-0.5 text-xs shrink-0" />
                 <span className="text-slate-600 leading-snug">
                   <strong>Direct Meta Graph API Ingest:</strong> Instant publication without third-party scheduling delay.
                 </span>
               </div>
               <div className="flex items-start gap-2">
-                <CheckCircleFilled className="text-emerald-500 mt-0.5 text-xs shrink-0" />
+                <CheckCircleFilled className="text-slate-950 mt-0.5 text-xs shrink-0" />
                 <span className="text-slate-600 leading-snug">
                   <strong>Zero Follower Interruption:</strong> Live stories appear in the top ring of all active followers.
                 </span>
@@ -543,7 +521,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
             </div>
 
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200/80 text-xs text-rose-700 flex items-start gap-2">
+              <div className="p-3.5 rounded-[18px] bg-[#FEECE4] text-xs text-slate-900 flex items-start gap-2">
                 <CloseCircleFilled className="mt-0.5 text-rose-500 shrink-0" />
                 <div>
                   <strong>Publishing Failed:</strong> {error}
@@ -553,7 +531,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
           </div>
 
           {/* CTA Button */}
-          <div className="pt-4 border-t border-slate-100 flex items-center gap-3">
+          <div className="pt-4 border-t border-[#e9e9ee] flex items-center gap-3">
             <Button
               type="primary"
               size="large"
@@ -561,23 +539,22 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               onClick={handlePostStory}
               disabled={!file || busy}
               loading={busy}
-              className={`flex-1 !h-12 !rounded-2xl font-bold text-sm shadow-md transition-all duration-200 ${
-                !file || busy
-                  ? "!bg-slate-100 !text-slate-400 !border-slate-200 !cursor-not-allowed"
-                  : "!bg-gradient-to-r !from-purple-600 !via-pink-600 !to-rose-500 hover:!opacity-95 text-white shadow-pink-500/25 !border-0"
-              }`}
+              className={`flex-1 !h-11 !rounded-full font-semibold text-sm !shadow-none transition-all duration-200 ${!file || busy
+                  ? "!bg-[#F1F3F7] !text-slate-400 !border-[#e9e9ee] !cursor-not-allowed"
+                  : "!bg-black hover:!bg-slate-800 !text-white !border-black"
+                }`}
             >
               {busy
                 ? file?.type.startsWith("video/")
                   ? "Uploading video to Instagram (can take up to a minute)..."
                   : "Publishing to Instagram Story..."
-                : "Publish to Story Now"}
+                : "Publish story"}
             </Button>
             {file && (
               <Button
                 size="large"
                 onClick={handleClearSelected}
-                className="!h-12 !rounded-2xl font-semibold text-xs !border-slate-200"
+                className="!h-11 !rounded-full font-medium text-xs !border-[#e9e9ee]"
               >
                 Clear
               </Button>
@@ -586,34 +563,31 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
         </div>
 
         {/* Right Column: Live Instagram Phone Mockup (5 cols) */}
-        <div className="lg:col-span-5 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col items-center justify-center">
-          <div className="w-full flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div className="lg:col-span-5 rounded-[26px] border border-[#e9e9ee] bg-white p-6 shadow-2xs flex flex-col items-center justify-center">
+          <div className="w-full flex items-center justify-between pb-3 border-b border-[#e9e9ee] mb-4">
             <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <MobileOutlined className="text-purple-600" />
-              <span>Live Instagram Follower Preview</span>
+              <MobileOutlined />
+              <span>Preview</span>
             </div>
 
             {/* Hardware Device Switcher matching app standard */}
             <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 text-[10px] font-medium">
+              <div className="flex items-center gap-0.5 rounded-full bg-[#F1F3F7] p-0.5 text-[10px] font-medium">
                 {(["iPhone 17", "Galaxy S25", "Pixel 10"] as SupportedDevice[]).map((dev) => (
                   <button
                     key={dev}
                     type="button"
                     onClick={() => setPreviewDevice(dev)}
-                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                      previewDevice === dev
+                    className={`rounded-full px-2.5 py-1 transition-all cursor-pointer ${previewDevice === dev
                         ? "bg-white font-semibold text-slate-900 shadow-xs"
                         : "text-slate-500 hover:text-slate-900"
-                    }`}
+                      }`}
                   >
                     {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
                   </button>
                 ))}
               </div>
-              <Tag color="purple" className="!rounded-full font-semibold !text-[10px] !m-0">
-                {previewDevice}
-              </Tag>
+              
             </div>
           </div>
 
@@ -624,7 +598,6 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
             showToolbar={false}
             theme="dark"
             fullBleed={true}
-            className="drop-shadow-2xl"
           >
             {/* Inner Story Canvas */}
             <div className="relative w-full h-full overflow-hidden bg-slate-950 flex flex-col justify-between select-none">
@@ -774,9 +747,9 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
       </div>
 
       {/* ── RECENT STORIES GALLERY & ARCHIVE ───────────────────────────── */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm space-y-6">
+      <div className="rounded-[26px] border border-[#e9e9ee] bg-white p-6 shadow-2xs space-y-6">
         {/* Header & Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#e9e9ee] gap-3">
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base font-bold text-slate-900 leading-none">
@@ -787,7 +760,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               </Tag>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Active and past stories published to @{cleanUser} through Instagram Hub.
+              Active and past stories published to @{cleanUser} through Fabroniee.
             </p>
           </div>
 

@@ -5,14 +5,12 @@ import { api } from "@/lib/api";
 
 type Status = { connected: false } | { connected: true; pageId: string; pageName: string; igUserId: string | null };
 
-// Separate from the main Instagram connection: only the Comment-to-DM automation needs this, because Meta's
-// "send a private reply to a comment" endpoint requires a Facebook Page access token, not an Instagram Login
-// token — see comment-dm.service.ts for the full explanation.
+// Optional. Comment-to-DM sends private replies through the account's Instagram login; a connected Page is only a
+// backup route (used if Instagram's login route is refused for a reason that is not about the comment itself).
 export function FacebookPageCard({ notice, error: externalError }: { notice?: string | null; error?: string | null }) {
   const [status, setStatus] = useState<Status | null>(null);
   const [busy, setBusy] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [token, setToken] = useState("");
 
   const load = () => api<Status>("/facebook-page").then(setStatus, (e: Error) => setLocalError(e.message));
   useEffect(() => {
@@ -23,7 +21,8 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
     setBusy(true);
     setLocalError(null);
     try {
-      const { url } = await api<{ url: string }>("/facebook-page/oauth/url");
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const { url } = await api<{ url: string }>(`/facebook-page/oauth/url?origin=${encodeURIComponent(origin)}`);
       window.location.href = url;
     } catch (err) {
       setLocalError((err as Error).message);
@@ -31,23 +30,8 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
     }
   }
 
-  async function connectWithToken(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setLocalError(null);
-    try {
-      await api("/facebook-page/token", { method: "POST", body: JSON.stringify({ accessToken: token }) });
-      setToken("");
-      await load();
-    } catch (err) {
-      setLocalError((err as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function disconnect() {
-    if (!confirm("Disconnect this Facebook Page? The Comment-to-DM automation won't be able to send until you reconnect one.")) return;
+    if (!confirm("Disconnect this Facebook Page? Comment-to-DM keeps working through your Instagram login.")) return;
     setBusy(true);
     setLocalError(null);
     try {
@@ -67,8 +51,8 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
       <div className="space-y-1">
         <h2 className="text-lg font-semibold tracking-tight text-[var(--viz-ink)]">Facebook Page</h2>
         <p className="text-sm text-[var(--viz-muted)]">
-          Only needed for the Comment-to-DM automation. Sending a DM as a private reply to a comment is a Facebook Page
-          feature — your Instagram login above doesn&apos;t cover it.
+          Optional. Comment-to-DM sends through your Instagram login. A Facebook Page is only a backup
+          way to send.
         </p>
       </div>
 
@@ -86,31 +70,6 @@ export function FacebookPageCard({ notice, error: externalError }: { notice?: st
           >
             {busy ? "Redirecting…" : "Connect a Facebook Page"}
           </button>
-
-          <details className="group text-sm">
-            <summary className="cursor-pointer list-none text-xs text-[var(--viz-muted)] hover:text-[var(--viz-ink)]">
-              <span className="underline decoration-dotted underline-offset-4">Paste a Page access token instead</span>
-            </summary>
-            <form onSubmit={connectWithToken} className="mt-3 space-y-2">
-              <p className="text-xs text-[var(--viz-muted)]">
-                From Meta Business Suite → Business Settings → Users → System Users → your system user → Generate New Token.
-              </p>
-              <textarea
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                rows={3}
-                aria-label="Facebook Page access token"
-                placeholder="Page access token"
-                className="w-full rounded-lg border border-[var(--viz-border)] bg-transparent px-3 py-2 font-mono text-xs outline-none focus:border-[var(--viz-ink)]"
-              />
-              <button
-                disabled={busy || !token.trim()}
-                className="rounded-full border border-[var(--viz-border)] px-4 py-1.5 text-xs hover:bg-black/5 disabled:opacity-40 dark:hover:bg-white/10"
-              >
-                {busy ? "Verifying…" : "Verify and connect"}
-              </button>
-            </form>
-          </details>
         </div>
       )}
 
