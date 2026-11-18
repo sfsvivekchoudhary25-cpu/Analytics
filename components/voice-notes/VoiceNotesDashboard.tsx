@@ -14,6 +14,7 @@ import {
   Lightbulb,
   FileText,
   CheckSquare,
+  Briefcase,
   Bell,
   TrendingUp,
   Clock,
@@ -24,6 +25,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import { InstagramIcon } from "@/components/icons";
 import { VoiceNoteCard, VoiceNoteItem } from "./VoiceNoteCard";
 import { VoiceNoteRecorderModal } from "./VoiceNoteRecorderModal";
 import { VoiceNoteDetailModal } from "./VoiceNoteDetailModal";
@@ -301,13 +303,18 @@ export function VoiceNotesDashboard() {
     return list.slice(0, 3);
   }, [notes]);
 
-  const categories = [
+  const categories: {
+    key: string;
+    label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    iconColor?: string;
+  }[] = [
     { key: "all", label: "All Notes" },
-    { key: "idea", label: "💡 Ideas" },
-    { key: "todo", label: "✅ To-Dos" },
-    { key: "instagram_caption", label: "📸 IG Captions" },
-    { key: "client_note", label: "💼 Client Notes" },
-    { key: "reminder", label: "⏰ Reminders" },
+    { key: "idea", label: "Ideas", icon: Lightbulb, iconColor: "text-amber-500" },
+    { key: "todo", label: "To-Dos", icon: CheckSquare, iconColor: "text-emerald-500" },
+    { key: "instagram_caption", label: "IG Captions", icon: InstagramIcon, iconColor: "text-pink-500" },
+    { key: "client_note", label: "Client Notes", icon: Briefcase, iconColor: "text-orange-500" },
+    { key: "reminder", label: "Reminders", icon: Bell, iconColor: "text-purple-500" },
   ];
 
   return (
@@ -570,22 +577,31 @@ export function VoiceNotesDashboard() {
               </button>
             </div>
 
-            {/* Category Filter Pills (Desktop/Tablet) */}
-            <div className="hidden md:flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-              {categories.map((c) => (
-                <button
-                  key={c.key}
-                  type="button"
-                  onClick={() => setSelectedCategory(c.key)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    selectedCategory === c.key
-                      ? "bg-black text-white shadow-xs"
-                      : "bg-white hover:bg-slate-100 text-slate-700 border border-[#e9e9ee]"
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {categories.map((c) => {
+                const Icon = c.icon;
+                const isSelected = selectedCategory === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setSelectedCategory(c.key)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-black text-white shadow-xs"
+                        : "bg-white hover:bg-slate-50 text-slate-900 border border-[#e9e9ee] hover:border-black/30 shadow-2xs"
+                    }`}
+                  >
+                    {Icon && (
+                      <span className={`shrink-0 flex items-center ${isSelected ? "text-white" : c.iconColor}`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+                    <span>{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Real Notes List */}

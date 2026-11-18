@@ -52,6 +52,7 @@ export interface VoicePillProps {
   onStart?: (info: { source: VoicePillSource }) => void;
   onStop?: (info: { reason: VoicePillStopReason; duration: number }) => void;
   className?: string;
+  centered?: boolean;
 }
 
 interface AudioBits {
@@ -246,7 +247,8 @@ const VoicePill: React.FC<VoicePillProps> = ({
   isRecording,
   onStart,
   onStop,
-  className = ''
+  className = '',
+  centered = false
 }) => {
   const [listening, setListening] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -461,6 +463,7 @@ const VoicePill: React.FC<VoicePillProps> = ({
   const clockW = showTime ? Math.round(timeSize * 2.5) + 4 : 0;
   const waveW = waveform ? Math.round(size * 1.9) : 0;
   const extra = clockW + waveW;
+  const centerShift = centered && listening ? Math.round((reach + extra) / 2) : 0;
 
   return (
     <button
@@ -468,7 +471,7 @@ const VoicePill: React.FC<VoicePillProps> = ({
       disabled={disabled}
       aria-label={ariaLabel}
       aria-pressed={listening}
-      className={`group relative isolate m-0 inline-grid cursor-pointer touch-none place-items-center border-0 bg-transparent p-0 outline-none select-none [width:var(--vp-size)] [height:var(--vp-size)] [border-radius:var(--vp-radius)] [color:var(--vp-icon)] [font-family:inherit] [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1),color_150ms_ease] before:absolute before:[inset:calc(-1*var(--vp-hit))] before:content-[''] data-[state=listening]:z-[1] data-[state=listening]:[color:var(--vp-accent)] data-[pressed]:[transform:scale(var(--vp-press))] disabled:pointer-events-none disabled:cursor-default disabled:opacity-55 motion-reduce:[transform:none]! motion-reduce:[transition:color_150ms_ease]${className ? ` ${className}` : ''}`}
+      className={`group relative isolate m-0 inline-grid cursor-pointer touch-none place-items-center border-0 bg-transparent p-0 outline-none select-none [width:var(--vp-size)] [height:var(--vp-size)] [border-radius:var(--vp-radius)] [color:var(--vp-icon)] [font-family:inherit] [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] [transition:translate_var(--vp-open)_cubic-bezier(0.23,1,0.32,1),transform_160ms_cubic-bezier(0.23,1,0.32,1),color_150ms_ease] before:absolute before:[inset:calc(-1*var(--vp-hit))] before:content-[''] data-[state=listening]:z-[1] data-[state=listening]:[color:var(--vp-accent)] data-[pressed]:[transform:scale(var(--vp-press))] disabled:pointer-events-none disabled:cursor-default disabled:opacity-55 motion-reduce:[transform:none]! motion-reduce:[transition:color_150ms_ease]${className ? ` ${className}` : ''}`}
       data-state={listening ? 'listening' : 'idle'}
       data-pressed={pressed ? '' : undefined}
       data-input={input}
@@ -501,6 +504,7 @@ const VoicePill: React.FC<VoicePillProps> = ({
           '--vp-hit': `${hit}px`,
           '--vp-cancel': '0',
           '--vp-slide': '0px',
+          translate: centered ? `${centerShift}px 0` : undefined,
         } as CSSProperties
       }
     >

@@ -889,6 +889,7 @@ export function VoiceNoteRecorderModal({
             <div className="relative flex items-center justify-center py-3 my-1">
               <div className="relative inline-flex items-center justify-center">
                 <VoicePill
+                  centered={true}
                   accentColor="#f5f5f5"
                   iconColor="#a1a1aa"
                   background="#18181b"
@@ -961,23 +962,6 @@ export function VoiceNoteRecorderModal({
             {/* When Recording: Live Transcript Window & Stop Controls */}
             {stage === "recording" && (
               <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                {/* 1. Status Pill & Timer */}
-                <div className="flex items-center justify-center">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 border border-rose-200/80 shadow-2xs">
-                    <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-600" />
-                    </span>
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-rose-950">
-                      {recordType === "dictate" ? "Listening & Transcribing with Groq" : "Recording Audio Memo"}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-rose-300" />
-                    <span className="text-[11px] font-mono font-bold text-rose-800 tabular-nums">
-                      {Math.floor(recordingSeconds / 60)}:{String(recordingSeconds % 60).padStart(2, "0")}
-                    </span>
-                  </div>
-                </div>
-
                 {/* 2. Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
                 {recordType === "dictate" ? (
                   <div className="rounded-[26px] border border-[#e9e9ee] bg-gradient-to-b from-[#fafafd] to-white p-4 sm:p-5 text-left shadow-xs transition-all hover:border-black/30">
@@ -994,16 +978,8 @@ export function VoiceNoteRecorderModal({
                           <div className="text-xs font-bold text-slate-950 tracking-tight flex items-center gap-1.5">
                             <span>Real-Time Transcript</span>
                           </div>
-                          <span className="text-[10px] text-slate-500 font-medium">
-                            Groq Whisper Live
-                          </span>
                         </div>
                       </div>
-
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-950 bg-white border border-black/80 px-2.5 py-1 rounded-full shadow-2xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Groq Live
-                      </span>
                     </div>
 
                     {/* Sound Wave Frequency Visualizer */}
@@ -1021,7 +997,7 @@ export function VoiceNoteRecorderModal({
                       ) : (
                         <div className="min-h-[100px] flex flex-col items-center justify-center text-center p-3">
                           <p className="text-xs sm:text-sm text-slate-500 font-medium italic">
-                            Start speaking... your words stream live with Groq Whisper.
+                            Start speaking... your words stream live in real time.
                           </p>
                           <span className="text-[10px] text-slate-400 mt-1 font-medium">
                             Microphone active • Spoken words appear here in real-time
@@ -1378,12 +1354,12 @@ export function VoiceNoteRecorderModal({
                   onChange={(e) => setPreviewCategory(e.target.value as any)}
                   className="w-full text-xs font-bold text-slate-950 bg-[#fbfbfc] border border-[#e9e9ee] rounded-xl px-3 py-2.5 focus:bg-white focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
                 >
-                  <option value="idea">💡 Idea</option>
-                  <option value="todo">✅ To-Do</option>
-                  <option value="instagram_caption">📸 IG Caption</option>
-                  <option value="client_note">💼 Client Note</option>
-                  <option value="reminder">⏰ Reminder</option>
-                  <option value="journal">📓 Memo</option>
+                  <option value="idea">Idea</option>
+                  <option value="todo">To-Do</option>
+                  <option value="instagram_caption">IG Caption</option>
+                  <option value="client_note">Client Note</option>
+                  <option value="reminder">Reminder</option>
+                  <option value="journal">Memo</option>
                 </select>
               </div>
             </div>
