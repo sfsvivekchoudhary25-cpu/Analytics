@@ -3,7 +3,7 @@ import { LegalLayout, LEGAL_EMAIL, LegalLink, LegalList, LegalNote, LegalP, Lega
 
 export const metadata: Metadata = {
   title: "Data deletion instructions",
-  description: "How to delete your InstaVeyra account and the data we hold, step by step.",
+  description: "How to delete your Fabroniee account and the data we hold, step by step.",
 };
 
 const sections: LegalSection[] = [
@@ -60,7 +60,7 @@ const sections: LegalSection[] = [
               In Facebook, go to <strong className="font-medium text-slate-900">Settings &amp; privacy → Settings → Apps and websites</strong>. In Instagram, go to <strong className="font-medium text-slate-900">Settings → Apps and websites</strong>.
             </>,
             <>
-              Find <strong className="font-medium text-slate-900">InstaVeyra</strong> (Inrō Studio) and click <strong className="font-medium text-slate-900">Remove</strong>.
+              Find <strong className="font-medium text-slate-900">Fabroniee</strong> and click <strong className="font-medium text-slate-900">Remove</strong>.
             </>,
             "Choose to delete the data it holds when Meta offers that.",
           ]}
@@ -109,7 +109,7 @@ export default function DataDeletionPage() {
       title="Delete your data, step by step."
       intro={
         <>
-          You can erase your <strong className="font-medium text-slate-900">InstaVeyra</strong> account and everything we hold about it. There are three ways to do it, and the first takes under a minute.
+          You can erase your <strong className="font-medium text-slate-900">Fabroniee</strong> account and everything we hold about it. There are three ways to do it, and the first takes under a minute.
         </>
       }
       highlights={[

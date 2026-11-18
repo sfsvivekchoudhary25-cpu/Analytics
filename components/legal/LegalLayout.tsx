@@ -213,7 +213,7 @@ export function LegalLayout({
                 ))}
               </div>
               <p className="mt-5 text-[11px] text-slate-400">
-                InstaVeyra (Inrō Studio) · page {idx + 1} of {PAGES.length}
+                Fabroniee · page {idx + 1} of {PAGES.length}
               </p>
             </div>
           </article>

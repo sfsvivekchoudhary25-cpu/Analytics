@@ -3,7 +3,7 @@ import { LegalLayout, LegalLink, LegalList, LegalNote, LegalP, type LegalSection
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "What InstaVeyra collects, how your customers' messages are handled, and how to delete your data.",
+  description: "What Fabroniee collects, how your customers' messages are handled, and how to delete your data.",
 };
 
 const sections: LegalSection[] = [
@@ -174,7 +174,7 @@ export default function PrivacyPolicyPage() {
       title="Your data, in plain words."
       intro={
         <>
-          This is how <strong className="font-medium text-slate-900">InstaVeyra</strong> (Inrō Studio), at fabroniee.store, handles your information and your customers&apos; messages when you connect Instagram.
+          This is how <strong className="font-medium text-slate-900">Fabroniee</strong>, at fabroniee.store, handles your information and your customers&apos; messages when you connect Instagram.
         </>
       }
       highlights={[

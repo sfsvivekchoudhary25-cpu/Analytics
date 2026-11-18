@@ -783,7 +783,7 @@ export function Stories({ username = "fabroniee", ownAvatar }: Props) {
               </Tag>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Active and past stories published to @{cleanUser} through InstaVeyra.
+              Active and past stories published to @{cleanUser} through Fabroniee.
             </p>
           </div>
 

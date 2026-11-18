@@ -3,7 +3,7 @@ import { LegalLayout, LegalLink, LegalList, LegalNote, LegalP, type LegalSection
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "The rules for using InstaVeyra: your account, acceptable use and ending your account.",
+  description: "The rules for using Fabroniee: your account, acceptable use and ending your account.",
 };
 
 const sections: LegalSection[] = [
@@ -13,7 +13,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <LegalP>
-          InstaVeyra provides creator tools: Comment-to-DM funnels, an inbox for your comments and messages, automatic replies and analytics. They run on the official Meta APIs. By connecting an account, building an automation or otherwise using the service, you agree to these terms.
+          Fabroniee provides creator tools: Comment-to-DM funnels, an inbox for your comments and messages, automatic replies and analytics. They run on the official Meta APIs. By connecting an account, building an automation or otherwise using the service, you agree to these terms.
         </LegalP>
       </>
     ),
@@ -55,7 +55,7 @@ const sections: LegalSection[] = [
     title: "Acceptable use",
     body: (
       <>
-        <LegalP>You may not use InstaVeyra to send:</LegalP>
+        <LegalP>You may not use Fabroniee to send:</LegalP>
         <LegalList
           items={[
             "unsolicited spam or bulk messages,",
@@ -120,7 +120,7 @@ export default function TermsPage() {
       title="The rules, kept short."
       intro={
         <>
-          By using <strong className="font-medium text-slate-900">InstaVeyra</strong> (Inrō Studio), at fabroniee.store, you agree to what is on this page.
+          By using <strong className="font-medium text-slate-900">Fabroniee</strong>, at fabroniee.store, you agree to what is on this page.
         </>
       }
       highlights={[
