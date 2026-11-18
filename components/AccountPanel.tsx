@@ -227,6 +227,56 @@ export function AccountPanel({
   const [deleteText, setDeleteText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [copiedWebhook, setCopiedWebhook] = useState(false);
+  // "Don't store my messages" switch (null = not loaded yet / not connected)
+  const [storeMessages, setStoreMessages] = useState<boolean | null>(null);
+  const [privacySaving, setPrivacySaving] = useState(false);
+
+  useEffect(() => {
+    if (!status?.connected) {
+      setStoreMessages(null);
+      return;
+    }
+    let live = true;
+    api<{ connected: boolean; storeMessages: boolean }>("/messages/privacy")
+      .then((r) => live && setStoreMessages(r.connected ? r.storeMessages : null))
+      .catch(() => live && setStoreMessages(null));
+    return () => {
+      live = false;
+    };
+  }, [status?.connected, status?.connected ? status.username : ""]);
+
+  const savePrivacy = async (store: boolean) => {
+    setPrivacySaving(true);
+    try {
+      const r = await api<{ storeMessages: boolean; scrubbed: number }>("/messages/privacy", {
+        method: "POST",
+        body: JSON.stringify({ storeMessages: store }),
+      });
+      setStoreMessages(r.storeMessages);
+      message.success(
+        store
+          ? "Messages will be stored again (encrypted)."
+          : `Message text is no longer stored.${r.scrubbed ? ` Erased the text of ${r.scrubbed} saved message(s).` : ""}`,
+      );
+    } catch (err: any) {
+      message.error(err?.message || "Could not change this setting.");
+    } finally {
+      setPrivacySaving(false);
+    }
+  };
+
+  const onTogglePrivacy = (store: boolean) => {
+    if (store) return void savePrivacy(true);
+    modal.confirm({
+      title: "Stop storing message text?",
+      content:
+        "Customer messages will be read live from Instagram instead of our database, and the message text already saved for your account will be erased. Chats may open a little slower, and you can't search old messages. Automatic replies keep working.",
+      okText: "Stop storing",
+      okButtonProps: { danger: true },
+      cancelText: "Keep storing",
+      onOk: () => savePrivacy(false),
+    });
+  };
 
 
   const connected = status?.connected === true;
@@ -1437,6 +1487,24 @@ export function AccountPanel({
           </div>
 
           <div className="mt-4 space-y-4">
+            {storeMessages !== null && (
+              <div className="flex items-start justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3.5">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-900">Don&apos;t store my messages</div>
+                  <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+                    {storeMessages
+                      ? "Right now your customers' messages are saved in our database, encrypted. Turn this on to keep no message text at all: chats are read live from Instagram, and automatic replies keep working."
+                      : "Message text is not saved in our database. Chats are read live from Instagram, so they open a little slower and old messages can't be searched."}
+                  </p>
+                </div>
+                <Switch
+                  checked={!storeMessages}
+                  loading={privacySaving}
+                  onChange={(on) => onTogglePrivacy(!on)}
+                  aria-label="Don't store my messages"
+                />
+              </div>
+            )}
             <div className="rounded-xl border border-rose-100 bg-rose-50/50 p-3.5 text-xs text-rose-900/90 leading-relaxed">
               <p>
                 <strong>Permanent Wipe:</strong> You can completely erase your account and all associated Meta access tokens at any time. When triggered, our backend will permanently delete your stored Meta User Tokens, Facebook Page tokens, and comment automation rules from our active database.
