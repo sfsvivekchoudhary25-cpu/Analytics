@@ -267,7 +267,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         setCardSubtitle(r.cardSubtitle ?? "");
         setCardImageUrl(r.cardImageUrl ?? "");
         setCardFileUrl(r.cardFileUrl ?? "");
-        setCardButtons(r.cardButtons ?? []);
+        setCardButtons((r.cardButtons ?? []).map((b) => (b.type === "web_url" ? b : { type: "web_url" as const, title: b.title, url: "https://instagram.com" })));
         if (r.mediaId) {
           api<Post[]>("/comment-dm/posts").then(setPosts).catch(() => {});
         }
@@ -1584,33 +1584,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           </button>
                         </div>
 
-                        {/* Full-Width 2-Tab Segmented Control */}
-                        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--viz-border)]/60">
-                          <button
-                            type="button"
-                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "web_url" }))}
-                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                              btn.type === "web_url"
-                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
-                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                            }`}
-                          >
-                            <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
-                            <span>Web Link</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "postback" }))}
-                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                              btn.type === "postback"
-                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
-                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                            }`}
-                          >
-                            <BoltIcon className="h-3.5 w-3.5 text-amber-500" />
-                            <span>Action Reply</span>
-                          </button>
-                        </div>
 
                         {/* Form Fields: Button Label & Destination URL */}
                         <div className="space-y-3">
@@ -1633,39 +1606,21 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           <div>
                             <div className="flex justify-between items-center text-[11px] mb-1.5">
                               <span className="font-semibold text-[var(--viz-ink)]">
-                                {btn.type === "web_url" ? "Destination URL" : "Action Identifier"}
+                                Destination URL
                               </span>
-                              {btn.type === "web_url" ? (
-                                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
                                   https://
                                 </span>
-                              ) : (
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-medium">
-                                  TRIGGER_ID
-                                </span>
-                              )}
                             </div>
-                            {btn.type === "web_url" ? (
-                              <div className="relative flex items-center">
+                            <div className="relative flex items-center">
                                 <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-blue-500 pointer-events-none" />
                                 <input
                                   value={btn.url || ""}
-                                  onChange={(e) => updateButton(idx, { url: e.target.value })}
+                                  onChange={(e) => updateButton(idx, { type: "web_url", url: e.target.value })}
                                   placeholder="https://instagram.com"
                                   className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                                 />
                               </div>
-                            ) : (
-                              <div className="relative flex items-center">
-                                <BoltIcon className="absolute left-3.5 h-3.5 w-3.5 text-amber-500 pointer-events-none" />
-                                <input
-                                  value={btn.payload || ""}
-                                  onChange={(e) => updateButton(idx, { payload: e.target.value })}
-                                  placeholder="ACTION_KEYWORD"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
-                                />
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -1678,15 +1633,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           <div className="w-full rounded-xl border border-blue-500/25 bg-blue-500/[0.04] hover:bg-blue-500/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
                             <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1.5">
                               <span>{btn.title || "Button Label"}</span>
-                              {btn.type === "web_url" ? (
-                                <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                   <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
                                   <polyline points="15 3 21 3 21 9" />
                                   <line x1="10" y1="14" x2="21" y2="3" />
                                 </svg>
-                              ) : (
-                                <BoltIcon className="h-3 w-3 opacity-70" />
-                              )}
                             </span>
                           </div>
                         </div>
@@ -2139,7 +2090,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 setCardSubtitle(rule.cardSubtitle ?? "");
                 setCardImageUrl(rule.cardImageUrl ?? "");
                 setCardFileUrl(rule.cardFileUrl ?? "");
-                setCardButtons(rule.cardButtons ?? []);
+                setCardButtons((rule.cardButtons ?? []).map((b) => (b.type === "web_url" ? b : { type: "web_url" as const, title: b.title, url: "https://instagram.com" })));
                 setDirty(false);
               })
             }
