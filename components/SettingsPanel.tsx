@@ -84,7 +84,7 @@ export function SettingsPanel({ status }: { status: ConnectionStatus | undefined
   };
 
   return (
-    <div className="mx-auto w-full max-w-3xl pb-12">
+    <div className="w-full pb-12">
       <div className="pb-2">
         <h1 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Settings</h1>
         <p className="mt-1 text-xs font-medium text-slate-500 sm:text-sm">Privacy of your customers&apos; messages, and your data.</p>
