@@ -305,6 +305,26 @@ export default function AppDashboard({
     );
   }
 
+  // The user finished or skipped setup but has no Instagram account connected yet: show the Account page (the
+  // connect buttons) instead of the "redirecting" screen below, which would spin forever.
+  if (!connected && onboarding.isDone()) {
+    return (
+      <div className="min-h-screen bg-slate-50/50">
+        <header className="flex items-center justify-between border-b border-slate-200/80 bg-white px-4 py-3 sm:px-6">
+          <div className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Fabroniee" className="h-8 w-8 object-contain" />
+            <span className="text-base font-bold tracking-tight text-slate-900">Fabroniee</span>
+          </div>
+          <button type="button" onClick={logout} className="text-sm font-medium text-slate-500 hover:text-slate-900">
+            Sign out
+          </button>
+        </header>
+        <main className="mx-auto w-full max-w-5xl p-4 sm:p-6">{accountPanel}</main>
+      </div>
+    );
+  }
+
   if (!connected) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
