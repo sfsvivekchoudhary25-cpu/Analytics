@@ -47,6 +47,7 @@ import {
   CompassOutlined,
 } from "@ant-design/icons";
 import { activeAccount, api, quickCache } from "@/lib/api";
+import { TrendingUp, Zap } from "lucide-react";
 import { UnifiedChart, Point } from "./UnifiedChart";
 import { EngagementBarChart } from "./EngagementBarChart";
 import { PostDetail } from "./PostDetail";
@@ -552,6 +553,28 @@ export function Dashboard({
   const profile = insights?.profile;
   const totals = insights?.totals ?? {};
   const reachSeries = insights?.series?.reach ?? [];
+  // Small stat pills shown in the chart header (Daily Performance / Reach view only).
+  const reachStatPills =
+    activeChart === "reach" && !insightsFetching && reachSeries.length > 0
+      ? [
+          { label: "Total", value: compact(reachSeries.reduce((a, p) => a + (p.value || 0), 0)), icon: <TrendingUp className="h-3 w-3" /> },
+          { label: "Peak", value: `${compact(Math.max(...reachSeries.map((p) => p.value || 0)))}/day`, icon: <Zap className="h-3 w-3" /> },
+        ]
+      : [];
+  const renderStatPills = (extra: string) => (
+    <div className={`items-center gap-1.5 ${extra}`}>
+      {reachStatPills.map((stat) => (
+        <span
+          key={stat.label}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] text-slate-950 shadow-[0_1px_6px_rgba(80,70,160,0.10)] ring-1 ring-black/5"
+        >
+          {stat.icon}
+          <span className="font-medium text-slate-600">{stat.label}</span>
+          <span className="font-black tabular-nums">{stat.value}</span>
+        </span>
+      ))}
+    </div>
+  );
   const prevTotals = insights?.previous ?? {};
   const reachChange = pctChange(totals.reach, prevTotals.reach);
   const viewsChange = pctChange(totals.views, prevTotals.views);
@@ -1092,39 +1115,57 @@ export function Dashboard({
             className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all flex flex-col h-full overflow-hidden"
             styles={{ body: { padding: "0px", flex: 1, display: "flex", flexDirection: "column" } }}
           >
-            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex items-center justify-between gap-3 bg-white">
+            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex flex-wrap items-center justify-between gap-x-3 gap-y-2 bg-white">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base sm:text-[17px] font-bold text-slate-950 tracking-tight">
-                    {activeChart === "reach" ? "Daily Reach Performance" : "Automated Messages Over Time"}
+                    {activeChart === "reach" ? "Daily Performance" : "Daily Automations"}
                   </h2>
                   <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-[#e2e2fc]/60 text-[#3730a3] text-[10px] font-bold uppercase tracking-wider">
                     {activeChart === "reach" ? "Reach" : "Automation"}
                   </span>
                 </div>
-                <p className="hidden sm:block text-xs font-normal text-slate-500 mt-1 max-w-md truncate">
-                  {activeChart === "reach"
-                    ? `Organic account reach trend over the last ${days} days`
-                    : `Comment-to-DM triggers, dispatches, and replies over ${days} days`}
-                </p>
               </div>
 
-              {/* Three dots dropdown for chart switcher (visible on every screen) */}
+              {/* Stat pills (tablet and up) */}
+              {renderStatPills("hidden md:flex ml-auto shrink-0")}
+
+              {/* Chart view tabs: both options always visible, active one is black */}
+              <div
+                role="tablist"
+                aria-label="Chart view"
+                className="hidden sm:inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[#e9e9ee] bg-white p-0.5 shadow-2xs"
+              >
+                {([
+                  { key: "reach", label: "Reach" },
+                  { key: "automations", label: "Automations" },
+                ] as const).map((tab) => {
+                  const active = activeChart === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setActiveChart(tab.key)}
+                      className={`rounded-full px-3 py-1 text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        active
+                          ? "bg-black text-white shadow-xs"
+                          : "text-slate-600 hover:bg-[#F1F3F7] hover:text-slate-950"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Phones: compact dropdown instead of tabs, so the title keeps its room */}
               <Dropdown
                 menu={{
                   items: [
-                    {
-                      key: "reach",
-                      icon: <LineChartOutlined />,
-                      label: <span className="font-semibold text-xs">Daily Reach</span>,
-                      className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]" : "",
-                    },
-                    {
-                      key: "automations",
-                      icon: <ThunderboltOutlined />,
-                      label: <span className="font-semibold text-xs">Automations</span>,
-                      className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]" : "",
-                    },
+                    { key: "reach", icon: <LineChartOutlined />, label: <span className="font-semibold text-xs">Reach</span>, className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]" : "" },
+                    { key: "automations", icon: <ThunderboltOutlined />, label: <span className="font-semibold text-xs">Automations</span>, className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]" : "" },
                   ],
                   onClick: ({ key }) => setActiveChart(key as "reach" | "automations"),
                   selectedKeys: [activeChart],
@@ -1134,11 +1175,13 @@ export function Dashboard({
               >
                 <button
                   type="button"
-                  aria-label="Chart view options"
-                  className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-                  title="Change chart view"
+                  aria-label="Change chart view"
+                  className="sm:hidden inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[#e9e9ee] bg-white px-3 text-[11px] font-bold text-slate-950 shadow-2xs active:scale-95 cursor-pointer"
                 >
-                  <EllipsisOutlined className="text-lg text-slate-800" />
+                  <span>{activeChart === "reach" ? "Reach" : "Automations"}</span>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" className="text-slate-500">
+                    <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               </Dropdown>
             </div>
@@ -1155,7 +1198,7 @@ export function Dashboard({
                       data={reachSeries}
                       label="Reach"
                       color="#4f46e5"
-                      showStats={true}
+                      height="fill"
                     />
                     {reachSeries.length === 0 && (
                       <p className="mt-3 text-xs text-slate-400 text-center">
@@ -1171,6 +1214,7 @@ export function Dashboard({
                   <UnifiedChart
                     key="automations-chart"
                     type="stacked-bar"
+                    height="fill"
                     dates={data.series.map((s) => s.date)}
                     series={[
                       {

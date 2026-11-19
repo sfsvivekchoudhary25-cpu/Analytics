@@ -127,9 +127,6 @@ export function EngagementBarChart({
               Past {days} days
             </span>
           </div>
-          <p className="text-xs font-normal text-slate-500 mt-0.5 truncate">
-            Total {compact(engTotal)} actions over {days} days
-          </p>
         </div>
       </div>
 
