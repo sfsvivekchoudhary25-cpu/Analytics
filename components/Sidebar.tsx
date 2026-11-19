@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Badge, Button, Avatar, Tooltip, Drawer, Dropdown, type MenuProps } from "antd";
 import {
-  InstagramOutlined,
-  CheckCircleFilled,
   CloseOutlined,
 } from "@ant-design/icons";
 import {
@@ -199,9 +197,6 @@ function SidebarContent({
                   <span className="text-[14px] font-semibold tracking-tight text-slate-850 leading-tight block truncate">
                     Fabroniee
                   </span>
-                  <p className="text-[11px] font-normal text-slate-400 tracking-tight truncate">
-                    Social Commerce OS
-                  </p>
                 </div>
               </div>
 
@@ -227,48 +222,6 @@ function SidebarContent({
                 </Tooltip>
               )}
             </>
-          )}
-        </div>
-
-        {/* Connected Instagram Account Status Card */}
-        <div className={`transition-all duration-200 ${isCollapsed ? "px-2 pb-2" : "px-3 pb-2"}`}>
-          {isCollapsed ? (
-            <div className="flex justify-center">
-              <Tooltip
-                title={
-                  <div className="text-xs">
-                    <p className="font-medium text-slate-900">{handle}</p>
-                    <p className="text-emerald-500 text-[11px] font-normal">{cleanUsername ? "Instagram Connected" : "Instagram not connected"}</p>
-                  </div>
-                }
-                placement="right"
-              >
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 transition-all cursor-default">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white">
-                    <InstagramOutlined className="text-[12px]" />
-                  </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"} ring-2 ring-white`} />
-                </div>
-              </Tooltip>
-            </div>
-          ) : (
-            <div className="flex w-full items-center gap-2.5 rounded-[22px] border border-[#e9e9ee] hover:border-black/20 bg-white/80 backdrop-blur-md p-2.5 text-left shadow-2xs transition-all group">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white shadow-xs group-hover:scale-105 transition-transform">
-                <InstagramOutlined className="text-sm" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1">
-                  <span className="truncate text-xs font-medium text-slate-800 tracking-tight">
-                    {handle}
-                  </span>
-                  {cleanUsername && <CheckCircleFilled className="text-[11px] text-slate-900 shrink-0" />}
-                </div>
-                <span className={`text-[10px] font-normal flex items-center gap-1.5 mt-0.5 ${cleanUsername ? "text-emerald-600" : "text-amber-600"}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${cleanUsername ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-                  {cleanUsername ? "Connected" : "Not connected"}
-                </span>
-              </div>
-            </div>
           )}
         </div>
       </div>

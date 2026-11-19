@@ -367,50 +367,6 @@ export default function AppDashboard({
             </div>
           </div>
 
-          {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
-          <div className="flex items-center gap-2.5">
-            {uname ? (
-              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-[#e9e9ee] text-xs text-slate-700 font-medium">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="truncate max-w-[130px]">@{uname}</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setTab("account")}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs text-amber-800 font-medium cursor-pointer"
-              >
-                <span className="h-2 w-2 rounded-full bg-amber-500" />
-                Instagram not connected
-              </button>
-            )}
-
-            {/* Notification Bell with indicator */}
-            <button
-              type="button"
-              onClick={() => setTab("photos")}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
-              aria-label="Notifications"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              {pendingPhotos > 0 && (
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#e13181] ring-2 ring-white" />
-              )}
-            </button>
-
-            {/* User Avatar */}
-            <button
-              type="button"
-              onClick={() => setTab("account")}
-              style={{ backgroundColor: "#000000", color: "#ffffff" }}
-              className="flex h-11 w-11 items-center justify-center rounded-full font-bold text-base shadow-xs hover:ring-2 hover:ring-[#e13181]/20 active:scale-95 transition-all cursor-pointer"
-              aria-label="Account Settings"
-            >
-              {uname.charAt(0).toUpperCase() || "F"}
-            </button>
-          </div>
         </header>
 
         {/* Main Section Content */}
