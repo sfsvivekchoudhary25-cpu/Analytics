@@ -11,7 +11,6 @@ import {
   MessageCircle,
   Image as ImageIcon,
   History,
-  Hash,
   Mic,
   Settings,
   User,
@@ -28,7 +27,6 @@ export type SectionId =
   | "messages"
   | "comments"
   | "stories"
-  | "hashtags"
   | "reels"
   | "voice-notes"
   | "settings"
@@ -43,7 +41,6 @@ const ICON_MAP: Record<SectionId, ReactNode> = {
   comments: <MessageCircle size={18} strokeWidth={1.75} />,
   photos: <ImageIcon size={18} strokeWidth={1.75} />,
   stories: <History size={18} strokeWidth={1.75} />,
-  hashtags: <Hash size={18} strokeWidth={1.75} />,
   reels: <Film size={18} strokeWidth={1.75} />,
   "voice-notes": <Mic size={18} strokeWidth={1.75} />,
   settings: <Settings size={18} strokeWidth={1.75} />,

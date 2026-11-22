@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
 import { Alert, Popconfirm, Segmented, Switch, Tooltip } from "antd";
 import {
   ArrowRightOutlined,
@@ -9,7 +8,6 @@ import {
   CommentOutlined,
   DeleteOutlined,
   ExclamationCircleOutlined,
-  InstagramOutlined,
   LineChartOutlined,
   LinkOutlined,
   MessageOutlined,
@@ -79,47 +77,12 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
-function FunnelCard({
-  bg,
-  label,
-  value,
-  note,
-  chip,
-  icon,
-}: {
-  bg: string;
-  label: string;
-  value: string;
-  note: string;
-  chip?: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div style={{ backgroundColor: bg }} className="flex flex-col justify-between rounded-[26px] p-4 shadow-xs sm:p-5">
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-semibold text-slate-950">{label}</span>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/80 bg-white text-slate-950 shadow-2xs">
-          {icon}
-        </div>
-      </div>
-      <div className="mt-4 text-3xl font-semibold tabular-nums text-slate-950 sm:text-4xl">{value}</div>
-      <div className="mt-2 flex min-h-7 flex-wrap items-center gap-2">
-        {chip && <Pill>{chip}</Pill>}
-        <span className="text-xs font-medium text-slate-600">{note}</span>
-      </div>
-    </div>
-  );
-}
-
 export function CommentDmAutomationList({
   onOpen,
   onOpenDashboard,
-  toolbarSlot,
 }: {
   onOpen: (id: string) => void;
   onOpenDashboard?: () => void;
-  // Where the period switch and "New automation" go (the top row next to the tabs). Without one they stay in the page.
-  toolbarSlot?: HTMLElement | null;
 }) {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -220,118 +183,101 @@ export function CommentDmAutomationList({
 
   return (
     <div className="flex w-full flex-col gap-8 animate-page-entrance">
-      {/* ── Period switch + New automation: in the top row next to the tabs ── */}
-      {toolbarSlot ? (
-        createPortal(
-          <>
-  <Segmented
-    options={[
-      { label: "7 days", value: 7 },
-      { label: "14 days", value: 14 },
-      { label: "30 days", value: 30 },
-    ]}
-    value={days}
-    onChange={(v) => setDays(v as 7 | 14 | 30)}
-    className="!rounded-xl font-medium"
-  />
-  <button
-    type="button"
-    onClick={createNew}
-    disabled={creating}
-    className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-  >
-    <PlusOutlined />
-    {creating ? "Creating…" : "New automation"}
-  </button>
-          </>,
-          toolbarSlot,
-        )
-      ) : (
-        <div className="flex flex-wrap items-center justify-end gap-3">
-  <Segmented
-    options={[
-      { label: "7 days", value: 7 },
-      { label: "14 days", value: 14 },
-      { label: "30 days", value: 30 },
-    ]}
-    value={days}
-    onChange={(v) => setDays(v as 7 | 14 | 30)}
-    className="!rounded-xl font-medium"
-  />
-  <button
-    type="button"
-    onClick={createNew}
-    disabled={creating}
-    className="inline-flex h-11 items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 cursor-pointer"
-  >
-    <PlusOutlined />
-    {creating ? "Creating…" : "New automation"}
-  </button>
-        </div>
-      )}
-
-      {error && <Alert type="error" showIcon title="Something went wrong" description={error} className="!rounded-2xl" />}
-
-      {/* ── Funnel: what happened to the comments ───────────────── */}
-      <section className="space-y-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-lg font-semibold tracking-tight text-slate-950">What your comments turned into</h2>
-          <div className="flex items-center gap-3 text-xs font-medium text-slate-500">
-            <span>{dateRangeLabel(days)}</span>
+      {/* ── Header: title, period switch and New automation ── */}
+      <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-950">Comment-to-DM</h1>
+          <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+            <span>What your comments turned into · {dateRangeLabel(days)}</span>
             {onOpenDashboard && (
               <button
                 type="button"
                 onClick={onOpenDashboard}
-                className="inline-flex items-center gap-1 text-slate-950 hover:underline cursor-pointer"
+                className="inline-flex min-h-6 cursor-pointer items-center gap-1 font-medium text-slate-900 hover:underline"
               >
-                <LineChartOutlined /> Full analytics
+                <LineChartOutlined aria-hidden /> Full analytics
               </button>
             )}
-          </div>
+          </p>
         </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Segmented
+            options={[
+              { label: "7 days", value: 7 },
+              { label: "14 days", value: 14 },
+              { label: "30 days", value: 30 },
+            ]}
+            value={days}
+            onChange={(v) => setDays(v as 7 | 14 | 30)}
+            className="!rounded-xl font-medium"
+          />
+          <button
+            type="button"
+            onClick={createNew}
+            disabled={creating}
+            className="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full bg-black px-5 text-sm font-semibold text-white shadow-xs transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+          >
+            <PlusOutlined aria-hidden />
+            {creating ? "Creating…" : "New automation"}
+          </button>
+        </div>
+      </header>
+      {error && <Alert type="error" showIcon title="Something went wrong" description={error} className="!rounded-2xl" />}
 
+      {/* ── Funnel: what happened to the comments ───────────────── */}
+      <section className="space-y-3">
         {!stats && statsError ? (
           <LoadFailed title="Couldn't load these numbers" message={statsError} onRetry={() => setStatsTick((n) => n + 1)} compact />
         ) : !stats ? (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-36" />
-            ))}
-          </div>
+          <Skeleton className="h-28" />
         ) : (
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <FunnelCard
-              bg={PASTEL.periwinkle}
-              label="Comments matched"
-              value={compact(stats.triggered)}
-              chip={`last ${stats.days} days`}
-              note="matched a keyword"
-              icon={<CommentOutlined />}
-            />
-            <FunnelCard
-              bg={PASTEL.butter}
-              label="DMs delivered"
-              value={compact(stats.sent)}
-              chip={`${pct(stats.deliveryRate)} delivered`}
-              note={stats.triggered ? `of ${compact(stats.triggered)} matched` : "waiting for comments"}
-              icon={<SendOutlined />}
-            />
-            <FunnelCard
-              bg={PASTEL.rose}
-              label="Replies"
-              value={compact(stats.replied)}
-              chip={`${pct(stats.responseRate)} replied`}
-              note={stats.sent ? `of ${compact(stats.sent)} DMs` : "no DMs yet"}
-              icon={<MessageOutlined />}
-            />
-            <FunnelCard
-              bg={stats.failed > 0 ? PASTEL.peach : PASTEL.memo}
-              label="Failed to send"
-              value={compact(stats.failed)}
-              note={stats.failed > 0 ? "open an automation to see why" : "nothing needs attention"}
-              icon={stats.failed > 0 ? <ExclamationCircleOutlined /> : <CheckCircleOutlined />}
-            />
-          </div>
+          <ul className="grid grid-cols-2 gap-px overflow-hidden rounded-[22px] border border-slate-200 bg-slate-200 shadow-sm lg:grid-cols-4">
+            {[
+              {
+                bg: PASTEL.periwinkle,
+                label: "Comments matched",
+                value: compact(stats.triggered),
+                note: `last ${stats.days} days · matched a keyword`,
+                icon: <CommentOutlined />,
+              },
+              {
+                bg: PASTEL.butter,
+                label: "DMs delivered",
+                value: compact(stats.sent),
+                note: `${pct(stats.deliveryRate)} delivered · ${stats.triggered ? `of ${compact(stats.triggered)} matched` : "waiting for comments"}`,
+                icon: <SendOutlined />,
+              },
+              {
+                bg: PASTEL.rose,
+                label: "Replies",
+                value: compact(stats.replied),
+                note: `${pct(stats.responseRate)} replied · ${stats.sent ? `of ${compact(stats.sent)} DMs` : "no DMs yet"}`,
+                icon: <MessageOutlined />,
+              },
+              {
+                bg: stats.failed > 0 ? PASTEL.peach : PASTEL.memo,
+                label: "Failed to send",
+                value: compact(stats.failed),
+                note: stats.failed > 0 ? "open an automation to see why" : "nothing needs attention",
+                icon: stats.failed > 0 ? <ExclamationCircleOutlined /> : <CheckCircleOutlined />,
+              },
+            ].map((s) => (
+              <li key={s.label} className="flex items-start gap-3 bg-white p-4 sm:p-5">
+                <span
+                  aria-hidden="true"
+                  style={{ backgroundColor: s.bg }}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-950"
+                >
+                  {s.icon}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-600">{s.label}</div>
+                  <div className="mt-0.5 text-3xl font-bold tabular-nums text-slate-950">{s.value}</div>
+                  <div className="mt-0.5 text-xs text-slate-500">{s.note}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
 
         {/* Charts */}
@@ -468,117 +414,64 @@ export function CommentDmAutomationList({
           </div>
         )}
 
-        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {visible.map((row) => {
             const kws = keywordList(row.rule.keywords);
-            const rate = row.triggered > 0 ? Math.round((row.sent / row.triggered) * 100) : null;
             const busy = busyId === row.rule.id;
+            const on = row.rule.enabled;
+            const panelLabel = "text-[11px] font-bold uppercase tracking-wide text-slate-500";
             return (
               <li key={row.rule.id} className="min-w-0">
-                <div
-                  onClick={() => onOpen(row.rule.id)}
-                  className="group flex h-full min-w-0 cursor-pointer flex-col gap-4 rounded-[24px] border border-[#e9e9ee] bg-white p-5 shadow-2xs transition-all hover:border-black/30"
+                {/* The title is a real button stretched over the whole card, so the card opens with mouse, touch and keyboard.
+                    The switch, post link and delete button sit above it (z-10). */}
+                <article
+                  className={`group relative flex h-full min-w-0 flex-col gap-3.5 rounded-[22px] border p-4 shadow-sm transition-shadow hover:shadow-md has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-black has-[:focus-visible]:ring-offset-2 ${
+                    on ? "border-slate-200 bg-white" : "border-dashed border-slate-300 bg-slate-50/60"
+                  }`}
                 >
-                  {/* Title row */}
+                  {/* Header */}
                   <div className="flex items-start gap-3">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl" style={{ backgroundColor: PASTEL.periwinkle }}>
-                      {row.rule.mediaThumb ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={row.rule.mediaThumb} alt="" referrerPolicy="no-referrer" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-xl text-slate-950">
-                          <InstagramOutlined />
-                        </div>
-                      )}
-                    </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-base font-semibold text-slate-950">{row.rule.name}</h3>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                      <h3 className="text-lg font-bold leading-tight text-slate-950">
+                        <button
+                          type="button"
+                          onClick={() => onOpen(row.rule.id)}
+                          title={row.rule.name}
+                          className="block max-w-full cursor-pointer truncate text-left focus-visible:outline-none after:absolute after:inset-0 after:rounded-[22px] after:content-['']"
+                        >
+                          {row.rule.name}
+                        </button>
+                      </h3>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-500">
                         {row.rule.mediaId ? (
                           row.rule.mediaPermalink ? (
                             <a
                               href={row.rule.mediaPermalink}
                               target="_blank"
                               rel="noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 font-medium text-slate-700 hover:text-slate-950 hover:underline"
+                              className="relative z-10 inline-flex min-h-6 items-center gap-1.5 hover:text-slate-900 hover:underline"
                             >
-                              One post <LinkOutlined />
+                              One post <LinkOutlined aria-hidden />
+                              <span className="sr-only">(opens on Instagram)</span>
                             </a>
                           ) : (
-                            <span className="font-medium text-slate-700">One post</span>
+                            <span>One post</span>
                           )
                         ) : (
-                          <span className="font-medium text-slate-700">Every post</span>
+                          <span>Every post</span>
                         )}
                         <span>Created {ago(row.rule.createdAt)}</span>
                       </div>
                     </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1" onClick={(e) => e.stopPropagation()}>
-                      <Switch size="small" checked={row.rule.enabled} loading={busy} onChange={(v) => toggle(row, v)} />
-                      <span className={`text-[11px] font-semibold ${row.rule.enabled ? "text-emerald-700" : "text-slate-400"}`}>
-                        {row.rule.enabled ? "Active" : "Paused"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Keywords */}
-                  <div>
-                    <div className="mb-1.5 text-xs font-medium text-slate-500">{kws.length === 0 ? "Starts on" : "Starts when a comment contains"}</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {kws.length === 0 ? (
-                        <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-700">
-                          Any comment
-                        </span>
-                      ) : (
-                        <>
-                          {kws.slice(0, 4).map((k) => (
-                            <span key={k} style={{ backgroundColor: PASTEL.butter }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-900">
-                              {k}
-                            </span>
-                          ))}
-                          {kws.length > 4 && (
-                            <Tooltip title={kws.slice(4).join(", ")}>
-                              <span style={{ backgroundColor: PASTEL.memo }} className="rounded-lg px-2.5 py-1 text-xs font-medium text-slate-600">
-                                +{kws.length - 4} more
-                              </span>
-                            </Tooltip>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* DM preview */}
-                  <div>
-                    <div className="mb-1.5 text-xs font-medium text-slate-500">Then sends this DM</div>
-                    <div
-                      style={{ backgroundColor: PASTEL.memo }}
-                      className="line-clamp-3 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed text-slate-800"
-                      title={row.rule.dmText}
-                    >
-                      {row.rule.dmText || <span className="text-slate-400">No message written yet</span>}
-                    </div>
-                  </div>
-
-                  {/* Results */}
-                  <div className="mt-auto border-t border-[#e9e9ee] pt-3.5">
-                    <div className="flex flex-wrap items-end justify-between gap-x-3 gap-y-3">
-                      <div className="flex items-center gap-4 sm:gap-5">
-                        <div>
-                          <div className="text-lg font-semibold tabular-nums text-slate-950">{compact(row.triggered)}</div>
-                          <div className="text-[11px] font-medium text-slate-500">matched</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold tabular-nums text-slate-950">{compact(row.sent)}</div>
-                          <div className="text-[11px] font-medium text-slate-500">DMs sent</div>
-                        </div>
-                        <div>
-                          <div className="text-lg font-semibold tabular-nums text-slate-950">{pct(rate)}</div>
-                          <div className="text-[11px] font-medium text-slate-500">delivered</div>
-                        </div>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <Switch
+                        checked={on}
+                        loading={busy}
+                        onChange={(v) => toggle(row, v)}
+                        aria-label={`${row.rule.name}: ${on ? "active" : "paused"}`}
+                        className="relative z-10 [&.ant-switch-checked]:!bg-emerald-500 [&.ant-switch-checked:hover]:!bg-emerald-600"
+                      />
+                      <div className="flex items-center gap-2">
                         <Popconfirm
                           title="Delete this automation?"
                           description={`"${row.rule.name}" will stop matching comments. Its past results are kept.`}
@@ -592,23 +485,61 @@ export function CommentDmAutomationList({
                               type="button"
                               disabled={busy}
                               aria-label={`Delete ${row.rule.name}`}
-                              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e9e9ee] text-slate-500 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50 cursor-pointer"
+                              className="relative z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-slate-300 bg-white text-slate-500 transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              <DeleteOutlined className="text-xs" />
+                              <DeleteOutlined />
                             </button>
                           </Tooltip>
                         </Popconfirm>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-white shadow-xs transition-transform group-hover:scale-110" aria-hidden>
-                          <ArrowRightOutlined className="text-xs" />
-                        </div>
+                        <span
+                          aria-hidden="true"
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-xs text-white shadow-xs transition-transform group-hover:translate-x-0.5"
+                        >
+                          <ArrowRightOutlined />
+                        </span>
                       </div>
                     </div>
-                    {/* Delivery bar */}
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: PASTEL.memo }}>
-                      <div className="h-full rounded-full bg-black transition-all" style={{ width: `${rate ?? 0}%` }} />
+                  </div>
+
+                  {/* Trigger → message */}
+                  <div className="grid grid-cols-1 items-stretch gap-2 border-t border-slate-200 pt-3.5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1.2fr)]">
+                    <div className="rounded-xl border border-slate-200 bg-[#eef2f8] p-3">
+                      <div className={panelLabel}>{kws.length === 0 ? "Triggers on" : "Triggers when a comment contains"}</div>
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {kws.length === 0 ? (
+                          <span className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-slate-800">Any comment</span>
+                        ) : (
+                          <>
+                            {kws.slice(0, 4).map((k) => (
+                              <span key={k} className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-slate-800">
+                                {k}
+                              </span>
+                            ))}
+                            {kws.length > 4 && (
+                              <Tooltip title={kws.slice(4).join(", ")}>
+                                <span className="relative z-10 rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
+                                  +{kws.length - 4} more
+                                </span>
+                              </Tooltip>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <ArrowRightOutlined aria-hidden className="hidden self-center text-slate-400 sm:block" />
+
+                    <div className="rounded-xl border border-slate-200 bg-[#eef2f8] p-3">
+                      <div className={panelLabel}>Then sends this DM</div>
+                      <div
+                        className="mt-2 line-clamp-3 rounded-xl bg-white px-3 py-2 text-sm leading-snug text-slate-900 shadow-xs"
+                        title={row.rule.dmText}
+                      >
+                        {row.rule.dmText || <span className="italic text-slate-500">No message written yet</span>}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </article>
               </li>
             );
           })}

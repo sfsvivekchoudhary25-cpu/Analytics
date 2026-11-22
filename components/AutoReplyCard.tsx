@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useId, useState, type KeyboardEvent, type ReactNode } from "react";
-import { Switch, InputNumber, Alert, Popconfirm, Collapse, Skeleton } from "antd";
-import { Bot, Zap, ShieldCheck, Gauge, Plus, Trash2, Pause, Play, Sparkles, Check } from "lucide-react";
+import { Switch, InputNumber, Alert, Popconfirm, Collapse, Skeleton, Tooltip } from "antd";
+import { Bot, Zap, ShieldCheck, Gauge, Plus, Trash2, Pause, Play, Sparkles, Check, Info } from "lucide-react";
 import { api } from "@/lib/api";
 
 export type RuleTemplate = { name: string; keywords: string; replyText: string };
@@ -96,6 +96,7 @@ function TabCard({
   selected,
   icon,
   label,
+  help,
   value,
   status,
   onSelect,
@@ -106,43 +107,52 @@ function TabCard({
   selected: boolean;
   icon: ReactNode;
   label: string;
+  /** One plain sentence on what this section is for; shown from the "i" icon on hover or keyboard focus. */
+  help: string;
   value: string;
   status?: StatusType;
   onSelect: () => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement>) => void;
 }) {
   return (
-    <button
-      type="button"
-      role="tab"
-      id={id}
-      aria-selected={selected}
-      aria-controls={panelId}
-      tabIndex={selected ? 0 : -1}
-      onClick={onSelect}
-      onKeyDown={onKeyDown}
-      className={`flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[18px] border p-3.5 text-left transition-colors ${FOCUS} ${
-        selected
-          ? "border-black bg-[#eeeefd] shadow-xs"
-          : "border-slate-200 bg-white shadow-2xs hover:border-slate-400"
-      }`}
-    >
-      <span
-        aria-hidden="true"
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-          selected ? "bg-white text-slate-950" : "bg-[#F1F3F7] text-slate-600"
+    <Tooltip title={help} placement="top" trigger={["hover", "focus"]}>
+      <button
+        type="button"
+        role="tab"
+        id={id}
+        aria-selected={selected}
+        aria-controls={panelId}
+        aria-describedby={`${id}-help`}
+        tabIndex={selected ? 0 : -1}
+        onClick={onSelect}
+        onKeyDown={onKeyDown}
+        className={`relative flex min-h-[72px] w-full cursor-pointer items-center gap-3 rounded-[18px] border p-3.5 pr-9 text-left transition-colors ${FOCUS} ${
+          selected
+            ? "border-black bg-[#eeeefd] shadow-xs"
+            : "border-slate-200 bg-white shadow-2xs hover:border-slate-400"
         }`}
       >
-        {icon}
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-semibold text-slate-950">{label}</span>
-        <span className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-slate-600">
-          {status ? <StatusDot status={status} pulse={false} /> : null}
-          <span className="truncate">{value}</span>
+        <span
+          aria-hidden="true"
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+            selected ? "bg-white text-slate-950" : "bg-[#F1F3F7] text-slate-600"
+          }`}
+        >
+          {icon}
         </span>
-      </span>
-    </button>
+        <span className="min-w-0">
+          <span className="block text-sm font-semibold text-slate-950">{label}</span>
+          <span className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-slate-600">
+            {status ? <StatusDot status={status} pulse={false} /> : null}
+            <span className="truncate">{value}</span>
+          </span>
+        </span>
+        <Info size={16} aria-hidden="true" className="absolute right-3 top-3 text-slate-500" />
+        <span id={`${id}-help`} className="sr-only">
+          {help}
+        </span>
+      </button>
+    </Tooltip>
   );
 }
 
@@ -308,7 +318,7 @@ export function AutoReplyCard({
   } else if (hasIssue) {
     overallStatus = "warning";
     if (auto.dryRun) overallBadgeText = "Simulation mode";
-    else if (rulesViolation) overallBadgeText = "No active rules";
+    else if (rulesViolation) overallBadgeText = "No keyword replies";
     else if (aiIssue && auto.ai?.pausedUntil) overallBadgeText = "AI paused";
     else if (aiIssue && !auto.ai?.available) overallBadgeText = "AI setup needed";
     else overallBadgeText = "Needs attention";
@@ -342,7 +352,7 @@ export function AutoReplyCard({
     : !rulesOn
       ? "Off"
       : rulesViolation
-        ? "No active rules"
+        ? "No keyword replies"
         : error
           ? "Issue"
           : `${rulesCount} active`;
@@ -391,7 +401,7 @@ export function AutoReplyCard({
             <StatusBadge status={overallStatus} text={overallBadgeText} />
           </div>
           <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Reply to Instagram {noun} automatically with AI, keyword rules, or both. Keyword rules are checked first.
+            Reply to Instagram {noun} automatically with AI, keyword replies, or both. Keyword replies are checked first.
           </p>
         </div>
       </header>
@@ -429,6 +439,7 @@ export function AutoReplyCard({
           selected={activeTab === "ai"}
           icon={<Bot size={18} />}
           label="AI replies"
+          help="The AI reads each incoming message and writes a short, friendly reply for you. It stays silent when it is not sure."
           value={aiBadgeText}
           status={aiStatus}
           onSelect={() => setActiveTab("ai")}
@@ -439,7 +450,8 @@ export function AutoReplyCard({
           panelId={panelId("keywords")}
           selected={activeTab === "keywords"}
           icon={<Zap size={18} />}
-          label="Keyword rules"
+          label="Keyword reply"
+          help="You choose the words and the exact reply. When a message contains one of your keywords, that reply is sent. These are checked before the AI."
           value={rulesBadgeText}
           status={rulesStatus}
           onSelect={() => setActiveTab("keywords")}
@@ -451,6 +463,7 @@ export function AutoReplyCard({
           selected={activeTab === "safety"}
           icon={<Gauge size={18} />}
           label="Hourly limit"
+          help="The most automatic replies sent in one hour. When it is reached, the rest wait for the next hour. This helps protect your Instagram account."
           value={auto ? `${auto.maxPerHour} replies per hour` : "Loading"}
           onSelect={() => setActiveTab("safety")}
           onKeyDown={onTabKey}
@@ -610,7 +623,7 @@ export function AutoReplyCard({
         </div>
       )}
 
-      {/* ── Keyword rules ── */}
+      {/* ── Keyword reply ── */}
       {auto && activeTab === "keywords" && (
         <div
           role="tabpanel"
@@ -620,8 +633,8 @@ export function AutoReplyCard({
           className={`${panelSurface} space-y-5 ${FOCUS} motion-safe:animate-in motion-safe:fade-in duration-200`}
         >
           <PanelHeader
-            title="Keyword rules"
-            description={`Send an exact reply when a ${one} contains certain words. A rule with no keywords answers any other ${one}.`}
+            title="Keyword reply"
+            description={`Send an exact reply when a ${one} contains certain words. A keyword reply with no keywords answers any other ${one}.`}
             status={rulesStatus}
             badge={rulesBadgeText}
             checked={rulesOn}
@@ -643,8 +656,8 @@ export function AutoReplyCard({
                   >
                     <Zap size={18} />
                   </span>
-                  <p className="text-sm font-semibold text-slate-900">No keyword rules yet</p>
-                  <p className="max-w-xs text-sm text-slate-600">Create your first rule, or start from a template on the right.</p>
+                  <p className="text-sm font-semibold text-slate-900">No keyword replies yet</p>
+                  <p className="max-w-xs text-sm text-slate-600">Create your first keyword reply, or start from a template on the right.</p>
                 </div>
               ) : (
                 <ul className="space-y-3">
@@ -730,7 +743,7 @@ export function AutoReplyCard({
             >
               <h4 className="flex items-center gap-2 text-sm font-semibold text-slate-950">
                 <Plus size={15} aria-hidden="true" />
-                New rule
+                New keyword reply
               </h4>
 
               {templates.length > 0 && (
@@ -804,7 +817,7 @@ export function AutoReplyCard({
 
               <button type="submit" disabled={!canSaveRule} className={`${BTN_PRIMARY} w-full`}>
                 <Plus size={15} aria-hidden="true" />
-                {busy === "add" ? "Saving…" : "Save rule"}
+                {busy === "add" ? "Saving…" : "Save keyword reply"}
               </button>
             </form>
           </div>

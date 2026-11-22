@@ -11,8 +11,7 @@ import { CommentsHub } from "@/components/CommentsHub";
 import { AccountPanel } from "@/components/AccountPanel";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
-import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
-import { HashtagSearch } from "@/components/HashtagSearch";
+import { ChatIcon, CommentIcon, GearIcon, GridIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { VoiceNotesDashboard } from "@/components/voice-notes/VoiceNotesDashboard";
 import { VoiceNoteGlobalButton } from "@/components/voice-notes/VoiceNoteGlobalButton";
 import { ReelsDownloader } from "@/components/reels/ReelsDownloader";
@@ -22,10 +21,9 @@ import { Film } from "lucide-react";
 export const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
   { id: "messages", label: "Auto-reply", icon: <ChatIcon /> },
-  { id: "comments", label: "Comments", icon: <CommentIcon /> },
+  { id: "comments", label: "Comment-to-DM", icon: <CommentIcon /> },
   { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
   { id: "stories", label: "Stories", icon: <StoriesIcon /> },
-  { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
   { id: "reels", label: "Reels Downloader", icon: <Film size={18} /> },
   { id: "voice-notes", label: "Voice Notes", icon: <AudioOutlined /> },
   { id: "settings", label: "Settings", icon: <GearIcon /> },
@@ -33,7 +31,7 @@ export const SECTIONS: Section[] = [
 ];
 
 // Pages whose data comes from the connected Instagram account. Without one they show a "connect" prompt.
-const INSTAGRAM_SECTIONS: SectionId[] = ["dashboard", "messages", "comments", "photos", "stories", "hashtags"];
+const INSTAGRAM_SECTIONS: SectionId[] = ["dashboard", "messages", "comments", "photos", "stories"];
 
 export type View = { status: ConnectionStatus; daysLeft: number | null };
 
@@ -55,13 +53,7 @@ export async function fetchView(): Promise<View> {
   return { status, daysLeft };
 }
 
-export default function AppDashboard({
-  initialTab,
-  initialCommentsTab,
-}: {
-  initialTab?: SectionId;
-  initialCommentsTab?: "inbox" | "automation";
-} = {}) {
+export default function AppDashboard({ initialTab }: { initialTab?: SectionId } = {}) {
   const router = useRouter();
   const [view, setView] = useState<View | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -69,37 +61,18 @@ export default function AppDashboard({
   const [notice, setNotice] = useState<string | null>(null);
   const [tab, setTabState] = useState<SectionId>(initialTab || "dashboard");
   const [pendingPhotos, setPendingPhotos] = useState(0);
-  const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">(initialCommentsTab || "inbox");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const handleCommentsTabChange = useCallback((nextSubTab: "inbox" | "automation") => {
-    setCommentsTab(nextSubTab);
-    if (typeof window !== "undefined") {
-      if (nextSubTab === "automation") {
-        if (window.location.pathname !== "/automations") {
-          window.history.pushState(null, "", "/automations");
-        }
-      } else {
-        if (window.location.pathname !== "/comments" || window.location.search) {
-          window.history.pushState(null, "", "/comments");
-        }
-      }
-    }
-  }, []);
 
   const setTab = useCallback((newTab: SectionId) => {
     setTabState(newTab);
     if (typeof window !== "undefined") {
-      let targetPath = `/${newTab}`;
-      if (newTab === "comments") {
-        targetPath = commentsTab === "automation" ? "/automations" : "/comments";
-      }
+      const targetPath = newTab === "comments" ? "/automations" : `/${newTab}`;
       if (window.location.pathname !== targetPath || (newTab === "dashboard" && window.location.search)) {
         window.history.pushState(null, "", targetPath);
         window.dispatchEvent(new PopStateEvent("popstate"));
       }
     }
-  }, [commentsTab]);
+  }, []);
 
   const handleLoadError = useCallback(
     (err: unknown) => {
@@ -116,17 +89,8 @@ export default function AppDashboard({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      const q = new URLSearchParams(window.location.search);
-
-      // Detect sub-tab for comments/automations
-      if (path === "automations" || q.get("tab") === "automation") {
-        setCommentsTab("automation");
+      if (path === "automations" || path === "comments") {
         setTabState("comments");
-      } else if (path === "comments") {
-        setTabState("comments");
-        if (q.get("tab") !== "automation") {
-          setCommentsTab("inbox");
-        }
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path && !initialTab) {
@@ -136,13 +100,8 @@ export default function AppDashboard({
 
     const handlePopState = () => {
       const path = window.location.pathname.replace(/^\//, "").split("/")[0];
-      const q = new URLSearchParams(window.location.search);
-      if (path === "automations") {
+      if (path === "automations" || path === "comments") {
         setTabState("comments");
-        setCommentsTab("automation");
-      } else if (path === "comments") {
-        setTabState("comments");
-        setCommentsTab(q.get("tab") === "automation" ? "automation" : "inbox");
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path) {
@@ -241,7 +200,6 @@ export default function AppDashboard({
       error={error}
       busy={busy}
       onConnectInstagram={connectWithInstagram}
-      onSignOut={logout}
     />
   );
 
@@ -355,9 +313,7 @@ export default function AppDashboard({
           className={
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
-              : active === "hashtags"
-                ? "animate-page-entrance w-full space-y-6 p-3 sm:p-6"
-                : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6 pb-0 sm:pb-8"
+              : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6 pb-0 sm:pb-8"
           }
         >
           {guest && !needsInstagram && active !== "account" && (
@@ -388,19 +344,14 @@ export default function AppDashboard({
             <MessagesTab />
           )}
           {!needsInstagram && active === "comments" && (
-            <CommentsHub
-              tab={commentsTab}
-              onTabChange={handleCommentsTabChange}
-              onOpenDashboard={() => setTab("dashboard")}
-            />
+            <CommentsHub onOpenDashboard={() => setTab("dashboard")} />
           )}
           {!needsInstagram && active === "stories" && (
             <Stories username={uname} ownAvatar={ownAvatar} />
           )}
-          {!needsInstagram && active === "hashtags" && <HashtagSearch />}
           {active === "reels" && <ReelsDownloader />}
           {active === "voice-notes" && <VoiceNotesDashboard />}
-          {active === "settings" && <SettingsPanel status={status} />}
+          {active === "settings" && <SettingsPanel />}
           {active === "account" && accountPanel}
         </div>
 
