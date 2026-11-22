@@ -587,7 +587,6 @@ type Props = {
   commentsCount?: number;
   mediaType?: string;
   onBack: () => void;
-  onOpenMessages?: (user?: string, text?: string) => void;
 };
 
 export function PostDetail({
@@ -600,7 +599,6 @@ export function PostDetail({
   commentsCount: initialCommentsCount,
   mediaType: initialMediaType,
   onBack,
-  onOpenMessages,
 }: Props) {
   const { message } = App.useApp();
   const [data, setData] = useState<PostDetailData | null>(null);
@@ -3915,31 +3913,15 @@ export function PostDetail({
                             </div>
                           </div>
                           <div className="mt-5 pt-3 border-t border-black/10 flex items-center justify-between gap-3">
-                            {topCommenters[0] && onOpenMessages ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const u = topCommenters[0].username;
-                                  onOpenMessages(u);
-                                  notify(`Opening DM conversation with @${u}`);
-                                }}
-                                style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-                              >
-                                <span className="!text-white">Message @{topCommenters[0].username}</span>
-                                <ArrowRight size={13} className="text-white" />
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => setQuickRuleModalOpen(true)}
-                                style={{ backgroundColor: "#000000", color: "#ffffff" }}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
-                              >
-                                <span className="!text-white">Configure keywords</span>
-                                <ArrowRight size={13} className="text-white" />
-                              </button>
-                            )}
+                                                        <button
+                              type="button"
+                              onClick={() => setQuickRuleModalOpen(true)}
+                              style={{ backgroundColor: "#000000", color: "#ffffff" }}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-full !bg-black hover:!bg-neutral-800 !text-white text-xs font-bold shadow-xs hover:scale-105 active:scale-95 transition-transform cursor-pointer"
+                            >
+                              <span className="!text-white">Configure keywords</span>
+                              <ArrowRight size={13} className="text-white" />
+                            </button>
                             <span className="text-[11px] font-semibold text-slate-600">Community outreach</span>
                           </div>
                         </div>
@@ -5652,24 +5634,6 @@ export function PostDetail({
               className="!rounded-lg text-xs"
             >
               Mark Outreach Sent ✓
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                setCollabModalOpen(false);
-                const collabUser = detectedCollabUsername;
-                const template1 = "Hey Vivek! Loved our collab post! Just published it on the feed. Would you mind sharing it to your Story with a sticker? Excited to push this together! 🙌";
-                const template2 = "Hey Vivek! Could you drop a quick comment or emoji on our new post? Early comments really boost the algorithm! Appreciate you! 💛";
-                const msgToSend = copiedKey === "comment" ? template2 : template1;
-                if (onOpenMessages) {
-                  onOpenMessages(collabUser, msgToSend);
-                } else {
-                  message.info(`Head to the Messages tab to chat with @${collabUser}!`);
-                }
-              }}
-              className="!rounded-lg !bg-purple-600 hover:!bg-purple-500 text-xs font-semibold"
-            >
-              Go to Inbox DMs with @{detectedCollabUsername} →
             </Button>
           </div>
         </div>

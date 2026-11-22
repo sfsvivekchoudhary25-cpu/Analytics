@@ -20,7 +20,7 @@ import { Film } from "lucide-react";
 
 export const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: <GridIcon /> },
-  { id: "messages", label: "Conversations", icon: <ChatIcon /> },
+  { id: "messages", label: "Auto-reply", icon: <ChatIcon /> },
   { id: "comments", label: "Comments", icon: <CommentIcon /> },
   { id: "photos", label: "Customer photos", icon: <PhotoIcon /> },
   { id: "stories", label: "Stories", icon: <StoriesIcon /> },
@@ -66,8 +66,6 @@ export default function AppDashboard({
   const [tab, setTabState] = useState<SectionId>(initialTab || "dashboard");
   const [pendingPhotos, setPendingPhotos] = useState(0);
   const [commentsTab, setCommentsTab] = useState<"inbox" | "automation">(initialCommentsTab || "inbox");
-  const [messagesTargetUser, setMessagesTargetUser] = useState<string | null>(null);
-  const [messagesInitialText, setMessagesInitialText] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleCommentsTabChange = useCallback((nextSubTab: "inbox" | "automation") => {
@@ -98,12 +96,6 @@ export default function AppDashboard({
       }
     }
   }, [commentsTab]);
-
-  const openMessagesWithUser = useCallback((user?: string, text?: string) => {
-    if (user) setMessagesTargetUser(user);
-    if (text) setMessagesInitialText(text);
-    setTab("messages");
-  }, [setTab]);
 
   const openAutomations = useCallback(() => {
     setCommentsTab("automation");
@@ -145,10 +137,6 @@ export default function AppDashboard({
         setTabState(path as SectionId);
       } else if (!path && !initialTab) {
         setTabState("dashboard");
-      }
-
-      if (q.get("user")) {
-        setMessagesTargetUser(q.get("user"));
       }
     }
 
@@ -430,17 +418,11 @@ export default function AppDashboard({
               onOpenPhotos={() => setTab("photos")}
               username={status.username}
               onOpenAccount={() => setTab("account")}
-              onOpenMessages={openMessagesWithUser}
             />
           )}
           {active === "photos" && <Submissions />}
           {active === "messages" && (
-            <MessagesTab
-              username={status.username}
-              ownAvatar={status.profilePictureUrl}
-              targetUsername={messagesTargetUser}
-              initialMessageText={messagesInitialText}
-            />
+            <MessagesTab />
           )}
           {active === "comments" && (
             <CommentsHub

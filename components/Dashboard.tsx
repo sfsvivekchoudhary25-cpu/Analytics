@@ -4,11 +4,8 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Card,
   Button,
-  Tag,
-  Badge,
   Progress,
   Alert,
-  Table,
   Dropdown,
   Tooltip,
   Empty,
@@ -17,7 +14,6 @@ import {
   Modal,
   Input,
 } from "antd";
-import type { ColumnsType } from "antd/es/table";
 import {
   CommentOutlined,
   SendOutlined,
@@ -106,13 +102,6 @@ type DashboardOverview = {
     replies: number;
     conversions: number;
   }[];
-  recentDms: {
-    username: string;
-    message: string;
-    type: string;
-    status: "sent" | "replied" | "failed";
-    time: string;
-  }[];
 };
 
 type Props = {
@@ -121,7 +110,6 @@ type Props = {
   onOpenPhotos?: () => void;
   username?: string;
   onOpenAccount?: () => void;
-  onOpenMessages?: (user?: string, text?: string) => void;
 };
 
 // ── Helper Utilities ──────────────────────────────────────────────────
@@ -135,14 +123,6 @@ const dateRangeLabel = (days: number) => {
   const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   return `${fmt(start)} – ${fmt(end)}`;
 };
-
-const when = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 
 const fmtPostDate = (iso: string) => {
   if (!iso) return "";
@@ -293,59 +273,6 @@ function PostsShowcaseSkeleton() {
   );
 }
 
-const DM_TYPE_COLORS: Record<string, string> = {
-  "Comment DM": "purple",
-  "Auto DM": "blue",
-  "AI DM": "magenta",
-  "Manual DM": "default",
-  "System DM": "gold",
-};
-
-function RecentDmsTableSkeleton() {
-  return (
-    <div className="space-y-3 py-1">
-      {/* Desktop Skeleton */}
-      <div className="hidden md:block space-y-3.5">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className="flex items-center justify-between border-b border-slate-100 pb-3 last:border-0"
-          >
-            <div className="flex items-center gap-2.5 w-1/4">
-              <Skeleton.Avatar active size={32} shape="circle" />
-              <Skeleton.Input active size="small" style={{ width: 90, height: 14 }} />
-            </div>
-            <Skeleton.Input active size="small" style={{ width: "35%", height: 14 }} />
-            <Skeleton.Button active size="small" style={{ width: 75, height: 22 }} className="!rounded-full" />
-            <Skeleton.Button active size="small" style={{ width: 55, height: 20 }} className="!rounded-full" />
-            <Skeleton.Input active size="small" style={{ width: 80, height: 12 }} />
-          </div>
-        ))}
-      </div>
-
-      {/* Mobile Skeleton */}
-      <div className="block md:hidden space-y-3">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="rounded-2xl border border-slate-100 p-3.5 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Skeleton.Avatar active size={28} shape="circle" />
-                <Skeleton.Input active size="small" style={{ width: 80, height: 14 }} />
-              </div>
-              <Skeleton.Input active size="small" style={{ width: 60, height: 12 }} />
-            </div>
-            <Skeleton.Input active size="small" block style={{ height: 32 }} />
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-              <Skeleton.Button active size="small" style={{ width: 60, height: 18 }} className="!rounded-full" />
-              <Skeleton.Button active size="small" style={{ width: 50, height: 18 }} className="!rounded-full" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ── Main Dashboard Component ──────────────────────────────────────────
 
 export function Dashboard({
@@ -354,7 +281,6 @@ export function Dashboard({
   onOpenPhotos,
   username,
   onOpenAccount,
-  onOpenMessages,
 }: Props) {
   const [days, setDays] = useState<7 | 14 | 30>(7);
   const [data, setData] = useState<DashboardOverview | null>(null);
@@ -578,121 +504,9 @@ export function Dashboard({
         commentsCount={selectedPost.comments_count}
         mediaType={selectedPost.media_type}
         onBack={handleClosePost}
-        onOpenMessages={onOpenMessages}
       />
     );
   }
-
-  // Table columns for Recent DMs
-  const dmColumns: ColumnsType<DashboardOverview["recentDms"][number]> = [
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
-      width: 170,
-      render: (u: string) => (
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-white shadow-xs">
-            {u ? u.charAt(0).toUpperCase() : "?"}
-          </span>
-          <a
-            href={`https://instagram.com/${u}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700 hover:underline truncate max-w-[120px]"
-          >
-            <span className="truncate">@{u || "unknown"}</span>
-          </a>
-        </div>
-      ),
-    },
-    {
-      title: "Message",
-      dataIndex: "message",
-      key: "message",
-      ellipsis: true,
-      render: (m: string) => (
-        <Tooltip title={m} placement="topLeft">
-          <span className="text-slate-700 font-normal">{m}</span>
-        </Tooltip>
-      ),
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-      width: 130,
-      render: (t: string) => (
-        <Tag color={DM_TYPE_COLORS[t] || "default"} className="!rounded-full px-2.5 py-0.5 text-xs font-medium">
-          {t}
-        </Tag>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      width: 110,
-      render: (s: "sent" | "replied" | "failed") => {
-        if (s === "replied") {
-          return <Badge status="success" text={<span className="text-xs font-medium text-emerald-700">Replied</span>} />;
-        }
-        if (s === "sent") {
-          return <Badge status="processing" color="#2563eb" text={<span className="text-xs font-medium text-blue-700">Sent</span>} />;
-        }
-        return <Badge status="error" text={<span className="text-xs font-medium text-rose-700">Failed</span>} />;
-      },
-    },
-    {
-      title: "Time",
-      dataIndex: "time",
-      key: "time",
-      width: 130,
-      render: (iso: string) => <span className="text-xs text-slate-500 whitespace-nowrap">{when(iso)}</span>,
-    },
-    {
-      title: "",
-      key: "actions",
-      width: 48,
-      align: "right",
-      render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: "profile",
-                icon: <InstagramOutlined />,
-                label: (
-                  <a href={`https://instagram.com/${record.username}`} target="_blank" rel="noreferrer">
-                    View profile on Instagram
-                  </a>
-                ),
-              },
-              ...(onOpenAutomations
-                ? [
-                  {
-                    key: "automation",
-                    icon: <ThunderboltOutlined />,
-                    label: "Open automation",
-                    onClick: onOpenAutomations,
-                  },
-                ]
-                : []),
-            ],
-          }}
-          trigger={["click"]}
-          placement="bottomRight"
-        >
-          <Button
-            type="text"
-            shape="circle"
-            icon={<EllipsisOutlined className="text-slate-400 hover:text-slate-700" />}
-            size="small"
-          />
-        </Dropdown>
-      ),
-    },
-  ];
 
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
@@ -1557,185 +1371,6 @@ export function Dashboard({
             </Modal>
           </Card>
         ) : null}
-
-        {/* ── 5. Recent Instagram DMs Table (Soft Pastel Minimal) ───────────────────────────── */}
-        <Card
-          className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all overflow-hidden"
-          styles={{ body: { padding: "0px" } }}
-        >
-          {/* Responsive Header: clean and uncluttered on mobile, detailed on desktop */}
-          <div className="p-4 sm:p-6 sm:border-b sm:border-[#e9e9ee] flex items-center justify-between gap-3 pb-2 sm:pb-6">
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-950">Recent Instagram DMs</h2>
-              <p className="hidden sm:block text-xs font-normal text-slate-500 mt-0.5">
-                Every DM sent from any source (Comment-to-DM, AI replies, keywords)
-              </p>
-            </div>
-            {onOpenAutomations && (
-              <div className="hidden sm:block">
-                <Button
-                  onClick={onOpenAutomations}
-                  className="!rounded-full !bg-black hover:!bg-neutral-800 !px-4 !py-1.5 !text-xs !font-bold !text-white !border-0 shadow-xs hover:scale-105 active:scale-95 transition-all"
-                >
-                  View All Automations
-                </Button>
-              </div>
-            )}
-          </div>
-
-          <div className="p-0 sm:p-6 sm:pt-6">
-            {dashLoading ? (
-              <RecentDmsTableSkeleton />
-            ) : !data || data.recentDms.length === 0 ? (
-              <Empty
-                description={
-                  <span className="text-sm text-slate-500">
-                    No automated DMs sent yet. Turn on Comment-to-DM automation to see them appear here.
-                  </span>
-                }
-                className="py-10"
-              />
-            ) : (
-              <>
-                {/* Mobile View: Dedicated cards matching screenshot */}
-                <div className="block md:hidden max-h-[460px] overflow-y-auto space-y-3 p-0 custom-scrollbar overscroll-contain">
-                  {data.recentDms.map((item, index) => (
-                    <div
-                      key={`${item.username}-${item.time}-${index}`}
-                      className="rounded-[20px] border border-[#e9e9ee] bg-white p-3.5 sm:p-4 shadow-2xs hover:border-black/20 transition-all space-y-3"
-                    >
-                      {/* Top: Avatar, Username, Time, and Actions */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white shadow-xs">
-                            {item.username ? item.username.charAt(0).toUpperCase() : "?"}
-                          </span>
-                          <div className="min-w-0">
-                            <a
-                              href={`https://instagram.com/${item.username}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="font-bold text-xs sm:text-[13px] text-[#2563eb] hover:text-[#1d4ed8] hover:underline truncate block"
-                            >
-                              @{item.username || "unknown"}
-                            </a>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-xs font-normal text-slate-400 whitespace-nowrap">
-                            {when(item.time)}
-                          </span>
-                          <Dropdown
-                            menu={{
-                              items: [
-                                {
-                                  key: "profile",
-                                  icon: <InstagramOutlined />,
-                                  label: (
-                                    <a
-                                      href={`https://instagram.com/${item.username}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      View profile on Instagram
-                                    </a>
-                                  ),
-                                },
-                                ...(onOpenAutomations
-                                  ? [
-                                    {
-                                      key: "automation",
-                                      icon: <ThunderboltOutlined />,
-                                      label: "Open automation",
-                                      onClick: onOpenAutomations,
-                                    },
-                                  ]
-                                  : []),
-                              ],
-                            }}
-                            trigger={["click"]}
-                            placement="bottomRight"
-                          >
-                            <button
-                              type="button"
-                              className="text-slate-400 hover:text-slate-600 transition-colors p-1 leading-none rounded-full cursor-pointer"
-                              aria-label="Actions"
-                            >
-                              <EllipsisOutlined className="text-sm" />
-                            </button>
-                          </Dropdown>
-                        </div>
-                      </div>
-
-                      {/* Message excerpt bubble */}
-                      {item.message ? (
-                        <div className="text-xs sm:text-[13px] text-slate-700 bg-slate-50 rounded-xl px-3.5 py-2.5 border border-slate-100/70 leading-relaxed break-words line-clamp-3">
-                          {item.message}
-                        </div>
-                      ) : null}
-
-                      {/* Bottom row: Type Pill + Dot Status (borderless) */}
-                      <div className="flex items-center justify-between gap-2 pt-0.5">
-                        <div className="flex items-center">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${item.type === "AI DM"
-                                ? "bg-[#FCEEF4] text-[#db2777]"
-                                : item.type === "Comment DM"
-                                  ? "bg-[#f3e8ff] text-[#7e22ce]"
-                                  : item.type === "Auto DM"
-                                    ? "bg-[#eff6ff] text-[#2563eb]"
-                                    : item.type === "System DM"
-                                      ? "bg-[#fef9c3] text-[#a16207]"
-                                      : "bg-slate-100 text-slate-700"
-                              }`}
-                          >
-                            {item.type}
-                          </span>
-                        </div>
-                        <div className="flex items-center">
-                          {item.status === "sent" && (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                              <span>Sent</span>
-                            </div>
-                          )}
-                          {item.status === "replied" && (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-                              <span>Replied</span>
-                            </div>
-                          )}
-                          {item.status === "failed" && (
-                            <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
-                              <span>Failed</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Desktop View: Full Data Table with horizontal scroll safety */}
-                <div className="hidden md:block overflow-x-auto">
-                  <Table
-                    dataSource={data.recentDms.map((d, index) => ({
-                      ...d,
-                      key: `${d.username}-${d.time}-${index}`,
-                    }))}
-                    columns={dmColumns}
-                    pagination={false}
-                    size="middle"
-                    scroll={{ x: 680 }}
-                    className="modern-antd-table"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
       </div>
     </div>
   );
