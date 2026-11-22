@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Modal, Tooltip } from "antd";
 import { api } from "@/lib/api";
 import {
   ArrowLeftIcon,
   BoltIcon,
   GearIcon,
+  PencilIcon,
   InstagramIcon,
   SendIcon,
   TrashIcon,
@@ -36,6 +37,7 @@ import {
 } from "./icons";
 import { MobilePreview, SupportedDevice } from "./MobilePreview";
 import { CloudinaryImageUploader } from "./CloudinaryImageUploader";
+import { CommentDmFlowPhone, type FlowStep } from "./CommentDmFlowPhone";
 
 export type MessageButton = {
   type: "web_url" | "postback";
@@ -54,6 +56,7 @@ type Rule = {
   mediaThumb: string | null;
   dmText: string;
   requireFollow: boolean;
+  recoveryEnabled?: boolean;
   followGateText: string;
   templateType?: "text" | "button" | "product" | "file" | "card";
   cardTitle?: string | null;
@@ -104,7 +107,7 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
     );
   if (status === "invited")
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-500/20 dark:text-blue-300">
+      <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-slate-900 ring-1 ring-inset ring-blue-500/20 dark:text-blue-300">
         <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
         Invited
       </span>
@@ -117,7 +120,7 @@ function StatusBadge({ status }: { status: LogEntry["status"] }) {
   );
 }
 
-const card = "rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-sm w-full min-w-0 [overflow-anchor:none]";
+const card = "rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs w-full min-w-0 [overflow-anchor:none]";
 
 /**
  * Captures current scroll position and locks it across consecutive
@@ -175,6 +178,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const [keywordDraft, setKeywordDraft] = useState("");
   const [dmText, setDmText] = useState("");
   const [requireFollow, setRequireFollow] = useState(false);
+  const [recoveryEnabled, setRecoveryEnabled] = useState(false);
   const [followGateText, setFollowGateText] = useState("");
   const [templateType, setTemplateType] = useState<"text" | "button" | "product" | "file" | "card">("text");
   const [cardTitle, setCardTitle] = useState("");
@@ -183,6 +187,49 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   const [cardFileUrl, setCardFileUrl] = useState("");
   const [cardButtons, setCardButtons] = useState<MessageButton[]>([]);
   const [previewDevice, setPreviewDevice] = useState<SupportedDevice>("iPhone 17");
+  // The one shared phone: which step it follows, whether the small-screen preview is open, and how tall it can be.
+  const [activeStep, setActiveStep] = useState<FlowStep>("target");
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [phoneHeight, setPhoneHeight] = useState(650);
+  const stepsRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const fit = () => setPhoneHeight(Math.max(520, Math.min(650, window.innerHeight - 170)));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, []);
+  // The phone shows the step being edited: the last step whose top has passed the upper part of the screen, or the
+  // one you click or type into.
+  useEffect(() => {
+    const root = stepsRef.current;
+    if (!root) return;
+    let frame = 0;
+    const order: FlowStep[] = ["target", "trigger", "follow", "message", "reminder"];
+    const update = () => {
+      frame = 0;
+      let current: FlowStep = order[0];
+      for (const step of order) {
+        const el = root.querySelector<HTMLElement>('[data-step="' + step + '"]');
+        if (el && el.getBoundingClientRect().top <= window.innerHeight * 0.4) current = step;
+      }
+      setActiveStep(current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    const onFocus = (e: FocusEvent) => {
+      const step = (e.target as HTMLElement | null)?.closest?.("[data-step]")?.getAttribute("data-step") as FlowStep | null;
+      if (step) setActiveStep(step);
+    };
+    document.addEventListener("scroll", onScroll, true);
+    root.addEventListener("focusin", onFocus);
+    update();
+    return () => {
+      document.removeEventListener("scroll", onScroll, true);
+      root.removeEventListener("focusin", onFocus);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [!!rule]);
   const [dirty, setDirty] = useState(false);
 
   const [keywordInput, setKeywordInput] = useState("");
@@ -203,6 +250,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         setTriggerMode(r.keywords && r.keywords.trim() ? "keywords" : "any");
         setDmText(r.dmText);
         setRequireFollow(r.requireFollow ?? false);
+        setRecoveryEnabled(r.recoveryEnabled ?? false);
         setFollowGateText(r.followGateText ?? "");
         const inferredTemplate =
           r.templateType && r.templateType !== "text"
@@ -219,7 +267,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         setCardSubtitle(r.cardSubtitle ?? "");
         setCardImageUrl(r.cardImageUrl ?? "");
         setCardFileUrl(r.cardFileUrl ?? "");
-        setCardButtons(r.cardButtons ?? []);
+        setCardButtons((r.cardButtons ?? []).map((b) => (b.type === "web_url" ? b : { type: "web_url" as const, title: b.title, url: "https://instagram.com" })));
         if (r.mediaId) {
           api<Post[]>("/comment-dm/posts").then(setPosts).catch(() => {});
         }
@@ -388,6 +436,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           keywords: keywordDraft,
           dmText,
           requireFollow,
+          recoveryEnabled,
           followGateText,
           templateType,
           cardTitle: templateType === "text" || templateType === "button" ? null : (cardTitle.trim() || null),
@@ -417,9 +466,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
   async function toggleActive() {
     if (!rule) return;
     const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
+    const before = rule;
     setError(null);
+    setRule({ ...rule, enabled: !rule.enabled }); // the switch moves at once; the save follows
     try {
-      const updated = await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ enabled: !rule.enabled }) });
+      const updated = await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ enabled: !before.enabled }) });
       setRule(updated);
       if (typeof window !== "undefined") {
         requestAnimationFrame(() => {
@@ -427,6 +478,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         });
       }
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
@@ -441,27 +493,35 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
     }
   }
 
+  // The post shows as chosen and the window closes straight away; saving happens in the background and is undone
+  // (with an error message) if it fails.
   async function choosePost(p: Post) {
     if (!rule) return;
+    const before = rule;
     setError(null);
+    setRule({ ...rule, mediaId: p.mediaId, mediaPermalink: p.permalink, mediaThumb: p.thumb });
+    setPickerOpen(false);
     try {
       const updated = await api<Rule>(basePath, {
         method: "PUT",
         body: JSON.stringify({ mediaId: p.mediaId, mediaPermalink: p.permalink, mediaThumb: p.thumb }),
       });
       setRule(updated);
-      setPickerOpen(false);
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
 
   async function clearPost() {
     if (!rule) return;
+    const before = rule;
+    setRule({ ...rule, mediaId: null, mediaPermalink: null, mediaThumb: null });
+    setPickerOpen(false);
     try {
       setRule(await api<Rule>(basePath, { method: "PUT", body: JSON.stringify({ mediaId: null, mediaPermalink: null, mediaThumb: null }) }));
-      setPickerOpen(false);
     } catch (err) {
+      setRule(before);
       setError((err as Error).message);
     }
   }
@@ -483,6 +543,24 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
   const previewText = dmText.replaceAll("{username}", "there") || "Your message will appear here.";
   const gatePreviewText = followGateText.replaceAll("{username}", "there") || "Oh no! It seems you're not following me 👀\nVisit my profile and hit that follow button 😁.\nOnce you do, I'll send you what you asked for!";
+
+  const phoneProps = {
+    activeStep,
+    device: previewDevice,
+    onDeviceChange: setPreviewDevice,
+    ruleName: name || rule.name,
+    keywords,
+    templateType,
+    dmText,
+    previewText,
+    gatePreviewText,
+    cardImageUrl,
+    cardTitle,
+    cardSubtitle,
+    cardButtons,
+    requireFollow,
+    recoveryEnabled,
+  };
 
   return (
     <div className="w-full max-w-full min-w-0 space-y-5 sm:space-y-6 [overflow-anchor:none]">
@@ -525,113 +603,286 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
       {error && <p role="alert" className="rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs sm:text-sm text-red-600">{error}</p>}
 
-      {/* Header Card: Icon, editable name, status pill, mobile action bar */}
-      <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs [overflow-anchor:none]">
-        <div className="flex items-start gap-3 sm:gap-4">
-          <span className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-xl bg-foreground text-background shadow-xs">
-            <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </span>
+      {/* Header Card: icon, editable name, live/paused switch, what it does, key settings at a glance */}
+      <div className="rounded-[26px] border border-[var(--viz-border)] bg-[var(--viz-surface)] shadow-2xs [overflow-anchor:none]">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-start gap-3.5 sm:gap-4">
+            <span className="flex h-11 w-11 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-[22px] bg-foreground text-background shadow-xs ring-4 ring-black/[0.04] dark:ring-white/[0.06]">
+              <BoltIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            </span>
 
-          <div className="flex-1 min-w-0">
-            {/* Top row: Title and Status Badge */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
-                {editingName ? (
-                  <input
-                    autoFocus
-                    value={name}
-                    onChange={(e) => {
-                      setName(e.target.value);
-                      setDirty(true);
-                    }}
-                    onBlur={() => setEditingName(false)}
-                    onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
-                    maxLength={100}
-                    className="w-full sm:w-auto rounded-lg border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-base sm:text-xl font-bold text-[var(--viz-ink)] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  />
-                ) : (
-                  <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--viz-ink)] truncate max-w-full">
-                    {name}
-                  </h1>
-                )}
-                {!editingName && (
-                  <button
-                    type="button"
-                    onClick={(e) => handleButtonClick(e, () => setEditingName(true))}
-                    aria-label="Rename automation"
-                    title="Rename automation"
-                    className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col items-start gap-2.5 sm:flex-row sm:justify-between sm:gap-3">
+                <div className="min-w-0 w-full flex-1">
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--viz-muted)]">Comment-to-DM</p>
+                  <div className="mt-0.5">
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0 flex-1">
+                                    {editingName ? (
+                                      <input
+                                        autoFocus
+                                        value={name}
+                                        onChange={(e) => {
+                                          setName(e.target.value);
+                                          setDirty(true);
+                                        }}
+                                        onBlur={() => setEditingName(false)}
+                                        onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
+                                        maxLength={100}
+                                        className="w-full sm:w-auto rounded-lg border border-[var(--viz-border)] bg-transparent px-2 py-0.5 text-base sm:text-xl font-bold text-[var(--viz-ink)] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                                      />
+                                    ) : (
+                                      <h1 className="text-base sm:text-xl font-bold tracking-tight text-[var(--viz-ink)] truncate max-w-full">
+                                        {name}
+                                      </h1>
+                                    )}
+                                    {!editingName && (
+                                      <button
+                                        type="button"
+                                        onClick={(e) => handleButtonClick(e, () => setEditingName(true))}
+                                        aria-label="Rename automation"
+                                        title="Rename automation"
+                                        className="p-1 rounded-md text-[var(--viz-muted)] hover:text-[var(--viz-ink)] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors"
+                                      >
+                                        <PencilIcon className="h-3.5 w-3.5" />
+                                      </button>
+                                    )}
+                                  </div>
+                  </div>
+                </div>
+
+                {/* Live / Paused switch */}
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={rule.enabled}
+                  aria-label={rule.enabled ? "Pause this automation" : "Turn this automation on"}
+                  onClick={(e) => handleButtonClick(e, toggleActive)}
+                  className={`group shrink-0 inline-flex items-center gap-2 rounded-full border py-1 pl-3 pr-1 text-xs font-medium transition-colors active:scale-95 ${
+                    rule.enabled
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                      : "border-[var(--viz-border)] bg-black/[0.03] text-[var(--viz-ink-2)] dark:bg-white/[0.05]"
+                  }`}
+                >
+                  <span>{rule.enabled ? "Live" : "Paused"}</span>
+                  <span
+                    className={`relative h-5 w-9 rounded-full transition-colors ${rule.enabled ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-600"}`}
                   >
-                    <GearIcon className="h-3.5 w-3.5" />
-                  </button>
-                )}
+                    <span
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-2xs transition-all ${rule.enabled ? "left-[18px]" : "left-0.5"}`}
+                    />
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
+          <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+            <button
+              type="button"
+              onClick={(e) => handleButtonClick(e, save)}
+              disabled={saving || !dirty}
+              className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
+                dirty
+                  ? "bg-foreground text-background active:scale-98"
+                  : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
+              }`}
+            >
+              {saving ? "Saving…" : dirty ? "Save Changes" : "Saved"}
+            </button>
+
+            <button
+              type="button"
+              onClick={removeAutomation}
+              disabled={deleting}
+              title="Delete this automation"
+              aria-label="Delete this automation"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 active:scale-95 transition-all"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          </div>
+
+          {savedNote && (
+            <div className="sm:hidden mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+              <span>✓</span>
+              <span>{savedNote}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Two columns on tablets and up: every step scrolls on the left, ONE phone stays on the right */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px] lg:gap-6 items-start w-full min-w-0">
+      <div ref={stepsRef} className="min-w-0 w-full space-y-5 sm:space-y-6">
+      {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
+      <div id="step-trigger-target" className="grid grid-cols-1 2xl:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
+        {/* Step 1: Target Post */}
+        <div data-step="target" className="rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+          <div className="space-y-3">
+            {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                  <InstagramIcon className="h-4 w-4" />
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">1. Target Post</span>
+                  <Tooltip
+                    title={
+                      rule.mediaId
+                        ? "Replies only when someone comments on this specific post or reel."
+                        : "Runs across every post and reel published on your Instagram account."
+                    }
+                  >
+                    <button
+                      type="button"
+                      aria-label="Target post info"
+                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
+                    >
+                      <InfoIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
 
-              {/* Status Toggle Badge */}
-              <button
-                type="button"
-                onClick={(e) => handleButtonClick(e, toggleActive)}
-                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold transition-all shadow-2xs active:scale-95 ${
-                  rule.enabled
-                    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
-                    : "bg-black/[0.06] text-[var(--viz-ink-2)] dark:bg-white/10 border border-black/5 dark:border-white/10"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    rule.enabled ? "bg-emerald-500 animate-pulse" : "bg-neutral-400"
-                  }`}
-                />
-                {rule.enabled ? "Active" : "Paused"}
-              </button>
             </div>
 
-            {/* Description Subtitle */}
-            <p className="mt-1 text-xs sm:text-sm text-[var(--viz-muted)] leading-relaxed">
-              When someone comments a keyword, reply with a link that opens a DM — then send the real message once they tap it.
-            </p>
+            {/* Target Display Card */}
+            {rule.mediaId ? (
+              (() => {
+                const linkedPost = posts?.find((p) => p.mediaId === rule.mediaId);
+                const isReel =
+                  rule.mediaPermalink?.includes("/reel/") ||
+                  linkedPost?.permalink?.includes("/reel/");
 
-            {/* Mobile-Only Action Buttons: Balanced, full-width thumb-friendly buttons */}
-            <div className="flex sm:hidden items-center gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
-              <button
-                type="button"
-                onClick={(e) => handleButtonClick(e, save)}
-                disabled={saving || !dirty}
-                className={`flex-1 flex items-center justify-center gap-1.5 h-10 rounded-xl px-4 text-xs font-bold transition-all shadow-xs ${
-                  dirty
-                    ? "bg-foreground text-background active:scale-98"
-                    : "bg-black/[0.06] dark:bg-white/10 text-[var(--viz-muted)] cursor-not-allowed"
-                }`}
-              >
-                {saving ? "Saving…" : dirty ? "Save Changes" : "Saved"}
-              </button>
+                return (
+                  <div className="group relative rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
+                    <div className="flex items-start gap-3.5">
+                      {/* Post / Reel Thumbnail */}
+                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
+                        {rule.mediaThumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={rule.mediaThumb}
+                            alt="Selected post thumbnail"
+                            referrerPolicy="no-referrer"
+                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-[#f9ed32]/10 via-[#ee2a7b]/10 to-[#002aff]/10 text-[var(--viz-muted)]">
+                            <InstagramIcon className="h-6 w-6 opacity-60" />
+                          </div>
+                        )}
+                        {isReel && (
+                          <span className="absolute bottom-1 left-1 flex items-center gap-0.5 rounded-md bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-xs">
+                            <PlayIcon className="h-2 w-2 fill-white" />
+                            <span>Reel</span>
+                          </span>
+                        )}
+                      </div>
 
-              <button
-                type="button"
-                onClick={removeAutomation}
-                disabled={deleting}
-                title="Delete this automation"
-                aria-label="Delete this automation"
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--viz-border)] text-[var(--viz-ink-2)] hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/30 active:scale-95 transition-all"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
+                      {/* Post Info & Metadata (NO ID DISPLAYED) */}
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex flex-wrap items-center justify-between gap-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                            </span>
+                            <span className="text-xs font-bold text-[var(--viz-ink)]">
+                              {isReel ? "Specific Reel Linked" : "Specific Post Linked"}
+                            </span>
+                            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Active
+                            </span>
+                          </div>
 
-            {savedNote && (
-              <div className="sm:hidden mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                <span>✓</span>
-                <span>{savedNote}</span>
+                          {rule.mediaPermalink && (
+                            <a
+                              href={rule.mediaPermalink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0095f6] hover:text-[#0077c5] hover:underline transition-colors"
+                              title="Open on Instagram"
+                            >
+                              <span>View on Instagram</span>
+                              <ExternalLinkIcon className="h-3 w-3" />
+                            </a>
+                          )}
+                        </div>
+
+                        {/* Caption / Contextual description instead of technical ID */}
+                        {linkedPost?.caption ? (
+                          <p className="line-clamp-2 text-xs text-[var(--viz-ink-2)] font-normal leading-relaxed pt-0.5">
+                            &ldquo;{linkedPost.caption}&rdquo;
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[var(--viz-muted)] font-normal leading-relaxed pt-0.5">
+                            Replies exclusively to comments placed on this selected {isReel ? "reel" : "post"}.
+                          </p>
+                        )}
+
+                        {linkedPost?.postedAt && (
+                          <p className="text-[10px] text-[var(--viz-muted)] font-medium">
+                            Published {new Date(linkedPost.postedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action buttons bar */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => handleButtonClick(e, openPicker)}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
+                          <span>Change Post</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleButtonClick(e, clearPost)}
+                          className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                          <span>Reset to All Posts</span>
+                        </button>
+                      </div>
+
+                      <span className="text-[10px] text-[var(--viz-muted)] font-medium">
+                        1 specific target
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="flex items-center justify-between gap-2.5 rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
+                    <InstagramIcon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
+                    <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => handleButtonClick(e, openPicker)}
+                  className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+                >
+                  Choose Post
+                </button>
               </div>
             )}
           </div>
         </div>
-      </div>
-
-      {/* ── Steps 1 & 2: Trigger Keywords & Target Post ────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
-        {/* Step 1: Trigger Condition */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
+        {/* Step 2: Trigger Condition */}
+        <div data-step="trigger" className="rounded-[22px] border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
           <div className="space-y-3">
             {/* Header: Icon + Title + Info Tooltip */}
             <div className="flex items-center justify-between gap-2">
@@ -640,7 +891,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   <BoltIcon className="h-4 w-4" />
                 </span>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[var(--viz-ink)]">1. Trigger Condition</span>
+                  <span className="text-sm font-bold text-[var(--viz-ink)]">2. Trigger Condition</span>
                   <Tooltip
                     title={
                       triggerMode === "any"
@@ -807,181 +1058,76 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           </div>
         </div>
 
-        {/* Step 2: Target Post */}
-        <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between space-y-3.5 transition-all w-full min-w-0 [overflow-anchor:none]">
-          <div className="space-y-3">
-            {/* Header: Icon + Title + Info Tooltip + Status/Switch Link */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
-                  <InstagramIcon className="h-4 w-4" />
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm font-bold text-[var(--viz-ink)]">2. Target Post</span>
-                  <Tooltip
-                    title={
-                      rule.mediaId
-                        ? "Replies only when someone comments on this specific post or reel."
-                        : "Runs across every post and reel published on your Instagram account."
-                    }
-                  >
-                    <button
-                      type="button"
-                      aria-label="Target post info"
-                      className="text-[var(--viz-muted)] hover:text-[var(--viz-ink)] transition-colors p-0.5 rounded cursor-pointer"
-                    >
-                      <InfoIcon className="h-3.5 w-3.5" />
-                    </button>
-                  </Tooltip>
-                </div>
-              </div>
-
-            </div>
-
-            {/* Target Display Card */}
-            {rule.mediaId ? (
-              (() => {
-                const linkedPost = posts?.find((p) => p.mediaId === rule.mediaId);
-                const isReel =
-                  rule.mediaPermalink?.includes("/reel/") ||
-                  linkedPost?.permalink?.includes("/reel/");
-
-                return (
-                  <div className="group relative rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-4 shadow-2xs hover:border-[var(--viz-ink)]/25 transition-all">
-                    <div className="flex items-start gap-3.5">
-                      {/* Post / Reel Thumbnail */}
-                      <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-xl border border-[var(--viz-border)] bg-black/5 dark:bg-white/5 shadow-2xs">
-                        {rule.mediaThumb ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={rule.mediaThumb}
-                            alt="Selected post thumbnail"
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-[#f9ed32]/10 via-[#ee2a7b]/10 to-[#002aff]/10 text-[var(--viz-muted)]">
-                            <InstagramIcon className="h-6 w-6 opacity-60" />
-                          </div>
-                        )}
-                        {isReel && (
-                          <span className="absolute bottom-1 left-1 flex items-center gap-0.5 rounded-md bg-black/75 px-1.5 py-0.5 text-[9px] font-semibold text-white backdrop-blur-xs">
-                            <PlayIcon className="h-2 w-2 fill-white" />
-                            <span>Reel</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Post Info & Metadata (NO ID DISPLAYED) */}
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex flex-wrap items-center justify-between gap-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="relative flex h-2 w-2">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                            </span>
-                            <span className="text-xs font-bold text-[var(--viz-ink)]">
-                              {isReel ? "Specific Reel Linked" : "Specific Post Linked"}
-                            </span>
-                            <span className="rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                              Active
-                            </span>
-                          </div>
-
-                          {rule.mediaPermalink && (
-                            <a
-                              href={rule.mediaPermalink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0095f6] hover:text-[#0077c5] hover:underline transition-colors"
-                              title="Open on Instagram"
-                            >
-                              <span>View on Instagram</span>
-                              <ExternalLinkIcon className="h-3 w-3" />
-                            </a>
-                          )}
-                        </div>
-
-                        {/* Caption / Contextual description instead of technical ID */}
-                        {linkedPost?.caption ? (
-                          <p className="line-clamp-2 text-xs text-[var(--viz-ink-2)] font-normal leading-relaxed pt-0.5">
-                            &ldquo;{linkedPost.caption}&rdquo;
-                          </p>
-                        ) : (
-                          <p className="text-xs text-[var(--viz-muted)] font-normal leading-relaxed pt-0.5">
-                            Replies exclusively to comments placed on this selected {isReel ? "reel" : "post"}.
-                          </p>
-                        )}
-
-                        {linkedPost?.postedAt && (
-                          <p className="text-[10px] text-[var(--viz-muted)] font-medium">
-                            Published {new Date(linkedPost.postedAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Action buttons bar */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-3 mt-3 border-t border-[var(--viz-border)]/60">
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, openPicker)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)] px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <RefreshIcon className="h-3 w-3 text-[var(--viz-muted)]" />
-                          <span>Change Post</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, clearPost)}
-                          className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-medium text-[var(--viz-muted)] hover:text-red-500 hover:bg-red-500/10 active:scale-95 transition-all cursor-pointer"
-                        >
-                          <TrashIcon className="h-3 w-3" />
-                          <span>Reset to All Posts</span>
-                        </button>
-                      </div>
-
-                      <span className="text-[10px] text-[var(--viz-muted)] font-medium">
-                        1 specific target
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()
-            ) : (
-              <div className="flex items-center justify-between gap-2.5 rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 transition-all w-full min-w-0">
-                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
-                    <InstagramIcon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-[var(--viz-ink)] truncate">All Posts &amp; Reels</p>
-                    <p className="text-[11px] text-[var(--viz-muted)] truncate">Runs on every post and reel published on your account</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => handleButtonClick(e, openPicker)}
-                  className="shrink-0 rounded-xl bg-foreground px-3 sm:px-3.5 py-2 text-xs font-bold text-background shadow-xs hover:opacity-90 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                >
-                  Choose Post
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* ── Step 3: Send this message & Custom Templates ───────────── */}
-      <div className={card}>
+      {/* ── Step 3: Follow Gate ─────────────────────────────────────── */}
+      <div data-step="follow" className={card}>
+        <div className={`flex items-start justify-between gap-4 ${requireFollow ? "mb-4" : ""}`}>
+          <div className="flex items-start gap-3">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <div>
+              <p className="text-sm font-medium text-[var(--viz-ink)]">3. Require Follow</p>
+              <p className="text-xs text-[var(--viz-muted)] mt-0.5">Check if the commenter follows you before sending the DM. If not, send a follow-gate message first.</p>
+            </div>
+          </div>
+          {/* Toggle */}
+          <button
+            id="require-follow-toggle"
+            role="switch"
+            aria-checked={requireFollow}
+            onClick={(e) =>
+              handleButtonClick(e, () => {
+                setRequireFollow((v) => !v);
+                setDirty(true);
+              })
+            }
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+              requireFollow ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                requireFollow ? "translate-x-5" : "translate-x-0"
+              }`}
+            />
+          </button>
+        </div>
+
+        {requireFollow && (
+          <div className="rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10">
+            <textarea
+              value={followGateText}
+              onChange={(e) => {
+                setFollowGateText(e.target.value.slice(0, 1000));
+                setDirty(true);
+              }}
+              rows={4}
+              aria-label="Follow-gate message"
+              placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
+              className="w-full min-h-[6rem] resize-none bg-transparent p-3.5 text-xs leading-relaxed text-[var(--viz-ink)] outline-none placeholder:text-[var(--viz-muted)]"
+            />
+            {followGateText.length > 800 && (
+              <p className="px-3.5 pb-2 text-right text-[10px] text-amber-600">{followGateText.length} / 1000</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── Step 4: Send this message & Custom Templates ───────────── */}
+      <div data-step="message" className={card}>
         <div className="mb-4">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.06] text-[var(--viz-ink)] border border-[var(--viz-border)] shadow-2xs">
               <SendIcon className="h-4 w-4" />
             </span>
             <div className="flex items-center gap-1.5 flex-1 min-w-0">
-              <h2 className="text-sm font-bold text-[var(--viz-ink)]">3. Response &amp; DM Template</h2>
+              <h2 className="text-sm font-bold text-[var(--viz-ink)]">4. Response &amp; DM Template</h2>
               <Tooltip title="Sent as a private Instagram DM to commenters. Customize with interactive buttons, product showcases, or downloadable lead magnets.">
                 <button
                   type="button"
@@ -1003,7 +1149,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 label: "Simple Text",
                 desc: "Clean text message",
                 badge: "Direct DM",
-                accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+                accent: "bg-black/10 text-slate-900 dark:text-slate-900 border-[#e9e9ee]",
               },
               {
                 id: "button",
@@ -1011,7 +1157,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 label: "Text + Buttons",
                 desc: "Message with clickable links",
                 badge: "Up to 3 links",
-                accent: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
+                accent: "bg-black/10 text-slate-900 dark:text-slate-900 border-[#e9e9ee]",
               },
               {
                 id: "product",
@@ -1045,11 +1191,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   key={tab.id}
                   type="button"
                   onClick={(e) => handleButtonClick(e, () => selectTemplate(tab.id as any))}
-                  className={`group relative flex flex-col justify-between rounded-2xl p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
+                  className={`group relative flex flex-col justify-between rounded-[22px] p-2.5 sm:p-3.5 text-left transition-all duration-200 border cursor-pointer select-none min-h-[110px] sm:min-h-[118px] min-w-0 ${
                     idx === 4 ? "col-span-2 sm:col-span-1" : ""
                   } ${
                     active
-                      ? "border-neutral-900 bg-neutral-900 text-white shadow-lg shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-neutral-900 dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
+                      ? "border-neutral-900 bg-neutral-900 text-white shadow-2xs shadow-neutral-900/15 dark:border-white dark:bg-white dark:text-neutral-900 dark:shadow-white/10 ring-1 ring-neutral-900/10 dark:ring-white/20"
                       : "border-[var(--viz-border)] bg-[var(--viz-surface)] text-[var(--viz-ink)] hover:-translate-y-0.5 hover:border-[var(--viz-ink)]/30 hover:shadow-xs"
                   }`}
                 >
@@ -1090,45 +1236,62 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
 
         {/* 2-Column Modern Studio: Editor Form + Sticky iPhone Mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
+        <div className="grid grid-cols-1 gap-6 items-start w-full min-w-0 [overflow-anchor:none]">
           {/* Left Column: Form Controls */}
-          <div className="space-y-4 lg:col-span-7 w-full min-w-0 [overflow-anchor:none]">
-            {/* Primary message caption card */}
-            <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-              {/* Header: Title, Subtitle, & Monospace Character Counter */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <label className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">
-                      Message Text / Caption
-                    </label>
-                    <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                      Primary DM
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
-                    Sent directly to the commenter&apos;s Instagram DM inbox.
-                  </p>
-                </div>
-                <div className="shrink-0 pt-0.5">
-                  <span
-                    className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
-                      dmText.length > 900
-                        ? "text-red-500 bg-red-500/10 border-red-500/25"
-                        : dmText.length > 700
-                        ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
-                        : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
-                    }`}
-                  >
-                    <span>{dmText.length}</span>
-                    <span className="opacity-40">/</span>
-                    <span>1000</span>
+          <div className="space-y-4 w-full min-w-0 [overflow-anchor:none]">
+            {/* Message text: label with quick inserts on the same row, one box */}
+            <div className="space-y-2.5 [overflow-anchor:none]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <label className="text-xs font-semibold text-[var(--viz-ink)] tracking-tight">Message Text / Caption</label>
+                  <span className="inline-flex items-center rounded-md bg-black/10 px-2 py-0.5 text-[10px] font-medium text-slate-900 dark:text-slate-900 border border-[#e9e9ee]">
+                    Primary DM
                   </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#e9e9ee] bg-black/8 text-slate-900 dark:text-purple-300 hover:bg-black/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span className="font-mono text-[10px] opacity-75">@</span>
+                  <span>username</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span>👋</span>
+                  <span>Greeting</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) =>
+                    handleButtonClick(e, () => {
+                      setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
+                      setDirty(true);
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 px-3 py-1.5 text-[11px] font-medium transition-colors cursor-pointer"
+                >
+                  <span>👇</span>
+                  <span>Call to Action</span>
+                </button>
                 </div>
               </div>
 
-              {/* Textarea Composer */}
-              <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
+              <div className="rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10">
                 <textarea
                   value={dmText}
                   onChange={(e) => {
@@ -1137,69 +1300,17 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   }}
                   maxLength={1000}
                   rows={3}
+                  aria-label="Message text"
                   placeholder="Hey! 👋 Thanks for your comment. Here is the link you requested:"
-                  className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[5.5rem]"
+                  className="w-full min-h-[5.5rem] resize-none bg-transparent p-3.5 text-xs leading-relaxed text-[var(--viz-ink)] outline-none placeholder:text-[var(--viz-muted)]"
                 />
-              </div>
-
-              {/* Quick Insert Variables: Symmetric 3-Column Grid */}
-              <div className="space-y-1.5 pt-0.5">
-                <div className="flex items-center justify-between px-0.5">
-                  <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
-                    Quick Insert
-                  </span>
-                  <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
-                    Tap to append
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span className="font-mono text-[10px] opacity-75">@</span>
-                    <span className="truncate">username</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span>👋</span>
-                    <span className="truncate">Greeting</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setDmText((t) => (t ? `${t}\n\nTap below to check it out! 👇` : "Tap below to check it out! 👇"));
-                        setDirty(true);
-                      })
-                    }
-                    className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/8 px-2 py-2 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-500/15 hover:border-amber-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                  >
-                    <span>👇</span>
-                    <span className="truncate sm:hidden">CTA</span>
-                    <span className="truncate hidden sm:inline">Call to Action</span>
-                  </button>
-                </div>
+                {dmText.length > 800 && <p className="px-3.5 pb-2 text-right text-[10px] text-amber-600">{dmText.length} / 1000</p>}
               </div>
             </div>
 
             {/* Product Card Details */}
             {templateType === "product" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -1207,43 +1318,42 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                     </span>
                     <p className="text-xs font-bold text-[var(--viz-ink)]">Product Showcase Settings</p>
                   </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    Instagram Direct Card
-                  </span>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Product Name / Title</label>
-                    <input
-                      value={cardTitle}
-                      onChange={(e) => { setCardTitle(e.target.value.slice(0, 80)); setDirty(true); }}
-                      placeholder="e.g. Premium Oversized Hoodie"
-                      className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 font-medium transition-all"
-                    />
+                <div className="grid items-start gap-4 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Product Name / Title</label>
+                      <input
+                        value={cardTitle}
+                        onChange={(e) => { setCardTitle(e.target.value.slice(0, 80)); setDirty(true); }}
+                        placeholder="e.g. Premium Oversized Hoodie"
+                        className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 font-medium transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Price & Badge Highlights</label>
+                      <input
+                        value={cardSubtitle}
+                        onChange={(e) => { setCardSubtitle(e.target.value.slice(0, 80)); setDirty(true); }}
+                        placeholder="e.g. $49.99 • Special 20% Off"
+                        className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition-all"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Price & Badge Highlights</label>
-                    <input
-                      value={cardSubtitle}
-                      onChange={(e) => { setCardSubtitle(e.target.value.slice(0, 80)); setDirty(true); }}
-                      placeholder="e.g. $49.99 • Special 20% Off"
-                      className="mt-1 w-full rounded-xl border border-[var(--viz-border)] bg-black/[0.015] dark:bg-white/[0.02] px-3 py-2 text-xs outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/15 transition-all"
-                    />
+                  <CloudinaryImageUploader
+                    label="Product Image"
+                    value={cardImageUrl}
+                    onChange={(url) => {
+                      setCardImageUrl(url);
+                      setDirty(true);
+                    }}
+                    accentColor="emerald"
+                    helperText="Instagram Direct displays this photo prominently at the top of the product card."
+                  />
                   </div>
                 </div>
-
-                {/* Product Image Upload with Cloudinary CDN */}
-                <CloudinaryImageUploader
-                  label="Product Image"
-                  value={cardImageUrl}
-                  onChange={(url) => {
-                    setCardImageUrl(url);
-                    setDirty(true);
-                  }}
-                  accentColor="emerald"
-                  helperText="Instagram Direct displays this photo prominently at the top of the product card."
-                />
 
                 <div>
                   <label className="text-[11px] font-medium text-[var(--viz-ink-2)]">Store Product Link</label>
@@ -1265,7 +1375,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Downloadable File Details */}
             {templateType === "file" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
@@ -1331,7 +1441,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Custom Media Card Details */}
             {templateType === "card" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-4 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
@@ -1381,12 +1491,12 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
 
             {/* Interactive Action Buttons Builder */}
             {templateType !== "text" && (
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/90 backdrop-blur-xs p-4 sm:p-5 shadow-2xs space-y-3.5">
+              <div className="space-y-3.5 pt-4">
                 {/* Header: Title, Inline Counter Badge & Add Button */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25 shadow-2xs">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/15 via-indigo-500/15 to-purple-500/15 text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shadow-2xs">
                         <MessageButtonsIcon className="h-4 w-4" />
                       </span>
                       <div className="flex items-center gap-2 min-w-0">
@@ -1394,7 +1504,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           <span className="sm:hidden">Action Buttons</span>
                           <span className="hidden sm:inline">Interactive Action Buttons</span>
                         </h4>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0 shadow-2xs">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 font-mono text-[10px] font-bold text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shrink-0 shadow-2xs">
                           {cardButtons.length}/3
                         </span>
                       </div>
@@ -1416,51 +1526,23 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                   </p>
                 </div>
 
-                {/* Quick Presets: Responsive Wrapping Chips */}
-                {cardButtons.length < 3 && (
-                  <div className="space-y-1.5 pt-2 border-t border-[var(--viz-border)]/60">
-                    <div className="flex items-center justify-between text-[10px] text-[var(--viz-muted)] px-0.5">
-                      <span className="font-bold tracking-wider uppercase text-[9px] text-[var(--viz-ink-2)]">QUICK PRESETS</span>
-                      <span className="text-[10px] text-[var(--viz-muted)]">Tap to add</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {[
-                        { title: "Shop Now", icon: "🛍️", url: cardFileUrl || "https://instagram.com" },
-                        { title: "Download PDF", icon: "📥", url: cardFileUrl || "https://instagram.com" },
-                        { title: "Visit Website", icon: "🌐", url: "https://instagram.com" },
-                        { title: "Claim Offer", icon: "🎁", url: "https://instagram.com" },
-                      ].map((preset, pIdx) => (
-                        <button
-                          key={pIdx}
-                          type="button"
-                          onClick={(e) => handleButtonClick(e, () => addButton({ title: preset.title, url: preset.url }))}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[var(--viz-border)] bg-background hover:bg-[var(--viz-surface)] hover:border-blue-500/40 px-3 py-1.5 text-xs font-semibold text-[var(--viz-ink)] shadow-2xs active:scale-95 transition-all cursor-pointer whitespace-nowrap"
-                        >
-                          <span className="text-xs">{preset.icon}</span>
-                          <span>+ {preset.title}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Buttons List */}
                 {cardButtons.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 mx-auto border border-blue-500/20">
+                  <div className="rounded-[22px] border border-dashed border-[var(--viz-border)] p-6 text-center bg-background/50">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/10 text-slate-900 dark:text-slate-900 mx-auto border border-[#e9e9ee]">
                       <MessageButtonsIcon className="h-5 w-5" />
                     </div>
                     <p className="text-xs font-bold text-[var(--viz-ink)] mt-2.5">No buttons attached</p>
                     <p className="text-[11px] text-[var(--viz-muted)] mt-0.5 max-w-xs mx-auto">
-                      Click &quot;+ Add Button&quot; or tap a preset above to attach clickable CTAs to your Instagram DM.
+                      Click &quot;+ Add Button&quot; to attach clickable links to your Instagram DM.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-3 pt-1">
+                  <div className="grid gap-4 pt-1 sm:grid-cols-2 2xl:grid-cols-3">
                     {cardButtons.map((btn, idx) => (
                       <div
                         key={idx}
-                        className="group relative rounded-2xl border border-[var(--viz-border)] bg-background p-3.5 sm:p-4 text-xs space-y-3.5 transition-all hover:border-[var(--viz-ink)]/25 shadow-2xs"
+                        className="group relative rounded-[22px] border border-[var(--viz-border)] bg-background p-3.5 sm:p-4 text-xs space-y-3.5 transition-all hover:border-[var(--viz-ink)]/25 shadow-2xs"
                       >
                         {/* Top Header Row: Badge, Title & Remove Button */}
                         <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--viz-border)]/60">
@@ -1485,33 +1567,6 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                           </button>
                         </div>
 
-                        {/* Full-Width 2-Tab Segmented Control */}
-                        <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.05] border border-[var(--viz-border)]/60">
-                          <button
-                            type="button"
-                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "web_url" }))}
-                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                              btn.type === "web_url"
-                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
-                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                            }`}
-                          >
-                            <LinkIcon className="h-3.5 w-3.5 text-blue-500" />
-                            <span>Web Link</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => handleButtonClick(e, () => updateButton(idx, { type: "postback" }))}
-                            className={`flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                              btn.type === "postback"
-                                ? "bg-background text-[var(--viz-ink)] shadow-2xs border border-[var(--viz-border)]/60"
-                                : "text-[var(--viz-muted)] hover:text-[var(--viz-ink)]"
-                            }`}
-                          >
-                            <BoltIcon className="h-3.5 w-3.5 text-amber-500" />
-                            <span>Action Reply</span>
-                          </button>
-                        </div>
 
                         {/* Form Fields: Button Label & Destination URL */}
                         <div className="space-y-3">
@@ -1527,46 +1582,28 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                               maxLength={20}
                               onChange={(e) => updateButton(idx, { title: e.target.value })}
                               placeholder="e.g. Shop Now"
-                              className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--viz-ink)] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
+                              className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 px-3.5 py-2 text-xs font-semibold text-[var(--viz-ink)] outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                             />
                           </div>
 
                           <div>
                             <div className="flex justify-between items-center text-[11px] mb-1.5">
                               <span className="font-semibold text-[var(--viz-ink)]">
-                                {btn.type === "web_url" ? "Destination URL" : "Action Identifier"}
+                                Destination URL
                               </span>
-                              {btn.type === "web_url" ? (
-                                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
+                              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium">
                                   https://
                                 </span>
-                              ) : (
-                                <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono font-medium">
-                                  TRIGGER_ID
-                                </span>
-                              )}
                             </div>
-                            {btn.type === "web_url" ? (
-                              <div className="relative flex items-center">
-                                <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-blue-500 pointer-events-none" />
+                            <div className="relative flex items-center">
+                                <LinkIcon className="absolute left-3.5 h-3.5 w-3.5 text-slate-900 pointer-events-none" />
                                 <input
                                   value={btn.url || ""}
-                                  onChange={(e) => updateButton(idx, { url: e.target.value })}
+                                  onChange={(e) => updateButton(idx, { type: "web_url", url: e.target.value })}
                                   placeholder="https://instagram.com"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
+                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
                                 />
                               </div>
-                            ) : (
-                              <div className="relative flex items-center">
-                                <BoltIcon className="absolute left-3.5 h-3.5 w-3.5 text-amber-500 pointer-events-none" />
-                                <input
-                                  value={btn.payload || ""}
-                                  onChange={(e) => updateButton(idx, { payload: e.target.value })}
-                                  placeholder="ACTION_KEYWORD"
-                                  className="w-full rounded-xl border border-[var(--viz-border)] bg-[var(--viz-surface)]/70 pl-9 pr-3.5 py-2 text-xs font-mono text-[11px] outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all shadow-2xs"
-                                />
-                              </div>
-                            )}
                           </div>
                         </div>
 
@@ -1576,18 +1613,14 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                             <span className="font-medium text-[9px] uppercase tracking-wider">Preview in Instagram DM</span>
                             <span className="text-[9px] opacity-75">Tap action</span>
                           </div>
-                          <div className="w-full rounded-xl border border-blue-500/25 bg-blue-500/[0.04] hover:bg-blue-500/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
-                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-center gap-1.5">
+                          <div className="w-full rounded-xl border border-[#e9e9ee] bg-black/[0.04] hover:bg-black/[0.07] py-2.5 px-3 text-center transition-all shadow-2xs">
+                            <span className="text-xs font-bold text-slate-900 dark:text-slate-900 flex items-center justify-center gap-1.5">
                               <span>{btn.title || "Button Label"}</span>
-                              {btn.type === "web_url" ? (
-                                <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <svg className="h-3 w-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                   <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
                                   <polyline points="15 3 21 3 21 9" />
                                   <line x1="10" y1="14" x2="21" y2="3" />
                                 </svg>
-                              ) : (
-                                <BoltIcon className="h-3 w-3 opacity-70" />
-                              )}
                             </span>
                           </div>
                         </div>
@@ -1599,328 +1632,9 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             )}
           </div>
 
-          {/* Right Column: Authentic Flagship Device Mockup */}
-          <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
-            <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Instagram Direct</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live
-                </span>
-              </div>
-
-              {/* Hardware Device Switcher */}
-              <div className="flex items-center gap-0.5 rounded-lg bg-black/[0.05] p-0.5 dark:bg-white/10 text-[10px] font-medium">
-                {(["iPhone 17", "Galaxy S25", "Pixel 10"] as SupportedDevice[]).map((dev) => (
-                  <button
-                    key={dev}
-                    type="button"
-                    onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
-                    className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                      previewDevice === dev
-                        ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
-                        : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-                    }`}
-                  >
-                    {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Proper Hardware Device UI using react-mockframe via MobilePreview */}
-            <MobilePreview
-              width={320}
-              height={650}
-              device={previewDevice}
-              showToolbar={false}
-            >
-              <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
-                {/* Instagram Direct Header */}
-                <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 py-2.5 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-xl text-black dark:text-white font-normal leading-none select-none cursor-pointer">‹</span>
-                    <div className="relative">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[1.5px] shadow-xs">
-                        <div className="h-full w-full rounded-full bg-white dark:bg-black flex items-center justify-center font-bold text-xs text-black dark:text-white">
-                          {rule.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                        </div>
-                      </div>
-                      <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white dark:border-black bg-emerald-500" />
-                    </div>
-                    <div className="truncate min-w-0">
-                      <p className="text-xs font-bold text-black dark:text-white truncate flex items-center gap-1 leading-tight">
-                        <span>fabroniee</span>
-                        <span className="text-[10px] text-[#0095f6]">✓</span>
-                      </p>
-                      <p className="text-[10px] text-black/50 dark:text-white/50 leading-tight">Active now</p>
-                    </div>
-                  </div>
-
-                  {/* Header icons: Phone, Video */}
-                  <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
-                      <PhoneIcon className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
-                      <VideoCameraIcon className="h-3.5 w-3.5" />
-                    </span>
-                  </div>
-                </div>
-
-                {/* DM Chat Thread */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {/* Authentic Instagram Profile Info Banner */}
-                  <div className="flex flex-col items-center justify-center pt-3 pb-2 text-center select-none border-b border-black/5 dark:border-white/5 mb-2">
-                    <div className="h-14 w-14 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[2px] shadow-sm mb-1.5">
-                      <div className="h-full w-full rounded-full bg-white dark:bg-[#1a1a1a] flex items-center justify-center font-black text-lg text-black dark:text-white">
-                        {rule.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                      </div>
-                    </div>
-                    <p className="text-xs font-bold text-black dark:text-white flex items-center gap-1">
-                      <span>fabroniee</span>
-                      <span className="text-[10px] text-[#0095f6]">✓</span>
-                    </p>
-                    <p className="text-[9px] text-black/50 dark:text-white/50 mt-0.5">
-                      Instagram · 14.8K followers · 82 posts
-                    </p>
-                    <p className="text-[9px] text-black/40 dark:text-white/40 mt-0.5">
-                      You follow each other on Instagram
-                    </p>
-                    <div className="mt-2 inline-block rounded-md bg-black/5 dark:bg-white/10 px-3 py-1 text-[10px] font-semibold text-black dark:text-white">
-                      View Profile
-                    </div>
-                  </div>
-
-                  {/* Timestamp separator */}
-                  <div className="flex justify-center my-1.5">
-                    <span className="text-[9px] font-medium text-black/40 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-0.5 rounded-full">
-                      Today 9:41 AM
-                    </span>
-                  </div>
-
-                  {/* User's comment trigger */}
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%] rounded-2xl rounded-tl-xs bg-black/[0.06] dark:bg-white/[0.08] px-3 py-2 shadow-2xs border border-black/5 dark:border-white/5">
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-[var(--viz-muted)]">
-                        User commented on post
-                      </p>
-                      <p className="text-xs font-semibold text-black dark:text-white mt-0.5">
-                        &quot;{keywords.length > 0 ? keywords[0] : "Nice"}&quot;
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Outgoing automated response strictly adhering to templateType */}
-                  <div className="flex justify-end">
-                    {templateType === "product" ? (
-                      /* Product Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
-                              <ShoppingBagIcon className="h-5 w-5" />
-                            </span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Product Showcase</span>
-                            <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-bold text-black dark:text-white truncate">
-                              {cardTitle || "Featured Product"}
-                            </p>
-                            {cardSubtitle && (
-                              <span className="shrink-0 rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-bold text-[10px] text-emerald-600 dark:text-emerald-400">
-                                {cardSubtitle}
-                              </span>
-                            )}
-                          </div>
-                          {dmText && (
-                            <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Shop Now"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "file" ? (
-                      /* Downloadable File / Lead Magnet Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Resource cover" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full items-center gap-3 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-orange-500/10 p-3">
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white font-black text-xs shadow-sm">
-                              PDF
-                            </div>
-                            <div className="min-w-0">
-                              <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-                                Instant Resource
-                              </span>
-                              <p className="text-xs font-bold text-black dark:text-white truncate mt-0.5">
-                                {cardTitle || "Free Resource Guide"}
-                              </p>
-                              <p className="text-[10px] text-[var(--viz-muted)] truncate">
-                                {cardSubtitle || "Direct PDF Download"}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          <p className="text-xs font-bold text-black dark:text-white">
-                            {cardTitle || "Free Resource Guide"}
-                          </p>
-                          <p className="text-[10px] text-black/60 dark:text-white/60">
-                            {cardSubtitle || "Instant PDF Download"}
-                          </p>
-                          {dmText && (
-                            <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Download PDF"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "card" ? (
-                      /* Custom Media Card */
-                      <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        {cardImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
-                        ) : (
-                          <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-black/5 dark:bg-white/5 p-2 text-center">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.08] text-[var(--viz-ink)] shadow-2xs">
-                              <MediaCardIcon className="h-5 w-5" />
-                            </span>
-                            <span className="text-xs font-bold text-black dark:text-white mt-1.5">Header Image</span>
-                            <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                          </div>
-                        )}
-                        <div className="p-3 space-y-1">
-                          {cardTitle && (
-                            <p className="text-xs font-bold text-black dark:text-white leading-tight">
-                              {cardTitle.replaceAll("{username}", "there")}
-                            </p>
-                          )}
-                          {cardSubtitle && (
-                            <p className="text-[10px] text-black/60 dark:text-white/60 leading-tight">
-                              {cardSubtitle.replaceAll("{username}", "there")}
-                            </p>
-                          )}
-                          {dmText && (
-                            <p className="text-xs text-black/80 dark:text-white/80 pt-1 leading-tight whitespace-pre-line border-t border-black/5 dark:border-white/5">
-                              {previewText}
-                            </p>
-                          )}
-                        </div>
-                        {cardButtons.length > 0 && (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || "Button"}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : templateType === "button" ? (
-                      /* Text + Buttons: Official Instagram Direct button template */
-                      <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                        <div className="p-3">
-                          <p className="text-xs leading-relaxed text-black dark:text-white whitespace-pre-line">
-                            {previewText}
-                          </p>
-                        </div>
-                        {cardButtons.length > 0 ? (
-                          <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10 bg-black/[0.01] dark:bg-white/[0.02]">
-                            {cardButtons.map((btn, idx) => (
-                              <div
-                                key={idx}
-                                className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                              >
-                                {btn.title || `Button #${idx + 1}`}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="border-t border-black/10 dark:border-white/10 p-2 text-center text-[10px] text-[var(--viz-muted)] italic">
-                            No buttons added
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      /* Simple Text Bubble: Clean Instagram Direct message */
-                      <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#0095f6] px-3.5 py-2.5 text-white shadow-sm">
-                        <p className="text-xs leading-relaxed whitespace-pre-line">{previewText}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end pr-1">
-                    <span className="text-[9px] text-black/40 dark:text-white/40">Sent • Just now</span>
-                  </div>
-                </div>
-
-                {/* Instagram Direct bottom chat bar */}
-                <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
-                    <CameraIcon className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
-                    <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                    <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
-                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
-                        <MicrophoneIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
-                        <PhotoIcon className="h-3.5 w-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
-                    <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
-                  </span>
-                </div>
-              </div>
-            </MobilePreview>
-            <p className="mt-2 text-center text-[10px] text-[var(--viz-muted)]">
-              Interactive Instagram Direct mockup
-            </p>
-          </div>
         </div>
 
-        {/* Step 3 Footer / Quick Save */}
+        {/* Step 4 Footer / Quick Save */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--viz-border)] pt-4">
           <div className="flex items-center gap-2 text-xs text-[var(--viz-muted)]">
             <span className={`inline-block h-2 w-2 rounded-full ${dirty ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
@@ -1937,576 +1651,36 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
         </div>
       </div>
 
-      {/* ── Follow Gate Step ─────────────────────────────────────── */}
-      <div className={card}>
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-black/[0.06] text-[var(--viz-ink)] dark:bg-white/10">
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <div>
-              <p className="text-sm font-medium text-[var(--viz-ink)]">4. Require Follow</p>
-              <p className="text-xs text-[var(--viz-muted)] mt-0.5">Check if the commenter follows you before sending the DM. If not, send a follow-gate message first.</p>
-            </div>
+      {/* ── Check-in Reminder ─────────────────────────────────────── */}
+      <div data-step="reminder" className={card}>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-[var(--viz-ink)]">5. Check-in Reminder</p>
+            <p className="text-xs text-[var(--viz-muted)] mt-0.5">
+              About 20 hours after your DM, if the customer has not replied, send one short &quot;just checking in&quot; message with two buttons. Off by default.
+            </p>
           </div>
-          {/* Toggle */}
           <button
-            id="require-follow-toggle"
+            id="recovery-toggle"
             role="switch"
-            aria-checked={requireFollow}
+            aria-checked={recoveryEnabled}
             onClick={(e) =>
               handleButtonClick(e, () => {
-                setRequireFollow((v) => !v);
+                setRecoveryEnabled((v) => !v);
                 setDirty(true);
               })
             }
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-              requireFollow ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
+              recoveryEnabled ? "bg-green-500" : "bg-black/20 dark:bg-white/20"
             }`}
           >
             <span
               className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                requireFollow ? "translate-x-5" : "translate-x-0"
+                recoveryEnabled ? "translate-x-5" : "translate-x-0"
               }`}
             />
           </button>
         </div>
-
-        {requireFollow && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start w-full min-w-0 [overflow-anchor:none]">
-            {/* Left Column: Editor & Workflow Explanation (7 cols) */}
-            <div className="lg:col-span-7 space-y-5 w-full min-w-0 [overflow-anchor:none]">
-              {/* Message Editor Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-3.5 sm:p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-                {/* Header: Title, Subtitle, & Character Counter */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                        <MessageSquareIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <p className="text-xs font-bold text-[var(--viz-ink)]">Follow-Gate Private Message</p>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed">
-                      Sent automatically to commenters who do not follow your account yet.
-                    </p>
-                  </div>
-                  <div className="shrink-0 pt-0.5">
-                    <span
-                      className={`inline-flex items-center gap-1 font-mono text-[10px] font-semibold tracking-tight whitespace-nowrap px-2.5 py-1 rounded-full border transition-colors ${
-                        followGateText.length > 900
-                          ? "text-red-500 bg-red-500/10 border-red-500/25"
-                          : followGateText.length > 700
-                          ? "text-amber-600 bg-amber-500/10 border-amber-500/25"
-                          : "text-[var(--viz-muted)] bg-black/[0.03] dark:bg-white/[0.05] border-[var(--viz-border)]/70"
-                      }`}
-                    >
-                      <span>{followGateText.length}</span>
-                      <span className="opacity-40">/</span>
-                      <span>1000</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Textarea */}
-                <div className="group rounded-xl border border-[var(--viz-border)] bg-background transition-all focus-within:border-[var(--viz-ink)] focus-within:ring-2 focus-within:ring-black/5 dark:focus-within:ring-white/10 shadow-2xs">
-                  <textarea
-                    value={followGateText}
-                    onChange={(e) => { setFollowGateText(e.target.value.slice(0, 1000)); setDirty(true); }}
-                    rows={4}
-                    placeholder={"Oh no! It seems you're not following me 🙈\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!"}
-                    className="w-full bg-transparent p-3.5 text-xs text-[var(--viz-ink)] placeholder:text-[var(--viz-muted)] outline-none resize-none leading-relaxed min-h-[6rem]"
-                  />
-                </div>
-
-                {/* Quick Insert Variables: Symmetric 3-Column Grid */}
-                <div className="space-y-1.5 pt-0.5">
-                  <div className="flex items-center justify-between px-0.5">
-                    <span className="text-[10px] font-bold tracking-wider text-[var(--viz-muted)] uppercase">
-                      Quick Insert
-                    </span>
-                    <span className="text-[10px] text-[var(--viz-muted)] opacity-75">
-                      Tap to append
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t.endsWith(" ") || !t ? `${t}{username} ` : `${t} {username} `));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-purple-500/25 bg-purple-500/8 px-2 py-2 text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/15 hover:border-purple-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span className="font-mono text-[10px] opacity-75">@</span>
-                      <span className="truncate">username</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t ? `Hey {username}! 👋\n\n${t}` : "Hey {username}! 👋"));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/25 bg-emerald-500/8 px-2 py-2 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span>👋</span>
-                      <span className="truncate">Greeting</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) =>
-                        handleButtonClick(e, () => {
-                          setFollowGateText((t) => (t ? `${t}\n\nHit follow on my profile to unlock! 👇` : "Hit follow on my profile to unlock! 👇"));
-                          setDirty(true);
-                        })
-                      }
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-blue-500/25 bg-blue-500/8 px-2 py-2 text-[11px] font-semibold text-blue-700 dark:text-blue-300 hover:bg-blue-500/15 hover:border-blue-500/40 active:scale-[0.98] transition-all cursor-pointer shadow-2xs"
-                    >
-                      <span>👇</span>
-                      <span className="truncate sm:hidden">Follow CTA</span>
-                      <span className="truncate hidden sm:inline">Hit Follow CTA</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Preset Templates */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[var(--viz-border)]">
-                  <span className="text-[10px] font-medium text-[var(--viz-muted)]">Presets:</span>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Oh no! It seems you're not following me 🙈\n\nVisit my profile and hit that follow button 🤩.\nOnce you do, I'll send you what you asked for!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Gentle & Friendly
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Hey {username}! 🎁 This download is exclusive to our Instagram community.\n\nHit follow on our profile, then tap 'I\\'m following' below to unlock your instant access!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    VIP Community
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) =>
-                      handleButtonClick(e, () => {
-                        setFollowGateText("Almost there! ✨ Follow our page first, then I\\'ll instantly send your link over!");
-                        setDirty(true);
-                      })
-                    }
-                    className="rounded-lg border border-black/10 dark:border-white/10 px-2 py-0.5 text-[10px] text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-                  >
-                    Short & Crisp
-                  </button>
-                </div>
-              </div>
-
-              {/* How it Works Workflow Card */}
-              <div className="rounded-2xl border border-[var(--viz-border)] bg-[var(--viz-surface)] p-5 shadow-2xs space-y-3.5 [overflow-anchor:none]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                      <BoltIcon className="h-3.5 w-3.5" />
-                    </span>
-                    <p className="text-xs font-bold text-[var(--viz-ink)]">How Follow-Gate Automation Works</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    Live Webhook Flow
-                  </span>
-                </div>
-
-                <div className="grid gap-2.5 sm:grid-cols-2 pt-1">
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white">1</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Comment Trigger</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      User writes your trigger keyword. Instagram webhooks instantly check follow status.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">2</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Already Following?</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      If commenter already follows you, your full template DM is delivered immediately!
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-500 text-[10px] font-bold text-white">3</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Gate Message Sent</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      If not following, this follow-gate DM is sent with direct profile and confirmation buttons.
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 dark:border-white/5 bg-black/[0.02] dark:bg-white/[0.02] p-3 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">4</span>
-                      <span className="text-xs font-semibold text-[var(--viz-ink)]">Instant Delivery</span>
-                    </div>
-                    <p className="text-[11px] text-[var(--viz-muted)] leading-relaxed pl-7">
-                      Once they follow and reply or tap confirmation, the reward is unlocked and sent!
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Authentic Flagship Device Mockup (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center sticky top-6 self-start w-full min-w-0">
-              <div className="w-full max-w-[320px] mb-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-[var(--viz-ink)] tracking-tight">Follow-Gate Direct</span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-semibold text-blue-600 dark:text-blue-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    Active
-                  </span>
-                </div>
-
-                {/* Hardware Device Switcher */}
-                <div className="flex items-center gap-0.5 rounded-lg bg-black/[0.05] p-0.5 dark:bg-white/10 text-[10px] font-medium">
-                  {(["iPhone 17", "Galaxy S25", "Pixel 10"] as SupportedDevice[]).map((dev) => (
-                    <button
-                      key={dev}
-                      type="button"
-                      onClick={(e) => handleButtonClick(e, () => setPreviewDevice(dev))}
-                      className={`rounded-md px-2 py-0.5 transition-all cursor-pointer ${
-                        previewDevice === dev
-                          ? "bg-white font-semibold text-black shadow-xs dark:bg-[#202020] dark:text-white"
-                          : "text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-                      }`}
-                    >
-                      {dev.replace(" 17", "").replace(" S25", "").replace(" 10", "")}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Proper Hardware Device UI using react-mockframe via MobilePreview */}
-              <MobilePreview
-                width={320}
-                height={650}
-                device={previewDevice}
-                showToolbar={false}
-              >
-                <div className="flex flex-col h-full bg-[#f8f9fa] dark:bg-[#121212] justify-between">
-                  {/* Instagram Direct Header */}
-                  <div className="flex items-center justify-between border-b border-black/10 bg-white px-3.5 py-2.5 dark:border-white/10 dark:bg-[#181818] shrink-0 sticky top-0 z-10">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-xl text-black dark:text-white font-normal leading-none select-none cursor-pointer">‹</span>
-                      <div className="relative">
-                        <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#f9ed32] via-[#ee2a7b] to-[#002aff] p-[1.5px] shadow-xs">
-                          <div className="h-full w-full rounded-full bg-white dark:bg-black flex items-center justify-center font-bold text-xs text-black dark:text-white">
-                            {rule?.name ? rule.name.charAt(0).toUpperCase() : "F"}
-                          </div>
-                        </div>
-                        <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-white dark:border-black bg-emerald-500" />
-                      </div>
-                      <div className="truncate min-w-0">
-                        <p className="text-xs font-bold text-black dark:text-white truncate flex items-center gap-1 leading-tight">
-                          <span>fabroniee</span>
-                          <span className="text-[10px] text-[#0095f6]">✓</span>
-                        </p>
-                        <p className="text-[10px] text-black/50 dark:text-white/50 leading-tight">Active now</p>
-                      </div>
-                    </div>
-
-                    {/* Header icons: Phone, Video */}
-                    <div className="flex items-center gap-2 text-black/70 dark:text-white/70">
-                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Audio Call">
-                        <PhoneIcon className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors" title="Video Call">
-                        <VideoCameraIcon className="h-3.5 w-3.5" />
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* DM Chat Thread */}
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                    {/* Timestamp separator */}
-                    <div className="flex justify-center my-1">
-                      <span className="text-[9px] font-medium text-black/40 dark:text-white/40 bg-black/[0.04] dark:bg-white/[0.06] px-2.5 py-0.5 rounded-full">
-                        Today 9:41 AM
-                      </span>
-                    </div>
-
-                    {/* 1. Gate Message (sent by your account to commenter who does NOT follow yet) */}
-                    <div className="space-y-1">
-                      <div className="flex justify-end">
-                        <div className="max-w-[88%] rounded-2xl rounded-tr-xs bg-[#0095f6] p-3 text-white shadow-sm space-y-2.5">
-                          <p className="text-xs leading-relaxed whitespace-pre-line font-normal">{gatePreviewText}</p>
-                          <div className="space-y-1.5 pt-1 border-t border-white/20">
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
-                              <UserIcon className="h-3.5 w-3.5" />
-                              <span>Visit Profile</span>
-                            </div>
-                            <div className="rounded-xl border border-white/40 bg-white/15 px-3 py-1.5 text-center text-xs font-semibold text-white cursor-pointer hover:bg-white/25 transition-colors flex items-center justify-center gap-1.5">
-                              <CheckCircleIcon className="h-3.5 w-3.5" />
-                              <span>I&apos;m following</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-end pr-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">Sent • 9:41 AM</span>
-                      </div>
-                    </div>
-
-                    {/* 2. User's reply after following (commenter replies on the left) */}
-                    <div className="space-y-1">
-                      <div className="flex justify-start">
-                        <div className="max-w-[75%] rounded-2xl rounded-tl-xs bg-black/[0.07] dark:bg-white/[0.09] px-3.5 py-2.5 shadow-2xs border border-black/5 dark:border-white/5">
-                          <p className="text-xs text-black dark:text-white leading-relaxed">Done, I&apos;m following you now :)</p>
-                        </div>
-                      </div>
-                      <div className="flex justify-start pl-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">9:42 AM</span>
-                      </div>
-                    </div>
-
-                    {/* Follow Verified Notice / Indicator */}
-                    <div className="flex justify-center my-1">
-                      <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                        <span>✓</span> Follow verified via Instagram API
-                      </span>
-                    </div>
-
-                    {/* 3. Real DM automatically delivered as the reward */}
-                    <div className="space-y-1">
-                      <div className="flex justify-end">
-                        {templateType === "product" ? (
-                          /* Product Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Product preview" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/15 via-purple-500/15 to-pink-500/15 p-2 text-center">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-emerald-600 dark:text-emerald-400 shadow-xs">
-                                  <ShoppingBagIcon className="h-5 w-5" />
-                                </span>
-                                <span className="text-xs font-bold text-black dark:text-white mt-1">Product Showcase</span>
-                                <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              <div className="flex items-center justify-between gap-1">
-                                <p className="text-xs font-bold text-black dark:text-white truncate">
-                                  {cardTitle || "Featured Product"}
-                                </p>
-                                {cardSubtitle && (
-                                  <span className="shrink-0 rounded-md bg-emerald-500/10 px-1.5 py-0.5 font-bold text-[10px] text-emerald-600 dark:text-emerald-400">
-                                    {cardSubtitle}
-                                  </span>
-                                )}
-                              </div>
-                              {dmText && (
-                                <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Shop Now"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "file" ? (
-                          /* Downloadable File / Lead Magnet Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Resource cover" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full items-center gap-3 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-orange-500/10 p-3">
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500 text-white font-black text-xs shadow-sm">
-                                  PDF
-                                </div>
-                                <div className="min-w-0">
-                                  <span className="rounded bg-red-500/20 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-400">
-                                    Instant Resource
-                                  </span>
-                                  <p className="text-xs font-bold text-black dark:text-white truncate mt-0.5">
-                                    {cardTitle || "Free Resource Guide"}
-                                  </p>
-                                  <p className="text-[10px] text-[var(--viz-muted)] truncate">
-                                    {cardSubtitle || "Direct PDF Download"}
-                                  </p>
-                                </div>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              <p className="text-xs font-bold text-black dark:text-white">
-                                {cardTitle || "Free Resource Guide"}
-                              </p>
-                              <p className="text-[10px] text-black/60 dark:text-white/60">
-                                {cardSubtitle || "Instant PDF Download"}
-                              </p>
-                              {dmText && (
-                                <p className="text-xs text-black/75 dark:text-white/75 leading-tight whitespace-pre-line pt-1 border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Download PDF"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "card" ? (
-                          /* Custom Media Card */
-                          <div className="max-w-[94%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            {cardImageUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img src={cardImageUrl} alt="Card preview" className="aspect-[1.91/1] w-full object-cover" />
-                            ) : (
-                              <div className="flex aspect-[1.91/1] w-full flex-col items-center justify-center bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 p-2 text-center">
-                                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/80 dark:bg-black/40 text-indigo-600 dark:text-indigo-400 shadow-xs">
-                                  <MediaCardIcon className="h-5 w-5" />
-                                </span>
-                                <span className="text-xs font-bold text-black dark:text-white mt-1">Header Image</span>
-                                <span className="text-[9px] text-[var(--viz-muted)]">Image URL preview</span>
-                              </div>
-                            )}
-                            <div className="p-3 space-y-1">
-                              {cardTitle && (
-                                <p className="text-xs font-bold text-black dark:text-white leading-tight">
-                                  {cardTitle.replaceAll("{username}", "there")}
-                                </p>
-                              )}
-                              {cardSubtitle && (
-                                <p className="text-[10px] text-black/60 dark:text-white/60 leading-tight">
-                                  {cardSubtitle.replaceAll("{username}", "there")}
-                                </p>
-                              )}
-                              {dmText && (
-                                <p className="text-xs text-black/80 dark:text-white/80 pt-1 leading-tight whitespace-pre-line border-t border-black/5 dark:border-white/5">
-                                  {previewText}
-                                </p>
-                              )}
-                            </div>
-                            {cardButtons.length > 0 && (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || "Button"}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ) : templateType === "button" ? (
-                          /* Text + Buttons: Official Instagram Direct button template */
-                          <div className="max-w-[90%] overflow-hidden rounded-2xl rounded-tr-xs border border-black/10 bg-white shadow-md dark:border-white/10 dark:bg-[#222222]">
-                            <div className="p-3">
-                              <p className="text-xs leading-relaxed text-black dark:text-white whitespace-pre-line">
-                                {previewText}
-                              </p>
-                            </div>
-                            {cardButtons.length > 0 ? (
-                              <div className="border-t border-black/10 dark:border-white/10 divide-y divide-black/10 dark:divide-white/10 bg-black/[0.01] dark:bg-white/[0.02]">
-                                {cardButtons.map((btn, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="py-2.5 text-center text-xs font-bold text-[#0095f6] hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
-                                  >
-                                    {btn.title || `Button #${idx + 1}`}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="border-t border-black/10 dark:border-white/10 p-2 text-center text-[10px] text-[var(--viz-muted)] italic">
-                                No buttons added
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          /* Simple Text Bubble: Clean Instagram Direct message */
-                          <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#0095f6] px-3.5 py-2.5 text-white shadow-sm">
-                            <p className="text-xs leading-relaxed whitespace-pre-line">{previewText}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end pr-1">
-                        <span className="text-[9px] text-black/40 dark:text-white/40">Sent • Just now</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Instagram Direct bottom chat bar */}
-                  <div className="border-t border-black/10 bg-white px-3 py-2 dark:border-white/10 dark:bg-[#181818] flex items-center gap-2 shrink-0">
-                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#0095f6] text-white cursor-pointer shadow-xs">
-                      <CameraIcon className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="flex-1 rounded-full bg-black/5 dark:bg-white/10 px-3.5 py-1.5 flex items-center justify-between">
-                      <span className="text-xs text-black/40 dark:text-white/40">Message...</span>
-                      <div className="flex items-center gap-2 text-black/60 dark:text-white/60">
-                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Voice memo">
-                          <MicrophoneIcon className="h-3.5 w-3.5" />
-                        </span>
-                        <span className="cursor-pointer hover:text-black dark:hover:text-white transition-colors" title="Gallery image">
-                          <PhotoIcon className="h-3.5 w-3.5" />
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-red-500 cursor-pointer hover:scale-110 transition-transform p-0.5" title="Like">
-                      <HeartIcon className="h-4 w-4 fill-red-500 text-red-500" />
-                    </span>
-                  </div>
-                </div>
-              </MobilePreview>
-              <p className="mt-2 text-center text-[10px] text-[var(--viz-muted)]">
-                Follow-gate conversation preview
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── Overlay Modal: Choose Target Post ────────────────────── */}
@@ -2526,7 +1700,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
           {/* Modal Header */}
           <div className="flex items-center justify-between px-6 py-4.5 border-b border-[var(--viz-border)] bg-black/[0.02] dark:bg-white/[0.02]">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-indigo-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/20 shadow-2xs">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/15 via-purple-500/15 to-indigo-500/15 text-slate-900 dark:text-slate-900 border border-[#e9e9ee] shadow-2xs">
                 <InstagramIcon className="h-5 w-5" />
               </div>
               <div>
@@ -2598,8 +1772,8 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       onClick={() => choosePost(p)}
                       className={`group relative flex flex-col overflow-hidden rounded-xl border transition-all cursor-pointer ${
                         isSelected
-                          ? "border-pink-500 ring-2 ring-pink-500/40 shadow-sm bg-pink-500/5"
-                          : "border-[var(--viz-border)] hover:border-[var(--viz-ink)]/50 hover:shadow-md bg-background"
+                          ? "border-[#e9e9ee] ring-2 ring-pink-500/40 shadow-2xs bg-black/5"
+                          : "border-[var(--viz-border)] hover:border-[var(--viz-ink)]/50 hover:shadow-2xs bg-background"
                       }`}
                     >
                       <div className="relative aspect-square w-full overflow-hidden bg-black/5 dark:bg-white/5">
@@ -2618,7 +1792,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         )}
 
                         {isSelected && (
-                          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-pink-600 text-white text-[11px] font-bold shadow-md">
+                          <div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-black text-white text-[11px] font-bold shadow-2xs">
                             ✓
                           </div>
                         )}
@@ -2729,7 +1903,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 );
               };
               return (
-                <li key={log.id} className="relative flex gap-4 rounded-2xl border border-[var(--viz-border)] bg-gradient-to-b from-transparent to-black/[0.01] p-4 transition-shadow hover:shadow-sm dark:to-white/[0.01]">
+                <li key={log.id} className="relative flex gap-4 rounded-[22px] border border-[var(--viz-border)] bg-gradient-to-b from-transparent to-black/[0.01] p-4 transition-shadow hover:shadow-2xs dark:to-white/[0.01]">
                   {/* Post thumbnail */}
                   <div className="shrink-0">
                     {log.mediaThumb ? (
@@ -2758,7 +1932,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                       <span className="text-xs text-[var(--viz-muted)]">{when(log.triggeredAt)}</span>
                       <StatusBadge status={log.status} />
                       {log.repliedAt && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[11px] font-semibold text-violet-700 ring-1 ring-inset ring-violet-500/20 dark:text-violet-300">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-black/10 px-2 py-0.5 text-[11px] font-semibold text-slate-900 ring-1 ring-inset ring-violet-500/20 dark:text-violet-300">
                           ↩ Replied back
                         </span>
                       )}
@@ -2770,7 +1944,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         <CommentIcon className="h-3 w-3" />
                         <span>Their comment</span>
                       </p>
-                      <div className="inline-flex max-w-full rounded-2xl rounded-tl-sm bg-slate-100 px-3.5 py-2 dark:bg-white/10">
+                      <div className="inline-flex max-w-full rounded-[22px] rounded-tl-sm bg-slate-100 px-3.5 py-2 dark:bg-white/10">
                         <p className="break-words text-sm text-[var(--viz-ink)]">{highlightComment()}</p>
                       </div>
                     </div>
@@ -2808,7 +1982,7 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                             </>
                           ) : log.status === "invited" ? (
                             <>
-                              <LinkIcon className="h-3 w-3 text-blue-500" />
+                              <LinkIcon className="h-3 w-3 text-slate-900" />
                               <span>Invite sent</span>
                             </>
                           ) : (
@@ -2821,11 +1995,11 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                         {log.status === "failed" ? (
                           <p className="text-xs text-red-600 dark:text-red-400">{log.note ?? "DM could not be delivered."}</p>
                         ) : log.status === "follow_gate" && log.pendingFollowGate ? (
-                          <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-amber-50 px-3.5 py-2 dark:bg-amber-400/10">
+                          <div className="inline-flex max-w-full rounded-[22px] rounded-tr-sm bg-amber-50 px-3.5 py-2 dark:bg-amber-400/10">
                             <p className="break-words text-sm text-amber-800 dark:text-amber-200">⏳ Waiting for user to follow and confirm…</p>
                           </div>
                         ) : (
-                          <div className="inline-flex max-w-full rounded-2xl rounded-tr-sm bg-[var(--viz-accent)]/10 px-3.5 py-2">
+                          <div className="inline-flex max-w-full rounded-[22px] rounded-tr-sm bg-[var(--viz-accent)]/10 px-3.5 py-2">
                             <p className="break-words text-sm text-[var(--viz-ink)]">{log.dmText.replaceAll("{username}", log.username || "there")}</p>
                           </div>
                         )}
@@ -2845,6 +2019,29 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
             })}
           </ol>
         )}
+      </div>
+
+      </div>
+
+      {/* The one phone: stays in view while the steps scroll */}
+      <aside className="hidden lg:block sticky top-4 self-start">
+        <CommentDmFlowPhone {...phoneProps} height={phoneHeight} />
+      </aside>
+      </div>
+
+      {/* Small screens: the same phone opens from a bar at the bottom */}
+      <div className="lg:hidden">
+        <button
+          type="button"
+          onClick={() => setPhoneOpen(true)}
+          className="fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2.5 text-xs font-medium text-background shadow-2xs active:scale-95"
+        >
+          <PhoneIcon className="h-4 w-4" />
+          Preview
+        </button>
+        <Modal open={phoneOpen} onCancel={() => setPhoneOpen(false)} footer={null} centered width={380} title="Live preview" destroyOnHidden>
+          <CommentDmFlowPhone {...phoneProps} height={Math.min(620, phoneHeight + 40)} />
+        </Modal>
       </div>
 
       {/* Floating Unsaved Changes Bar */}
@@ -2869,13 +2066,14 @@ export function CommentDmAutomation({ ruleId, onBack, onDeleted }: Props) {
                 setKeywordDraft(rule.keywords);
                 setDmText(rule.dmText);
                 setRequireFollow(rule.requireFollow ?? false);
+                setRecoveryEnabled(rule.recoveryEnabled ?? false);
                 setFollowGateText(rule.followGateText ?? "");
                 setTemplateType(rule.templateType || "text");
                 setCardTitle(rule.cardTitle ?? "");
                 setCardSubtitle(rule.cardSubtitle ?? "");
                 setCardImageUrl(rule.cardImageUrl ?? "");
                 setCardFileUrl(rule.cardFileUrl ?? "");
-                setCardButtons(rule.cardButtons ?? []);
+                setCardButtons((rule.cardButtons ?? []).map((b) => (b.type === "web_url" ? b : { type: "web_url" as const, title: b.title, url: "https://instagram.com" })));
                 setDirty(false);
               })
             }

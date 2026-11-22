@@ -307,9 +307,9 @@ export default function AuthPage() {
       <div className="hidden lg:flex lg:w-1/2 h-full bg-[#090b14] relative overflow-hidden flex-col justify-between p-6 sm:p-8 xl:p-12 text-white select-none shrink-0">
         {/* Dark Neon Atmospheric Glows */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0d1b] via-[#100d28] to-[#060812] z-0" />
-        <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-purple-600/20 rounded-full blur-[130px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[420px] bg-pink-600/15 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/3 w-[360px] h-[360px] bg-blue-500/15 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-[420px] h-[420px] bg-black/20 rounded-full blur-[130px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[420px] h-[420px] bg-black/15 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/3 w-[360px] h-[360px] bg-black/15 rounded-full blur-[120px] pointer-events-none" />
 
         {/* Subtle grid pattern */}
         <div
@@ -328,7 +328,7 @@ export default function AuthPage() {
           {/* SLIDE 1: COMMENT AUTOMATION */}
           {activeSlide === 0 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-3.5 shadow-2xl space-y-3">
+              <div className="rounded-[22px] border border-white/15 bg-slate-900/90 backdrop-blur-xl p-3.5 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 p-0.5">
@@ -353,7 +353,7 @@ export default function AuthPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 z-10" />
 
-                  <div className="absolute top-3 left-3 z-20 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold shadow-lg flex items-center gap-1.5">
+                  <div className="absolute top-3 left-3 z-20 px-3 py-1.5 rounded-full bg-white text-slate-900 text-xs font-bold shadow-2xs flex items-center gap-1.5">
                     <span>I want to register for your next drop!</span>
                   </div>
 
@@ -362,7 +362,7 @@ export default function AuthPage() {
                     <span>Commented on your ad</span>
                   </div>
 
-                  <div className="absolute bottom-2 inset-x-2 z-20 p-3 rounded-xl bg-blue-600 text-white shadow-xl space-y-2 text-xs">
+                  <div className="absolute bottom-2 inset-x-2 z-20 p-3 rounded-xl bg-black text-white shadow-2xs space-y-2 text-xs">
                     <p className="leading-snug text-[11px] font-medium">
                       Fantastic! Here is the link to our upcoming drop! You can register as VIP and get notified first!
                     </p>
@@ -371,7 +371,7 @@ export default function AuthPage() {
                         <div className="font-bold text-[10px]">Shop the next drop</div>
                         <div className="text-[9px] text-white/80">Get exclusive access to VIP drop</div>
                       </div>
-                      <span className="px-2.5 py-1 rounded bg-white text-blue-600 font-bold text-[10px]">
+                      <span className="px-2.5 py-1 rounded bg-white text-slate-900 font-bold text-[10px]">
                         Register as VIP
                       </span>
                     </div>
@@ -384,7 +384,7 @@ export default function AuthPage() {
                     <span className="flex items-center gap-1"><MessageOutlined /> 114</span>
                     <span className="flex items-center gap-1"><SendOutlined /> 340</span>
                   </div>
-                  <span className="text-[10px] text-blue-400 font-bold cursor-pointer">Register now &gt;</span>
+                  <span className="text-[10px] text-slate-900 font-bold cursor-pointer">Register now &gt;</span>
                 </div>
               </div>
             </div>
@@ -393,7 +393,7 @@ export default function AuthPage() {
           {/* SLIDE 2: AI AGENT */}
           {activeSlide === 1 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
+              <div className="rounded-[22px] border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between pb-2.5 border-b border-white/10 text-xs">
                   <div className="flex items-center gap-2">
                     <span className="text-white/60">&larr;</span>
@@ -405,13 +405,13 @@ export default function AuthPage() {
                 </div>
 
                 <div className="flex justify-start">
-                  <div className="max-w-[85%] rounded-2xl rounded-tl-xs px-3.5 py-2.5 bg-white/10 text-white text-xs leading-relaxed">
+                  <div className="max-w-[85%] rounded-[22px] rounded-tl-xs px-3.5 py-2.5 bg-white/10 text-white text-xs leading-relaxed">
                     I need help with my ecommerce shop, can we book a meeting?
                   </div>
                 </div>
 
                 <div className="flex justify-end">
-                  <div className="max-w-[85%] rounded-2xl rounded-tr-xs px-3.5 py-2.5 bg-blue-600 text-white text-xs leading-relaxed shadow-lg">
+                  <div className="max-w-[85%] rounded-[22px] rounded-tr-xs px-3.5 py-2.5 bg-black text-white text-xs leading-relaxed shadow-2xs">
                     No problem! You can book a consultation here!
                   </div>
                 </div>
@@ -426,7 +426,7 @@ export default function AuthPage() {
                       <div className="font-bold text-white text-xs">Get your free consultation</div>
                       <div className="text-[10px] text-white/50">Join a 30 min strategy session</div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-md bg-blue-500 text-white font-bold text-[10px]">
+                    <span className="px-2.5 py-1 rounded-md bg-black text-white font-bold text-[10px]">
                       Book meeting
                     </span>
                   </div>
@@ -438,13 +438,13 @@ export default function AuthPage() {
           {/* SLIDE 3: STORY AUTOMATION */}
           {activeSlide === 2 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
+              <div className="rounded-[22px] border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between text-xs pb-2 border-b border-white/10">
                   <span className="font-bold text-white flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-pink-500" />
+                    <span className="h-2 w-2 rounded-full bg-black" />
                     <span>24h Story Automation</span>
                   </span>
-                  <span className="text-[10px] font-bold text-pink-400">100% Native</span>
+                  <span className="text-[10px] font-bold text-slate-900">100% Native</span>
                 </div>
 
                 <div className="aspect-16/9 rounded-xl bg-gradient-to-tr from-purple-800 via-pink-700 to-rose-600 p-4 flex flex-col justify-between text-white shadow-inner">
@@ -468,7 +468,7 @@ export default function AuthPage() {
           {/* SLIDE 4: CUSTOMER UGC ENGINE */}
           {activeSlide === 3 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
+              <div className="rounded-[22px] border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between text-xs pb-2 border-b border-white/10">
                   <span className="font-bold text-white">Customer Tagged Photo</span>
                   <span className="text-emerald-400 font-bold text-[10px]">Verified UGC</span>
@@ -498,13 +498,13 @@ export default function AuthPage() {
           {/* SLIDE 5: SMART CONVERSION FUNNELS */}
           {activeSlide === 4 && (
             <div className="relative w-full max-w-[360px] animate-page-entrance">
-              <div className="rounded-2xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
+              <div className="rounded-[22px] border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between text-xs pb-2 border-b border-white/10">
                   <span className="font-bold text-white">Direct DM Checkout</span>
-                  <span className="text-blue-400 font-bold text-[10px]">Zero Dropoff</span>
+                  <span className="text-slate-900 font-bold text-[10px]">Zero Dropoff</span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-blue-600/20 border border-blue-500/30 space-y-2">
+                <div className="p-3.5 rounded-xl bg-black/20 border border-[#e9e9ee] space-y-2">
                   <div className="flex items-center justify-between text-xs font-bold text-white">
                     <span>Order #FAB-8821</span>
                     <span className="text-emerald-400 font-bold">$128.00 Paid</span>
@@ -551,14 +551,14 @@ export default function AuthPage() {
       </div>
 
       {/* ── RIGHT HALF: REAL AUTHENTICATION WORKSPACE (50% on desktop) ────── */}
-      <div className="w-full lg:w-1/2 h-full min-h-screen lg:min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-6 xl:p-8 bg-slate-50/50 relative overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="w-full lg:w-1/2 h-full min-h-screen lg:min-h-0 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-6 xl:p-8 bg-[#F1F3F7] relative overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="w-full max-w-[390px] xl:max-w-[415px] space-y-3.5 xl:space-y-4 my-auto py-2 xl:py-4 animate-page-entrance">
           {/* Back to Home Button & URL */}
           <div className="flex items-center justify-between pb-0.5">
             <Link
               href="/"
               id="back-to-home-btn"
-              className="group inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all active:scale-[0.98]"
+              className="group inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100/90 border border-[#e9e9ee] hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all active:scale-[0.98]"
             >
               <ArrowLeftOutlined className="text-[10px] transition-transform group-hover:-translate-x-1 text-slate-500 group-hover:text-slate-900" />
               <span>Back to Home</span>
@@ -666,7 +666,7 @@ export default function AuthPage() {
                     placeholder="creator@fabroniee.store"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
@@ -686,7 +686,7 @@ export default function AuthPage() {
                         setSuccessMsg(null);
                         setForgotStep(1);
                       }}
-                      className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                      className="text-xs font-semibold text-slate-900 hover:text-slate-900 hover:underline cursor-pointer"
                     >
                       Forgot password?
                     </button>
@@ -702,7 +702,7 @@ export default function AuthPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
@@ -721,7 +721,7 @@ export default function AuthPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                    className="w-3.5 h-3.5 rounded text-slate-900 border-slate-300 focus:ring-blue-500 cursor-pointer"
                   />
                   <span className="text-xs text-slate-600 font-medium">Remember this browser</span>
                 </label>
@@ -731,7 +731,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-2xs active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                 <span>Sign In</span>
@@ -748,7 +748,7 @@ export default function AuthPage() {
                       setError(null);
                       setSuccessMsg(null);
                     }}
-                    className="font-bold text-blue-600 hover:underline cursor-pointer"
+                    className="font-bold text-slate-900 hover:underline cursor-pointer"
                   >
                     Create account &rarr;
                   </button>
@@ -786,7 +786,7 @@ export default function AuthPage() {
                     placeholder="Alex Morgan"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
@@ -806,7 +806,7 @@ export default function AuthPage() {
                     placeholder="alex@creator.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-3 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                 </div>
               </div>
@@ -827,7 +827,7 @@ export default function AuthPage() {
                     placeholder="Minimum 6 characters"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
@@ -855,7 +855,7 @@ export default function AuthPage() {
                     placeholder="Re-enter password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                    className="w-full h-9.5 xl:h-10 pl-8.5 pr-9 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                   />
                   <button
                     type="button"
@@ -874,7 +874,7 @@ export default function AuthPage() {
                   required
                   checked={agreeTerms}
                   onChange={(e) => setAgreeTerms(e.target.checked)}
-                  className="w-3.5 h-3.5 mt-0.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
+                  className="w-3.5 h-3.5 mt-0.5 rounded text-slate-900 border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
                 />
                 <span className="text-[10px] xl:text-[11px] text-slate-500 leading-snug">
                   I agree to the{" "}
@@ -897,7 +897,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={busy}
-                className="w-full h-10 xl:h-10.5 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-[#5046e5] hover:bg-[#4338ca] flex items-center justify-center gap-2"
+                className="w-full h-10 xl:h-10.5 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-2xs active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-[#5046e5] hover:bg-[#4338ca] flex items-center justify-center gap-2"
               >
                 {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                 <span>Create Account &amp; Continue &rarr;</span>
@@ -914,7 +914,7 @@ export default function AuthPage() {
                       setError(null);
                       setSuccessMsg(null);
                     }}
-                    className="font-bold text-blue-600 hover:underline cursor-pointer"
+                    className="font-bold text-slate-900 hover:underline cursor-pointer"
                   >
                     Sign in &rarr;
                   </button>
@@ -940,7 +940,7 @@ export default function AuthPage() {
               </div>
 
               {devCodeHint && (
-                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-800 flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-[#E2E2FC] border border-[#e9e9ee] text-xs text-blue-800 flex items-center justify-between">
                   <span>Demo / Dev Reset Code: <strong>{devCodeHint}</strong></span>
                   <button
                     type="button"
@@ -968,7 +968,7 @@ export default function AuthPage() {
                         placeholder="you@creator.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+                        className="w-full h-10 xl:h-11 pl-9.5 pr-3.5 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-[#e9e9ee] focus:ring-2 focus:ring-blue-100 transition-all"
                       />
                     </div>
                   </div>
@@ -976,7 +976,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-2xs active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
                   >
                     {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                     <span>Send Reset Code</span>
@@ -994,7 +994,7 @@ export default function AuthPage() {
                       placeholder="e.g. 123456"
                       value={resetCode}
                       onChange={(e) => setResetCode(e.target.value)}
-                      className="w-full h-10 xl:h-11 px-3.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 font-mono tracking-widest text-center focus:outline-none focus:border-blue-500"
+                      className="w-full h-10 xl:h-11 px-3.5 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 font-mono tracking-widest text-center focus:outline-none focus:border-[#e9e9ee]"
                     />
                   </div>
 
@@ -1013,7 +1013,7 @@ export default function AuthPage() {
                         placeholder="At least 6 characters"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                        className="w-full h-10 xl:h-11 pl-9.5 pr-10 rounded-xl border border-[#e9e9ee] bg-white text-xs text-slate-900 focus:outline-none focus:border-[#e9e9ee]"
                       />
                       <button
                         type="button"
@@ -1028,7 +1028,7 @@ export default function AuthPage() {
                   <button
                     type="submit"
                     disabled={busy}
-                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-md active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
+                    className="w-full h-10.5 xl:h-11 rounded-xl text-white font-semibold text-xs tracking-wide uppercase transition-all shadow-2xs active:scale-[0.99] disabled:opacity-60 cursor-pointer bg-slate-900 hover:bg-black flex items-center justify-center gap-2"
                   >
                     {busy && <LoadingOutlined className="text-xs text-white animate-spin" />}
                     <span>Update Password &amp; Sign In</span>

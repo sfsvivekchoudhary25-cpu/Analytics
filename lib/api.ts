@@ -16,11 +16,11 @@ export function getApiBase(): string {
     if (override) return override;
 
     const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1" || /^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
-      // If explicit localhost port is desired via custom env, use it; otherwise proxy via Next.js rewrite
-      if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes("localhost:4000")) {
-        return process.env.NEXT_PUBLIC_API_URL;
-      }
+    if (host === "localhost" || host === "127.0.0.1") {
+      // Connect directly to local backend on desktop to bypass proxy hops and eliminate Turbopack ECONNREFUSED logs
+      return process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    }
+    if (/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/.test(host)) {
       return "/backend-proxy";
     }
   }
@@ -31,10 +31,95 @@ export const API_BASE = process.env.NEXT_PUBLIC_API_URL || REMOTE_API_BASE;
 const TOKEN_KEY = "ighub_token";
 const ACCOUNT_KEY = "ighub_account";
 
+const ONBOARDING_KEY = "ighub_onboarding_done";
+const LAST_USER_KEY = "ighub_last_user";
+
+// Everything this browser remembers about one user's DATA (not settings like sidebar collapse or cookie consent).
+// It must never be shown to, or uploaded for, the next person who signs in on the same browser.
+const USER_DATA_KEYS = ["fabroniee_saved_reels_vault_v1", "ighub_cloudinary_config", "ig-hub:comment-quick-replies", ACCOUNT_KEY, ONBOARDING_KEY];
+const USER_DATA_PREFIXES = ["collab_outreach_", "post_dwell_", "post_hashtags_", "post_rule_", "ighub_qc_"];
+
+function clearUserData() {
+  USER_DATA_KEYS.forEach((k) => localStorage.removeItem(k));
+  for (let i = localStorage.length - 1; i >= 0; i--) {
+    const k = localStorage.key(i);
+    if (k && USER_DATA_PREFIXES.some((p) => k.startsWith(p))) localStorage.removeItem(k);
+  }
+}
+
+// Who a JWT belongs to (only used to notice that a DIFFERENT user is now signed in; the server still verifies tokens).
+function tokenUserId(token: string | null): string | null {
+  try {
+    if (!token) return null;
+    const body = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const p = JSON.parse(atob(body));
+    return String(p.sub || p.id || p.email || "") || null;
+  } catch {
+    return null;
+  }
+}
+
+// If the signed-in user is not the one whose data is cached here, drop that cached data first.
+function ensureUserScope(token: string | null) {
+  const uid = tokenUserId(token);
+  if (!uid) return;
+  if (localStorage.getItem(LAST_USER_KEY) !== uid) {
+    clearUserData();
+    localStorage.setItem(LAST_USER_KEY, uid);
+  }
+}
+
 export const auth = {
-  get: () => (typeof window === "undefined" ? null : localStorage.getItem(TOKEN_KEY)),
-  set: (t: string) => localStorage.setItem(TOKEN_KEY, t),
-  clear: () => localStorage.removeItem(TOKEN_KEY),
+  get: () => {
+    if (typeof window === "undefined") return null;
+    const t = localStorage.getItem(TOKEN_KEY);
+    ensureUserScope(t);
+    return t;
+  },
+  set: (t: string) => {
+    ensureUserScope(t);
+    localStorage.setItem(TOKEN_KEY, t);
+  },
+  // Signing out removes the session and everything cached for that user (saved reels, templates, "I skipped setup").
+  clear: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(LAST_USER_KEY);
+    clearUserData();
+  },
+};
+
+// Set when the user finishes OR skips the setup page, so the dashboard stops sending them back to it.
+export const onboarding = {
+  isDone: () => (typeof window === "undefined" ? false : localStorage.getItem(ONBOARDING_KEY) === "1"),
+  markDone: () => {
+    if (typeof window !== "undefined") localStorage.setItem(ONBOARDING_KEY, "1");
+  },
+};
+
+// The last answer for a screen, kept in this browser so the screen can show it at once and then refresh it.
+// Numbers and lists only (never message text). Stored under the "ighub_qc_" prefix, so signing out or a different
+// user signing in on this browser clears it with the rest of that user's data. Anything older than a day is ignored.
+const QUICK_MAX_AGE_MS = 24 * 3600_000;
+export const quickCache = {
+  read<T>(key: string): T | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("ighub_qc_" + key);
+      if (!raw) return null;
+      const { at, v } = JSON.parse(raw) as { at: number; v: T };
+      return Date.now() - at < QUICK_MAX_AGE_MS ? v : null;
+    } catch {
+      return null;
+    }
+  },
+  write(key: string, value: unknown) {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem("ighub_qc_" + key, JSON.stringify({ at: Date.now(), v: value }));
+    } catch {
+      /* storage full or blocked: the screen just loads normally next time */
+    }
+  },
 };
 
 export const activeAccount = {

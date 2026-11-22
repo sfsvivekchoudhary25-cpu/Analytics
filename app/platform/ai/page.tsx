@@ -60,7 +60,7 @@ export default function AiPlatformPage() {
             <Link
               href="/login"
               style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-900 !text-white font-semibold text-sm shadow-xl transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full hover:bg-neutral-900 !text-white font-semibold text-sm shadow-2xs transition-all"
             >
               <span>Deploy Your AI Agent Free</span>
               <ArrowRightOutlined className="text-xs !text-white" />
@@ -89,7 +89,7 @@ export default function AiPlatformPage() {
             </h2>
           </div>
 
-          <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-[#e9e9ee] space-y-6 shadow-md">
+          <div className="p-6 sm:p-8 rounded-[26px] bg-white border-2 border-[#e9e9ee] space-y-6 shadow-2xs">
             <div>
               <span className="text-xs font-semibold text-slate-700 block mb-2">Select a Sample Customer Inquiry:</span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -98,9 +98,9 @@ export default function AiPlatformPage() {
                     key={label}
                     type="button"
                     onClick={() => setActiveIdx(idx)}
-                    className={`p-3 rounded-2xl text-xs font-semibold transition-all text-left cursor-pointer ${
+                    className={`p-3 rounded-[22px] text-xs font-semibold transition-all text-left cursor-pointer ${
                       activeIdx === idx
-                        ? "bg-[#e3622b] text-white shadow-md ring-2 ring-[#e3622b]"
+                        ? "bg-[#e3622b] text-white shadow-2xs ring-2 ring-[#e3622b]"
                         : "bg-slate-100 text-slate-800 hover:bg-[#f8d7ca] hover:text-[#883a19]"
                     }`}
                   >
@@ -111,20 +111,20 @@ export default function AiPlatformPage() {
             </div>
 
             {/* Chat preview */}
-            <div className="p-5 rounded-2xl bg-[#fafafa] border border-slate-200 space-y-4">
+            <div className="p-5 rounded-[22px] bg-[#fafafa] border border-[#e9e9ee] space-y-4">
               {/* Customer message */}
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center font-semibold text-xs shrink-0">
                   U
                 </div>
-                <div className="p-3.5 rounded-2xl bg-white border border-slate-200 text-xs font-normal text-slate-800 max-w-lg shadow-2xs leading-relaxed">
+                <div className="p-3.5 rounded-[22px] bg-white border border-[#e9e9ee] text-xs font-normal text-slate-800 max-w-lg shadow-2xs leading-relaxed">
                   {AI_PRESETS[activeIdx].question}
                 </div>
               </div>
 
               {/* AI Agent message */}
               <div className="flex items-start gap-3 justify-end">
-                <div className="p-3.5 rounded-2xl bg-[#f8d7ca] border border-[#eea07f] text-xs font-medium text-[#883a19] max-w-lg shadow-2xs leading-relaxed">
+                <div className="p-3.5 rounded-[22px] bg-[#f8d7ca] border border-[#eea07f] text-xs font-medium text-[#883a19] max-w-lg shadow-2xs leading-relaxed">
                   <div className="flex items-center gap-1.5 pb-1 text-[10px] uppercase font-semibold text-[#e3622b]">
                     <RobotOutlined /> Fabroniee AI Co-Pilot &bull; 0.6s
                   </div>
@@ -152,7 +152,7 @@ export default function AiPlatformPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="p-6 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
+            <div className="p-6 rounded-[26px] bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
               <div className="w-10 h-10 rounded-xl bg-[#f8d7ca] text-[#883a19] flex items-center justify-center text-lg font-bold">
                 <SafetyCertificateFilled />
               </div>
@@ -162,7 +162,7 @@ export default function AiPlatformPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
+            <div className="p-6 rounded-[26px] bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
               <div className="w-10 h-10 rounded-xl bg-[#bfbff9] text-[#00008b] flex items-center justify-center text-lg font-bold">
                 <GlobalOutlined />
               </div>
@@ -172,7 +172,7 @@ export default function AiPlatformPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
+            <div className="p-6 rounded-[26px] bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
               <div className="w-10 h-10 rounded-xl bg-[#f7cbdf] text-[#871d4d] flex items-center justify-center text-lg font-bold">
                 <ThunderboltFilled />
               </div>
@@ -182,7 +182,7 @@ export default function AiPlatformPage() {
               </p>
             </div>
 
-            <div className="p-6 rounded-3xl bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
+            <div className="p-6 rounded-[26px] bg-[#fafaf9] border-2 border-[#e9e9ee] space-y-3 shadow-xs">
               <div className="w-10 h-10 rounded-xl bg-[#ffefb2] text-[#997a00] flex items-center justify-center text-lg font-bold">
                 <MessageOutlined />
               </div>
@@ -198,7 +198,7 @@ export default function AiPlatformPage() {
       {/* ── FINAL CTA ────────────────────────────────────────────────────────── */}
       <section className="py-20 bg-[#fafaf9]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="p-10 sm:p-14 rounded-3xl bg-gradient-to-br from-[#f8d7ca] via-[#ffefb2] to-[#f7cbdf] border-2 border-[#eea07f] space-y-5 shadow-xl">
+          <div className="p-10 sm:p-14 rounded-[26px] bg-gradient-to-br from-[#f8d7ca] via-[#ffefb2] to-[#f7cbdf] border-2 border-[#eea07f] space-y-5 shadow-2xs">
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
               Train Your First AI Assistant in 5 Minutes
             </h2>
@@ -209,7 +209,7 @@ export default function AiPlatformPage() {
               <Link
                 href="/login"
                 style={{ backgroundColor: "#000000", color: "#ffffff", border: "2px solid #000000" }}
-                className="inline-flex px-8 py-4 rounded-full font-semibold text-sm hover:bg-neutral-900 !text-white shadow-xl transition-all"
+                className="inline-flex px-8 py-4 rounded-full font-semibold text-sm hover:bg-neutral-900 !text-white shadow-2xs transition-all"
               >
                 <span className="!text-white">Get Started with Meta Login &rarr;</span>
               </Link>

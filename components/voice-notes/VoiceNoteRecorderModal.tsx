@@ -44,6 +44,121 @@ const LANGUAGES = [
   { code: "pt-BR", label: "Portuguese (Português)" },
 ];
 
+function VoiceVisualizerBars({
+  stream,
+  isRecording,
+}: {
+  stream?: MediaStream | null;
+  isRecording?: boolean;
+}) {
+  const [levels, setLevels] = useState<number[]>([
+    6, 12, 18, 24, 16, 8, 14, 22, 28, 18, 10, 16, 24, 20, 12, 6, 14, 22, 16, 10, 6, 14, 20, 12,
+  ]);
+  const animationFrameRef = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    if (!isRecording) {
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+        try {
+          audioContextRef.current.close();
+        } catch {}
+      }
+      return;
+    }
+
+    let sourceNode: MediaStreamAudioSourceNode | null = null;
+    let isMounted = true;
+
+    try {
+      if (stream && stream.active) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          audioContextRef.current = ctx;
+
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 64;
+          analyser.smoothingTimeConstant = 0.7;
+
+          sourceNode = ctx.createMediaStreamSource(stream);
+          sourceNode.connect(analyser);
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+          const update = () => {
+            if (!isMounted) return;
+            analyser.getByteFrequencyData(dataArray);
+
+            const next: number[] = [];
+            const barCount = 24;
+            for (let i = 0; i < barCount; i++) {
+              const binIndex = Math.min(Math.floor((i / barCount) * 18), dataArray.length - 1);
+              const val = dataArray[binIndex] || 0;
+              const barHeight = Math.max(4, Math.round((val / 255) * 30));
+              next.push(barHeight);
+            }
+            setLevels(next);
+            animationFrameRef.current = requestAnimationFrame(update);
+          };
+
+          animationFrameRef.current = requestAnimationFrame(update);
+          return;
+        }
+      }
+    } catch (e) {
+      // AudioContext fallback
+    }
+
+    // Gentle rhythmic organic pulse fallback when stream analyser is unavailable
+    let tick = 0;
+    const interval = setInterval(() => {
+      tick++;
+      setLevels((prev) =>
+        prev.map((_, i) => Math.max(4, Math.round(12 + 10 * Math.sin(tick * 0.35 + i * 0.45))))
+      );
+    }, 70);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+      if (sourceNode) {
+        try {
+          sourceNode.disconnect();
+        } catch {}
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+        try {
+          audioContextRef.current.close();
+        } catch {}
+      }
+    };
+  }, [isRecording, stream]);
+
+  return (
+    <div
+      className="flex items-center justify-center gap-1 sm:gap-1.5 h-8 px-2 overflow-hidden"
+      aria-hidden="true"
+    >
+      {levels.map((height, i) => (
+        <span
+          key={i}
+          style={{ height: `${height}px` }}
+          className={`w-1 sm:w-1.5 rounded-full transition-all duration-75 ${
+            isRecording
+              ? height > 13
+                ? "bg-slate-950"
+                : "bg-slate-400"
+              : "bg-slate-200"
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function VoiceNoteRecorderModal({
   isOpen,
   onClose,
@@ -80,6 +195,7 @@ export function VoiceNoteRecorderModal({
   const [whisperTranscript, setWhisperTranscript] = useState("");
   const [isTranscribingChunk, setIsTranscribingChunk] = useState(false);
   const isTranscribingChunkRef = useRef(false);
+  const transcriptEndRef = useRef<HTMLDivElement | null>(null);
 
   const speech = useSpeechRecognition();
   const audio = useAudioRecorder();
@@ -89,6 +205,13 @@ export function VoiceNoteRecorderModal({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Auto-scroll transcript container as speech streams in
+  useEffect(() => {
+    if (stage === "recording" && transcriptEndRef.current) {
+      transcriptEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [whisperTranscript, speech.transcript, speech.interimTranscript, stage]);
 
   // Safe close handler that immediately cuts off microphone tracks and speech recognition
   const handleCloseModal = () => {
@@ -188,7 +311,8 @@ export function VoiceNoteRecorderModal({
     const interval = setInterval(async () => {
       if (isTranscribingChunkRef.current) return;
       const snapshot = audio.getSnapshotBlob();
-      if (!snapshot || snapshot.size < 4000) return;
+      // Lower snapshot size threshold so live audio slices trigger prompt transcription
+      if (!snapshot || snapshot.size < 600) return;
 
       isTranscribingChunkRef.current = true;
       setIsTranscribingChunk(true);
@@ -197,13 +321,37 @@ export function VoiceNoteRecorderModal({
         formData.append("audio", snapshot, "live-slice.webm");
         if (selectedLang) formData.append("languageCode", selectedLang);
 
-        const res = await api<{ text: string }>("/voice-notes/transcribe-audio", {
-          method: "POST",
-          body: formData,
-        });
+        let text = "";
 
-        if (res?.text && res.text.trim()) {
-          setWhisperTranscript(res.text.trim());
+        // 1. Direct Next.js route (instant, zero cold-start latency)
+        try {
+          const directRes = await fetch("/api/groq/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+          if (directRes.ok) {
+            const data = await directRes.json();
+            if (data?.text && data.text.trim()) {
+              text = data.text.trim();
+            }
+          }
+        } catch {}
+
+        // 2. Fallback to NestJS backend if direct route did not yield text
+        if (!text) {
+          try {
+            const res = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+              method: "POST",
+              body: formData,
+            });
+            if (res?.text && res.text.trim()) {
+              text = res.text.trim();
+            }
+          } catch {}
+        }
+
+        if (text) {
+          setWhisperTranscript(text);
         }
       } catch (err) {
         // Non-blocking live stream retry
@@ -211,7 +359,7 @@ export function VoiceNoteRecorderModal({
         isTranscribingChunkRef.current = false;
         setIsTranscribingChunk(false);
       }
-    }, 2500);
+    }, 2200);
 
     return () => clearInterval(interval);
   }, [stage, recordType, selectedLang, audio]);
@@ -278,13 +426,34 @@ export function VoiceNoteRecorderModal({
             transcribeFormData.append("languageCode", selectedLang);
           }
 
-          const whisperResult = await api<{ text: string }>("/voice-notes/transcribe-audio", {
-            method: "POST",
-            body: transcribeFormData,
-          });
+          let whisperText = "";
+          // 1. Direct Next.js route
+          try {
+            const directRes = await fetch("/api/groq/transcribe", {
+              method: "POST",
+              body: transcribeFormData,
+            });
+            if (directRes.ok) {
+              const data = await directRes.json();
+              if (data?.text && data.text.trim()) {
+                whisperText = data.text.trim();
+              }
+            }
+          } catch {}
 
-          if (whisperResult?.text) {
-            textToClean = whisperResult.text;
+          // 2. Fallback to NestJS backend
+          if (!whisperText) {
+            const whisperResult = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+              method: "POST",
+              body: transcribeFormData,
+            });
+            if (whisperResult?.text) {
+              whisperText = whisperResult.text.trim();
+            }
+          }
+
+          if (whisperText) {
+            textToClean = whisperText;
           }
         } catch (whisperErr) {
           console.warn("Groq Whisper audio transcription error:", whisperErr);
@@ -376,9 +545,13 @@ export function VoiceNoteRecorderModal({
       console.warn("Hardware audio acquisition did not start");
     }
 
-    // On desktop, also listen with browser speech recognition for instant real-time typing of spoken words
-    if (!isMobile && recordType === "dictate") {
-      speech.startListening(selectedLang);
+    // Instant speech recognition (runs on both desktop and mobile when supported by browser)
+    if (recordType === "dictate" && speech.isSupported) {
+      try {
+        speech.startListening(selectedLang);
+      } catch (speechErr) {
+        console.warn("Speech recognition initialization skipped:", speechErr);
+      }
     }
   };
 
@@ -404,13 +577,32 @@ export function VoiceNoteRecorderModal({
         formData.append("audio", blob, "final.webm");
         if (selectedLang) formData.append("languageCode", selectedLang);
 
-        const whisperRes = await api<{ text: string }>("/voice-notes/transcribe-audio", {
-          method: "POST",
-          body: formData,
-        });
+        let finalWhisper = "";
+        try {
+          const directRes = await fetch("/api/groq/transcribe", {
+            method: "POST",
+            body: formData,
+          });
+          if (directRes.ok) {
+            const data = await directRes.json();
+            if (data?.text && data.text.trim()) {
+              finalWhisper = data.text.trim();
+            }
+          }
+        } catch {}
 
-        if (whisperRes?.text?.trim()) {
-          fullSpokenText = whisperRes.text.trim();
+        if (!finalWhisper) {
+          const whisperRes = await api<{ text: string }>("/voice-notes/transcribe-audio", {
+            method: "POST",
+            body: formData,
+          });
+          if (whisperRes?.text?.trim()) {
+            finalWhisper = whisperRes.text.trim();
+          }
+        }
+
+        if (finalWhisper) {
+          fullSpokenText = finalWhisper;
           setWhisperTranscript(fullSpokenText);
         }
       } catch (err) {
@@ -694,14 +886,10 @@ export function VoiceNoteRecorderModal({
             )}
 
             {/* The Swelling VoicePill Centerpiece */}
-            <div className="relative flex items-center justify-center py-4 my-1">
-              <div
-                className="relative inline-flex items-center justify-center transition-transform duration-220 ease-out"
-                style={{
-                  transform: stage === "recording" ? "translateX(89px)" : "translateX(0px)",
-                }}
-              >
+            <div className="relative flex items-center justify-center py-3 my-1">
+              <div className="relative inline-flex items-center justify-center">
                 <VoicePill
+                  centered={true}
                   accentColor="#f5f5f5"
                   iconColor="#a1a1aa"
                   background="#18181b"
@@ -774,84 +962,121 @@ export function VoiceNoteRecorderModal({
             {/* When Recording: Live Transcript Window & Stop Controls */}
             {stage === "recording" && (
               <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="text-center">
-                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                    {recordType === "dictate" ? "Listening & Transcribing with Groq" : "Recording Audio Memo"}
-                  </span>
-                </div>
-
-                {/* Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
+                {/* 2. Live Streaming Transcript Window (Dictation) OR Audio Memo In-Progress Box */}
                 {recordType === "dictate" ? (
-                  <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-4 min-h-[110px] max-h-[160px] overflow-y-auto text-left shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 font-bold">
-                        <Sparkles size={11} className="text-slate-950" />
-                        <span>Real-Time Transcript</span>
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-950 bg-white border border-black/80 px-2 py-0.5 rounded-full shadow-2xs">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                        Groq Whisper Live
+                  <div className="rounded-[26px] border border-[#e9e9ee] bg-gradient-to-b from-[#fafafd] to-white p-4 sm:p-5 text-left shadow-xs transition-all hover:border-black/30">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pb-3 border-b border-[#f1f3f7] mb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          style={{ backgroundColor: "#e2e2fc" }}
+                          className="w-8 h-8 rounded-xl text-slate-950 flex items-center justify-center shrink-0 shadow-2xs font-bold"
+                        >
+                          <Sparkles size={14} />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-slate-950 tracking-tight flex items-center gap-1.5">
+                            <span>Real-Time Transcript</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Sound Wave Frequency Visualizer */}
+                    <div className="py-2 border-b border-[#f1f3f7]/80 mb-2">
+                      <VoiceVisualizerBars stream={audio.stream} isRecording={stage === "recording"} />
+                    </div>
+
+                    {/* Live Transcript Content */}
+                    <div className="min-h-[110px] max-h-[160px] overflow-y-auto text-left pr-1 scroll-smooth">
+                      {fullSpokenLive ? (
+                        <p className="text-xs sm:text-sm text-slate-950 leading-relaxed font-medium">
+                          {fullSpokenLive}
+                          <span className="inline-block w-1.5 h-4 ml-1 bg-slate-950 animate-pulse align-middle rounded-full" />
+                        </p>
+                      ) : (
+                        <div className="min-h-[100px] flex flex-col items-center justify-center text-center p-3">
+                          <p className="text-xs sm:text-sm text-slate-500 font-medium italic">
+                            Start speaking... your words stream live in real time.
+                          </p>
+                          <span className="text-[10px] text-slate-400 mt-1 font-medium">
+                            Microphone active • Spoken words appear here in real-time
+                          </span>
+                        </div>
+                      )}
+                      <div ref={transcriptEndRef} />
+                    </div>
+
+                    {/* Card Footer Status */}
+                    <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-[#f1f3f7] text-[10px] font-semibold text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        {isTranscribingChunk ? (
+                          <span className="inline-flex items-center gap-1.5 text-slate-800 font-bold">
+                            <RefreshCw size={11} className="animate-spin text-slate-950" />
+                            Transcribing chunk...
+                          </span>
+                        ) : (
+                          <span>
+                            {fullSpokenLive
+                              ? `${fullSpokenLive.split(/\s+/).filter(Boolean).length} words spoken`
+                              : "Listening for voice input..."}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        Auto-cleans on stop
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-900 leading-relaxed font-normal">
-                      {fullSpokenLive ? (
-                        <span className="text-slate-950 font-medium">{fullSpokenLive} </span>
-                      ) : (
-                        <span className="text-slate-400 italic">
-                          Start speaking... your words stream live with Groq Whisper.
-                        </span>
-                      )}
-                      {isTranscribingChunk && (
-                        <span className="inline-block ml-1.5 text-[10px] font-bold text-slate-400 animate-pulse">
-                          ● transcribing...
-                        </span>
-                      )}
-                    </p>
+
                     {audio.error && (
-                      <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
+                      <div className="mt-3 text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl flex items-center gap-1.5">
                         <AlertCircle size={13} className="shrink-0 text-amber-700" />
                         <span>{audio.error}</span>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="rounded-[22px] border border-[#e9e9ee] bg-[#fbfbfc] p-5 min-h-[100px] flex flex-col items-center justify-center text-center shadow-2xs">
+                  <div className="rounded-[26px] border border-[#e9e9ee] bg-gradient-to-b from-[#fafafd] to-white p-5 min-h-[140px] flex flex-col items-center justify-center text-center shadow-xs">
                     <div
                       style={{ backgroundColor: "#feece4" }}
-                      className="w-10 h-10 rounded-2xl text-slate-950 flex items-center justify-center mb-2 shadow-2xs"
+                      className="w-12 h-12 rounded-2xl text-slate-950 flex items-center justify-center mb-2.5 shadow-2xs"
                     >
-                      <Mic size={18} />
+                      <Mic size={20} />
                     </div>
-                    <p className="text-xs font-bold text-slate-950">Capturing High-Fidelity Audio Memo</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Microphone is capturing voice audio. Tap the capsule or Stop button when finished.</p>
+                    <p className="text-sm font-bold text-slate-950">Capturing High-Fidelity Voice Memo</p>
+                    <p className="text-xs text-slate-500 mt-0.5 max-w-xs">
+                      Audio waveform is recording directly to memory. Tap Stop when finished.
+                    </p>
+                    <div className="w-full mt-3">
+                      <VoiceVisualizerBars stream={audio.stream} isRecording={stage === "recording"} />
+                    </div>
                   </div>
                 )}
 
-                {/* Stop Controls */}
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-center gap-2.5 sm:gap-3 pt-1">
+                {/* 3. Stop Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full">
                   <button
                     type="button"
                     onClick={() => handleStop({ useAi: false })}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-black/80 font-bold text-xs shadow-2xs transition-transform active:scale-95 cursor-pointer"
+                    className="w-full sm:flex-1 py-3.5 px-5 rounded-full bg-white hover:bg-slate-50 text-slate-950 border border-[#e9e9ee] hover:border-black/40 font-bold text-xs sm:text-sm shadow-2xs active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
                   >
-                    <Square size={12} className="fill-slate-950" />
+                    <Square size={13} className="fill-slate-950 text-slate-950" />
                     <span>Stop (Keep Raw)</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleStop({ useAi: true })}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs shadow-xs transition-transform active:scale-95 cursor-pointer"
+                    className="w-full sm:flex-1 py-3.5 px-6 rounded-full bg-black hover:bg-neutral-800 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[48px] group"
                   >
                     {recordType === "dictate" ? (
                       <>
-                        <Sparkles size={13} className="text-white" />
+                        <Sparkles size={14} className="text-white group-hover:rotate-12 transition-transform" />
                         <span>Stop & Clean with AI</span>
                       </>
                     ) : (
                       <>
-                        <Check size={13} className="text-white" />
+                        <Check size={14} className="text-white" />
                         <span>Stop & Review Memo</span>
                       </>
                     )}
@@ -1129,12 +1354,12 @@ export function VoiceNoteRecorderModal({
                   onChange={(e) => setPreviewCategory(e.target.value as any)}
                   className="w-full text-xs font-bold text-slate-950 bg-[#fbfbfc] border border-[#e9e9ee] rounded-xl px-3 py-2.5 focus:bg-white focus:outline-none focus:border-black cursor-pointer shadow-2xs transition-all"
                 >
-                  <option value="idea">💡 Idea</option>
-                  <option value="todo">✅ To-Do</option>
-                  <option value="instagram_caption">📸 IG Caption</option>
-                  <option value="client_note">💼 Client Note</option>
-                  <option value="reminder">⏰ Reminder</option>
-                  <option value="journal">📓 Memo</option>
+                  <option value="idea">Idea</option>
+                  <option value="todo">To-Do</option>
+                  <option value="instagram_caption">IG Caption</option>
+                  <option value="client_note">Client Note</option>
+                  <option value="reminder">Reminder</option>
+                  <option value="journal">Memo</option>
                 </select>
               </div>
             </div>

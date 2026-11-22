@@ -9,9 +9,6 @@ export async function POST(request: NextRequest) {
     const email = String(body.email || "").trim().toLowerCase();
     const name = String(body.name || "").trim();
     const password = String(body.password || "");
-    const instagramHandle = String(body.instagramHandle || "")
-      .trim()
-      .replace(/^@/, "");
 
     // Validations
     if (!email || !email.includes("@")) {
@@ -56,9 +53,10 @@ export async function POST(request: NextRequest) {
     // Insert user into PostgreSQL
     const insertRes = await db.query(
       `INSERT INTO app_users (email, name, password_hash, instagram_handle, role)
-       VALUES ($1, $2, $3, $4, 'admin')
+       VALUES ($1, $2, $3, $4, 'user')
        RETURNING id, email, name, instagram_handle, role, created_at`,
-      [email, name, passwordHash, instagramHandle || null]
+      // A typed handle is never trusted; it is linked only after a verified Instagram connection.
+      [email, name, passwordHash, null]
     );
 
     const user = insertRes.rows[0];

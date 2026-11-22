@@ -3,8 +3,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Badge, Button, Avatar, Tooltip, Drawer, Dropdown, type MenuProps } from "antd";
 import {
-  InstagramOutlined,
-  CheckCircleFilled,
   CloseOutlined,
 } from "@ant-design/icons";
 import {
@@ -16,6 +14,7 @@ import {
   Hash,
   Mic,
   Settings,
+  User,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -32,6 +31,7 @@ export type SectionId =
   | "hashtags"
   | "reels"
   | "voice-notes"
+  | "settings"
   | "account";
 
 export type Section = { id: SectionId; label: string; icon: ReactNode };
@@ -46,7 +46,8 @@ const ICON_MAP: Record<SectionId, ReactNode> = {
   hashtags: <Hash size={18} strokeWidth={1.75} />,
   reels: <Film size={18} strokeWidth={1.75} />,
   "voice-notes": <Mic size={18} strokeWidth={1.75} />,
-  account: <Settings size={18} strokeWidth={1.75} />,
+  settings: <Settings size={18} strokeWidth={1.75} />,
+  account: <User size={18} strokeWidth={1.75} />,
 };
 
 type Props = {
@@ -91,6 +92,8 @@ function SidebarContent({
   isDrawer = false,
 }: SidebarContentProps) {
   const cleanUsername = username.replace(/^@/, "");
+  // Empty when the user skipped connecting Instagram.
+  const handle = cleanUsername ? `@${cleanUsername}` : "No account yet";
 
   // Dropdown menu items for collapsed profile trigger
   const profileMenuItems: MenuProps["items"] = [
@@ -98,10 +101,10 @@ function SidebarContent({
       key: "user-info",
       label: (
         <div className="py-1 px-1">
-          <p className="text-xs font-medium text-slate-800 truncate">@{cleanUsername}</p>
+          <p className="text-xs font-medium text-slate-800 truncate">{handle}</p>
           <p className="text-[11px] text-emerald-600 font-normal flex items-center gap-1.5 mt-0.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            {daysLeft != null ? `${daysLeft} days active` : "Connected"}
+            {daysLeft != null ? `${daysLeft} days active` : cleanUsername ? "Connected" : "Connect Instagram"}
           </p>
         </div>
       ),
@@ -158,7 +161,7 @@ function SidebarContent({
           {isCollapsed ? (
             /* Collapsed Mode: Logo & Dedicated Expand Toggle */
             <div className="flex flex-col items-center gap-2 w-full">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs p-1 shrink-0">
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs p-1 shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/logo.png"
@@ -182,7 +185,7 @@ function SidebarContent({
             /* Expanded Mode: Full Logo, Title, Subtitle, and Collapse Button */
             <>
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs shrink-0 p-1">
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs shrink-0 p-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/logo.png"
@@ -194,9 +197,6 @@ function SidebarContent({
                   <span className="text-[14px] font-semibold tracking-tight text-slate-850 leading-tight block truncate">
                     Fabroniee
                   </span>
-                  <p className="text-[11px] font-normal text-slate-400 tracking-tight truncate">
-                    Social Commerce OS
-                  </p>
                 </div>
               </div>
 
@@ -222,48 +222,6 @@ function SidebarContent({
                 </Tooltip>
               )}
             </>
-          )}
-        </div>
-
-        {/* Connected Instagram Account Status Card */}
-        <div className={`transition-all duration-200 ${isCollapsed ? "px-2 pb-2" : "px-3 pb-2"}`}>
-          {isCollapsed ? (
-            <div className="flex justify-center">
-              <Tooltip
-                title={
-                  <div className="text-xs">
-                    <p className="font-medium text-slate-900">@{cleanUsername}</p>
-                    <p className="text-emerald-500 text-[11px] font-normal">Instagram Connected</p>
-                  </div>
-                }
-                placement="right"
-              >
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 transition-all cursor-default">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white">
-                    <InstagramOutlined className="text-[12px]" />
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
-                </div>
-              </Tooltip>
-            </div>
-          ) : (
-            <div className="flex w-full items-center gap-2.5 rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white/80 backdrop-blur-md p-2.5 text-left shadow-2xs transition-all group">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white shadow-xs group-hover:scale-105 transition-transform">
-                <InstagramOutlined className="text-sm" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1">
-                  <span className="truncate text-xs font-medium text-slate-800 tracking-tight">
-                    @{cleanUsername}
-                  </span>
-                  <CheckCircleFilled className="text-[11px] text-blue-500 shrink-0" />
-                </div>
-                <span className="text-[10px] text-emerald-600 font-normal flex items-center gap-1.5 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Connected
-                </span>
-              </div>
-            </div>
           )}
         </div>
       </div>
@@ -314,7 +272,7 @@ function SidebarContent({
                       }}
                       aria-label={s.label}
                       aria-current={isSelected ? "page" : undefined}
-                      className={`group relative flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-200 cursor-pointer ${
+                      className={`group relative flex h-10 w-10 items-center justify-center rounded-[22px] transition-all duration-200 cursor-pointer ${
                         isSelected
                           ? "bg-[#e2e2fc] text-slate-950 font-medium shadow-xs scale-105"
                           : "text-slate-500 hover:bg-white hover:text-slate-900 hover:shadow-2xs active:scale-95"
@@ -345,7 +303,7 @@ function SidebarContent({
                     if (isDrawer) onClose?.();
                   }}
                   aria-current={isSelected ? "page" : undefined}
-                  className={`group relative flex w-full items-center justify-between rounded-2xl px-3 py-2 text-xs sm:text-[13px] font-normal transition-all duration-200 cursor-pointer ${
+                  className={`group relative flex w-full items-center justify-between rounded-[22px] px-3 py-2 text-xs sm:text-[13px] font-normal transition-all duration-200 cursor-pointer ${
                     isSelected
                       ? "bg-[#e2e2fc] text-slate-950 font-medium shadow-2xs"
                       : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-2xs active:scale-[0.98]"
@@ -388,7 +346,7 @@ function SidebarContent({
             >
               <button
                 type="button"
-                className="group relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 active:scale-95 transition-all cursor-pointer"
+                className="group relative flex h-10 w-10 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs hover:border-black/30 active:scale-95 transition-all cursor-pointer"
                 aria-label="User settings & profile"
               >
                 <Avatar
@@ -397,13 +355,13 @@ function SidebarContent({
                 >
                   {cleanUsername.charAt(0).toUpperCase() || "F"}
                 </Avatar>
-                <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+                <span className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"} ring-2 ring-white`} />
               </button>
             </Dropdown>
           </div>
         ) : (
           /* Expanded User Profile Card */
-          <div className="rounded-2xl border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all">
+          <div className="rounded-[22px] border border-[#e9e9ee] hover:border-black/20 bg-white p-3 shadow-2xs transition-all">
             <div className="flex items-center gap-2.5">
               <Avatar
                 size={34}
@@ -413,15 +371,15 @@ function SidebarContent({
               </Avatar>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-xs font-medium text-slate-800 tracking-tight">
-                  @{cleanUsername}
+                  {handle}
                 </div>
                 <div className="mt-0.5 flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className={`relative inline-flex h-2 w-2 rounded-full ${cleanUsername ? "bg-emerald-500" : "bg-amber-500"}`} />
                   </span>
-                  <span className="text-[11px] font-normal text-emerald-600">
-                    {daysLeft != null ? `${daysLeft}d left` : "Active"}
+                  <span className={`text-[11px] font-normal ${cleanUsername ? "text-emerald-600" : "text-amber-600"}`}>
+                    {daysLeft != null ? `${daysLeft}d left` : cleanUsername ? "Active" : "Setup pending"}
                   </span>
                 </div>
               </div>

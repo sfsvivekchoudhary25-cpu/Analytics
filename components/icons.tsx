@@ -51,6 +51,15 @@ export function ChartIcon({ className = base }: IconProps) {
   );
 }
 
+export function PencilIcon({ className = base }: IconProps) {
+  return (
+    <svg {...svgProps} className={className} aria-hidden>
+      <path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17l-1 3z" />
+      <path d="m14.5 7.5 3 3" />
+    </svg>
+  );
+}
+
 export function GearIcon({ className = base }: IconProps) {
   return (
     <svg {...svgProps} className={className} aria-hidden>

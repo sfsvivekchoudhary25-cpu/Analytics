@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { activeAccount, api, ApiError, auth, ConnectionStatus } from "@/lib/api";
+import { activeAccount, api, ApiError, auth, ConnectionStatus, onboarding } from "@/lib/api";
 import { Dashboard as DashboardOverview } from "@/components/Dashboard";
 import { Submissions } from "@/components/Submissions";
 import { MessagesTab } from "@/components/MessagesTab";
 import { Stories } from "@/components/Stories";
 import { CommentsHub } from "@/components/CommentsHub";
 import { AccountPanel } from "@/components/AccountPanel";
+import { SettingsPanel } from "@/components/SettingsPanel";
 import { Sidebar, type Section, type SectionId } from "@/components/Sidebar";
 import { ChatIcon, CommentIcon, GearIcon, GridIcon, HashtagIcon, PhotoIcon, StoriesIcon } from "@/components/icons";
 import { HashtagSearch } from "@/components/HashtagSearch";
@@ -27,8 +28,12 @@ export const SECTIONS: Section[] = [
   { id: "hashtags", label: "Hashtag Search", icon: <HashtagIcon /> },
   { id: "reels", label: "Reels Downloader", icon: <Film size={18} /> },
   { id: "voice-notes", label: "Voice Notes", icon: <AudioOutlined /> },
+  { id: "settings", label: "Settings", icon: <GearIcon /> },
   { id: "account", label: "Account", icon: <GearIcon /> },
 ];
+
+// Pages whose data comes from the connected Instagram account. Without one they show a "connect" prompt.
+const INSTAGRAM_SECTIONS: SectionId[] = ["dashboard", "messages", "comments", "photos", "stories", "hashtags"];
 
 export type View = { status: ConnectionStatus; daysLeft: number | null };
 
@@ -59,7 +64,6 @@ export default function AppDashboard({
 } = {}) {
   const router = useRouter();
   const [view, setView] = useState<View | null>(null);
-  const [token, setToken] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -97,14 +101,6 @@ export default function AppDashboard({
     }
   }, [commentsTab]);
 
-  const openAutomations = useCallback(() => {
-    setCommentsTab("automation");
-    setTabState("comments");
-    if (typeof window !== "undefined") {
-      window.history.pushState(null, "", "/automations");
-    }
-  }, []);
-
   const handleLoadError = useCallback(
     (err: unknown) => {
       if (err instanceof ApiError && err.status === 401) {
@@ -131,8 +127,6 @@ export default function AppDashboard({
         if (q.get("tab") !== "automation") {
           setCommentsTab("inbox");
         }
-      } else if (path === "settings") {
-        setTabState("account");
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path && !initialTab) {
@@ -149,8 +143,6 @@ export default function AppDashboard({
       } else if (path === "comments") {
         setTabState("comments");
         setCommentsTab(q.get("tab") === "automation" ? "automation" : "inbox");
-      } else if (path === "settings") {
-        setTabState("account");
       } else if (SECTIONS.some((s) => s.id === path)) {
         setTabState(path as SectionId);
       } else if (!path) {
@@ -193,7 +185,9 @@ export default function AppDashboard({
   }, [router, handleLoadError, setTab]);
 
   useEffect(() => {
-    if (view && !view.status.connected) {
+    // Send a brand-new user to setup once. After they finish or skip it they stay here and see the Account page
+    // (with the connect buttons) instead of being bounced back to onboarding in a loop.
+    if (view && !view.status.connected && !onboarding.isDone()) {
       router.replace("/onboarding");
     }
   }, [view, router]);
@@ -224,24 +218,6 @@ export default function AppDashboard({
     }
   }
 
-  async function connect(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    try {
-      await api("/instagram/connection", {
-        method: "POST",
-        body: JSON.stringify({ accessToken: token.trim() }),
-      });
-      setToken("");
-      setView(await fetchView());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Connection failed");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   function logout() {
     auth.clear();
     activeAccount.clear();
@@ -251,7 +227,11 @@ export default function AppDashboard({
   const status = view?.status;
   const daysLeft = view?.daysLeft;
   const connected = status?.connected === true;
-  const active: SectionId = connected ? tab : "account";
+  // Someone who finished or skipped setup without connecting Instagram still gets the full app. Pages that need an
+  // Instagram account show a "connect" prompt; the rest (saved reels, voice notes, account) work as normal.
+  const guest = !connected && onboarding.isDone();
+  const active: SectionId = connected || guest ? tab : "account";
+  const needsInstagram = guest && INSTAGRAM_SECTIONS.includes(active);
 
   const accountPanel = (
     <AccountPanel
@@ -259,23 +239,20 @@ export default function AppDashboard({
       daysLeft={daysLeft}
       notice={notice}
       error={error}
-      token={token}
-      setToken={setToken}
       busy={busy}
       onConnectInstagram={connectWithInstagram}
-      onPasteConnect={connect}
       onSignOut={logout}
     />
   );
 
   if (!view && !error) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#F1F3F7] p-4">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Fabroniee" className="h-10 w-10 object-contain" />
-            <div className="absolute -inset-1 rounded-2xl border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-1 rounded-[22px] border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
           </div>
           <div className="text-center space-y-1">
             <h2 className="text-base font-bold text-slate-900 tracking-tight font-sans">Fabroniee</h2>
@@ -291,14 +268,15 @@ export default function AppDashboard({
     );
   }
 
-  if (!connected) {
+  // Not connected AND hasn't done setup yet: the effect above is sending them to /onboarding.
+  if (!connected && !guest) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50/50 p-4">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-[#F1F3F7] p-4">
         <div className="flex flex-col items-center space-y-4">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white border border-slate-200/80 shadow-md">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-[22px] bg-white border border-[#e9e9ee] shadow-2xs">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="Fabroniee" className="h-10 w-10 object-contain" />
-            <div className="absolute -inset-1 rounded-2xl border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
+            <div className="absolute -inset-1 rounded-[22px] border-2 border-[#e13181]/20 animate-pulse pointer-events-none" />
           </div>
           <div className="text-center space-y-1">
             <h2 className="text-base font-bold text-slate-900 tracking-tight font-sans">Fabroniee</h2>
@@ -314,8 +292,12 @@ export default function AppDashboard({
     );
   }
 
+  // Empty when no Instagram account is connected (guest). Everything below uses these instead of status.username.
+  const uname = status?.connected ? status.username.replace(/^@/, "") : "";
+  const ownAvatar = status?.connected ? status.profilePictureUrl : undefined;
+
   return (
-    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-slate-50/50`}>
+    <div className={`flex ${active === "messages" ? "h-screen overflow-hidden" : "min-h-screen"} bg-[#F1F3F7]`}>
       <Sidebar
         sections={SECTIONS}
         active={active}
@@ -323,7 +305,7 @@ export default function AppDashboard({
           setTab(id);
           setMobileMenuOpen(false);
         }}
-        username={status.username.replace(/^@/, "")}
+        username={uname}
         daysLeft={daysLeft ?? null}
         onSignOut={logout}
         pendingPhotos={pendingPhotos}
@@ -345,7 +327,7 @@ export default function AppDashboard({
               type="button"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open navigation menu"
-              className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-slate-50/70 text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
+              className="flex h-11 w-11 items-center justify-center rounded-[22px] border border-[#e9e9ee] bg-[#F1F3F7] text-slate-700 shadow-2xs hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer"
             >
               <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -365,44 +347,11 @@ export default function AppDashboard({
             </div>
           </div>
 
-          {/* Right: Connected Account (Tablet) + Notification Bell & Account Avatar */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/60 text-xs text-slate-700 font-medium">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="truncate max-w-[130px]">@{status.username.replace(/^@/, "")}</span>
-            </div>
-
-            {/* Notification Bell with indicator */}
-            <button
-              type="button"
-              onClick={() => setTab("photos")}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/90 bg-slate-50/70 text-slate-700 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all cursor-pointer shadow-2xs"
-              aria-label="Notifications"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-              </svg>
-              {pendingPhotos > 0 && (
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-[#e13181] ring-2 ring-white" />
-              )}
-            </button>
-
-            {/* User Avatar */}
-            <button
-              type="button"
-              onClick={() => setTab("account")}
-              style={{ backgroundColor: "#000000", color: "#ffffff" }}
-              className="flex h-11 w-11 items-center justify-center rounded-full font-bold text-base shadow-xs hover:ring-2 hover:ring-[#e13181]/20 active:scale-95 transition-all cursor-pointer"
-              aria-label="Account Settings"
-            >
-              {status.username.replace(/^@/, "").charAt(0).toUpperCase() || "F"}
-            </button>
-          </div>
         </header>
 
         {/* Main Section Content */}
         <div
-          key={`${active}-${status.username}`}
+          key={`${active}-${uname}`}
           className={
             active === "messages"
               ? "flex h-full w-full flex-1 flex-col min-h-0 overflow-hidden"
@@ -411,38 +360,73 @@ export default function AppDashboard({
                 : "animate-page-entrance mx-auto w-full max-w-[100rem] min-w-0 space-y-6 p-3 sm:p-6 pb-0 sm:pb-8"
           }
         >
-          {active === "dashboard" && (
+          {guest && !needsInstagram && active !== "account" && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              <span>Instagram isn&apos;t connected yet. This page works without it; connect to unlock comments, messages and automations.</span>
+              <button type="button" onClick={() => setTab("account")} className="rounded-xl bg-black px-3 py-1.5 text-xs font-semibold text-white cursor-pointer">
+                Connect Instagram
+              </button>
+            </div>
+          )}
+          {needsInstagram && (
+            <ConnectInstagramPrompt
+              section={SECTIONS.find((s) => s.id === active)?.label ?? "This page"}
+              onConnect={connectWithInstagram}
+              onMore={() => setTab("account")}
+            />
+          )}
+          {!needsInstagram && active === "dashboard" && (
             <DashboardOverview
-              onOpenAutomations={openAutomations}
               pendingPhotos={pendingPhotos}
               onOpenPhotos={() => setTab("photos")}
-              username={status.username}
+              username={uname}
               onOpenAccount={() => setTab("account")}
             />
           )}
-          {active === "photos" && <Submissions />}
-          {active === "messages" && (
+          {!needsInstagram && active === "photos" && <Submissions />}
+          {!needsInstagram && active === "messages" && (
             <MessagesTab />
           )}
-          {active === "comments" && (
+          {!needsInstagram && active === "comments" && (
             <CommentsHub
               tab={commentsTab}
               onTabChange={handleCommentsTabChange}
               onOpenDashboard={() => setTab("dashboard")}
             />
           )}
-          {active === "stories" && (
-            <Stories username={status.username} ownAvatar={status.profilePictureUrl} />
+          {!needsInstagram && active === "stories" && (
+            <Stories username={uname} ownAvatar={ownAvatar} />
           )}
-          {active === "hashtags" && <HashtagSearch />}
+          {!needsInstagram && active === "hashtags" && <HashtagSearch />}
           {active === "reels" && <ReelsDownloader />}
           {active === "voice-notes" && <VoiceNotesDashboard />}
+          {active === "settings" && <SettingsPanel status={status} />}
           {active === "account" && accountPanel}
         </div>
 
         {/* Global Quick Voice Note Launcher */}
         <VoiceNoteGlobalButton />
       </main>
+    </div>
+  );
+}
+
+// Shown instead of a page that needs Instagram, for a user who skipped connecting.
+function ConnectInstagramPrompt({ section, onConnect, onMore }: { section: string; onConnect: () => void; onMore: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center gap-4 rounded-[24px] border border-[#e9e9ee] bg-white p-8 text-center shadow-2xs">
+      <h2 className="text-lg font-bold text-slate-950">{section} needs your Instagram account</h2>
+      <p className="text-sm text-slate-500">
+        Connect your Instagram Professional or Business account to see your {section.toLowerCase()}. Voice notes, saved reels and the account page work without it.
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button type="button" onClick={onConnect} className="rounded-[22px] bg-black px-5 py-2.5 text-sm font-semibold text-white cursor-pointer">
+          Connect with Instagram
+        </button>
+        <button type="button" onClick={onMore} className="rounded-[22px] border border-[#e9e9ee] bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 cursor-pointer hover:border-black/30">
+          More ways to connect
+        </button>
+      </div>
     </div>
   );
 }

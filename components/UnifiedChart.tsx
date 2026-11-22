@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useId, useMemo } from "react";
-import { TrendingUp } from "lucide-react";
+import { CalendarDays, TrendingUp, Zap } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -136,6 +136,11 @@ export function UnifiedChart({
   className = "",
 }: UnifiedChartProps) {
   const chartId = useId().replace(/:/g, "");
+  // An explicit height is required: recharts measures its parent, and a parent sized only by flex/min-height measures 0
+  // (that is what left the "DMs sent" chart blank).
+  // height="fill": stretch to the space the parent gives us (never below 260px) instead of a fixed height.
+  const fill = height === "fill";
+  const chartH = typeof height === "number" ? `${height}px` : fill ? "260px" : height ?? "260px";
 
   // Auto-detect chart type if not explicitly set
   const effectiveType: ChartType = useMemo(() => {
@@ -289,8 +294,13 @@ export function UnifiedChart({
     );
 
     return (
-      <div className={`flex-1 flex flex-col justify-between w-full h-full min-h-[300px] ${className}`}>
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[240px] max-h-none">
+      <div className={`flex-1 flex flex-col justify-between w-full ${className}`}>
+        <div className={fill ? "relative flex-1 min-h-[260px]" : undefined}>
+        <ChartContainer
+          config={chartConfig}
+          className={fill ? "!absolute inset-0 !aspect-auto !h-full w-full" : "w-full"}
+          style={fill ? undefined : { height: chartH }}
+        >
           <BarChart
             data={chartData}
             accessibilityLayer={false}
@@ -337,6 +347,7 @@ export function UnifiedChart({
             })}
           </BarChart>
         </ChartContainer>
+        </div>
 
         {!hideFooter && (
           <div className="flex items-center gap-2 pt-3 border-t border-[#e9e9ee] mt-auto text-xs font-medium text-slate-500">
@@ -376,24 +387,34 @@ export function UnifiedChart({
   };
 
   return (
-    <div className={`flex-1 flex flex-col justify-between w-full h-full min-h-[300px] ${className}`}>
-      {/* Optional Top Stat Pills */}
+    <div className={`flex-1 flex flex-col justify-between w-full ${className}`}>
+      {/* Optional Top Stats: soft white pills with an icon (Soft Pastel Minimal) */}
       {showStats && (
-        <div className="flex items-center gap-2 mb-3 flex-wrap">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs font-bold text-slate-900">
-            TOTAL <span className="text-slate-950 font-black">{fmtNum(totalValue)}</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs font-bold text-slate-900">
-            Peak <span className="text-slate-950 font-black">{fmtNum(peakValue)}/day</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-50 border border-[#e9e9ee] text-xs font-bold text-slate-900">
-            Active <span className="text-slate-950 font-black">{activeDays}d</span>
-          </span>
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          {[
+            { label: "Total", value: fmtNum(totalValue), icon: <TrendingUp className="h-3 w-3" /> },
+            { label: "Peak", value: `${fmtNum(peakValue)}/day`, icon: <Zap className="h-3 w-3" /> },
+            { label: "Active", value: `${activeDays}d`, icon: <CalendarDays className="h-3 w-3" /> },
+          ].map((stat) => (
+            <span
+              key={stat.label}
+              className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] text-slate-950 shadow-[0_1px_6px_rgba(80,70,160,0.10)] ring-1 ring-black/5"
+            >
+              {stat.icon}
+              <span className="font-medium text-slate-600">{stat.label}</span>
+              <span className="font-black tabular-nums">{stat.value}</span>
+            </span>
+          ))}
         </div>
       )}
 
       {effectiveType === "area" ? (
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
+        <div className={fill ? "relative flex-1 min-h-[260px]" : undefined}>
+        <ChartContainer
+          config={chartConfig}
+          className={fill ? "!absolute inset-0 !aspect-auto !h-full w-full" : "w-full"}
+          style={fill ? undefined : { height: chartH }}
+        >
           <AreaChart
             data={chartData}
             accessibilityLayer={false}
@@ -436,8 +457,14 @@ export function UnifiedChart({
             />
           </AreaChart>
         </ChartContainer>
+        </div>
       ) : (
-        <ChartContainer config={chartConfig} className="w-full flex-1 min-h-[220px] max-h-none">
+        <div className={fill ? "relative flex-1 min-h-[260px]" : undefined}>
+        <ChartContainer
+          config={chartConfig}
+          className={fill ? "!absolute inset-0 !aspect-auto !h-full w-full" : "w-full"}
+          style={fill ? undefined : { height: chartH }}
+        >
           <BarChart
             data={chartData}
             accessibilityLayer={false}
@@ -480,6 +507,7 @@ export function UnifiedChart({
             </Bar>
           </BarChart>
         </ChartContainer>
+        </div>
       )}
 
       {!hideFooter && (

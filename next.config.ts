@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "https://analytics-backend-vxak.onrender.com";
+// Normalize localhost to 127.0.0.1 for internal proxying to avoid Node.js IPv6 (::1) ECONNREFUSED delays
+const apiUrl = rawApiUrl.replace("://localhost:", "://127.0.0.1:");
 
 const nextConfig: NextConfig = {
   // Lets a second copy (e.g. a preview on another port) build into its own folder without touching a running site.

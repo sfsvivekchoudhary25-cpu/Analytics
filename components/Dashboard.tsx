@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Card,
   Button,
   Progress,
   Alert,
   Dropdown,
-  Tooltip,
   Empty,
   Skeleton,
   Segmented,
@@ -25,7 +24,6 @@ import {
   ThunderboltOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
-  DownOutlined,
   UpOutlined,
   EyeOutlined,
   HeartOutlined,
@@ -43,10 +41,10 @@ import {
   TeamOutlined,
   CompassOutlined,
 } from "@ant-design/icons";
-import { api } from "@/lib/api";
+import { activeAccount, api, quickCache } from "@/lib/api";
+import { TrendingUp, Zap } from "lucide-react";
 import { UnifiedChart, Point } from "./UnifiedChart";
 import { EngagementBarChart } from "./EngagementBarChart";
-import { NotificationBell, AccountAvatar } from "./HeaderControls";
 import { PostDetail } from "./PostDetail";
 
 // ── Types ─────────────────────────────────────────────────────────────
@@ -81,6 +79,7 @@ type InsightsOverview = {
   totals: Record<string, number | null>;
   series: { reach: Point[]; followers: Point[] };
   errors: Record<string, string>;
+  previous?: Record<string, number | null>;
 };
 
 type DashboardOverview = {
@@ -105,7 +104,6 @@ type DashboardOverview = {
 };
 
 type Props = {
-  onOpenAutomations?: () => void;
   pendingPhotos?: number;
   onOpenPhotos?: () => void;
   username?: string;
@@ -117,12 +115,6 @@ type Props = {
 const compact = (n: number | null | undefined) =>
   n == null ? "—" : Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 }).format(n);
 
-const dateRangeLabel = (days: number) => {
-  const end = new Date();
-  const start = new Date(Date.now() - (days - 1) * 86_400_000);
-  const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  return `${fmt(start)} – ${fmt(end)}`;
-};
 
 const fmtPostDate = (iso: string) => {
   if (!iso) return "";
@@ -130,12 +122,11 @@ const fmtPostDate = (iso: string) => {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 };
 
-function trend(series: Point[]): { pct: number; up: boolean } | null {
-  if (!series || series.length < 2) return null;
-  const first = series[0].value;
-  const last = series[series.length - 1].value;
-  if (!first) return null;
-  return { pct: Math.round(Math.abs(((last - first) / first) * 100)), up: last >= first };
+// % change of this period's total vs the previous period's total (null when there is nothing to compare).
+function pctChange(current: number | null | undefined, previous: number | null | undefined) {
+  if (current == null || previous == null || previous === 0) return null;
+  const pct = Math.round(((current - previous) / previous) * 100);
+  return { pct: Math.abs(pct), up: pct >= 0 };
 }
 
 // ── Resilient Post Thumbnail Component ────────────────────────────────
@@ -152,7 +143,7 @@ function PostMediaThumbnail({ post }: { post: Media }) {
   if (loadFailed || !preferredUrl) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-tr from-slate-800 to-slate-900 p-4 text-center text-white">
-        <InstagramOutlined className="text-3xl text-pink-400 mb-2" />
+        <InstagramOutlined className="text-3xl text-slate-900 mb-2" />
         <span className="text-[11px] font-medium text-slate-300 line-clamp-2 px-2 leading-relaxed">
           {post.caption || (post.media_type === "VIDEO" ? "Instagram Video" : "Instagram Post")}
         </span>
@@ -190,7 +181,7 @@ function ProfileHeroSkeleton() {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs space-y-1.5 text-center min-w-0"
+              className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 lg:min-w-[92px] lg:rounded-[24px] lg:py-3.5 shadow-2xs space-y-1.5 text-center min-w-0"
             >
               <Skeleton.Input active size="small" style={{ width: 36, height: 16 }} />
               <Skeleton.Input active size="small" style={{ width: 48, height: 12 }} />
@@ -204,7 +195,7 @@ function ProfileHeroSkeleton() {
 
 function KpiCardSkeleton() {
   return (
-    <div className="rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] bg-white p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between min-h-[108px] sm:min-h-[120px]">
+    <div className="rounded-[22px] sm:rounded-[26px] border border-[#e9e9ee] bg-white p-3.5 sm:p-5 shadow-2xs flex flex-col justify-between min-h-[108px] sm:min-h-[120px]">
       <div className="flex items-center justify-between">
         <Skeleton.Input active size="large" style={{ width: 60, height: 24 }} />
         <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-slate-100 flex items-center justify-center shrink-0" />
@@ -230,7 +221,7 @@ function AnalyticsChartSkeleton() {
         <Skeleton.Button active size="small" style={{ width: 120, height: 24 }} className="!rounded-lg" />
       </div>
 
-      <div className="relative h-[220px] w-full flex items-end justify-between gap-2.5 px-6 pb-6 pt-4 rounded-xl bg-slate-50/50 border border-dashed border-slate-200">
+      <div className="relative h-[220px] w-full flex items-end justify-between gap-2.5 px-6 pb-6 pt-4 rounded-xl bg-[#F1F3F7] border border-dashed border-[#e9e9ee]">
         {[25, 45, 30, 65, 50, 75, 40, 85, 60, 95, 70, 45, 80, 55, 90].map((h, i) => (
           <div
             key={i}
@@ -252,7 +243,7 @@ function PostsShowcaseSkeleton() {
       {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
-          className="flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs"
+          className="flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] bg-white shadow-xs"
         >
           <div className="relative aspect-video sm:aspect-square w-full bg-slate-100 skeleton-pulse" />
           <div className="flex flex-1 flex-col p-4 space-y-3">
@@ -276,7 +267,6 @@ function PostsShowcaseSkeleton() {
 // ── Main Dashboard Component ──────────────────────────────────────────
 
 export function Dashboard({
-  onOpenAutomations,
   pendingPhotos = 0,
   onOpenPhotos,
   username,
@@ -285,6 +275,14 @@ export function Dashboard({
   const [days, setDays] = useState<7 | 14 | 30>(7);
   const [data, setData] = useState<DashboardOverview | null>(null);
   const [insights, setInsights] = useState<InsightsOverview | null>(null);
+  const dataRef = useRef<DashboardOverview | null>(null);
+  const insightsRef = useRef<InsightsOverview | null>(null);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+  useEffect(() => {
+    insightsRef.current = insights;
+  }, [insights]);
   const [insightsError, setInsightsError] = useState<string | null>(null);
   const [dashError, setDashError] = useState<string | null>(null);
   const [selectedPost, setSelectedPost] = useState<Media | null>(() => {
@@ -396,6 +394,10 @@ export function Dashboard({
   const [dashLoading, setDashLoading] = useState(true);
   const [insightsLoading, setInsightsLoading] = useState(true);
 
+  // True while a (re)fetch is in flight, even when old data is still on screen.
+  const [dashFetching, setDashFetching] = useState(true);
+  const [insightsFetching, setInsightsFetching] = useState(true);
+
   const [tick, setTick] = useState(0);
   const [activeChart, setActiveChart] = useState<"reach" | "automations">("reach");
   const [postSort, setPostSort] = useState<"recent" | "top">("recent");
@@ -407,21 +409,43 @@ export function Dashboard({
 
   useEffect(() => {
     let cancelled = false;
-    setDashLoading(true);
-    setInsightsLoading(true);
+    // Show what this account saw last time straight away, then refresh it in the background.
+    const acct = activeAccount.get() ?? "";
+    const dashKey = `dash:${acct}:${days}`;
+    const insKey = `insights:${acct}:${days}`;
+    const savedDash = quickCache.read<DashboardOverview>(dashKey);
+    const savedIns = quickCache.read<InsightsOverview>(insKey);
+    // Skeletons are only for the very first load. When the range changes we keep the current
+    // profile, posts and numbers on screen and just refresh the metrics in place.
+    setDashFetching(true);
+    setInsightsFetching(true);
+    if (savedDash) {
+      setData(savedDash);
+      setDashLoading(false);
+    } else setDashLoading(dataRef.current == null);
+    if (savedIns) {
+      setInsights(savedIns);
+      setInsightsLoading(false);
+    } else setInsightsLoading(insightsRef.current == null);
 
-    api<DashboardOverview>(`/dashboard/overview?days=${days}`).then(
+    // The Refresh button (tick > 0) asks the server to skip its own short copy as well.
+    const fresh = tick > 0 ? "&fresh=1" : "";
+    api<DashboardOverview>(`/dashboard/overview?days=${days}${fresh}`).then(
       (d) => {
         if (!cancelled) {
           setData(d);
           setDashError(null);
           setDashLoading(false);
+          setDashFetching(false);
+          quickCache.write(dashKey, d);
         }
       },
       (e: Error) => {
         if (!cancelled) {
-          setDashError(e.message);
+          // Keep showing the saved numbers if there are any; only say so when there is nothing to show.
+          if (!savedDash && dataRef.current == null) setDashError(e.message);
           setDashLoading(false);
+          setDashFetching(false);
         }
       }
     );
@@ -432,12 +456,15 @@ export function Dashboard({
           setInsights(i);
           setInsightsError(null);
           setInsightsLoading(false);
+          setInsightsFetching(false);
+          quickCache.write(insKey, i);
         }
       },
       (e: Error) => {
         if (!cancelled) {
-          setInsightsError(e.message);
+          if (!savedIns && insightsRef.current == null) setInsightsError(e.message);
           setInsightsLoading(false);
+          setInsightsFetching(false);
         }
       }
     );
@@ -450,9 +477,34 @@ export function Dashboard({
   const profile = insights?.profile;
   const totals = insights?.totals ?? {};
   const reachSeries = insights?.series?.reach ?? [];
-  const reachTrend = trend(reachSeries);
+  // Small stat pills shown in the chart header (Daily Performance / Reach view only).
+  const reachStatPills =
+    activeChart === "reach" && !insightsFetching && reachSeries.length > 0
+      ? [
+          { label: "Total", value: compact(reachSeries.reduce((a, p) => a + (p.value || 0), 0)), icon: <TrendingUp className="h-3 w-3" /> },
+          { label: "Peak", value: `${compact(Math.max(...reachSeries.map((p) => p.value || 0)))}/day`, icon: <Zap className="h-3 w-3" /> },
+        ]
+      : [];
+  const renderStatPills = (extra: string) => (
+    <div className={`items-center gap-1.5 ${extra}`}>
+      {reachStatPills.map((stat) => (
+        <span
+          key={stat.label}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] text-slate-950 shadow-[0_1px_6px_rgba(80,70,160,0.10)] ring-1 ring-black/5"
+        >
+          {stat.icon}
+          <span className="font-medium text-slate-600">{stat.label}</span>
+          <span className="font-black tabular-nums">{stat.value}</span>
+        </span>
+      ))}
+    </div>
+  );
+  const prevTotals = insights?.previous ?? {};
+  const reachChange = pctChange(totals.reach, prevTotals.reach);
+  const viewsChange = pctChange(totals.views, prevTotals.views);
+  const interactionsChange = pctChange(totals.total_interactions, prevTotals.total_interactions);
 
-  const isAnyLoading = dashLoading || insightsLoading;
+  const isAnyLoading = dashFetching || insightsFetching;
 
   // Rates calculation for KPI cards
   const engagementRate = totals.reach ? Math.round(((totals.total_interactions ?? 0) / totals.reach) * 1000) / 10 : null;
@@ -460,6 +512,8 @@ export function Dashboard({
 
   // Followers calculation (Current vs Past)
   const followerSeries = insights?.series?.followers ?? [];
+  // Instagram returns no follower history when the request fails (e.g. accounts under 100 followers).
+  const followerHistoryAvailable = !insights?.errors?.followers && followerSeries.length > 0;
   const netFollowers = followerSeries.reduce((acc, p) => acc + (p.value ?? 0), 0);
   const currentFollowers = profile?.followers_count ?? 0;
   const pastFollowers = Math.max(0, currentFollowers - netFollowers);
@@ -510,102 +564,6 @@ export function Dashboard({
 
   return (
     <div className="w-full flex flex-col gap-8 md:gap-10">
-      {/* ── Top Hero Card (Soft Pastel Minimal) ───────────── */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-2.5 sm:py-3.5 sm:px-5 lg:p-7 shadow-2xs transition-all">
-        {/* Soft pastel accent ambient glow */}
-        <div className="pointer-events-none absolute -right-8 -top-8 h-64 w-64 rounded-full bg-[#e2e2fc]/40 blur-3xl" />
-        <div className="pointer-events-none absolute right-10 bottom-0 h-40 w-40 rounded-full bg-[#feece4]/30 blur-2xl" />
-
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 lg:gap-6">
-          {/* Title & Live Hub Badge with Refresh Button (Tablet & Desktop only) */}
-          <div className="hidden sm:block min-w-0">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950">
-                Dashboard
-              </h1>
-              {/* Category & Header Pill (Soft Pastel Minimal standard) */}
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-slate-950 border border-black/80 text-xs font-bold shadow-2xs">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-                <span>Live Hub</span>
-              </span>
-              <Tooltip title="Refresh data">
-                <Button
-                  icon={isAnyLoading ? <LoadingOutlined className="text-slate-950 text-xs sm:text-sm" /> : <ReloadOutlined className="text-slate-950 text-xs sm:text-sm" />}
-                  onClick={() => setTick((n) => n + 1)}
-                  disabled={isAnyLoading}
-                  className="!flex !items-center !justify-center !h-8 !w-8 !shrink-0 !rounded-xl !border !border-black/80 !bg-white hover:!bg-slate-50 !shadow-2xs transition-all active:scale-95 cursor-pointer"
-                  aria-label="Refresh data"
-                />
-              </Tooltip>
-            </div>
-            <p className="mt-1 text-xs sm:text-sm text-slate-600 font-normal leading-relaxed truncate hidden lg:block lg:max-w-md xl:max-w-xl">
-              Instagram performance, account growth analytics, and automated messaging.
-            </p>
-          </div>
-
-          {/* Action Toolbar & Header Controls (On mobile: Date + Automations + Refresh) */}
-          <div className="flex items-center gap-2 sm:gap-2.5 w-full sm:w-auto shrink-0 justify-between sm:justify-end">
-            {/* Date Range Dropdown with subtle border */}
-            <Dropdown
-              menu={{
-                items: [
-                  { key: "7", label: "Last 7 days", onClick: () => setDays(7) },
-                  { key: "14", label: "Last 14 days", onClick: () => setDays(14) },
-                  { key: "30", label: "Last 30 days", onClick: () => setDays(30) },
-                ],
-                selectedKeys: [String(days)],
-              }}
-              trigger={["click"]}
-              disabled={isAnyLoading}
-            >
-              <Button className="!flex-1 sm:!flex-initial !flex !items-center !justify-between !gap-2 sm:!gap-2.5 !h-10 sm:!h-10.5 !rounded-full !border !border-[#e9e9ee] hover:!border-black/30 !bg-white !px-3.5 sm:!px-4 !text-xs sm:!text-sm !font-bold !text-slate-950 !shadow-2xs transition-all active:scale-[0.99] whitespace-nowrap min-w-0">
-                <span className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-0">
-                  <CalendarOutlined className="text-slate-950 text-xs sm:text-sm shrink-0" />
-                  <span className="whitespace-nowrap font-bold text-slate-950 text-xs sm:text-sm truncate">{dateRangeLabel(days)}</span>
-                </span>
-                <DownOutlined className="text-[9px] sm:text-[10px] text-slate-500 shrink-0 ml-1.5" />
-              </Button>
-            </Dropdown>
-
-            {/* Automations Primary CTA (Black pill standard button) */}
-            {onOpenAutomations && (
-              <Button
-                type="primary"
-                icon={<PlusOutlined className="text-xs sm:text-sm font-bold" />}
-                onClick={onOpenAutomations}
-                className="!flex !items-center !justify-center !gap-1.5 !h-10 sm:!h-10.5 !shrink-0 !rounded-full !bg-black hover:!bg-neutral-800 !px-4 sm:!px-4.5 !text-xs sm:!text-sm !font-bold !text-white !border-0 !shadow-xs hover:!scale-105 active:!scale-95 transition-all whitespace-nowrap cursor-pointer"
-              >
-                <span>Automations</span>
-              </Button>
-            )}
-
-            {/* Mobile-only Refresh Button (strictly hidden on sm: tablet and above) */}
-            <div className="sm:hidden shrink-0">
-              <Tooltip title="Refresh data">
-                <Button
-                  icon={isAnyLoading ? <LoadingOutlined className="text-slate-950 text-sm" /> : <ReloadOutlined className="text-slate-950 text-sm" />}
-                  onClick={() => setTick((n) => n + 1)}
-                  disabled={isAnyLoading}
-                  className="sm:!hidden !flex !items-center !justify-center !h-10 !w-10 !shrink-0 !rounded-2xl !border !border-[#e9e9ee] hover:!border-black/30 !bg-white hover:!bg-slate-50 !shadow-2xs transition-all active:scale-95 cursor-pointer"
-                  aria-label="Refresh data"
-                />
-              </Tooltip>
-            </div>
-
-            {/* Desktop-only secondary header controls (Bell & Avatar) */}
-            {(onOpenPhotos || (username && onOpenAccount)) && (
-              <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-[#e9e9ee] ml-1 shrink-0">
-                {onOpenPhotos && <NotificationBell pendingPhotos={pendingPhotos} onClick={onOpenPhotos} />}
-                {username && onOpenAccount && <AccountAvatar username={username} onClick={onOpenAccount} />}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Error Notices */}
       {dashError && (
         <Alert
@@ -614,7 +572,7 @@ export function Dashboard({
           title="Could not load automations overview"
           description={dashError}
           closable
-          className="rounded-2xl border-red-200 bg-red-50/80"
+          className="rounded-[22px] border-red-200 bg-red-50/80"
         />
       )}
 
@@ -625,7 +583,7 @@ export function Dashboard({
           title="Some Instagram analytics could not be retrieved"
           description={insightsError}
           closable
-          className="rounded-2xl border-amber-200 bg-amber-50/80"
+          className="rounded-[22px] border-amber-200 bg-amber-50/80"
         />
       )}
 
@@ -635,10 +593,12 @@ export function Dashboard({
         {insightsLoading ? (
           <ProfileHeroSkeleton />
         ) : profile ? (
-          <div className="rounded-[26px] border border-[#e9e9ee] hover:border-black/30 bg-white p-4 sm:p-6 shadow-2xs transition-all">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5">
+          <div className="relative overflow-hidden rounded-[26px] lg:rounded-[32px] border border-[#e9e9ee] hover:border-black/30 bg-white p-4 sm:p-6 lg:px-9 lg:py-7 shadow-2xs transition-all">
+            {/* Large screens: soft lilac fade on the right edge */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 hidden lg:block w-1/3 bg-gradient-to-l from-[#ececfb] via-[#f6f6fd]/60 to-transparent" />
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-5 lg:gap-8">
               {/* User Profile Header */}
-              <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+              <div className="flex items-center gap-3.5 sm:gap-4 lg:gap-5 min-w-0 lg:flex-1">
                 <div className="relative shrink-0">
                   {profile.profile_picture_url ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -646,56 +606,56 @@ export function Dashboard({
                       src={profile.profile_picture_url}
                       alt={profile.username}
                       referrerPolicy="no-referrer"
-                      className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover ring-2 ring-black/10 shadow-xs"
+                      className="h-14 w-14 sm:h-16 sm:w-16 lg:h-[76px] lg:w-[76px] rounded-full object-cover ring-2 ring-black/10 shadow-xs"
                     />
                   ) : (
                     <span className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-black text-base sm:text-lg font-bold text-white shadow-xs">
                       {profile.username?.charAt(0).toUpperCase()}
                     </span>
                   )}
-                  <span className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2 ring-white">
+                  <span className="absolute bottom-0 right-0 lg:bottom-1 lg:right-auto lg:left-0 flex h-4 w-4 items-center justify-center rounded-full bg-white ring-2 ring-white">
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                   </span>
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between sm:justify-start gap-2.5">
-                    <h2 className="text-base sm:text-lg font-black text-slate-950 truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
+                    <h2 className="text-base sm:text-lg lg:text-xl font-black text-slate-950 truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">
                       @{profile.username}
                     </h2>
-                    {/* Header Pill */}
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs shrink-0">
+                    {/* Header Pill (hidden on large screens, status shown by the green dot) */}
+                    <span className="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white text-slate-950 border border-black/80 text-[11px] font-bold shadow-2xs shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       <span>Connected</span>
                     </span>
                   </div>
                   {profile.name && (
-                    <p className="text-xs font-semibold text-slate-600 mt-0.5 truncate">{profile.name}</p>
+                    <p className="text-xs lg:text-sm font-semibold lg:font-bold text-slate-600 lg:text-slate-800 mt-0.5 truncate">{profile.name}</p>
                   )}
                   {profile.biography && (
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-600 max-w-xl leading-relaxed">{profile.biography}</p>
+                    <p className="mt-1 line-clamp-2 lg:line-clamp-none text-xs lg:text-[13px] text-slate-600 max-w-xl lg:max-w-[560px] leading-relaxed">{profile.biography}</p>
                   )}
                 </div>
               </div>
 
               {/* Account Metric Boxes - 3 Columns with Soft Pastel Minimal White Card Styling */}
               <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:items-center sm:gap-3 shrink-0 pt-1 sm:pt-0">
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
-                  <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 lg:min-w-[92px] lg:rounded-[24px] lg:py-3.5 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                  <span className="text-base sm:text-lg lg:text-xl font-black text-slate-950 tabular-nums">
                     {compact(profile.followers_count)}
                   </span>
                   <span className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">Followers</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
-                  <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 lg:min-w-[92px] lg:rounded-[24px] lg:py-3.5 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                  <span className="text-base sm:text-lg lg:text-xl font-black text-slate-950 tabular-nums">
                     {compact(profile.follows_count)}
                   </span>
                   <span className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">Following</span>
                 </div>
 
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
-                  <span className="text-base sm:text-lg font-black text-slate-950 tabular-nums">
+                <div className="flex flex-col items-center justify-center rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3 py-2.5 sm:px-4.5 sm:py-3 lg:min-w-[92px] lg:rounded-[24px] lg:py-3.5 shadow-2xs hover:shadow-xs transition-all text-center min-w-0">
+                  <span className="text-base sm:text-lg lg:text-xl font-black text-slate-950 tabular-nums">
                     {compact(profile.media_count)}
                   </span>
                   <span className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5">Posts</span>
@@ -706,7 +666,7 @@ export function Dashboard({
                     href={profile.website}
                     target="_blank"
                     rel="noreferrer"
-                    className="hidden xl:flex items-center gap-1.5 rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-all"
+                    className="hidden xl:flex items-center gap-1.5 rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-all"
                   >
                     <LinkOutlined />
                     <span>Website</span>
@@ -721,19 +681,45 @@ export function Dashboard({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-950 tracking-tight">
-              Key Performance Indicators
+              Performance Overview
             </h2>
-            <span className="text-xs font-semibold text-slate-500">Past {days} days</span>
+            <div
+              role="tablist"
+              aria-label="Date range"
+              className="inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[#e9e9ee] bg-white p-0.5 shadow-2xs"
+            >
+              {([7, 14, 30] as const).map((d) => {
+                const active = days === d;
+                return (
+                  <button
+                    key={d}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    disabled={isAnyLoading}
+                    onClick={() => setDays(d)}
+                    className={`rounded-full px-3 py-1 text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all disabled:cursor-not-allowed ${
+                      active
+                        ? "bg-black text-white shadow-xs"
+                        : "text-slate-600 hover:bg-[#F1F3F7] hover:text-slate-950 cursor-pointer"
+                    }`}
+                  >
+                    <span className="sm:hidden">{d}D</span>
+                    <span className="hidden sm:inline">{d} days</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6">
+          <div className={`grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-6`}>
             {/* KPI 1: Total Reach (Soft Periwinkle #e2e2fc - Borderless) */}
-            {insightsLoading ? (
+            {insightsFetching ? (
               <KpiCardSkeleton />
             ) : (
               <div
                 style={{ backgroundColor: "#e2e2fc" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -746,24 +732,24 @@ export function Dashboard({
                 <div className="mt-3 sm:mt-4">
                   <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Total Reach</div>
                   <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
-                    {reachTrend ? (
+                    {reachChange ? (
                       <span className="inline-flex items-center font-bold text-slate-950">
-                        {reachTrend.up ? "+" : "-"}{reachTrend.pct}%
+                        {reachChange.up ? "+" : "-"}{reachChange.pct}%
                       </span>
                     ) : null}
-                    <span className="truncate">{reachTrend ? "vs last period" : "Total accounts seen"}</span>
+                    <span className="truncate">{reachChange ? "vs last period" : "Total accounts seen"}</span>
                   </div>
                 </div>
               </div>
             )}
 
             {/* KPI 2: Content Views (Soft Butter Yellow #fff9db - Borderless) */}
-            {insightsLoading ? (
+            {insightsFetching ? (
               <KpiCardSkeleton />
             ) : (
               <div
                 style={{ backgroundColor: "#fff9db" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -775,20 +761,29 @@ export function Dashboard({
                 </div>
                 <div className="mt-3 sm:mt-4">
                   <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Content Views</div>
-                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">
-                    {compact(totals.accounts_engaged)} engaged
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+                    {viewsChange ? (
+                      <>
+                        <span className="inline-flex items-center font-bold text-slate-950">
+                          {viewsChange.up ? "+" : "-"}{viewsChange.pct}%
+                        </span>
+                        <span className="truncate">vs last period</span>
+                      </>
+                    ) : (
+                      <span className="truncate">{compact(totals.accounts_engaged)} accounts engaged</span>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
             {/* KPI 3: Interactions (Soft Rose Pink #fceef4 - Borderless) */}
-            {insightsLoading ? (
+            {insightsFetching ? (
               <KpiCardSkeleton />
             ) : (
               <div
                 style={{ backgroundColor: "#fceef4" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -800,20 +795,31 @@ export function Dashboard({
                 </div>
                 <div className="mt-3 sm:mt-4">
                   <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Interactions</div>
-                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 truncate">
-                    {engagementRate != null ? `${engagementRate}% rate` : "Likes & shares"}
+                  <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
+                    {interactionsChange ? (
+                      <>
+                        <span className="inline-flex items-center font-bold text-slate-950">
+                          {interactionsChange.up ? "+" : "-"}{interactionsChange.pct}%
+                        </span>
+                        <span className="truncate">vs last period</span>
+                      </>
+                    ) : (
+                      <span className="truncate">
+                        {engagementRate != null ? `${engagementRate}% of reach` : "Likes, comments & shares"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
             {/* KPI 4: Comment DMs Sent (Soft Peach Coral #feece4 - Borderless) */}
-            {dashLoading ? (
+            {dashFetching ? (
               <KpiCardSkeleton />
             ) : data ? (
               <div
                 style={{ backgroundColor: "#feece4" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -838,12 +844,12 @@ export function Dashboard({
             ) : null}
 
             {/* KPI 5: Followers - Current vs Past (Soft Sky #e0f2fe - Borderless) */}
-            {insightsLoading ? (
+            {insightsFetching ? (
               <KpiCardSkeleton />
             ) : (
               <div
                 style={{ backgroundColor: "#e0f2fe" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
@@ -856,26 +862,41 @@ export function Dashboard({
                 <div className="mt-3 sm:mt-4">
                   <div className="text-xs sm:text-sm font-bold text-slate-950 truncate">Followers</div>
                   <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-0.5 flex items-center gap-1 truncate">
-                    <span className="inline-flex items-center font-bold text-slate-950">
-                      {netFollowers >= 0 ? `+${netFollowers}` : netFollowers}
-                    </span>
-                    <span className="truncate">vs {compact(pastFollowers)} past</span>
+                    {followerHistoryAvailable ? (
+                      <>
+                        <span className="inline-flex items-center font-bold text-slate-950">
+                          {netFollowers >= 0 ? `+${netFollowers}` : netFollowers}
+                        </span>
+                        <span className="truncate">vs {compact(pastFollowers)} past</span>
+                      </>
+                    ) : (
+                      <span
+                        className="truncate"
+                        title={
+                          currentFollowers < 100
+                            ? "Instagram only provides follower growth for accounts with 100 or more followers."
+                            : insights?.errors?.followers
+                        }
+                      >
+                        {currentFollowers < 100 ? "Needs 100+ followers" : "Change not available"}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
             {/* KPI 6: Profile Visits (Soft Mint #e8f5e9 - Borderless) */}
-            {insightsLoading ? (
+            {insightsFetching ? (
               <KpiCardSkeleton />
             ) : (
               <div
                 style={{ backgroundColor: "#e8f5e9" }}
-                className="rounded-2xl sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-sm transition-all border-0"
+                className="rounded-[22px] sm:rounded-[26px] p-3.5 sm:p-5 flex flex-col justify-between shadow-xs hover:shadow-2xs transition-all border-0"
               >
                 <div className="flex items-start justify-between gap-1.5">
                   <span className="text-xl sm:text-3xl font-black text-slate-950 tabular-nums leading-none">
-                    {compact(totals.profile_views ?? 0)}
+                    {compact(totals.profile_views)}
                   </span>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                     <CompassOutlined className="text-xs sm:text-sm font-bold" />
@@ -890,7 +911,7 @@ export function Dashboard({
                       </span>
                     ) : null}
                     <span className="truncate">
-                      {totals.reach && totals.profile_views ? "of reach" : `Past ${days} days`}
+                      {totals.reach && totals.profile_views ? "of reach" : `Last ${days} days`}
                     </span>
                   </div>
                 </div>
@@ -906,39 +927,57 @@ export function Dashboard({
             className="!rounded-[26px] !border-[#e9e9ee] hover:!border-black/30 !bg-white !shadow-2xs transition-all flex flex-col h-full overflow-hidden"
             styles={{ body: { padding: "0px", flex: 1, display: "flex", flexDirection: "column" } }}
           >
-            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex items-center justify-between gap-3 bg-white">
+            <div className="px-5 sm:px-6 py-4 border-b border-[#e9e9ee] flex flex-wrap items-center justify-between gap-x-3 gap-y-2 bg-white">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base sm:text-[17px] font-bold text-slate-950 tracking-tight">
-                    {activeChart === "reach" ? "Daily Reach Performance" : "Automated Messages Over Time"}
+                    {activeChart === "reach" ? "Daily Performance" : "Daily Automations"}
                   </h2>
                   <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-[#e2e2fc]/60 text-[#3730a3] text-[10px] font-bold uppercase tracking-wider">
                     {activeChart === "reach" ? "Reach" : "Automation"}
                   </span>
                 </div>
-                <p className="hidden sm:block text-xs font-normal text-slate-500 mt-1 max-w-md truncate">
-                  {activeChart === "reach"
-                    ? `Organic account reach trend over the last ${days} days`
-                    : `Comment-to-DM triggers, dispatches, and replies over ${days} days`}
-                </p>
               </div>
 
-              {/* Three dots dropdown for chart switcher (visible on every screen) */}
+              {/* Stat pills (tablet and up) */}
+              {renderStatPills("hidden md:flex ml-auto shrink-0")}
+
+              {/* Chart view tabs: both options always visible, active one is black */}
+              <div
+                role="tablist"
+                aria-label="Chart view"
+                className="hidden sm:inline-flex shrink-0 items-center gap-0.5 rounded-full border border-[#e9e9ee] bg-white p-0.5 shadow-2xs"
+              >
+                {([
+                  { key: "reach", label: "Reach" },
+                  { key: "automations", label: "Automations" },
+                ] as const).map((tab) => {
+                  const active = activeChart === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      onClick={() => setActiveChart(tab.key)}
+                      className={`rounded-full px-3 py-1 text-[11px] sm:text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                        active
+                          ? "bg-black text-white shadow-xs"
+                          : "text-slate-600 hover:bg-[#F1F3F7] hover:text-slate-950"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Phones: compact dropdown instead of tabs, so the title keeps its room */}
               <Dropdown
                 menu={{
                   items: [
-                    {
-                      key: "reach",
-                      icon: <LineChartOutlined />,
-                      label: <span className="font-semibold text-xs">Daily Reach</span>,
-                      className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]" : "",
-                    },
-                    {
-                      key: "automations",
-                      icon: <ThunderboltOutlined />,
-                      label: <span className="font-semibold text-xs">Automations</span>,
-                      className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]" : "",
-                    },
+                    { key: "reach", icon: <LineChartOutlined />, label: <span className="font-semibold text-xs">Reach</span>, className: activeChart === "reach" ? "!font-bold !bg-[#e2e2fc]" : "" },
+                    { key: "automations", icon: <ThunderboltOutlined />, label: <span className="font-semibold text-xs">Automations</span>, className: activeChart === "automations" ? "!font-bold !bg-[#e2e2fc]" : "" },
                   ],
                   onClick: ({ key }) => setActiveChart(key as "reach" | "automations"),
                   selectedKeys: [activeChart],
@@ -948,18 +987,20 @@ export function Dashboard({
               >
                 <button
                   type="button"
-                  aria-label="Chart view options"
-                  className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
-                  title="Change chart view"
+                  aria-label="Change chart view"
+                  className="sm:hidden inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-[#e9e9ee] bg-white px-3 text-[11px] font-bold text-slate-950 shadow-2xs active:scale-95 cursor-pointer"
                 >
-                  <EllipsisOutlined className="text-lg text-slate-800" />
+                  <span>{activeChart === "reach" ? "Reach" : "Automations"}</span>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true" className="text-slate-500">
+                    <path d="M2 3.5l3 3 3-3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </button>
               </Dropdown>
             </div>
 
-            <div className="p-[5px] sm:p-6 flex-1 flex flex-col justify-between">
+            <div className={`p-[5px] sm:p-6 flex-1 flex flex-col justify-between`}>
               {activeChart === "reach" ? (
-                insightsLoading ? (
+                insightsFetching ? (
                   <AnalyticsChartSkeleton />
                 ) : (
                   <div className="flex-1 flex flex-col justify-between">
@@ -969,7 +1010,7 @@ export function Dashboard({
                       data={reachSeries}
                       label="Reach"
                       color="#4f46e5"
-                      showStats={true}
+                      height="fill"
                     />
                     {reachSeries.length === 0 && (
                       <p className="mt-3 text-xs text-slate-400 text-center">
@@ -978,13 +1019,14 @@ export function Dashboard({
                     )}
                   </div>
                 )
-              ) : dashLoading ? (
+              ) : dashFetching ? (
                 <AnalyticsChartSkeleton />
               ) : data ? (
                 <div className="flex-1 flex flex-col justify-between">
                   <UnifiedChart
                     key="automations-chart"
                     type="stacked-bar"
+                    height="fill"
                     dates={data.series.map((s) => s.date)}
                     series={[
                       {
@@ -1019,11 +1061,15 @@ export function Dashboard({
           </Card>
 
           {/* Right: Engagement Breakdown Card (Soft Pastel Minimal White Widget) */}
-          <EngagementBarChart
-            totals={totals}
-            days={days}
-            loading={insightsLoading}
-          />
+          <div className={`flex`}>
+            <div className="flex-1 min-w-0">
+              <EngagementBarChart
+                totals={totals}
+                days={days}
+                loading={insightsFetching}
+              />
+            </div>
+          </div>
         </div>
 
         {/* ── 4. Recent & Top Instagram Posts Showcase (Soft Pastel Minimal) ────────────────── */}
@@ -1093,7 +1139,7 @@ export function Dashboard({
                   <button
                     type="button"
                     aria-label="Sort posts options"
-                    className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                    className="w-8 h-8 rounded-full border border-[#e9e9ee] hover:border-black/30 bg-white hover:bg-[#F1F3F7] flex items-center justify-center text-slate-700 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                     title="Change sort order"
                   >
                     <EllipsisOutlined className="text-lg text-slate-800" />
@@ -1108,9 +1154,9 @@ export function Dashboard({
                   <div
                     key={p.id}
                     onClick={() => handleSelectPost(p)}
-                    className="group flex flex-col overflow-hidden rounded-2xl border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
+                    className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white transition-all shadow-2xs hover:shadow-xs cursor-pointer hover:-translate-y-0.5"
                   >
-                    <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
+                    <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-black">
                       <PostMediaThumbnail post={p} />
                       <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/70 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
                         {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
@@ -1118,7 +1164,7 @@ export function Dashboard({
                       </span>
                       {/* Hover overlay */}
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                        <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-sm">
+                        <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-2xs">
                           <EyeOutlined />
                           View Analytics
                         </span>
@@ -1134,7 +1180,7 @@ export function Dashboard({
                             target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                            className="flex items-center gap-1 font-bold text-slate-900 hover:text-slate-900 hover:underline"
                           >
                             <span>Instagram</span>
                             <LinkOutlined className="text-[10px]" />
@@ -1156,7 +1202,7 @@ export function Dashboard({
                           <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
                         </span>
                         <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs">
-                          <CommentOutlined className="text-blue-600" />
+                          <CommentOutlined className="text-slate-900" />
                           <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
                         </span>
                       </div>
@@ -1214,7 +1260,7 @@ export function Dashboard({
               title={
                 <div className="px-6 py-5 border-b border-[#e9e9ee] flex items-center justify-between gap-4 bg-white">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-[22px] bg-white border border-black/80 text-slate-950 shadow-2xs flex items-center justify-center shrink-0">
                       <AppstoreOutlined className="text-lg" />
                     </div>
                     <div>
@@ -1309,9 +1355,9 @@ export function Dashboard({
                         setShowAllPostsModal(false);
                         handleSelectPost(p);
                       }}
-                      className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-sm cursor-pointer hover:-translate-y-0.5 transition-all"
+                      className="group flex flex-col overflow-hidden rounded-[22px] border border-[#e9e9ee] hover:border-black/30 bg-white shadow-2xs hover:shadow-2xs cursor-pointer hover:-translate-y-0.5 transition-all"
                     >
-                      <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-slate-900">
+                      <div className="relative aspect-video sm:aspect-square w-full overflow-hidden bg-black">
                         <PostMediaThumbnail post={p} />
                         <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/80 px-2.5 py-0.5 text-[10px] font-bold text-white backdrop-blur-xs shadow-xs">
                           {p.media_type === "VIDEO" ? <PlayCircleOutlined /> : null}
@@ -1319,7 +1365,7 @@ export function Dashboard({
                         </span>
                         {/* Hover overlay with Soft Pastel Minimal White Action Button */}
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 opacity-0 transition-opacity group-hover:opacity-100 gap-2 p-3 text-center backdrop-blur-[2px]">
-                          <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-md hover:scale-105 transition-transform">
+                          <span className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold text-slate-950 shadow-2xs hover:scale-105 transition-transform">
                             <EyeOutlined />
                             View Analytics
                           </span>
@@ -1336,7 +1382,7 @@ export function Dashboard({
                               target="_blank"
                               rel="noreferrer"
                               onClick={(e) => e.stopPropagation()}
-                              className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-700 hover:underline"
+                              className="flex items-center gap-1 font-bold text-slate-900 hover:text-slate-900 hover:underline"
                             >
                               <span>Instagram</span>
                               <LinkOutlined className="text-[10px]" />
@@ -1359,7 +1405,7 @@ export function Dashboard({
                             <span className="tabular-nums font-bold">{p.like_count ?? 0}</span>
                           </span>
                           <span className="flex items-center gap-1.5 rounded-full bg-[#e2e2fc] px-2.5 py-1 text-slate-950 border-0 shadow-2xs font-bold">
-                            <CommentOutlined className="text-blue-600" />
+                            <CommentOutlined className="text-slate-900" />
                             <span className="tabular-nums font-bold">{p.comments_count ?? 0}</span>
                           </span>
                         </div>
